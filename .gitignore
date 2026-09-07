@@ -1,0 +1,17 @@
+# Dependencias y entornos locales
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Variables y secretos locales
+.env
+.env.*
+!.env.example
+
+# Salidas y cachés
+dist/
+build/
+.cache/
+*.log

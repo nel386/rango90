@@ -16,8 +16,34 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
   const publishedSnapshots = await pool.query<{ count: number }>(
     `SELECT COUNT(*)::int AS count FROM ranking_snapshots WHERE status = 'published'`
   );
-  const approvedSources = await pool.query<{ count: number }>(
-    `SELECT COUNT(*)::int AS count FROM sources WHERE rights_status = 'approved'`
+  const approvedSources = await pool.query<{ count: number; invalid_count: number }>(
+    `SELECT COUNT(*) FILTER (WHERE rights_status = 'approved')::int AS count,
+            COUNT(*) FILTER (
+              WHERE rights_status = 'approved'
+                AND (
+                  rights_basis IN ('unknown', 'not_applicable')
+                  OR commercial_use IS DISTINCT FROM TRUE
+                  OR NULLIF(rights_evidence_url, '') IS NULL
+                  OR rights_evidence_url !~* '^https?://'
+                  OR rights_verified_at IS NULL
+                  OR NULLIF(BTRIM(rights_verified_by), '') IS NULL
+                  OR NULLIF(BTRIM(rights_notes), '') IS NULL
+                  OR jsonb_typeof(rights_usage_scope) <> 'array'
+                  OR NOT (rights_usage_scope @> '["web", "pwa", "android", "local_storage"]'::jsonb)
+                  OR NOT EXISTS (
+                    SELECT 1
+                      FROM source_rights_reviews review
+                     WHERE review.source_key = sources.key
+                       AND review.decision = 'approved'
+                       AND review.rights_basis = sources.rights_basis
+                       AND review.commercial_use = TRUE
+                       AND review.evidence_url = sources.rights_evidence_url
+                       AND review.reviewer = sources.rights_verified_by
+                       AND review.usage_scope @> '["web", "pwa", "android", "local_storage"]'::jsonb
+                  )
+                )
+            )::int AS invalid_count
+       FROM sources`
   );
   const latestDaily = await pool.query<{
     id: string;
@@ -161,6 +187,11 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
   const checks: Record<string, Check> = {
     database: check(Boolean(connection.rows[0]?.now), connection.rows[0]?.now ?? null, 'La base de datos responde'),
     approvedSources: check((approvedSources.rows[0]?.count ?? 0) > 0, approvedSources.rows[0]?.count ?? 0, 'Existe al menos una fuente con derechos aprobados'),
+    approvedSourceEvidence: check(
+      (approvedSources.rows[0]?.count ?? 0) > 0 && (approvedSources.rows[0]?.invalid_count ?? 0) === 0,
+      { approved: approvedSources.rows[0]?.count ?? 0, invalid: approvedSources.rows[0]?.invalid_count ?? 0 },
+      'Cada fuente aprobada tiene evidencia comercial, alcance requerido y una revisión coincidente en el ledger'
+    ),
     publishedSnapshots: check((publishedSnapshots.rows[0]?.count ?? 0) > 0, publishedSnapshots.rows[0]?.count ?? 0, 'Existe al menos un snapshot publicado'),
     publishedDaily7x7: check(
       Boolean(daily

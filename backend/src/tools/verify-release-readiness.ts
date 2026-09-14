@@ -115,7 +115,17 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
       `SELECT c.slug, c.status AS category_status, rs.status AS snapshot_status,
               rs.coverage_complete, rs.unresolved_conflicts, rs.eligible_count,
               COUNT(DISTINCT COALESCE(identity_link.canonical_entity_id, re.entity_id))
-                FILTER (WHERE re.rank <= 200)::int AS ranking_entry_count,
+                FILTER (
+                  WHERE re.rank <= 200
+                    AND canonical_entity.entity_type = c.entity_type
+                    AND canonical_entity.catalog_status = 'active'
+                    AND (canonical_entity.entity_type <> 'player' OR EXISTS (
+                      SELECT 1
+                        FROM entity_game_profiles playable_profile
+                       WHERE playable_profile.entity_id = canonical_entity.id
+                         AND playable_profile.playable_default = TRUE
+                    ))
+                )::int AS ranking_entry_count,
               COALESCE(s.rights_status, 'unknown') AS source_rights_status
          FROM game_challenge_categories gcc
          JOIN category_definitions c ON c.id = gcc.category_id
@@ -123,6 +133,8 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
          LEFT JOIN ranking_entries re ON re.snapshot_id = rs.id
          LEFT JOIN entity_identity_links identity_link
            ON identity_link.source_entity_id = re.entity_id
+         LEFT JOIN entities canonical_entity
+           ON canonical_entity.id = COALESCE(identity_link.canonical_entity_id, re.entity_id)
          LEFT JOIN source_snapshots ss ON ss.id = rs.metadata->>'sourceSnapshotId'
          LEFT JOIN sources s ON s.key = ss.source_key
         WHERE gcc.game_challenge_id = $1

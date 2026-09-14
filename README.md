@@ -118,6 +118,8 @@ El estado cuantitativo vigente de la BBDD y la definición de cobertura están e
 
 La combinación candidata de siete categorías y su intersección 7×7 están documentadas en [`DATA_7X7_CANDIDATE.md`](./DATA_7X7_CANDIDATE.md). Es una ruta de trabajo en estado `draft`, no un conjunto autorizado para publicar.
 
+La revisión de proveedores y derechos está en [`DATA_PROVIDER_LICENSE_REVIEW.md`](./DATA_PROVIDER_LICENSE_REVIEW.md). La aplicación no tratará una API o una imagen descargable como autorización de redistribución.
+
 La revisión arquitectónica inicial está documentada en [`ARCHITECTURE_REVIEW.md`](./ARCHITECTURE_REVIEW.md). La decisión actual es conservar Next.js para el frontend estático y mantener el backend como servicio independiente. La capa inicial de datos ya está preparada en [`backend/`](./backend/); la plataforma Android nativa ya está inicializada con Capacitor.
 
 ## Comprobaciones locales

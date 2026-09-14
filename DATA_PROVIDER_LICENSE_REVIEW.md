@@ -1,0 +1,38 @@
+# Revisión de proveedores y derechos de datos
+
+Fecha de revisión: 14 de septiembre de 2026 (UTC)
+
+Este documento es un registro técnico de diligencia, no una opinión jurídica. Rango90 no debe publicar estadísticas, retratos, escudos o marcas hasta conservar un contrato o autorización verificable que cubra exactamente el uso previsto.
+
+## Resultado operativo
+
+La existencia de una API, un plan gratuito o una respuesta con imágenes no demuestra que Rango90 pueda redistribuir esos contenidos. La fuente solo podrá pasar a `approved` cuando el expediente incluya proveedor, competición, campos autorizados, territorios, duración, uso web/Android, atribución, almacenamiento/cache, sublicencia o redistribución y tratamiento de imágenes/logos.
+
+## Fuentes revisadas
+
+| Fuente | Lo que permiten inferir sus condiciones públicas | Decisión para Rango90 |
+| --- | --- | --- |
+| [API-Football, Terms of Service](https://www.api-football.com/terms) | Permite crear aplicaciones con los datos, pero prohíbe la reventa directa y declara que no concede por sí misma la licencia para publicar datos; el usuario debe obtener las autorizaciones necesarias de los titulares. Las imágenes, logos y marcas pueden requerir autorización separada. | No aprobada sin autorización escrita que cubra la redistribución y los activos visuales. |
+| [Football-Data.org, General Terms](https://www.football-data.org/client/register) | Exige una aplicación concreta, mantiene las credenciales confidenciales y requiere atribución. Declara que los gráficos, logos y fotos pertenecen a sus titulares y que el consentimiento debe obtenerse por separado. | Puede servir como candidato de alimentación bajo su plan adecuado; no resuelve por sí sola los derechos de publicación ni de imágenes. |
+| [Sportradar, Terms and Conditions](https://developer.sportradar.com/sportradar-updates/page/terms-and-conditions) | La licencia pública está limitada al producto y a las propiedades autorizadas; restringe la redistribución y el uso fuera del alcance contratado. Los logos requieren derechos propios o autorización específica. | No aprobada sin contrato con alcance explícito para el juego, web, Android y almacenamiento de snapshots. |
+| [Stats Perform, pricing and licensing FAQ](https://www.statsperform.com/faqs/stats-perform-faqs-pricing-licensing/) | Ofrece licencias a medida para estadísticas, analítica y APIs, incluso por competición o país. Esto confirma que el alcance debe contratarse, no presumirse. | Candidato comercial para cotizar; no aprobado mientras no exista oferta/contrato archivado. |
+
+## Evidencia local actual
+
+- `sources` contiene 0 fuentes con `rights_status = approved`.
+- Las siete categorías candidatas 7×7 y sus snapshots continúan en `draft`.
+- Los activos de retratos y escudos no se consideran publicables solo por estar descargados o por tener un fallback visual.
+- El validador `validate:evidence:global-career-goals` informa que no hay fuente válida y cierra el expediente sin importación insegura.
+
+## Criterio de desbloqueo
+
+Para cada una de las siete categorías debe incorporarse al expediente:
+
+1. Contrato, permiso o términos aplicables archivados con URL y fecha de comprobación.
+2. Identificación de la fuente y de la competición cubierta.
+3. Confirmación expresa de uso en una aplicación de juego, web y Android.
+4. Confirmación sobre snapshots, cache, backups y exposición de respuestas al cliente.
+5. Derechos separados para retratos, escudos, logos y marcas, o decisión documentada de usar únicamente el fallback propio.
+6. Atribución y límites de uso implementados en la interfaz y en la política de datos.
+
+Hasta completar esos seis puntos, el pipeline debe mantener la fuente y los snapshots en `review_required`/`draft` y bloquear `publish`.

@@ -47,6 +47,8 @@ La documentación oficial de [licenciamiento de Wikidata](https://www.wikidata.o
 
 Wikidata queda aprobado aquí únicamente como candidato para identidad, nombres, fechas y relaciones de entidades. No se considera todavía fuente suficiente para ninguna de las siete clasificaciones: hay que demostrar, mediante una consulta reproducible y una auditoría de cobertura, 200 filas reales, una definición estadística homogénea y procedencia verificable para cada valor. Hasta entonces no se cambia ningún snapshot a `approved`.
 
+Se hizo una prueba específica para `player-career-goals` con la propiedad Wikidata `P6509` (“total goals in career”). La consulta devuelve más de 200 personas, pero el campo es un total escalar sin garantía de que represente exactamente goles oficiales de clubes más selección absoluta: aparecen declaraciones incompatibles entre sí y la propia propiedad indica una completitud esperada “always incomplete”. Por ello no se utiliza como atajo para alcanzar 200 filas. La alternativa correcta requeriría reconstruir y auditar los valores por equipo mediante `P1351`, separar selecciones absolutas de juveniles y verificar referencias antes de generar un snapshot.
+
 ## Candidatos abiertos adicionales para títulos de clubes
 
 La revisión de fuentes abiertas identifica dos conjuntos útiles para investigar la categoría `national-league-club-titles`, pero ninguno se aprueba automáticamente ni cubre las cinco categorías de jugadores:

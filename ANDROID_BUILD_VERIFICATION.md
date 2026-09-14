@@ -28,6 +28,24 @@ JAVA_HOME=/usr/lib/jvm/java-21-openjdk-arm64 \
 
 Resultado: `BUILD SUCCESSFUL`, firma v1 y v2 verificadas y manifiesto inspeccionado con AAPT2.
 
+## Compilación de la variante release
+
+También se ejecutó `assembleRelease` con el mismo build estático y la misma toolchain local:
+
+```bash
+JAVA_HOME=/usr/lib/jvm/java-21-openjdk-arm64 \
+  ./gradlew --no-daemon --console=plain \
+  -Pandroid.aapt2FromMavenOverride=/tmp/rango90-aapt2/aapt2 \
+  assembleRelease
+
+/usr/lib/android-sdk/build-tools/34.0.0/aapt dump badging \
+  android/app/build/outputs/apk/release/app-release-unsigned.apk
+```
+
+Resultado: `BUILD SUCCESSFUL`; el manifiesto confirma `com.rango90.app`, `versionCode=1`, `versionName=1.0`, `compileSdkVersion=35`, `targetSdkVersion=35` y `sdkVersion=23`. El SHA-256 del artefacto unsigned es `46338ceffe5020053050110f162caadb37a615adb937cd12da16a941d774e7eb`.
+
+`apksigner verify` devuelve correctamente un fallo para este archivo porque no contiene `META-INF/MANIFEST.MF`: es una compilación release sin firma, no una APK distribuible.
+
 ## Alcance pendiente
 
-Esta evidencia demuestra que el proyecto puede producir una APK debug firmada y válida como artefacto. No se ha instalado en un dispositivo o emulador. Antes de una distribución pública todavía se necesita una variante `release` con clave de firma protegida, pruebas en dispositivo/emulador y QA funcional de la aplicación contra un backend real autorizado.
+Esta evidencia demuestra que el proyecto puede producir una APK debug válida y compilar la variante release. No se ha instalado en un dispositivo o emulador. Antes de una distribución pública todavía se necesita firmar la variante `release` con una clave protegida, verificar la firma resultante y ejecutar QA funcional de la aplicación contra un backend real autorizado.

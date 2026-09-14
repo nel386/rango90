@@ -116,7 +116,7 @@ Proyecto base inicializado con Next.js, TypeScript, App Router, exportación est
 
 El estado cuantitativo vigente de la BBDD y la definición de cobertura están en [`DATA_CURRENT_STATUS.md`](./DATA_CURRENT_STATUS.md). Ese documento es la referencia para no mezclar auditorías históricas con el estado operativo actual.
 
-La combinación candidata de siete categorías y su intersección 7×7 están documentadas en [`DATA_7X7_CANDIDATE.md`](./DATA_7X7_CANDIDATE.md). Es una ruta de trabajo en estado `draft`, no un conjunto autorizado para publicar.
+La matriz elegida de siete categorías —cinco de jugadores y dos de equipos— y su auditoría tipada están documentadas en [`DATA_7X7_OPTIONS.md`](./DATA_7X7_OPTIONS.md) y [`DATA_7X7_CANDIDATE.md`](./DATA_7X7_CANDIDATE.md). Es una ruta de trabajo en estado `draft`, no un conjunto autorizado para publicar.
 
 La matriz requisito-evidencia de la salida está en [`RELEASE_READINESS.md`](./RELEASE_READINESS.md). Resume el estado verificable y no sustituye la aprobación legal ni el guard técnico.
 
@@ -225,6 +225,7 @@ psql "$DATABASE_URL" -f migrations/073_allow_approved_categories_in_game_challen
 psql "$DATABASE_URL" -f migrations/074_validate_published_game_ranking_values.sql
 psql "$DATABASE_URL" -f migrations/075_source_rights_ledger.sql
 psql "$DATABASE_URL" -f migrations/076_require_https_rights_evidence.sql
+psql "$DATABASE_URL" -f migrations/077_allow_typed_daily_challenges.sql
 npm run seed
 npm run seed:game-audience
 npm run entity:consolidate:uefa-shared-clubs

@@ -195,7 +195,7 @@ export function buildOpenFootballClubTitleRanking(
     current.titles += 1;
     current.seasons.push(season.season);
     if (season.sourceUrl) current.sourceUrls.push(season.sourceUrl);
-    titleCounts.set(result.winner, current);
+    titleCounts.set(clubKey, current);
   }
   const entries = [...titleCounts.entries()]
     .sort((left, right) => right[1].titles - left[1].titles || left[0].localeCompare(right[0]))

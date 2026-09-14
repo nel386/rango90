@@ -67,6 +67,21 @@ assert.equal(ranking.entries[0]?.name, 'Alpha FC');
 assert.equal(ranking.entries[0]?.rawValue, 1);
 assert.ok(ranking.partialDraftReason?.includes('sistema de puntos'));
 
+const homonymRanking = buildOpenFootballClubTitleRanking([
+  {
+    competition: 'england',
+    season: '2023-24',
+    matches: [{ date: '2023-08-12', home: 'United FC', away: 'Other FC', homeGoals: 2, awayGoals: 0 }]
+  },
+  {
+    competition: 'scotland',
+    season: '2023-24',
+    matches: [{ date: '2023-08-12', home: 'United FC', away: 'Other FC', homeGoals: 2, awayGoals: 0 }]
+  }
+]);
+assert.equal(homonymRanking.entries.length, 2);
+assert.notEqual(homonymRanking.entries[0]?.entityId, homonymRanking.entries[1]?.entityId);
+
 assert.throws(() => parseFootballTxtResults('no matches', 'not-a-season'), /etiqueta de temporada inválida/);
 assert.throws(() => calculateOpenFootballWinner([]), /tabla vacía/);
 

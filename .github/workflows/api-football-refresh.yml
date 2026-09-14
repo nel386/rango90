@@ -1,0 +1,68 @@
+name: Refresh API-Football data
+
+on:
+  workflow_dispatch:
+    inputs:
+      frequency:
+        description: "Refresh cadence to execute"
+        required: true
+        type: choice
+        options:
+          - daily
+          - weekly
+  schedule:
+    - cron: "15 3 * * *"
+    - cron: "30 4 * * 0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-football-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.RANGO90_DATABASE_URL }}
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select scheduled cadence
+        id: cadence
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            frequency="${{ inputs.frequency }}"
+          elif [[ "${{ github.event.schedule }}" == "30 4 * * 0" ]]; then
+            frequency="weekly"
+          else
+            frequency="daily"
+          fi
+          echo "frequency=$frequency" >> "$GITHUB_OUTPUT"
+
+      - name: Require private refresh credentials
+        shell: bash
+        run: |
+          test -n "$DATABASE_URL" || { echo "Falta el secreto RANGO90_DATABASE_URL (External Database URL de Render)." >&2; exit 1; }
+          test -n "$API_FOOTBALL_KEY" || { echo "Falta el secreto API_FOOTBALL_KEY." >&2; exit 1; }
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Run protected API-Football refresh
+        working-directory: backend
+        env:
+          RANGO90_API_REFRESH_FREQUENCY: ${{ steps.cadence.outputs.frequency }}
+        run: npm run refresh:api-football:scheduled -- "$RANGO90_API_REFRESH_FREQUENCY"

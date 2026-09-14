@@ -82,6 +82,23 @@ API-Football es la fuente operativa de datos; Datadog es observabilidad externa.
 
 La clave de Datadog es independiente de API-Football. Si no vas a usar Datadog, no crees ninguna variable, secret o cuenta relacionada.
 
+## Actualización automática sin añadir un servicio de pago
+
+Render no ofrece Cron Jobs en el plan gratuito: la documentación actual indica un mínimo de 1 USD/mes por tarea programada. Para conservar el coste cero, el repositorio incluye `.github/workflows/api-football-refresh.yml`, que ejecuta la política existente desde GitHub Actions:
+
+- diario a las 03:15 UTC: seis ligas activas;
+- semanal los domingos a las 04:30 UTC: Champions/Mundial y reconstrucciones semanales previstas;
+- ejecución manual mediante **Actions → Refresh API-Football data → Run workflow**.
+
+Configura una sola vez estos dos secretos privados del repositorio `nel386/rango90`:
+
+```text
+RANGO90_DATABASE_URL=(External Database URL de rango90-db; solo en GitHub Secrets)
+API_FOOTBALL_KEY=(la misma clave ya configurada en Render; solo en GitHub Secrets)
+```
+
+La URL debe ser la **External Database URL** de PostgreSQL, no la `DATABASE_URL` interna del Web Service. El workflow no imprime ninguno de los dos valores. La sincronización conserva snapshots previos, deja los nuevos en revisión/draft y nunca aprueba fuentes ni publica categorías o retos automáticamente. Las ejecuciones requieren que la base gratuita de Render siga activa y que la cuota de API-Football sea suficiente.
+
 ## Base de datos: dos opciones de contenido
 
 - **Base limpia:** crear el PostgreSQL, ejecutar las migraciones y después los comandos de seed/import del README. Es la opción inicial más sencilla y no copia credenciales ni datos desde Ubuntu.

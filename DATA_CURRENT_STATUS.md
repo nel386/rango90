@@ -8,6 +8,22 @@ Solo se consideran jugables los jugadores con al menos una entrada en un snapsho
 
 Un jugador canónico cuenta una sola vez aunque aparezca en varias categorías.
 
+## Matriz elegida: auditoría exacta
+
+La auditoría `npm run audit:7x7` valida ahora exclusivamente las siete categorías fijadas en `DATA_7X7_OPTIONS.md`; no puede sustituirlas por una combinación técnicamente más cómoda del catálogo.
+
+| Categoría | Snapshot seleccionado | Estado | Entradas | Jugables top 200 | Jugables top 90 | Bloqueo actual |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| `club-career-yellow-cards` | `rs_d4763396b3eecd9d94a49831` | draft | 200 | 200 | 91 | cobertura incompleta |
+| `club-career-red-cards` | `rs_1ff5a575c51e9641ac0ba0d8` | draft | 200 | 200 | 120 | cobertura incompleta |
+| `club-career-titles` | `rs_9db3675a17b09bda84327786` | draft | 200 | 200 | 109 | cobertura incompleta |
+| `world-cup-goals` | `rs_7cc0d9cf795a275b93106c43` | draft | 200 | 82 | 61 | faltan jugadores canónicos jugables |
+| `player-career-goals` | `rs_c2c4a7942b4f8d2bd156306c` | draft | 200 | 200 | 92 | cobertura incompleta |
+| `national-league-club-titles` | `rs_5943de063ce56ca0b02a48ab` | draft | 69 | 69 | 69 | universo abierto incompleto |
+| `european-cup-champions-league-club-titles` | `rs_a5608e2d2d543e7e8a25e045` | draft | 24 | 24 | 24 | ninguno estadístico; faltan derechos/publicación |
+
+Resultado verificado el 14 de septiembre de 2026: `ready=false`, sin combinación común válida de cinco jugadores y dos equipos para esta matriz. Los números de esta tabla son una fotografía de la auditoría; deben regenerarse tras cada nueva carga o consolidación.
+
 ## Contadores verificados
 
 | Métrica | Valor |

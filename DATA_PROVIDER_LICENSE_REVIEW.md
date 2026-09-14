@@ -52,6 +52,10 @@ La revisión de fuentes abiertas identifica dos conjuntos útiles para investiga
 
 Antes de usarlos en un snapshot publicable hay que conservar la licencia y versión exactas, reconstruir la clasificación de cada temporada, resolver cambios históricos de identidad, contrastar los campeones y documentar la atribución ODC cuando corresponda. Esta ruta puede ampliar el universo de títulos nacionales; no resuelve por sí misma las tarjetas amarillas/rojas ni los goles globales de carrera.
 
+El backend ya incorpora `openFootballClient.ts`, sus pruebas unitarias y el comando `build:rankings:openfootball:national-league-club-titles`. El comando exige un manifiesto de temporadas con URLs HTTPS, conserva esas URLs en la evidencia y solo produce snapshots `draft`. Una prueba contra el archivo real de la Premier League 2023/24 devolvió sus 380 partidos esperados.
+
+Como control adicional, se inspeccionó el archivo `games.parquet` de `schochastics/football-data`: aunque declara 1.309.501 partidos y 206 etiquetas domésticas, contiene etiquetas históricas que no son suficientemente fiables para importar sin revisión (por ejemplo, filas bajo `ddr` corresponden a clubes rusos y `Copa Sud` aparece mezclada con el nivel nacional). Por ello se mantiene como referencia de investigación, no como fuente automática para el ranking.
+
 ## Candidato adicional revisado — Football API / Roanuz
 
 El [texto oficial de términos de Football API](https://footballapi.com/legal/terms-of-use/) actualizado el 15 de mayo de 2026 indica que el uso comercial de los datos solo está permitido en la medida autorizada por el plan contratado o por un acuerdo separado. También permite mostrar datos dentro de la aplicación y conservar caché razonable, pero prohíbe redistribuir datos crudos o crear feeds/productos derivados competitivos sin un acuerdo escrito específico.

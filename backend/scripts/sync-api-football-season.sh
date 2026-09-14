@@ -103,6 +103,7 @@ fi
 for item in "${leagues[@]}"; do
   competition="${item%%:*}"
   league="${item##*:}"
+  echo "[api-football] sincronizando $competition (temporada $season)"
   if [[ "$league" == "premier" ]]; then
     npm run import:api-football:premier-league -- --season "$season" --full "${import_media_args[@]}"
   else

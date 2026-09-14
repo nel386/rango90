@@ -4,6 +4,7 @@ set -euo pipefail
 frequency="daily"
 dry_run=false
 season_override=""
+only_competitions=""
 
 if [[ "${1:-}" == daily || "${1:-}" == weekly ]]; then
   frequency="$1"
@@ -25,8 +26,13 @@ while (($# > 0)); do
       season_override="$2"
       shift 2
       ;;
+    --only)
+      [[ $# -ge 2 ]] || { echo "Falta el valor de --only" >&2; exit 2; }
+      only_competitions="$2"
+      shift 2
+      ;;
     *)
-      echo "Uso: $0 daily|weekly [--dry-run] [--season YYYY]" >&2
+      echo "Uso: $0 daily|weekly [--dry-run] [--season YYYY] [--only id1,id2,...]" >&2
       exit 2
       ;;
   esac
@@ -60,7 +66,11 @@ fi
 
 if [[ "$dry_run" == true ]]; then
   printf '%s\n' "$plan"
-  npm run --silent sync:api-football:season -- --season "$season" --skip-media --only "$competition_list" --dry-run
+  dry_run_args=(--season "$season" --skip-media --only "$competition_list" --dry-run)
+  if [[ -n "$only_competitions" ]]; then
+    dry_run_args=(--season "$season" --skip-media --only "$only_competitions" --dry-run)
+  fi
+  npm run --silent sync:api-football:season -- "${dry_run_args[@]}"
   if [[ "$frequency" == weekly ]]; then
     echo "También reconstruiría los agregados de carrera de la última temporada cerrada."
   fi
@@ -70,11 +80,19 @@ fi
 if [[ "$frequency" == daily ]]; then
   # Daily keeps active-season provider snapshots fresh. It does not rebuild
   # career totals from an unfinished season.
-  npm run --silent sync:api-football:season -- --season "$season" --skip-media --only "$competition_list"
+  sync_args=(--season "$season" --skip-media --only "$competition_list")
+  if [[ -n "$only_competitions" ]]; then
+    sync_args=(--season "$season" --skip-media --only "$only_competitions")
+  fi
+  npm run --silent sync:api-football:season -- "${sync_args[@]}"
 else
   # Weekly first archives the less frequent tournament feeds, then refreshes
   # the closed domestic season and rebuilds career aggregates.
-  npm run --silent sync:api-football:season -- --season "$season" --skip-media --only "$competition_list"
+  sync_args=(--season "$season" --skip-media --only "$competition_list")
+  if [[ -n "$only_competitions" ]]; then
+    sync_args=(--season "$season" --skip-media --only "$only_competitions")
+  fi
+  npm run --silent sync:api-football:season -- "${sync_args[@]}"
   RANGO90_SEASON="$season" npm run --silent refresh:api-football:current
 
   # /trophies is intentionally batched to control quota. --missing-only makes

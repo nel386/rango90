@@ -23,16 +23,32 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
     id: string;
     category_count: number;
     decision_count: number;
+    decision_entity_count: number;
     answer_count: number;
+    non_common_decisions: number;
   }>(
-    `SELECT gc.id,
+    `WITH decision_category_counts AS (
+       SELECT gcd.game_challenge_id, gcd.decision_ordinal,
+              COUNT(DISTINCT gca.category_id)::int AS category_count
+         FROM game_challenge_decisions gcd
+         LEFT JOIN game_challenge_answers gca
+           ON gca.game_challenge_id = gcd.game_challenge_id
+          AND gca.decision_ordinal = gcd.decision_ordinal
+        GROUP BY gcd.game_challenge_id, gcd.decision_ordinal
+     )
+     SELECT gc.id,
             COUNT(DISTINCT gcc.category_id)::int AS category_count,
             COUNT(DISTINCT gcd.decision_ordinal)::int AS decision_count,
-            COUNT(DISTINCT (gca.decision_ordinal, gca.category_id))::int AS answer_count
+            COUNT(DISTINCT gcd.entity_id)::int AS decision_entity_count,
+            COUNT(DISTINCT (gca.decision_ordinal, gca.category_id))::int AS answer_count,
+            COUNT(*) FILTER (WHERE dcc.category_count <> 7)::int AS non_common_decisions
        FROM game_challenges gc
        LEFT JOIN game_challenge_categories gcc ON gcc.game_challenge_id = gc.id
        LEFT JOIN game_challenge_decisions gcd ON gcd.game_challenge_id = gc.id
        LEFT JOIN game_challenge_answers gca ON gca.game_challenge_id = gc.id
+       LEFT JOIN decision_category_counts dcc
+         ON dcc.game_challenge_id = gcd.game_challenge_id
+        AND dcc.decision_ordinal = gcd.decision_ordinal
       WHERE gc.status = 'published' AND gc.challenge_kind = 'daily'
       GROUP BY gc.id
       ORDER BY gc.challenge_date DESC NULLS LAST, gc.published_at DESC NULLS LAST, gc.id DESC
@@ -41,7 +57,7 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
 
   const daily = latestDaily.rows[0] ?? null;
   const dailyShape = daily
-    ? { id: daily.id, categories: daily.category_count, decisions: daily.decision_count, answers: daily.answer_count }
+    ? { id: daily.id, categories: daily.category_count, decisions: daily.decision_count, distinctEntities: daily.decision_entity_count, answers: daily.answer_count, nonCommonDecisions: daily.non_common_decisions }
     : null;
 
   const dailyCategories = daily
@@ -84,7 +100,7 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
     approvedSources: check((approvedSources.rows[0]?.count ?? 0) > 0, approvedSources.rows[0]?.count ?? 0, 'Existe al menos una fuente con derechos aprobados'),
     publishedSnapshots: check((publishedSnapshots.rows[0]?.count ?? 0) > 0, publishedSnapshots.rows[0]?.count ?? 0, 'Existe al menos un snapshot publicado'),
     publishedDaily7x7: check(
-      Boolean(daily && daily.category_count === 7 && daily.decision_count === 7 && daily.answer_count === 49),
+      Boolean(daily && daily.category_count === 7 && daily.decision_count === 7 && daily.decision_entity_count === 7 && daily.answer_count === 49 && daily.non_common_decisions === 0),
       dailyShape,
       'Existe un reto diario publicado con matriz 7 categorías × 7 decisiones'
     ),

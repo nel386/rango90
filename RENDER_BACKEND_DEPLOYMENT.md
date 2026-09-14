@@ -87,6 +87,17 @@ La clave de Datadog es independiente de API-Football. Si no vas a usar Datadog, 
 - **Base limpia:** crear el PostgreSQL, ejecutar las migraciones y después los comandos de seed/import del README. Es la opción inicial más sencilla y no copia credenciales ni datos desde Ubuntu.
 - **Copia de la base local:** crear primero el PostgreSQL en Render y restaurar un `pg_dump` usando su URL externa. La aplicación debe seguir usando la URL interna que Render inyecta como `DATABASE_URL`.
 
+Para la copia local se incluye `backend/scripts/restore-render-database.sh`. Desde Ubuntu, con el proyecto y el contenedor local levantados:
+
+```bash
+export RENDER_DATABASE_URL='(pega aquí solo en tu terminal la External Database URL de Render)'
+export CONFIRM_RENDER_DB_RESTORE=YES
+npm --prefix backend run db:restore:render
+unset RENDER_DATABASE_URL CONFIRM_RENDER_DB_RESTORE
+```
+
+La URL se utiliza únicamente en memoria y no se imprime. El comando sobrescribe la base Render indicada, pero no toca la base local. Es una transferencia para pruebas: conserva los estados `draft` y no publica categorías ni retos. La URL que usa el Web Service sigue siendo la `DATABASE_URL` interna generada por Render.
+
 El arranque del backend ejecuta ahora las migraciones idempotentes y siembra el catálogo automáticamente. Esto crea la estructura y las categorías base, pero no publica automáticamente los rankings históricos actuales ni un reto diario: esos datos requieren sus importaciones y la validación editorial correspondiente.
 
 ## Variable para GitHub Pages

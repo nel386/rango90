@@ -172,6 +172,7 @@
     "sync:api-football:season": "bash scripts/sync-api-football-season.sh",
     "refresh:api-football:current": "bash scripts/refresh-api-football-current.sh",
     "refresh:api-football:scheduled": "bash scripts/refresh-api-football-scheduled.sh",
+    "db:restore:render": "bash scripts/restore-render-database.sh",
     "data:plan:api-football": "tsx src/tools/plan-api-football-refresh.ts",
     "build:rankings:api-football": "tsx src/cli.ts build-api-football-rankings",
     "approve:category": "tsx src/cli.ts approve-category",

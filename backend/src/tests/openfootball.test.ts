@@ -81,6 +81,7 @@ const homonymRanking = buildOpenFootballClubTitleRanking([
 ]);
 assert.equal(homonymRanking.entries.length, 2);
 assert.notEqual(homonymRanking.entries[0]?.entityId, homonymRanking.entries[1]?.entityId);
+assert.ok(homonymRanking.entries.every((entry) => !/[A-Z\s/]/u.test(entry.entityId)));
 
 assert.throws(() => parseFootballTxtResults('no matches', 'not-a-season'), /etiqueta de temporada inválida/);
 assert.throws(() => calculateOpenFootballWinner([]), /tabla vacía/);

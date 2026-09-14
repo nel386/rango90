@@ -87,6 +87,15 @@ function cleanTeamName(value: string): string {
     .trim();
 }
 
+function identitySlug(value: string): string {
+  return value
+    .toLocaleLowerCase('en-US')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 /**
  * Parse match rows from a Football.TXT season file.
  *
@@ -200,7 +209,7 @@ export function buildOpenFootballClubTitleRanking(
   const entries = [...titleCounts.entries()]
     .sort((left, right) => right[1].titles - left[1].titles || left[0].localeCompare(right[0]))
     .map(([, value], index) => ({
-      entityId: `openfootball:club:${value.competition}:${value.clubName.toLocaleLowerCase('en-US').replace(/[^a-z0-9]+/g, '-')}`,
+      entityId: `openfootball:club:${identitySlug(value.competition)}:${identitySlug(value.clubName)}`,
       entityType: 'club' as const,
       name: value.clubName,
       rawValue: value.titles,

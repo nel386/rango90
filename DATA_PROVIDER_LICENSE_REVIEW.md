@@ -32,6 +32,14 @@ La [página oficial de precios](https://footballapi.com/pricing/) publica el pla
 
 Decisión: **no seleccionado**. Podría solicitarse una oferta empresarial únicamente si cambia el presupuesto; antes de importar o aprobar cualquier dato todavía habría que obtener confirmación escrita sobre el juego comercial, rankings derivados, snapshots inmutables, almacenamiento, Android, atribución y derechos de terceros.
 
+## Candidato adicional revisado — Sportmonks
+
+La [página oficial de precios de Sportmonks](https://www.sportmonks.com/football-api/plans-pricing/) publica planes desde **29 €/mes** o **24 €/mes con pago anual**, con selección de cinco ligas en el plan Starter. La documentación comercial también anuncia estadísticas de equipos y jugadores y datos históricos; sin embargo, el propio proveedor indica que la profundidad histórica y los tipos de estadísticas varían por liga y temporada. Por tanto, el precio y la afirmación general de cobertura no demuestran que exista la matriz exacta de siete categorías homogéneas, 200 jugadores por categoría y siete jugadores comunes que necesita Rango90.
+
+Los [términos oficiales de Sportmonks](https://www.sportmonks.com/terms-of-service/) dicen que el proveedor permite crear aplicaciones, sitios web y juegos, y que la distribución, transferencia y almacenamiento de los datos del servicio están permitidos; también prohíben revender directamente los datos sin aprobación. Los mismos términos declaran que los datos pueden tener huecos o discrepancias y que los logos y fotos de perfil requieren que Rango90 obtenga y conserve su propia prueba de propiedad intelectual. La página oficial para productos de medios confirma que la redistribución depende del plan y del caso de uso y recomienda obtener esos términos por escrito antes de publicar.
+
+Decisión: **candidato condicional, no aprobado**. Antes de contratar o importar datos hay que pedir por escrito, para el plan y las ligas concretas, autorización para los siete rankings históricos derivados, snapshots inmutables, caché/backups, web/PWA/Android, atribución y uso sin retratos/logos del proveedor. También hay que ejecutar una extracción de prueba y demostrar cobertura, identidad canónica, empates y conflictos con el contrato 7×7. Sin esa evidencia, la fuente permanece en `review_required` y los snapshots en `draft`.
+
 ## Criterio de desbloqueo
 
 Para cada una de las siete categorías debe incorporarse al expediente:

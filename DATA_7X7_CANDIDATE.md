@@ -35,6 +35,8 @@ La intersección se calculó sobre `ranking_entries.entity_id` de los snapshots 
 
 En la verificación del 14 de septiembre de 2026 se reexaminaron las categorías de jugadores activas usando sus snapshots vigentes. No existe ninguna combinación de siete que cumpla simultáneamente `coverage_complete=true`, cero conflictos, al menos 200 entradas y al menos 200 jugadores canónicos activos y jugables dentro del top 200. Las categorías que sí tienen cobertura histórica validada todavía pierden jugadores históricos al aplicar la política de catálogo; las que conservan 200 jugables siguen siendo parciales o tienen derechos pendientes.
 
+Esta conclusión ahora se puede reproducir con `cd backend && npm run audit:7x7`. El comando selecciona el snapshot vigente de cada categoría de jugadores, deduplica por identidad canónica, exige 200 jugadores jugables por categoría y comprueba tanto siete comunes en el top 200 como siete comunes dentro de la banda top 90 utilizada por el reto diario. Devuelve código distinto de cero si no existe ninguna combinación válida.
+
 Por tanto, los ocho jugadores comunes del bloque anterior demuestran únicamente que el selector puede construir una matriz técnica con el candidato actual. No demuestran que exista todavía un conjunto 7×7 publicable ni autorizado.
 
 ## Bloqueos para convertirlo en reto real

@@ -191,9 +191,12 @@ npm run approve:category -- --slug premier-league-goals
 npm run approve:snapshot -- --snapshot rs_xxx
 npm run publish -- --snapshot rs_xxx
 npm run audit:data-readiness
+npm run audit:7x7
 ```
 
 `audit:data-readiness` genera un informe por categoría con snapshot vigente, cobertura, derechos de la fuente, entidades jugables e imágenes aprobadas. `readyForPublish` solo es `true` cuando se cumplen todas las comprobaciones de publicación; no modifica datos.
+
+`audit:7x7` es una auditoría de solo lectura que busca combinaciones de siete categorías de jugadores con 200 jugadores canónicos jugables por categoría, cobertura completa, cero conflictos y siete jugadores comunes; también exige que esos siete estén dentro de la banda top 90 usada por el reto diario. Devuelve código distinto de cero si no encuentra una combinación y no aprueba licencias ni activos visuales.
 
 La curación del pool jugable está bloqueada por defecto para que una nueva
 importación no cambie silenciosamente el denominador de imágenes ni los

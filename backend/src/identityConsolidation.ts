@@ -449,6 +449,102 @@ export async function consolidateFootballDataClubIdentities(client: PoolClient):
   return { linked, skipped, conflicts, moved };
 }
 
+/**
+ * goals_time2 stores cards as `Surname Initial` labels rather than stable
+ * player IDs. Link only when that compact label resolves to one canonical
+ * player after checking the final surname and first-name initial. Ambiguous
+ * cases such as `Silva D.` remain separate and therefore cannot leak a
+ * speculative identity into a published ranking.
+ */
+export async function consolidateFootballDataIncidentIdentities(client: PoolClient): Promise<{
+  linked: number;
+  skipped: number;
+  conflicts: Array<{ sourceEntityId: string; canonicalEntityId: string; error: string }>;
+  moved: IdentityMoveCounts;
+}> {
+  const sourceKey = 'schochastics-football-data-incidents';
+  const sourceEntities = await client.query<{ id: string; canonical_name: string }>(
+    `SELECT DISTINCT e.id, e.canonical_name
+       FROM entities e
+       JOIN ranking_entries re ON re.entity_id = e.id AND re.rank <= 200
+       JOIN ranking_snapshots rs ON rs.id = re.snapshot_id AND rs.status <> 'superseded'
+       JOIN source_snapshots ss ON ss.id = rs.metadata->>'sourceSnapshotId'
+      WHERE ss.source_key = $1
+        AND e.id LIKE 'football-data:player:%'
+        AND e.entity_type = 'player'
+        AND e.catalog_status = 'active'
+      ORDER BY e.canonical_name, e.id`,
+    [sourceKey]
+  );
+  const candidates = await client.query<{ id: string; canonical_name: string }>(
+    `SELECT e.id, e.canonical_name
+       FROM entities e
+      WHERE e.entity_type = 'player'
+        AND e.id NOT LIKE 'football-data:%'
+        AND e.catalog_status = 'active'
+      ORDER BY e.id`
+  );
+  const candidateKeys = new Map<string, Set<string>>();
+  const compactKey = (name: string): string | null => {
+    const tokens = normalizeIdentityName(name).split(' ').filter(Boolean);
+    if (tokens.length < 2) return null;
+    const first = tokens[0] ?? '';
+    const last = tokens.at(-1) ?? '';
+    // Source incidents use `Surname Initial`; canonical records use the
+    // conventional `First-name Surname` order. Normalize both forms to the
+    // same surname/first-initial key.
+    return last.length === 1 ? `${first} ${last}` : `${last} ${first[0] ?? ''}`;
+  };
+  for (const candidate of candidates.rows) {
+    const key = compactKey(candidate.canonical_name);
+    if (!key) continue;
+    const ids = candidateKeys.get(key) ?? new Set<string>();
+    ids.add(candidate.id);
+    candidateKeys.set(key, ids);
+  }
+  const moved = emptyMoveCounts();
+  const conflicts: Array<{ sourceEntityId: string; canonicalEntityId: string; error: string }> = [];
+  let linked = 0;
+  let skipped = 0;
+  for (const source of sourceEntities.rows) {
+    const matches = [...(candidateKeys.get(compactKey(source.canonical_name) ?? '') ?? [])]
+      .filter((id) => id !== source.id)
+      .map((id) => resolveCanonicalEntityId(client, id));
+    const resolvedMatches = [...new Set(await Promise.all(matches))];
+    if (resolvedMatches.length !== 1) {
+      skipped += 1;
+      continue;
+    }
+    const canonical = resolvedMatches[0];
+    if (!canonical || canonical === source.id) {
+      skipped += 1;
+      continue;
+    }
+    await client.query('SAVEPOINT football_data_incident_identity');
+    try {
+      await recordIdentityLink(
+        client,
+        source.id,
+        canonical,
+        sourceKey,
+        'Coincidencia única de etiqueta Surname Initial con apellido e inicial del nombre canónico; se omiten homónimos ambiguos'
+      );
+      addMoveCounts(moved, await moveEntityDataToCanonical(client, source.id, canonical));
+      await client.query('RELEASE SAVEPOINT football_data_incident_identity');
+      linked += 1;
+    } catch (error) {
+      await client.query('ROLLBACK TO SAVEPOINT football_data_incident_identity');
+      await client.query('RELEASE SAVEPOINT football_data_incident_identity');
+      conflicts.push({
+        sourceEntityId: source.id,
+        canonicalEntityId: canonical,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
+  return { linked, skipped, conflicts, moved };
+}
+
 export async function consolidateUefaChampionsLeagueIdentities(client: PoolClient): Promise<{
   linked: number;
   skipped: number;

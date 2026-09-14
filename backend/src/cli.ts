@@ -63,7 +63,7 @@ import { downloadOpenverseImage, searchOpenversePlayerCandidates, type Openverse
 import { seedGameAudienceProfiles } from './gameAudience.js';
 import { cleanupApiFootballSeasonCache, fetchApiFootballLeagueCompleteSeason, fetchApiFootballPremierLeagueCompleteSeason, fetchApiFootballPremierLeagueSeason } from './providers/apiFootballSeasonClient.js';
 import { fetchApiFootballPlayerTrophies, type ApiFootballTrophy } from './providers/apiFootballTrophiesClient.js';
-import { consolidateApiFootballIdentities, consolidateBdfutbolLaLigaIdentities, consolidateBdfutbolSharedPlayerIdentities, consolidateDfbBundesligaIdentities, consolidateDfbPokalIdentities, consolidateDflSupercupIdentities, consolidateFaCupIdentities, consolidateFootballDataClubIdentities, consolidateRsssfIdentities, consolidateSerieAClubTitlesIdentities, consolidateStatbunkerChampionsLeagueIdentities, consolidateStatbunkerClubWorldCupIdentities, consolidateStatbunkerConferenceIdentities, consolidateStatbunkerCopaAmericaIdentities, consolidateStatbunkerCopaLibertadoresIdentities, consolidateStatbunkerEuroIdentities, consolidateStatbunkerEuropaIdentities, consolidateStatbunkerNationsLeagueIdentities, consolidateStatbunkerWorldCupIdentities, consolidateSupercoppaItalianaIdentities, consolidateTransfermarktBundesligaAssistsIdentities, consolidateTransfermarktClubWorldCupIdentities, consolidateTransfermarktCopaAmericaIdentities, consolidateTransfermarktCopaLibertadoresIdentities, consolidateTransfermarktCopaSudamericanaIdentities, consolidateTransfermarktEuropeanCupChampionsLeagueIdentities, consolidateTransfermarktLaLigaAssistsIdentities, consolidateTransfermarktLigue1AssistsIdentities, consolidateTransfermarktNationsLeagueIdentities, consolidateTransfermarktPrimeiraLigaAssistsIdentities, consolidateTransfermarktSerieAAssistsIdentities, consolidateTransfermarktUefaEuropaLeagueIdentities, consolidateTransfermarktWorldCupIdentities, consolidateUefaChampionsLeagueIdentities, consolidateUefaClubIdentities, consolidateUefaConferenceLeagueIdentities, consolidateUefaEuroIdentities, consolidateUefaSharedClubIdentities, consolidateUefaSharedPlayerIdentities, consolidateWikipediaCopaDelReyIdentities, consolidateWikipediaCopaSudamericanaIdentities, consolidateWikipediaRecopaSudamericanaIdentities, consolidateWikipediaSerieAIdentities, repairIdentityLinks } from './identityConsolidation.js';
+import { consolidateApiFootballIdentities, consolidateBdfutbolLaLigaIdentities, consolidateBdfutbolSharedPlayerIdentities, consolidateDfbBundesligaIdentities, consolidateDfbPokalIdentities, consolidateDflSupercupIdentities, consolidateFaCupIdentities, consolidateFootballDataClubIdentities, consolidateFootballDataIncidentIdentities, consolidateRsssfIdentities, consolidateSerieAClubTitlesIdentities, consolidateStatbunkerChampionsLeagueIdentities, consolidateStatbunkerClubWorldCupIdentities, consolidateStatbunkerConferenceIdentities, consolidateStatbunkerCopaAmericaIdentities, consolidateStatbunkerCopaLibertadoresIdentities, consolidateStatbunkerEuroIdentities, consolidateStatbunkerEuropaIdentities, consolidateStatbunkerNationsLeagueIdentities, consolidateStatbunkerWorldCupIdentities, consolidateSupercoppaItalianaIdentities, consolidateTransfermarktBundesligaAssistsIdentities, consolidateTransfermarktClubWorldCupIdentities, consolidateTransfermarktCopaAmericaIdentities, consolidateTransfermarktCopaLibertadoresIdentities, consolidateTransfermarktCopaSudamericanaIdentities, consolidateTransfermarktEuropeanCupChampionsLeagueIdentities, consolidateTransfermarktLaLigaAssistsIdentities, consolidateTransfermarktLigue1AssistsIdentities, consolidateTransfermarktNationsLeagueIdentities, consolidateTransfermarktPrimeiraLigaAssistsIdentities, consolidateTransfermarktSerieAAssistsIdentities, consolidateTransfermarktUefaEuropaLeagueIdentities, consolidateTransfermarktWorldCupIdentities, consolidateUefaChampionsLeagueIdentities, consolidateUefaClubIdentities, consolidateUefaConferenceLeagueIdentities, consolidateUefaEuroIdentities, consolidateUefaSharedClubIdentities, consolidateUefaSharedPlayerIdentities, consolidateWikipediaCopaDelReyIdentities, consolidateWikipediaCopaSudamericanaIdentities, consolidateWikipediaRecopaSudamericanaIdentities, consolidateWikipediaSerieAIdentities, repairIdentityLinks } from './identityConsolidation.js';
 import { findUniqueCanonicalEntity, moveEntityDataToCanonical, recordIdentityLink, resolveCanonicalEntityId } from './entityIdentity.js';
 import { assertPublishableImageLicense, assertRightsApproval, assertSourceRightsApproval } from './mediaRights.js';
 import { MAX_GAME_RANKING_ENTRIES, runDataCatalogCleanup, verifyGameCatalogBoundary } from './catalogCleanup.js';
@@ -72,6 +72,7 @@ import { selectCommonDailyEntities, type DailyChallengeCandidate } from './daily
 import { SELECTED_DAILY_CATEGORY_SLUGS } from './dailyMatrix.js';
 import { buildOpenFootballClubTitleRanking, openFootballLeaguesUrl, parseFootballTxtResults, type OpenFootballSeasonSource } from './providers/openFootballClient.js';
 import { buildFootballDataNationalLeagueRanking, fetchFootballDataResults, footballDataResultsUrl } from './providers/footballDataResultsClient.js';
+import { buildFootballDataCareerCardsRankings, fetchFootballDataIncidents, type FootballDataCardMetric } from './providers/footballDataIncidentsClient.js';
 
 const [command, ...args] = process.argv.slice(2);
 const argument = (name: string): string | undefined => {
@@ -2675,6 +2676,36 @@ try {
       coverageComplete: input.coverageComplete,
       published: false,
       note: 'Snapshot draft provisional: los resultados tienen licencia de atribución y advertencias históricas; falta contraste de campeones, identidades, cobertura y derechos antes de aprobar o publicar.'
+    }, null, 2));
+  } else if (command === 'build-football-data-career-cards') {
+    const requestedMetrics = (argument('metric') ?? 'yellow_cards,red_cards')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean) as FootballDataCardMetric[];
+    if (requestedMetrics.length === 0 || requestedMetrics.some((value) => !['yellow_cards', 'red_cards'].includes(value))) {
+      throw new Error('Métricas válidas: yellow_cards, red_cards');
+    }
+    const uniqueMetrics = [...new Set(requestedMetrics)];
+    const fetched = await fetchFootballDataIncidents();
+    const rankings = buildFootballDataCareerCardsRankings(fetched.incidents, {
+      sourceVersion: fetched.manifest.commitSha,
+      sourceFiles: fetched.manifest.files.length
+    });
+    const results = [];
+    for (const metric of uniqueMetrics) {
+      const input = rankings[metric];
+      const rankingId = await importRankingInput(input);
+      results.push({ metric, categorySlug: input.categorySlug, rankingId, entries: input.entries.length });
+    }
+    console.log(JSON.stringify({
+      source: 'schochastics-football-data-incidents',
+      sourceVersion: fetched.manifest.commitSha,
+      sourceFiles: fetched.manifest.files.length,
+      sourceIncidents: fetched.incidents.length,
+      results,
+      coverageComplete: false,
+      published: false,
+      note: 'Snapshots draft candidatos: la fuente ODbL aporta incidentes, pero usa nombres Surname Initial sin IDs estables y no demuestra por sí sola cobertura mundial ni una identidad canónica segura.'
     }, null, 2));
   } else if (command === 'build-openfootball-national-league-club-titles') {
     const manifestPath = argument('manifest');
@@ -7683,6 +7714,19 @@ try {
       const result = await consolidateFootballDataClubIdentities(client);
       await client.query('COMMIT');
       console.log(JSON.stringify({ source: 'schochastics-football-data', ...result }, null, 2));
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  } else if (command === 'consolidate-football-data-incident-identities') {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await consolidateFootballDataIncidentIdentities(client);
+      await client.query('COMMIT');
+      console.log(JSON.stringify({ source: 'schochastics-football-data-incidents', ...result }, null, 2));
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;

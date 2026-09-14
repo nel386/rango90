@@ -1,0 +1,2855 @@
+{
+  "artifact": "rango90-ranking-input",
+  "artifactVersion": 1,
+  "categorySlug": "uefa-champions-league-goals",
+  "dataVersion": "uefa-champions-league-goals-transfermarkt-top-200-2026-09-12",
+  "source": {
+    "key": "transfermarkt-european-cup-champions-league-historical-goals",
+    "name": "Transfermarkt — historical European Cup / Champions League top scorers",
+    "sourceType": "reference",
+    "baseUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+    "rightsStatus": "review_required"
+  },
+  "coverageComplete": true,
+  "reviewed": false,
+  "audit": {
+    "primarySourceRole": "ranking-values",
+    "contrastSources": [
+      {
+        "key": "uefa-champions-league-official",
+        "name": "UEFA Champions League official player statistics",
+        "url": "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/",
+        "archivedSnapshotId": "src_c9359c9f91bba9215af8fef6",
+        "observedRows": 100,
+        "comparison": "conservative_name_match_top_100",
+        "matchedNames": 24,
+        "equalValues": 12,
+        "valueDiscrepancies": 12,
+        "usedToBuildRanking": false,
+        "status": "review_required"
+      },
+      {
+        "key": "api-football",
+        "name": "API-Football / API-Sports",
+        "url": "https://v3.football.api-sports.io/players",
+        "archivedSnapshotId": "src_9f045034874eed9a0badd298",
+        "observedRows": 200,
+        "comparison": "historical_2000_2026_partial",
+        "usedToBuildRanking": false,
+        "status": "insufficient_historical_coverage"
+      }
+    ],
+    "identityPolicy": "The source player URL is the source key; only exact reviewed identity links may collapse records. Historical players remain in the ranking evidence and outside the modern playable default unless explicitly curated.",
+    "ties": "Competition ranking by exact raw value; equal values share rank and tie_group; subsequent ranks include skipped positions. The 200 source rows are retained even when rank exceeds 200 because the source cutoff is row-based.",
+    "rights": {
+      "data": "review_required",
+      "primarySourceRedistribution": "not_granted",
+      "images": "optional_and_separate",
+      "publicationGate": "source_rights_approved_and_each_playable_entry_has_legal_portrait_or_approved_owned_fallback"
+    },
+    "productionDecision": "draft_only_until_contrast_and_rights_are_resolved",
+    "unresolvedConflicts": 12
+  },
+  "entries": [
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:08acf787022849299b30ba6a",
+      "entityType": "player",
+      "name": "Cristiano Ronaldo",
+      "rawValue": 140,
+      "evidence": {
+        "sourceRank": 1,
+        "externalId": "https://www.transfermarkt.com/cristiano-ronaldo/profil/spieler/8198",
+        "profileUrl": "https://www.transfermarkt.com/cristiano-ronaldo/profil/spieler/8198",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/8198-1748102259.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:e0cbd48e4220c983d0bc20e3",
+      "entityType": "player",
+      "name": "Lionel Messi",
+      "rawValue": 129,
+      "evidence": {
+        "sourceRank": 2,
+        "externalId": "https://www.transfermarkt.com/lionel-messi/profil/spieler/28003",
+        "profileUrl": "https://www.transfermarkt.com/lionel-messi/profil/spieler/28003",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/28003-1771694720.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:8714e706e9495653652bb741",
+      "entityType": "player",
+      "name": "Robert Lewandowski",
+      "rawValue": 109,
+      "evidence": {
+        "sourceRank": 3,
+        "externalId": "https://www.transfermarkt.com/robert-lewandowski/profil/spieler/38253",
+        "profileUrl": "https://www.transfermarkt.com/robert-lewandowski/profil/spieler/38253",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/38253-1784310398.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ad09e5098a5ab5a23eace5fd",
+      "entityType": "player",
+      "name": "Karim Benzema",
+      "rawValue": 90,
+      "evidence": {
+        "sourceRank": 4,
+        "externalId": "https://www.transfermarkt.com/karim-benzema/profil/spieler/18922",
+        "profileUrl": "https://www.transfermarkt.com/karim-benzema/profil/spieler/18922",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/18922-1702414196.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:b8cc45b74357d05470f9fa6c",
+      "entityType": "player",
+      "name": "Raúl",
+      "rawValue": 71,
+      "evidence": {
+        "sourceRank": 5,
+        "externalId": "https://www.transfermarkt.com/raul/profil/spieler/7349",
+        "profileUrl": "https://www.transfermarkt.com/raul/profil/spieler/7349",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7349-1570439548.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:a071134f4896322ba99edf15",
+      "entityType": "player",
+      "name": "Kylian Mbappé",
+      "rawValue": 71,
+      "evidence": {
+        "sourceRank": 6,
+        "externalId": "https://www.transfermarkt.com/kylian-mbappe/profil/spieler/342229",
+        "profileUrl": "https://www.transfermarkt.com/kylian-mbappe/profil/spieler/342229",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/342229-1682683695.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:45fc6d44fb472d65f0da04cc",
+      "entityType": "player",
+      "name": "Erling Haaland",
+      "rawValue": 59,
+      "evidence": {
+        "sourceRank": 7,
+        "externalId": "https://www.transfermarkt.com/erling-haaland/profil/spieler/418560",
+        "profileUrl": "https://www.transfermarkt.com/erling-haaland/profil/spieler/418560",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/418560-1788115885.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:70cc893c99cf8f0529a17150",
+      "entityType": "player",
+      "name": "Thomas Müller",
+      "rawValue": 57,
+      "evidence": {
+        "sourceRank": 8,
+        "externalId": "https://www.transfermarkt.com/thomas-muller/profil/spieler/58358",
+        "profileUrl": "https://www.transfermarkt.com/thomas-muller/profil/spieler/58358",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/58358-1771861722.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:c8a6da224cb9c27fdfd3edb3",
+      "entityType": "player",
+      "name": "Ruud van Nistelrooy",
+      "rawValue": 56,
+      "evidence": {
+        "sourceRank": 9,
+        "externalId": "https://www.transfermarkt.com/ruud-van-nistelrooy/profil/spieler/3407",
+        "profileUrl": "https://www.transfermarkt.com/ruud-van-nistelrooy/profil/spieler/3407",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3407-1730121299.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:4a3c94c4023852ebc490ff8f",
+      "entityType": "player",
+      "name": "Harry Kane",
+      "rawValue": 55,
+      "evidence": {
+        "sourceRank": 10,
+        "externalId": "https://www.transfermarkt.com/harry-kane/profil/spieler/132098",
+        "profileUrl": "https://www.transfermarkt.com/harry-kane/profil/spieler/132098",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/132098-1700211169.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:140976132d8500a5497dccb9",
+      "entityType": "player",
+      "name": "Thierry Henry",
+      "rawValue": 50,
+      "evidence": {
+        "sourceRank": 11,
+        "externalId": "https://www.transfermarkt.com/thierry-henry/profil/spieler/3207",
+        "profileUrl": "https://www.transfermarkt.com/thierry-henry/profil/spieler/3207",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3207-1683199668.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:0c9e8a8ce10d0844b6f6f909",
+      "entityType": "player",
+      "name": "Mohamed Salah",
+      "rawValue": 50,
+      "evidence": {
+        "sourceRank": 12,
+        "externalId": "https://www.transfermarkt.com/mohamed-salah/profil/spieler/148455",
+        "profileUrl": "https://www.transfermarkt.com/mohamed-salah/profil/spieler/148455",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/148455-1727337594.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:103fe5079e6d2c71d79c3406",
+      "entityType": "player",
+      "name": "Alfredo di Stéfano",
+      "rawValue": 49,
+      "evidence": {
+        "sourceRank": 13,
+        "externalId": "https://www.transfermarkt.com/alfredo-di-stefano/profil/spieler/135778",
+        "profileUrl": "https://www.transfermarkt.com/alfredo-di-stefano/profil/spieler/135778",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/135778-1465807355.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:2ae2a8010ba024ac44267ca4",
+      "entityType": "player",
+      "name": "Zlatan Ibrahimović",
+      "rawValue": 48,
+      "evidence": {
+        "sourceRank": 14,
+        "externalId": "https://www.transfermarkt.com/zlatan-ibrahimovic/profil/spieler/3455",
+        "profileUrl": "https://www.transfermarkt.com/zlatan-ibrahimovic/profil/spieler/3455",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3455-1579506060.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:6fbe83e52fdb0cb098d50828",
+      "entityType": "player",
+      "name": "Andriy Shevchenko",
+      "rawValue": 48,
+      "evidence": {
+        "sourceRank": 15,
+        "externalId": "https://www.transfermarkt.com/andriy-shevchenko/profil/spieler/3522",
+        "profileUrl": "https://www.transfermarkt.com/andriy-shevchenko/profil/spieler/3522",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3522-1570438190.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:85475889fed12b4ef7971029",
+      "entityType": "player",
+      "name": "Eusébio",
+      "rawValue": 46,
+      "evidence": {
+        "sourceRank": 16,
+        "externalId": "https://www.transfermarkt.com/eusebio/profil/spieler/89230",
+        "profileUrl": "https://www.transfermarkt.com/eusebio/profil/spieler/89230",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/89230-1464768840.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:3818959882ab1ce74d4b1ddc",
+      "entityType": "player",
+      "name": "Filippo Inzaghi",
+      "rawValue": 46,
+      "evidence": {
+        "sourceRank": 17,
+        "externalId": "https://www.transfermarkt.com/filippo-inzaghi/profil/spieler/5821",
+        "profileUrl": "https://www.transfermarkt.com/filippo-inzaghi/profil/spieler/5821",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/5821-1590494397.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:2292035925a4f01a9f259b01",
+      "entityType": "player",
+      "name": "Antoine Griezmann",
+      "rawValue": 44,
+      "evidence": {
+        "sourceRank": 18,
+        "externalId": "https://www.transfermarkt.com/antoine-griezmann/profil/spieler/125781",
+        "profileUrl": "https://www.transfermarkt.com/antoine-griezmann/profil/spieler/125781",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/125781-1775233998.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:2e269fac2111f68c7f671272",
+      "entityType": "player",
+      "name": "Didier Drogba",
+      "rawValue": 44,
+      "evidence": {
+        "sourceRank": 19,
+        "externalId": "https://www.transfermarkt.com/didier-drogba/profil/spieler/3924",
+        "profileUrl": "https://www.transfermarkt.com/didier-drogba/profil/spieler/3924",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3924-1683633427.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:3885ec2e25136d206ab6b3f2",
+      "entityType": "player",
+      "name": "Neymar",
+      "rawValue": 43,
+      "evidence": {
+        "sourceRank": 20,
+        "externalId": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+        "profileUrl": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/68290-1692601435.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:5d785e0e1fb9cc00a242678c",
+      "entityType": "player",
+      "name": "Alessandro Del Piero",
+      "rawValue": 42,
+      "evidence": {
+        "sourceRank": 21,
+        "externalId": "https://www.transfermarkt.com/alessandro-del-piero/profil/spieler/4289",
+        "profileUrl": "https://www.transfermarkt.com/alessandro-del-piero/profil/spieler/4289",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4289-1683631011.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:4114012ea975e860718b8495",
+      "entityType": "player",
+      "name": "Sergio Agüero",
+      "rawValue": 41,
+      "evidence": {
+        "sourceRank": 22,
+        "externalId": "https://www.transfermarkt.com/sergio-aguero/profil/spieler/26399",
+        "profileUrl": "https://www.transfermarkt.com/sergio-aguero/profil/spieler/26399",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/26399-1580460866.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:11ae6957792a3ecb9e63757a",
+      "entityType": "player",
+      "name": "Ferenc Puskás",
+      "rawValue": 36,
+      "evidence": {
+        "sourceRank": 23,
+        "externalId": "https://www.transfermarkt.com/ferenc-puskas/profil/spieler/103092",
+        "profileUrl": "https://www.transfermarkt.com/ferenc-puskas/profil/spieler/103092",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/s_103092_4023_2014_03_17_1.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:79be8c1511fd0cc7c11467ac",
+      "entityType": "player",
+      "name": "Edinson Cavani",
+      "rawValue": 35,
+      "evidence": {
+        "sourceRank": 24,
+        "externalId": "https://www.transfermarkt.com/edinson-cavani/profil/spieler/48280",
+        "profileUrl": "https://www.transfermarkt.com/edinson-cavani/profil/spieler/48280",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/48280-1739899618.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:671f692c3c2848b0d5359401",
+      "entityType": "player",
+      "name": "Vinicius Junior",
+      "rawValue": 34,
+      "evidence": {
+        "sourceRank": 25,
+        "externalId": "https://www.transfermarkt.com/vinicius-junior/profil/spieler/371998",
+        "profileUrl": "https://www.transfermarkt.com/vinicius-junior/profil/spieler/371998",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/371998-1761575144.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ba9459195f1c91f27eac05dc",
+      "entityType": "player",
+      "name": "Gerd Müller",
+      "rawValue": 34,
+      "evidence": {
+        "sourceRank": 26,
+        "externalId": "https://www.transfermarkt.com/gerd-muller/profil/spieler/35604",
+        "profileUrl": "https://www.transfermarkt.com/gerd-muller/profil/spieler/35604",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/35604-1629028308.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:722a92320112224243ec9866",
+      "entityType": "player",
+      "name": "Fernando Morientes",
+      "rawValue": 33,
+      "evidence": {
+        "sourceRank": 27,
+        "externalId": "https://www.transfermarkt.com/fernando-morientes/profil/spieler/7531",
+        "profileUrl": "https://www.transfermarkt.com/fernando-morientes/profil/spieler/7531",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7531-1683669122.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:e9d7950d0ea63a938f6b8787",
+      "entityType": "player",
+      "name": "Arjen Robben",
+      "rawValue": 31,
+      "evidence": {
+        "sourceRank": 28,
+        "externalId": "https://www.transfermarkt.com/arjen-robben/profil/spieler/4360",
+        "profileUrl": "https://www.transfermarkt.com/arjen-robben/profil/spieler/4360",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4360-1719545379.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:9e04a5413019590b969fbab6",
+      "entityType": "player",
+      "name": "Kaká",
+      "rawValue": 30,
+      "evidence": {
+        "sourceRank": 29,
+        "externalId": "https://www.transfermarkt.com/kaka/profil/spieler/3366",
+        "profileUrl": "https://www.transfermarkt.com/kaka/profil/spieler/3366",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3366-1683638749.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:bd82c469db6902349f8ec861",
+      "entityType": "player",
+      "name": "Ousmane Dembélé",
+      "rawValue": 30,
+      "evidence": {
+        "sourceRank": 30,
+        "externalId": "https://www.transfermarkt.com/ousmane-dembele/profil/spieler/288230",
+        "profileUrl": "https://www.transfermarkt.com/ousmane-dembele/profil/spieler/288230",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/288230-1684148641.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:1d75457e6355316d04c96e88",
+      "entityType": "player",
+      "name": "Wayne Rooney",
+      "rawValue": 30,
+      "evidence": {
+        "sourceRank": 31,
+        "externalId": "https://www.transfermarkt.com/wayne-rooney/profil/spieler/3332",
+        "profileUrl": "https://www.transfermarkt.com/wayne-rooney/profil/spieler/3332",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3332-1406462596.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:0861be2f76c2c3a92496e189",
+      "entityType": "player",
+      "name": "Samuel Eto'o",
+      "rawValue": 30,
+      "evidence": {
+        "sourceRank": 32,
+        "externalId": "https://www.transfermarkt.com/samuel-etoo/profil/spieler/4257",
+        "profileUrl": "https://www.transfermarkt.com/samuel-etoo/profil/spieler/4257",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4257-1683640611.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:c257f639a09ac3a66feb9ed2",
+      "entityType": "player",
+      "name": "Paco Gento",
+      "rawValue": 30,
+      "evidence": {
+        "sourceRank": 33,
+        "externalId": "https://www.transfermarkt.com/paco-gento/profil/spieler/170723",
+        "profileUrl": "https://www.transfermarkt.com/paco-gento/profil/spieler/170723",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/170723-1672434589.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:720e8c2b3bea45b3082069d7",
+      "entityType": "player",
+      "name": "Edin Dzeko",
+      "rawValue": 29,
+      "evidence": {
+        "sourceRank": 34,
+        "externalId": "https://www.transfermarkt.com/edin-dzeko/profil/spieler/28396",
+        "profileUrl": "https://www.transfermarkt.com/edin-dzeko/profil/spieler/28396",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/28396-1752151521.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:50776bce47b26846a30813ab",
+      "entityType": "player",
+      "name": "Álvaro Morata",
+      "rawValue": 29,
+      "evidence": {
+        "sourceRank": 35,
+        "externalId": "https://www.transfermarkt.com/alvaro-morata/profil/spieler/128223",
+        "profileUrl": "https://www.transfermarkt.com/alvaro-morata/profil/spieler/128223",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/128223-1719989301.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:8e0fb05f720a0ea6298df204",
+      "entityType": "player",
+      "name": "Patrick Kluivert",
+      "rawValue": 29,
+      "evidence": {
+        "sourceRank": 36,
+        "externalId": "https://www.transfermarkt.com/patrick-kluivert/profil/spieler/4385",
+        "profileUrl": "https://www.transfermarkt.com/patrick-kluivert/profil/spieler/4385",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4385-1495621412.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:20722aac00cc408bee893d86",
+      "entityType": "player",
+      "name": "David Trezeguet",
+      "rawValue": 29,
+      "evidence": {
+        "sourceRank": 37,
+        "externalId": "https://www.transfermarkt.com/david-trezeguet/profil/spieler/4146",
+        "profileUrl": "https://www.transfermarkt.com/david-trezeguet/profil/spieler/4146",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4146-1491231443.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ed90da5ec4a6d434fe48179b",
+      "entityType": "player",
+      "name": "Roy Makaay",
+      "rawValue": 29,
+      "evidence": {
+        "sourceRank": 38,
+        "externalId": "https://www.transfermarkt.com/roy-makaay/profil/spieler/3994",
+        "profileUrl": "https://www.transfermarkt.com/roy-makaay/profil/spieler/3994",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3994-1461327946.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:39601d291975d8bb93bc8827",
+      "entityType": "player",
+      "name": "Ryan Giggs",
+      "rawValue": 28,
+      "evidence": {
+        "sourceRank": 39,
+        "externalId": "https://www.transfermarkt.com/ryan-giggs/profil/spieler/3406",
+        "profileUrl": "https://www.transfermarkt.com/ryan-giggs/profil/spieler/3406",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3406-1589198838.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:2a9034bdf715899d60b7f1e0",
+      "entityType": "player",
+      "name": "Jean-Pierre Papin",
+      "rawValue": 28,
+      "evidence": {
+        "sourceRank": 40,
+        "externalId": "https://www.transfermarkt.com/jean-pierre-papin/profil/spieler/17168",
+        "profileUrl": "https://www.transfermarkt.com/jean-pierre-papin/profil/spieler/17168",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/17168-1546600583.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:e21b55c76708759288909a81",
+      "entityType": "player",
+      "name": "Luis Suárez",
+      "rawValue": 27,
+      "evidence": {
+        "sourceRank": 41,
+        "externalId": "https://www.transfermarkt.com/luis-suarez/profil/spieler/44352",
+        "profileUrl": "https://www.transfermarkt.com/luis-suarez/profil/spieler/44352",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/44352-1771695059.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:f55b5e5bc2e3f930f1eca67e",
+      "entityType": "player",
+      "name": "Raheem Sterling",
+      "rawValue": 27,
+      "evidence": {
+        "sourceRank": 42,
+        "externalId": "https://www.transfermarkt.com/raheem-sterling/profil/spieler/134425",
+        "profileUrl": "https://www.transfermarkt.com/raheem-sterling/profil/spieler/134425",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/134425-1684165974.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:0062bc6c23db9c8738449bde",
+      "entityType": "player",
+      "name": "Rivaldo",
+      "rawValue": 27,
+      "evidence": {
+        "sourceRank": 43,
+        "externalId": "https://www.transfermarkt.com/rivaldo/profil/spieler/3372",
+        "profileUrl": "https://www.transfermarkt.com/rivaldo/profil/spieler/3372",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3372-1588239928.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:1815a1cd3640f190856b0c73",
+      "entityType": "player",
+      "name": "Sadio Mané",
+      "rawValue": 27,
+      "evidence": {
+        "sourceRank": 44,
+        "externalId": "https://www.transfermarkt.com/sadio-mane/profil/spieler/200512",
+        "profileUrl": "https://www.transfermarkt.com/sadio-mane/profil/spieler/200512",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/200512-1767005854.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:b34e9e1ce5e73658e0bb8f2f",
+      "entityType": "player",
+      "name": "Gabriel Jesus",
+      "rawValue": 27,
+      "evidence": {
+        "sourceRank": 45,
+        "externalId": "https://www.transfermarkt.com/gabriel-jesus/profil/spieler/363205",
+        "profileUrl": "https://www.transfermarkt.com/gabriel-jesus/profil/spieler/363205",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/363205-1669711141.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:7baa2a9985f3a34762d00e71",
+      "entityType": "player",
+      "name": "Rodrygo",
+      "rawValue": 26,
+      "evidence": {
+        "sourceRank": 46,
+        "externalId": "https://www.transfermarkt.com/rodrygo/profil/spieler/412363",
+        "profileUrl": "https://www.transfermarkt.com/rodrygo/profil/spieler/412363",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/412363-1763041611.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:d0ae526bc42b7b84d91abddd",
+      "entityType": "player",
+      "name": "Mario Gómez",
+      "rawValue": 26,
+      "evidence": {
+        "sourceRank": 47,
+        "externalId": "https://www.transfermarkt.com/mario-gomez/profil/spieler/6288",
+        "profileUrl": "https://www.transfermarkt.com/mario-gomez/profil/spieler/6288",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/6288-1683668325.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:c00dfd6f1c291fb2fc7f1459",
+      "entityType": "player",
+      "name": "Julián Alvarez",
+      "rawValue": 25,
+      "evidence": {
+        "sourceRank": 48,
+        "externalId": "https://www.transfermarkt.com/julian-alvarez/profil/spieler/576024",
+        "profileUrl": "https://www.transfermarkt.com/julian-alvarez/profil/spieler/576024",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/576024-1684920938.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:2f6236e4bb66ff8b57fa120d",
+      "entityType": "player",
+      "name": "Lautaro Martínez",
+      "rawValue": 25,
+      "evidence": {
+        "sourceRank": 49,
+        "externalId": "https://www.transfermarkt.com/lautaro-martinez/profil/spieler/406625",
+        "profileUrl": "https://www.transfermarkt.com/lautaro-martinez/profil/spieler/406625",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/406625-1695024988.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ca6b25dba91ab7fe0f08c349",
+      "entityType": "player",
+      "name": "Robin van Persie",
+      "rawValue": 25,
+      "evidence": {
+        "sourceRank": 50,
+        "externalId": "https://www.transfermarkt.com/robin-van-persie/profil/spieler/4380",
+        "profileUrl": "https://www.transfermarkt.com/robin-van-persie/profil/spieler/4380",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4380-1707301752.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:5599f6a1ea29294aeab477c2",
+      "entityType": "player",
+      "name": "Hernán Crespo",
+      "rawValue": 25,
+      "evidence": {
+        "sourceRank": 51,
+        "externalId": "https://www.transfermarkt.com/hernan-crespo/profil/spieler/3410",
+        "profileUrl": "https://www.transfermarkt.com/hernan-crespo/profil/spieler/3410",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3410-1719458041.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:978f4ca0e07ea33d2db445a5",
+      "entityType": "player",
+      "name": "Jardel",
+      "rawValue": 25,
+      "evidence": {
+        "sourceRank": 52,
+        "externalId": "https://www.transfermarkt.com/jardel/profil/spieler/3625",
+        "profileUrl": "https://www.transfermarkt.com/jardel/profil/spieler/3625",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3625-1738949812.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:844931ba33eec4a36becfa6e",
+      "entityType": "player",
+      "name": "Ángel Di María",
+      "rawValue": 24,
+      "evidence": {
+        "sourceRank": 53,
+        "externalId": "https://www.transfermarkt.com/angel-di-maria/profil/spieler/45320",
+        "profileUrl": "https://www.transfermarkt.com/angel-di-maria/profil/spieler/45320",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/45320-1700648952.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:100474b3c575c3a8405cd15d",
+      "entityType": "player",
+      "name": "Luís Figo",
+      "rawValue": 24,
+      "evidence": {
+        "sourceRank": 54,
+        "externalId": "https://www.transfermarkt.com/luis-figo/profil/spieler/3446",
+        "profileUrl": "https://www.transfermarkt.com/luis-figo/profil/spieler/3446",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3446-1570440028.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:7eb0104ea5b421533138fd66",
+      "entityType": "player",
+      "name": "Marco Reus",
+      "rawValue": 24,
+      "evidence": {
+        "sourceRank": 55,
+        "externalId": "https://www.transfermarkt.com/marco-reus/profil/spieler/35207",
+        "profileUrl": "https://www.transfermarkt.com/marco-reus/profil/spieler/35207",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/35207-1771691672.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:00c51b96627019c387ca002c",
+      "entityType": "player",
+      "name": "Giovane Élber",
+      "rawValue": 24,
+      "evidence": {
+        "sourceRank": 56,
+        "externalId": "https://www.transfermarkt.com/giovane-elber/profil/spieler/198",
+        "profileUrl": "https://www.transfermarkt.com/giovane-elber/profil/spieler/198",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/198-1461223190.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:26a409822670baa279c616e8",
+      "entityType": "player",
+      "name": "Gonzalo Higuaín",
+      "rawValue": 24,
+      "evidence": {
+        "sourceRank": 57,
+        "externalId": "https://www.transfermarkt.com/gonzalo-higuain/profil/spieler/39153",
+        "profileUrl": "https://www.transfermarkt.com/gonzalo-higuain/profil/spieler/39153",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/39153-1595579337.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:0d60e2d932cfc05fe25ad64f",
+      "entityType": "player",
+      "name": "Paul Scholes",
+      "rawValue": 24,
+      "evidence": {
+        "sourceRank": 58,
+        "externalId": "https://www.transfermarkt.com/paul-scholes/profil/spieler/3397",
+        "profileUrl": "https://www.transfermarkt.com/paul-scholes/profil/spieler/3397",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3397-1595498527.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:50c9f264e5ab624c80015b3f",
+      "entityType": "player",
+      "name": "Marco Simone",
+      "rawValue": 24,
+      "evidence": {
+        "sourceRank": 59,
+        "externalId": "https://www.transfermarkt.com/marco-simone/profil/spieler/3524",
+        "profileUrl": "https://www.transfermarkt.com/marco-simone/profil/spieler/3524",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/s_3524_123_2012_1.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:21bd9fdef58f02fcdae05ed1",
+      "entityType": "player",
+      "name": "Olivier Giroud",
+      "rawValue": 24,
+      "evidence": {
+        "sourceRank": 60,
+        "externalId": "https://www.transfermarkt.com/olivier-giroud/profil/spieler/82442",
+        "profileUrl": "https://www.transfermarkt.com/olivier-giroud/profil/spieler/82442",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/82442-1725258600.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:6ba6f71581c8ba42e28f114a",
+      "entityType": "player",
+      "name": "José Altafini",
+      "rawValue": 24,
+      "evidence": {
+        "sourceRank": 61,
+        "externalId": "https://www.transfermarkt.com/jose-altafini/profil/spieler/31571",
+        "profileUrl": "https://www.transfermarkt.com/jose-altafini/profil/spieler/31571",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/31571-1487854947.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:538edc1965fd336f219ed9b5",
+      "entityType": "player",
+      "name": "Frank Lampard",
+      "rawValue": 23,
+      "evidence": {
+        "sourceRank": 62,
+        "externalId": "https://www.transfermarkt.com/frank-lampard/profil/spieler/3163",
+        "profileUrl": "https://www.transfermarkt.com/frank-lampard/profil/spieler/3163",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3163-1674475335.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ea44080b2b099a504694fc16",
+      "entityType": "player",
+      "name": "Leroy Sané",
+      "rawValue": 23,
+      "evidence": {
+        "sourceRank": 63,
+        "externalId": "https://www.transfermarkt.com/leroy-sane/profil/spieler/192565",
+        "profileUrl": "https://www.transfermarkt.com/leroy-sane/profil/spieler/192565",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/192565-1694587968.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:06741d6314ee2451fcbf63a8",
+      "entityType": "player",
+      "name": "Jari Litmanen",
+      "rawValue": 23,
+      "evidence": {
+        "sourceRank": 64,
+        "externalId": "https://www.transfermarkt.com/jari-litmanen/profil/spieler/4675",
+        "profileUrl": "https://www.transfermarkt.com/jari-litmanen/profil/spieler/4675",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4675-1683630540.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:09d5b47eb93b0cdd159441a9",
+      "entityType": "player",
+      "name": "Roberto Firmino",
+      "rawValue": 22,
+      "evidence": {
+        "sourceRank": 65,
+        "externalId": "https://www.transfermarkt.com/roberto-firmino/profil/spieler/131789",
+        "profileUrl": "https://www.transfermarkt.com/roberto-firmino/profil/spieler/131789",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/131789-1762261875.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ce78dc598483ffa13f2f4671",
+      "entityType": "player",
+      "name": "José Torres",
+      "rawValue": 22,
+      "evidence": {
+        "sourceRank": 66,
+        "externalId": "https://www.transfermarkt.com/jose-torres/profil/spieler/137747",
+        "profileUrl": "https://www.transfermarkt.com/jose-torres/profil/spieler/137747",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/137747-1775427019.jpeg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:21fcaf438867b086911dd488",
+      "entityType": "player",
+      "name": "Santillana",
+      "rawValue": 22,
+      "evidence": {
+        "sourceRank": 67,
+        "externalId": "https://www.transfermarkt.com/santillana/profil/spieler/135092",
+        "profileUrl": "https://www.transfermarkt.com/santillana/profil/spieler/135092",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/135092-1474368172.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:cc03ad2a940739eab2a6ba79",
+      "entityType": "player",
+      "name": "Raphinha",
+      "rawValue": 21,
+      "evidence": {
+        "sourceRank": 68,
+        "externalId": "https://www.transfermarkt.com/raphinha/profil/spieler/411295",
+        "profileUrl": "https://www.transfermarkt.com/raphinha/profil/spieler/411295",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/411295-1729754479.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ed73e975e695a7db87c3a587",
+      "entityType": "player",
+      "name": "Steven Gerrard",
+      "rawValue": 21,
+      "evidence": {
+        "sourceRank": 69,
+        "externalId": "https://www.transfermarkt.com/steven-gerrard/profil/spieler/3109",
+        "profileUrl": "https://www.transfermarkt.com/steven-gerrard/profil/spieler/3109",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/s_3109_31_2013_01_16_1.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:e173c123314a340136d8ff84",
+      "entityType": "player",
+      "name": "Serhou Guirassy",
+      "rawValue": 21,
+      "evidence": {
+        "sourceRank": 70,
+        "externalId": "https://www.transfermarkt.com/serhou-guirassy/profil/spieler/270541",
+        "profileUrl": "https://www.transfermarkt.com/serhou-guirassy/profil/spieler/270541",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/270541-1755989642.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ee2be8dc224fef135ed15854",
+      "entityType": "player",
+      "name": "Claudio Pizarro",
+      "rawValue": 21,
+      "evidence": {
+        "sourceRank": 71,
+        "externalId": "https://www.transfermarkt.com/claudio-pizarro/profil/spieler/532",
+        "profileUrl": "https://www.transfermarkt.com/claudio-pizarro/profil/spieler/532",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/532-1535124277.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:590ebb4170b8acddb25e14d4",
+      "entityType": "player",
+      "name": "José Augusto",
+      "rawValue": 21,
+      "evidence": {
+        "sourceRank": 72,
+        "externalId": "https://www.transfermarkt.com/jose-augusto/profil/spieler/153195",
+        "profileUrl": "https://www.transfermarkt.com/jose-augusto/profil/spieler/153195",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/153195-1782679759.jpeg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:d91d0844bc1d9a2f83a3515c",
+      "entityType": "player",
+      "name": "Mario Mandžukić",
+      "rawValue": 21,
+      "evidence": {
+        "sourceRank": 73,
+        "externalId": "https://www.transfermarkt.com/mario-mandzukic/profil/spieler/34572",
+        "profileUrl": "https://www.transfermarkt.com/mario-mandzukic/profil/spieler/34572",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/34572-1669305573.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:3719479031baf6ea8652401c",
+      "entityType": "player",
+      "name": "Ferran Torres",
+      "rawValue": 21,
+      "evidence": {
+        "sourceRank": 74,
+        "externalId": "https://www.transfermarkt.com/ferran-torres/profil/spieler/398184",
+        "profileUrl": "https://www.transfermarkt.com/ferran-torres/profil/spieler/398184",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/398184-1779789996.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:cb430b265c6e6abe0abd67d6",
+      "entityType": "player",
+      "name": "Sergiy Rebrov",
+      "rawValue": 21,
+      "evidence": {
+        "sourceRank": 75,
+        "externalId": "https://www.transfermarkt.com/sergiy-rebrov/profil/spieler/3122",
+        "profileUrl": "https://www.transfermarkt.com/sergiy-rebrov/profil/spieler/3122",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3122-1602169592.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:20feea78db481fae3bf89149",
+      "entityType": "player",
+      "name": "Amancio",
+      "rawValue": 21,
+      "evidence": {
+        "sourceRank": 76,
+        "externalId": "https://www.transfermarkt.com/amancio/profil/spieler/135743",
+        "profileUrl": "https://www.transfermarkt.com/amancio/profil/spieler/135743",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/135743-1474538622.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:fd63bbea083b3aa0f322614d",
+      "entityType": "player",
+      "name": "Luiz Adriano",
+      "rawValue": 21,
+      "evidence": {
+        "sourceRank": 77,
+        "externalId": "https://www.transfermarkt.com/luiz-adriano/profil/spieler/48974",
+        "profileUrl": "https://www.transfermarkt.com/luiz-adriano/profil/spieler/48974",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/48974-1665561133.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:a60b83ca1c772b4c35eff765",
+      "entityType": "player",
+      "name": "Cesc Fàbregas",
+      "rawValue": 20,
+      "evidence": {
+        "sourceRank": 78,
+        "externalId": "https://www.transfermarkt.com/cesc-fabregas/profil/spieler/8806",
+        "profileUrl": "https://www.transfermarkt.com/cesc-fabregas/profil/spieler/8806",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/8806-1614090062.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ddd55a138369257d07f08c69",
+      "entityType": "player",
+      "name": "Gareth Bale",
+      "rawValue": 20,
+      "evidence": {
+        "sourceRank": 79,
+        "externalId": "https://www.transfermarkt.com/gareth-bale/profil/spieler/39381",
+        "profileUrl": "https://www.transfermarkt.com/gareth-bale/profil/spieler/39381",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/39381-1658665343.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:c0a1dea0b8c3a2c3a65bb1c0",
+      "entityType": "player",
+      "name": "Riyad Mahrez",
+      "rawValue": 20,
+      "evidence": {
+        "sourceRank": 80,
+        "externalId": "https://www.transfermarkt.com/riyad-mahrez/profil/spieler/171424",
+        "profileUrl": "https://www.transfermarkt.com/riyad-mahrez/profil/spieler/171424",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/171424-1699948752.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:999ae0c453a49590b2f3ed93",
+      "entityType": "player",
+      "name": "Phil Foden",
+      "rawValue": 20,
+      "evidence": {
+        "sourceRank": 81,
+        "externalId": "https://www.transfermarkt.com/phil-foden/profil/spieler/406635",
+        "profileUrl": "https://www.transfermarkt.com/phil-foden/profil/spieler/406635",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/406635-1668524492.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:869fa22189bf547a773ee35a",
+      "entityType": "player",
+      "name": "Fernando Torres",
+      "rawValue": 20,
+      "evidence": {
+        "sourceRank": 82,
+        "externalId": "https://www.transfermarkt.com/fernando-torres/profil/spieler/7767",
+        "profileUrl": "https://www.transfermarkt.com/fernando-torres/profil/spieler/7767",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7767-1683642827.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:4d8382467f787f2252c22209",
+      "entityType": "player",
+      "name": "Pierre-Emerick Aubameyang",
+      "rawValue": 20,
+      "evidence": {
+        "sourceRank": 83,
+        "externalId": "https://www.transfermarkt.com/pierre-emerick-aubameyang/profil/spieler/58864",
+        "profileUrl": "https://www.transfermarkt.com/pierre-emerick-aubameyang/profil/spieler/58864",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/58864-1762262625.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:9b1570b598de88c38feeb15e",
+      "entityType": "player",
+      "name": "Nicolas Anelka",
+      "rawValue": 20,
+      "evidence": {
+        "sourceRank": 84,
+        "externalId": "https://www.transfermarkt.com/nicolas-anelka/profil/spieler/3226",
+        "profileUrl": "https://www.transfermarkt.com/nicolas-anelka/profil/spieler/3226",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3226-1683728957.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:dadff30c4ed7d4afe5017e0d",
+      "entityType": "player",
+      "name": "Romário",
+      "rawValue": 20,
+      "evidence": {
+        "sourceRank": 85,
+        "externalId": "https://www.transfermarkt.com/romario/profil/spieler/7942",
+        "profileUrl": "https://www.transfermarkt.com/romario/profil/spieler/7942",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7942-1464018929.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:3c4781c12e67778c41f0ad3f",
+      "entityType": "player",
+      "name": "Paul Van Himst",
+      "rawValue": 20,
+      "evidence": {
+        "sourceRank": 86,
+        "externalId": "https://www.transfermarkt.com/paul-van-himst/profil/spieler/101754",
+        "profileUrl": "https://www.transfermarkt.com/paul-van-himst/profil/spieler/101754",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/s_101754_123_2014_03_05_1.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:dedfc3f06218abcce21130f7",
+      "entityType": "player",
+      "name": "Johan Cruyff",
+      "rawValue": 19,
+      "evidence": {
+        "sourceRank": 87,
+        "externalId": "https://www.transfermarkt.com/johan-cruyff/profil/spieler/8021",
+        "profileUrl": "https://www.transfermarkt.com/johan-cruyff/profil/spieler/8021",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/8021-1458823519.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:e0f5732170afc3e77c24abb6",
+      "entityType": "player",
+      "name": "Ole Gunnar Solskjaer",
+      "rawValue": 19,
+      "evidence": {
+        "sourceRank": 88,
+        "externalId": "https://www.transfermarkt.com/ole-gunnar-solskjaer/profil/spieler/3394",
+        "profileUrl": "https://www.transfermarkt.com/ole-gunnar-solskjaer/profil/spieler/3394",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3394-1595504030.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:3303da5bd3ad0a8c75796eba",
+      "entityType": "player",
+      "name": "Lisandro López",
+      "rawValue": 19,
+      "evidence": {
+        "sourceRank": 89,
+        "externalId": "https://www.transfermarkt.com/lisandro-lopez/profil/spieler/27661",
+        "profileUrl": "https://www.transfermarkt.com/lisandro-lopez/profil/spieler/27661",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/27661-1618606866.JPG",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:281bb8dd82feb72813b88374",
+      "entityType": "player",
+      "name": "Marco van Basten",
+      "rawValue": 19,
+      "evidence": {
+        "sourceRank": 90,
+        "externalId": "https://www.transfermarkt.com/marco-van-basten/profil/spieler/74471",
+        "profileUrl": "https://www.transfermarkt.com/marco-van-basten/profil/spieler/74471",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/74471-1590494247.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:93ff0a0402b3fce7ea0d7bc2",
+      "entityType": "player",
+      "name": "Luis Enrique",
+      "rawValue": 19,
+      "evidence": {
+        "sourceRank": 91,
+        "externalId": "https://www.transfermarkt.com/luis-enrique/profil/spieler/7601",
+        "profileUrl": "https://www.transfermarkt.com/luis-enrique/profil/spieler/7601",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7601-1519129048.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:6003fa4520c4a81ab58ebfe2",
+      "entityType": "player",
+      "name": "Julio Cruz",
+      "rawValue": 19,
+      "evidence": {
+        "sourceRank": 92,
+        "externalId": "https://www.transfermarkt.com/julio-cruz/profil/spieler/6006",
+        "profileUrl": "https://www.transfermarkt.com/julio-cruz/profil/spieler/6006",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/6006-1707469105.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:b8ac828f6f0aecc28b2f2097",
+      "entityType": "player",
+      "name": "Heung-min Son",
+      "rawValue": 19,
+      "evidence": {
+        "sourceRank": 93,
+        "externalId": "https://www.transfermarkt.com/heung-min-son/profil/spieler/91845",
+        "profileUrl": "https://www.transfermarkt.com/heung-min-son/profil/spieler/91845",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/91845-1771690023.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:32b0da31b85c1614f5f26259",
+      "entityType": "player",
+      "name": "Pirri",
+      "rawValue": 19,
+      "evidence": {
+        "sourceRank": 94,
+        "externalId": "https://www.transfermarkt.com/pirri/profil/spieler/135098",
+        "profileUrl": "https://www.transfermarkt.com/pirri/profil/spieler/135098",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/135098-1474382726.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:9d4f22996a548097ae730b69",
+      "entityType": "player",
+      "name": "Franck Ribéry",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 95,
+        "externalId": "https://www.transfermarkt.com/franck-ribery/profil/spieler/22068",
+        "profileUrl": "https://www.transfermarkt.com/franck-ribery/profil/spieler/22068",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/22068-1663667692.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:bdccbe96ba73a65cb65372dd",
+      "entityType": "player",
+      "name": "Juninho Pernambucano",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 96,
+        "externalId": "https://www.transfermarkt.com/juninho-pernambucano/profil/spieler/5354",
+        "profileUrl": "https://www.transfermarkt.com/juninho-pernambucano/profil/spieler/5354",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/5354-1683633269.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:e662d9277be54e53546f8651",
+      "entityType": "player",
+      "name": "Willian",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 97,
+        "externalId": "https://www.transfermarkt.com/willian/profil/spieler/52769",
+        "profileUrl": "https://www.transfermarkt.com/willian/profil/spieler/52769",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/52769-1740646449.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:5b177669f1010a64ba32b9de",
+      "entityType": "player",
+      "name": "Serge Gnabry",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 98,
+        "externalId": "https://www.transfermarkt.com/serge-gnabry/profil/spieler/159471",
+        "profileUrl": "https://www.transfermarkt.com/serge-gnabry/profil/spieler/159471",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/159471-1759909173.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:99da8725907b04c06e7642d5",
+      "entityType": "player",
+      "name": "Ronaldinho",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 99,
+        "externalId": "https://www.transfermarkt.com/ronaldinho/profil/spieler/3373",
+        "profileUrl": "https://www.transfermarkt.com/ronaldinho/profil/spieler/3373",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3373-1515762355.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:b90d65912e3be54d94952b38",
+      "entityType": "player",
+      "name": "Pedro",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 100,
+        "externalId": "https://www.transfermarkt.com/pedro/profil/spieler/65278",
+        "profileUrl": "https://www.transfermarkt.com/pedro/profil/spieler/65278",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/65278-1695027154.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:50ca221ba9faa179b2c4e70d",
+      "entityType": "player",
+      "name": "Lucho González",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 101,
+        "externalId": "https://www.transfermarkt.com/lucho-gonzalez/profil/spieler/26244",
+        "profileUrl": "https://www.transfermarkt.com/lucho-gonzalez/profil/spieler/26244",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/26244-1719514353.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:5d74f0c5c3af9dae58dfc055",
+      "entityType": "player",
+      "name": "John Carew",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 102,
+        "externalId": "https://www.transfermarkt.com/john-carew/profil/spieler/3570",
+        "profileUrl": "https://www.transfermarkt.com/john-carew/profil/spieler/3570",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3570-1730987230.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:6a52d77470b2995c479d2400",
+      "entityType": "player",
+      "name": "José Águas",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 103,
+        "externalId": "https://www.transfermarkt.com/jose-aguas/profil/spieler/179147",
+        "profileUrl": "https://www.transfermarkt.com/jose-aguas/profil/spieler/179147",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/179147-1772229664.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:a761e587d005937c6ff0b995",
+      "entityType": "player",
+      "name": "Romelu Lukaku",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 104,
+        "externalId": "https://www.transfermarkt.com/romelu-lukaku/profil/spieler/96341",
+        "profileUrl": "https://www.transfermarkt.com/romelu-lukaku/profil/spieler/96341",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/96341-1661780981.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:f656b4c17c22317e7a5862fe",
+      "entityType": "player",
+      "name": "Andy Cole",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 105,
+        "externalId": "https://www.transfermarkt.com/andy-cole/profil/spieler/3238",
+        "profileUrl": "https://www.transfermarkt.com/andy-cole/profil/spieler/3238",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3238-1551429940.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:0e8bdff09ca30c5e19281aac",
+      "entityType": "player",
+      "name": "Javier Saviola",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 106,
+        "externalId": "https://www.transfermarkt.com/javier-saviola/profil/spieler/7611",
+        "profileUrl": "https://www.transfermarkt.com/javier-saviola/profil/spieler/7611",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7611-1719457586.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:fcbb246d83ed8cf9b7510313",
+      "entityType": "player",
+      "name": "Paulo Dybala",
+      "rawValue": 18,
+      "evidence": {
+        "sourceRank": 107,
+        "externalId": "https://www.transfermarkt.com/paulo-dybala/profil/spieler/206050",
+        "profileUrl": "https://www.transfermarkt.com/paulo-dybala/profil/spieler/206050",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/206050-1725530843.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:522e52111fe262d01e4a32e8",
+      "entityType": "player",
+      "name": "Alexis Sánchez",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 108,
+        "externalId": "https://www.transfermarkt.com/alexis-sanchez/profil/spieler/40433",
+        "profileUrl": "https://www.transfermarkt.com/alexis-sanchez/profil/spieler/40433",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/40433-1759840737.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:cddcdd65697d2e897c0893ac",
+      "entityType": "player",
+      "name": "Kingsley Coman",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 109,
+        "externalId": "https://www.transfermarkt.com/kingsley-coman/profil/spieler/243714",
+        "profileUrl": "https://www.transfermarkt.com/kingsley-coman/profil/spieler/243714",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/243714-1700040256.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:088fbdd7eccff99768244a85",
+      "entityType": "player",
+      "name": "Bernardo Silva",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 110,
+        "externalId": "https://www.transfermarkt.com/bernardo-silva/profil/spieler/241641",
+        "profileUrl": "https://www.transfermarkt.com/bernardo-silva/profil/spieler/241641",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/241641-1684311533.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:e89bb0a8c2a3716667ed75d0",
+      "entityType": "player",
+      "name": "Michel Platini",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 111,
+        "externalId": "https://www.transfermarkt.com/michel-platini/profil/spieler/88994",
+        "profileUrl": "https://www.transfermarkt.com/michel-platini/profil/spieler/88994",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/88994-1592212447.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:5f92699dcae75a7473ecd508",
+      "entityType": "player",
+      "name": "Francesco Totti",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 112,
+        "externalId": "https://www.transfermarkt.com/francesco-totti/profil/spieler/5958",
+        "profileUrl": "https://www.transfermarkt.com/francesco-totti/profil/spieler/5958",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/5958-1448466835.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:e15b1eedbbc04f94c3c14082",
+      "entityType": "player",
+      "name": "Marcus Rashford",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 113,
+        "externalId": "https://www.transfermarkt.com/marcus-rashford/profil/spieler/258923",
+        "profileUrl": "https://www.transfermarkt.com/marcus-rashford/profil/spieler/258923",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/258923-1674473054.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:77932ad813863168b52bab25",
+      "entityType": "player",
+      "name": "Sergio Ramos",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 114,
+        "externalId": "https://www.transfermarkt.com/sergio-ramos/profil/spieler/25557",
+        "profileUrl": "https://www.transfermarkt.com/sergio-ramos/profil/spieler/25557",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/25557-1694502812.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:32bb42ea8758cb160b2b1bbf",
+      "entityType": "player",
+      "name": "Hulk",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 115,
+        "externalId": "https://www.transfermarkt.com/hulk/profil/spieler/80562",
+        "profileUrl": "https://www.transfermarkt.com/hulk/profil/spieler/80562",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/80562-1563436073.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:50adcaa4ba00e7fdd79ea637",
+      "entityType": "player",
+      "name": "Hristo Stoichkov",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 116,
+        "externalId": "https://www.transfermarkt.com/hristo-stoichkov/profil/spieler/7938",
+        "profileUrl": "https://www.transfermarkt.com/hristo-stoichkov/profil/spieler/7938",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7938-1461231110.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:1f4497f998546dde0bb3376d",
+      "entityType": "player",
+      "name": "Luis Díaz",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 117,
+        "externalId": "https://www.transfermarkt.com/luis-diaz/profil/spieler/480692",
+        "profileUrl": "https://www.transfermarkt.com/luis-diaz/profil/spieler/480692",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/480692-1757938077.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:c0d1335f38b89927eb6ccf0d",
+      "entityType": "player",
+      "name": "Timo Werner",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 118,
+        "externalId": "https://www.transfermarkt.com/timo-werner/profil/spieler/170527",
+        "profileUrl": "https://www.transfermarkt.com/timo-werner/profil/spieler/170527",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/170527-1774652461.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:b49874ee5cf7e357f2a7ec5c",
+      "entityType": "player",
+      "name": "Karim Adeyemi",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 119,
+        "externalId": "https://www.transfermarkt.com/karim-adeyemi/profil/spieler/496094",
+        "profileUrl": "https://www.transfermarkt.com/karim-adeyemi/profil/spieler/496094",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/496094-1788248133.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ca513ad251933cf192a8d90e",
+      "entityType": "player",
+      "name": "Emilio Butragueño",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 120,
+        "externalId": "https://www.transfermarkt.com/emilio-butragueno/profil/spieler/117598",
+        "profileUrl": "https://www.transfermarkt.com/emilio-butragueno/profil/spieler/117598",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/117598-1492517171.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:f467825c681fc730143e64b5",
+      "entityType": "player",
+      "name": "Hugo Sánchez",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 121,
+        "externalId": "https://www.transfermarkt.com/hugo-sanchez/profil/spieler/84528",
+        "profileUrl": "https://www.transfermarkt.com/hugo-sanchez/profil/spieler/84528",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/84528-1415373216.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:efdd7485000d6069a68e320f",
+      "entityType": "player",
+      "name": "Luc Nilis",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 122,
+        "externalId": "https://www.transfermarkt.com/luc-nilis/profil/spieler/27656",
+        "profileUrl": "https://www.transfermarkt.com/luc-nilis/profil/spieler/27656",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/27656-1598533292.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:b96b393ff8edbcd6f4930979",
+      "entityType": "player",
+      "name": "Sandro Mazzola",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 123,
+        "externalId": "https://www.transfermarkt.com/sandro-mazzola/profil/spieler/145344",
+        "profileUrl": "https://www.transfermarkt.com/sandro-mazzola/profil/spieler/145344",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/145344-1522940109.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:d071bd4858af9c4ed0093e95",
+      "entityType": "player",
+      "name": "Bora Kostic",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 124,
+        "externalId": "https://www.transfermarkt.com/bora-kostic/profil/spieler/215719",
+        "profileUrl": "https://www.transfermarkt.com/bora-kostic/profil/spieler/215719",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/default.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:4ad4a27a4f97bf1d89ba3cd7",
+      "entityType": "player",
+      "name": "Jozef Adamec",
+      "rawValue": 17,
+      "evidence": {
+        "sourceRank": 125,
+        "externalId": "https://www.transfermarkt.com/jozef-adamec/profil/spieler/234403",
+        "profileUrl": "https://www.transfermarkt.com/jozef-adamec/profil/spieler/234403",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/234403-1546591214.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:c2504ce657a40a80dcbee59a",
+      "entityType": "player",
+      "name": "David Beckham",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 126,
+        "externalId": "https://www.transfermarkt.com/david-beckham/profil/spieler/3139",
+        "profileUrl": "https://www.transfermarkt.com/david-beckham/profil/spieler/3139",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3139-1746174990.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:cbd0dab8fb3857f41049bd66",
+      "entityType": "player",
+      "name": "Kevin De Bruyne",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 127,
+        "externalId": "https://www.transfermarkt.com/kevin-de-bruyne/profil/spieler/88755",
+        "profileUrl": "https://www.transfermarkt.com/kevin-de-bruyne/profil/spieler/88755",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/88755-1713391485.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:9238a0209e3a367a120b1ee9",
+      "entityType": "player",
+      "name": "Roberto Carlos",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 128,
+        "externalId": "https://www.transfermarkt.com/roberto-carlos/profil/spieler/7518",
+        "profileUrl": "https://www.transfermarkt.com/roberto-carlos/profil/spieler/7518",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7518-1726487760.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:b5e8832733de68749b21748b",
+      "entityType": "player",
+      "name": "Guti",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 129,
+        "externalId": "https://www.transfermarkt.com/guti/profil/spieler/7530",
+        "profileUrl": "https://www.transfermarkt.com/guti/profil/spieler/7530",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7530-1761145794.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:33b7a5e4ffdb5e94e38a2ae5",
+      "entityType": "player",
+      "name": "Dries Mertens",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 130,
+        "externalId": "https://www.transfermarkt.com/dries-mertens/profil/spieler/56416",
+        "profileUrl": "https://www.transfermarkt.com/dries-mertens/profil/spieler/56416",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/56416-1671109411.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:3842e35b5760c484fc3122f0",
+      "entityType": "player",
+      "name": "Michael Ballack",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 131,
+        "externalId": "https://www.transfermarkt.com/michael-ballack/profil/spieler/63",
+        "profileUrl": "https://www.transfermarkt.com/michael-ballack/profil/spieler/63",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/63-1461310873.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:195b9219ae8b3d2ceedaafbf",
+      "entityType": "player",
+      "name": "Victor Osimhen",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 132,
+        "externalId": "https://www.transfermarkt.com/victor-osimhen/profil/spieler/401923",
+        "profileUrl": "https://www.transfermarkt.com/victor-osimhen/profil/spieler/401923",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/401923-1737730981.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:1773bb78557a07109f3c3f79",
+      "entityType": "player",
+      "name": "Roberto Soldado",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 133,
+        "externalId": "https://www.transfermarkt.com/roberto-soldado/profil/spieler/34870",
+        "profileUrl": "https://www.transfermarkt.com/roberto-soldado/profil/spieler/34870",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/34870-1583308636.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:5a47241d36547927451a82ca",
+      "entityType": "player",
+      "name": "Gerard Piqué",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 134,
+        "externalId": "https://www.transfermarkt.com/gerard-pique/profil/spieler/18944",
+        "profileUrl": "https://www.transfermarkt.com/gerard-pique/profil/spieler/18944",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/18944-1667548226.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:68c6562d7b703b58b6cfda93",
+      "entityType": "player",
+      "name": "Nené",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 135,
+        "externalId": "https://www.transfermarkt.com/nene/profil/spieler/116370",
+        "profileUrl": "https://www.transfermarkt.com/nene/profil/spieler/116370",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/116370-1713175056.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:eee42901d8513910e7c90eb2",
+      "entityType": "player",
+      "name": "Karl-Heinz Rummenigge",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 136,
+        "externalId": "https://www.transfermarkt.com/karl-heinz-rummenigge/profil/spieler/72343",
+        "profileUrl": "https://www.transfermarkt.com/karl-heinz-rummenigge/profil/spieler/72343",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/72343-1662993469.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:4d58e5f54424a8a751d9b581",
+      "entityType": "player",
+      "name": "Dieter Hoeneß",
+      "rawValue": 16,
+      "evidence": {
+        "sourceRank": 137,
+        "externalId": "https://www.transfermarkt.com/dieter-hoeness/profil/spieler/72350",
+        "profileUrl": "https://www.transfermarkt.com/dieter-hoeness/profil/spieler/72350",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/72350-1444740164.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ec618c7d0ad3dcfb19ac3364",
+      "entityType": "player",
+      "name": "Pavel Nedved",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 138,
+        "externalId": "https://www.transfermarkt.com/pavel-nedved/profil/spieler/3603",
+        "profileUrl": "https://www.transfermarkt.com/pavel-nedved/profil/spieler/3603",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3603-1570438744.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:f11cf1444f48c281dc7027f2",
+      "entityType": "player",
+      "name": "Kenny Dalglish",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 139,
+        "externalId": "https://www.transfermarkt.com/kenny-dalglish/profil/spieler/135269",
+        "profileUrl": "https://www.transfermarkt.com/kenny-dalglish/profil/spieler/135269",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/135269-1595575902.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:a678971779c74a1e16965cc4",
+      "entityType": "player",
+      "name": "Khvicha Kvaratskhelia",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 140,
+        "externalId": "https://www.transfermarkt.com/khvicha-kvaratskhelia/profil/spieler/502670",
+        "profileUrl": "https://www.transfermarkt.com/khvicha-kvaratskhelia/profil/spieler/502670",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/502670-1777411223.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:0a8d62b0ccf68848360cf1c1",
+      "entityType": "player",
+      "name": "Sylvain Wiltord",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 141,
+        "externalId": "https://www.transfermarkt.com/sylvain-wiltord/profil/spieler/3188",
+        "profileUrl": "https://www.transfermarkt.com/sylvain-wiltord/profil/spieler/3188",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3188-1491232150.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:1d1414f5d3ddfc2e9a900ca3",
+      "entityType": "player",
+      "name": "Jude Bellingham",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 142,
+        "externalId": "https://www.transfermarkt.com/jude-bellingham/profil/spieler/581678",
+        "profileUrl": "https://www.transfermarkt.com/jude-bellingham/profil/spieler/581678",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/581678-1748102891.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:3e78bbd7834aabd2465dab59",
+      "entityType": "player",
+      "name": "Theo Walcott",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 143,
+        "externalId": "https://www.transfermarkt.com/theo-walcott/profil/spieler/33713",
+        "profileUrl": "https://www.transfermarkt.com/theo-walcott/profil/spieler/33713",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/33713-1685709936.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:da4bda09786f7016d9ed33fd",
+      "entityType": "player",
+      "name": "Arturo Vidal",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 144,
+        "externalId": "https://www.transfermarkt.com/arturo-vidal/profil/spieler/37666",
+        "profileUrl": "https://www.transfermarkt.com/arturo-vidal/profil/spieler/37666",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/37666-1686843752.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:9896a87ba7626173d883bffa",
+      "entityType": "player",
+      "name": "Wlodzimierz Lubanski",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 145,
+        "externalId": "https://www.transfermarkt.com/wlodzimierz-lubanski/profil/spieler/141046",
+        "profileUrl": "https://www.transfermarkt.com/wlodzimierz-lubanski/profil/spieler/141046",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/141046-1465291358.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:17f00ed22f9dd7c02e89b270",
+      "entityType": "player",
+      "name": "Gheorghe Hagi",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 146,
+        "externalId": "https://www.transfermarkt.com/gheorghe-hagi/profil/spieler/7939",
+        "profileUrl": "https://www.transfermarkt.com/gheorghe-hagi/profil/spieler/7939",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7939-1570438291.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:99ed94b9e01e0551a9a8f941",
+      "entityType": "player",
+      "name": "Marco Asensio",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 147,
+        "externalId": "https://www.transfermarkt.com/marco-asensio/profil/spieler/296622",
+        "profileUrl": "https://www.transfermarkt.com/marco-asensio/profil/spieler/296622",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/296622-1765459707.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:a47bea37d5903596f9b55a4d",
+      "entityType": "player",
+      "name": "Kai Havertz",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 148,
+        "externalId": "https://www.transfermarkt.com/kai-havertz/profil/spieler/309400",
+        "profileUrl": "https://www.transfermarkt.com/kai-havertz/profil/spieler/309400",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/309400-1782889722.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:9d81eef93e14d971f8deb97c",
+      "entityType": "player",
+      "name": "Iván Helguera",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 149,
+        "externalId": "https://www.transfermarkt.com/ivan-helguera/profil/spieler/7514",
+        "profileUrl": "https://www.transfermarkt.com/ivan-helguera/profil/spieler/7514",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7514-1413446725.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:53d34df70696e342eb18eb78",
+      "entityType": "player",
+      "name": "Simone Inzaghi",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 150,
+        "externalId": "https://www.transfermarkt.com/simone-inzaghi/profil/spieler/5849",
+        "profileUrl": "https://www.transfermarkt.com/simone-inzaghi/profil/spieler/5849",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/5849-1416905147.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:f64ea00457cf88ef2baa3f51",
+      "entityType": "player",
+      "name": "Seydou Doumbia",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 151,
+        "externalId": "https://www.transfermarkt.com/seydou-doumbia/profil/spieler/75287",
+        "profileUrl": "https://www.transfermarkt.com/seydou-doumbia/profil/spieler/75287",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/75287-1764927369.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:6e56d82a0def42749c882a64",
+      "entityType": "player",
+      "name": "Diego Tristán",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 152,
+        "externalId": "https://www.transfermarkt.com/diego-tristan/profil/spieler/7504",
+        "profileUrl": "https://www.transfermarkt.com/diego-tristan/profil/spieler/7504",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/s_7504_123_2013_10_10_1.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:f6c2e2ad27896e0e948b7178",
+      "entityType": "player",
+      "name": "Ferenc Bene",
+      "rawValue": 15,
+      "evidence": {
+        "sourceRank": 153,
+        "externalId": "https://www.transfermarkt.com/ferenc-bene/profil/spieler/211551",
+        "profileUrl": "https://www.transfermarkt.com/ferenc-bene/profil/spieler/211551",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/211551-1720593511.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ab4df3b46476f8acba2f8450",
+      "entityType": "player",
+      "name": "Zinédine Zidane",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 154,
+        "externalId": "https://www.transfermarkt.com/zinedine-zidane/profil/spieler/3111",
+        "profileUrl": "https://www.transfermarkt.com/zinedine-zidane/profil/spieler/3111",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3111-1478769687.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:fbaf9dacaf35fb8db12fe313",
+      "entityType": "player",
+      "name": "Robert Pirès",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 155,
+        "externalId": "https://www.transfermarkt.com/robert-pires/profil/spieler/3185",
+        "profileUrl": "https://www.transfermarkt.com/robert-pires/profil/spieler/3185",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3185-1586964073.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ee353ea3ec0b143f6f5fb032",
+      "entityType": "player",
+      "name": "Ronaldo",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 156,
+        "externalId": "https://www.transfermarkt.com/ronaldo/profil/spieler/3140",
+        "profileUrl": "https://www.transfermarkt.com/ronaldo/profil/spieler/3140",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3140-1489417571.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:50db3596ab98a240a328bc6c",
+      "entityType": "player",
+      "name": "Héctor Rial",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 157,
+        "externalId": "https://www.transfermarkt.com/hector-rial/profil/spieler/170719",
+        "profileUrl": "https://www.transfermarkt.com/hector-rial/profil/spieler/170719",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/170719-1672432619.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:c0f52715816313ac9f5d54b4",
+      "entityType": "player",
+      "name": "Sören Lerby",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 158,
+        "externalId": "https://www.transfermarkt.com/soren-lerby/profil/spieler/95374",
+        "profileUrl": "https://www.transfermarkt.com/soren-lerby/profil/spieler/95374",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/95374-1446129621.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:b9015506df7aea4a4548556a",
+      "entityType": "player",
+      "name": "David Villa",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 159,
+        "externalId": "https://www.transfermarkt.com/david-villa/profil/spieler/7980",
+        "profileUrl": "https://www.transfermarkt.com/david-villa/profil/spieler/7980",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7980-1684165569.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:3dbeed01709153cdbc046692",
+      "entityType": "player",
+      "name": "Roy Keane",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 160,
+        "externalId": "https://www.transfermarkt.com/roy-keane/profil/spieler/3396",
+        "profileUrl": "https://www.transfermarkt.com/roy-keane/profil/spieler/3396",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3396-1570441538.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:c6a4c0513984aaa61f716899",
+      "entityType": "player",
+      "name": "Konstantinos Mitroglou",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 161,
+        "externalId": "https://www.transfermarkt.com/konstantinos-mitroglou/profil/spieler/34944",
+        "profileUrl": "https://www.transfermarkt.com/konstantinos-mitroglou/profil/spieler/34944",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/34944-1474546393.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:22acbce556c6cfd85a0497e1",
+      "entityType": "player",
+      "name": "Ian Rush",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 162,
+        "externalId": "https://www.transfermarkt.com/ian-rush/profil/spieler/145743",
+        "profileUrl": "https://www.transfermarkt.com/ian-rush/profil/spieler/145743",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/145743-1524842870.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:81941cb6e4c936dffa8c0d51",
+      "entityType": "player",
+      "name": "Luuk de Jong",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 163,
+        "externalId": "https://www.transfermarkt.com/luuk-de-jong/profil/spieler/72522",
+        "profileUrl": "https://www.transfermarkt.com/luuk-de-jong/profil/spieler/72522",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/72522-1682332002.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:d3e3391703395371cff4c4ae",
+      "entityType": "player",
+      "name": "Denis Law",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 164,
+        "externalId": "https://www.transfermarkt.com/denis-law/profil/spieler/174867",
+        "profileUrl": "https://www.transfermarkt.com/denis-law/profil/spieler/174867",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/174867-1597827051.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:142f3bb04550dc5e2f02bdd8",
+      "entityType": "player",
+      "name": "Miroslav Klose",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 165,
+        "externalId": "https://www.transfermarkt.com/miroslav-klose/profil/spieler/10",
+        "profileUrl": "https://www.transfermarkt.com/miroslav-klose/profil/spieler/10",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/10-1448468291.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:12dd50c48a0350414d6b1d43",
+      "entityType": "player",
+      "name": "Adriano",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 166,
+        "externalId": "https://www.transfermarkt.com/adriano/profil/spieler/5876",
+        "profileUrl": "https://www.transfermarkt.com/adriano/profil/spieler/5876",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/5876-1683639650.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:aba167bf651cd6f21093e403",
+      "entityType": "player",
+      "name": "Vincent Aboubakar",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 167,
+        "externalId": "https://www.transfermarkt.com/vincent-aboubakar/profil/spieler/147487",
+        "profileUrl": "https://www.transfermarkt.com/vincent-aboubakar/profil/spieler/147487",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/147487-1674477789.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:a73d88888bf7a27bfd42e33f",
+      "entityType": "player",
+      "name": "Marius Lăcătuş",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 168,
+        "externalId": "https://www.transfermarkt.com/marius-lacatus/profil/spieler/103220",
+        "profileUrl": "https://www.transfermarkt.com/marius-lacatus/profil/spieler/103220",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/s_103220_123_2012_1.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:26318ed4ee708cfe04d03dbb",
+      "entityType": "player",
+      "name": "Klaas-Jan Huntelaar",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 169,
+        "externalId": "https://www.transfermarkt.com/klaas-jan-huntelaar/profil/spieler/4357",
+        "profileUrl": "https://www.transfermarkt.com/klaas-jan-huntelaar/profil/spieler/4357",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4357-1684166367.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:d36610c374a9cd5b095bd2f0",
+      "entityType": "player",
+      "name": "Chicharito",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 170,
+        "externalId": "https://www.transfermarkt.com/chicharito/profil/spieler/50935",
+        "profileUrl": "https://www.transfermarkt.com/chicharito/profil/spieler/50935",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/50935-1678022181.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:677969b17a480979a89b8e93",
+      "entityType": "player",
+      "name": "Jupp Heynckes",
+      "rawValue": 14,
+      "evidence": {
+        "sourceRank": 171,
+        "externalId": "https://www.transfermarkt.com/jupp-heynckes/profil/spieler/97301",
+        "profileUrl": "https://www.transfermarkt.com/jupp-heynckes/profil/spieler/97301",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/97301-1444739580.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:cc35c7f33c4e65f6e70f5614",
+      "entityType": "player",
+      "name": "Deco",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 172,
+        "externalId": "https://www.transfermarkt.com/deco/profil/spieler/8564",
+        "profileUrl": "https://www.transfermarkt.com/deco/profil/spieler/8564",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/8564-1720495726.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ae810cfbaad2e94d0b8a5185",
+      "entityType": "player",
+      "name": "İlkay Gündoğan",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 173,
+        "externalId": "https://www.transfermarkt.com/ilkay-gundogan/profil/spieler/53622",
+        "profileUrl": "https://www.transfermarkt.com/ilkay-gundogan/profil/spieler/53622",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/53622-1756980813.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:68880f9da8737a3131091cb2",
+      "entityType": "player",
+      "name": "Mehdi Taremi",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 174,
+        "externalId": "https://www.transfermarkt.com/mehdi-taremi/profil/spieler/307058",
+        "profileUrl": "https://www.transfermarkt.com/mehdi-taremi/profil/spieler/307058",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/307058-1784903334.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:33f1adc453d8ac8773e46f43",
+      "entityType": "player",
+      "name": "Bukayo Saka",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 175,
+        "externalId": "https://www.transfermarkt.com/bukayo-saka/profil/spieler/433177",
+        "profileUrl": "https://www.transfermarkt.com/bukayo-saka/profil/spieler/433177",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/433177-1684155052.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:042732183f149f8cddfd5d98",
+      "entityType": "player",
+      "name": "Dominik Szoboszlai",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 176,
+        "externalId": "https://www.transfermarkt.com/dominik-szoboszlai/profil/spieler/451276",
+        "profileUrl": "https://www.transfermarkt.com/dominik-szoboszlai/profil/spieler/451276",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/451276-1758715234.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:8d8eb328172ae5ba7fbb5980",
+      "entityType": "player",
+      "name": "Sergey Yuran",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 177,
+        "externalId": "https://www.transfermarkt.com/sergey-yuran/profil/spieler/85424",
+        "profileUrl": "https://www.transfermarkt.com/sergey-yuran/profil/spieler/85424",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/s_85424_123_2012_1.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:11b791c1a25525a50dd29cf3",
+      "entityType": "player",
+      "name": "Ronald Koeman",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 178,
+        "externalId": "https://www.transfermarkt.com/ronald-koeman/profil/spieler/7940",
+        "profileUrl": "https://www.transfermarkt.com/ronald-koeman/profil/spieler/7940",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/7940-1461231132.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:baa7a2737e65070aaf1d54a1",
+      "entityType": "player",
+      "name": "Jan Koller",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 179,
+        "externalId": "https://www.transfermarkt.com/jan-koller/profil/spieler/1157",
+        "profileUrl": "https://www.transfermarkt.com/jan-koller/profil/spieler/1157",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/1157-1461311304.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:9cedfa171c797c38580df4b1",
+      "entityType": "player",
+      "name": "Carlos Tévez",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 180,
+        "externalId": "https://www.transfermarkt.com/carlos-tevez/profil/spieler/4276",
+        "profileUrl": "https://www.transfermarkt.com/carlos-tevez/profil/spieler/4276",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4276-1719495009.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:318add5c479b4042418f540b",
+      "entityType": "player",
+      "name": "Dimitar Berbatov",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 181,
+        "externalId": "https://www.transfermarkt.com/dimitar-berbatov/profil/spieler/65",
+        "profileUrl": "https://www.transfermarkt.com/dimitar-berbatov/profil/spieler/65",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/65-1683670068.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:62d21cc715868390654c8ac0",
+      "entityType": "player",
+      "name": "Lukas Podolski",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 182,
+        "externalId": "https://www.transfermarkt.com/lukas-podolski/profil/spieler/15185",
+        "profileUrl": "https://www.transfermarkt.com/lukas-podolski/profil/spieler/15185",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/15185-1670769304.png",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:3900da72630c4d1d93fc1315",
+      "entityType": "player",
+      "name": "Peter Crouch",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 183,
+        "externalId": "https://www.transfermarkt.com/peter-crouch/profil/spieler/4072",
+        "profileUrl": "https://www.transfermarkt.com/peter-crouch/profil/spieler/4072",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4072-1719156908.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:bb92bf880be480b2c2a44476",
+      "entityType": "player",
+      "name": "Dennis Viollet",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 184,
+        "externalId": "https://www.transfermarkt.com/dennis-viollet/profil/spieler/289653",
+        "profileUrl": "https://www.transfermarkt.com/dennis-viollet/profil/spieler/289653",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/289653-1637057053.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:f352853d062fa03f278585f8",
+      "entityType": "player",
+      "name": "Freddie Ljungberg",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 185,
+        "externalId": "https://www.transfermarkt.com/freddie-ljungberg/profil/spieler/3134",
+        "profileUrl": "https://www.transfermarkt.com/freddie-ljungberg/profil/spieler/3134",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3134-1488212398.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:d925145faa2d702f265a96bd",
+      "entityType": "player",
+      "name": "George Weah",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 186,
+        "externalId": "https://www.transfermarkt.com/george-weah/profil/spieler/8542",
+        "profileUrl": "https://www.transfermarkt.com/george-weah/profil/spieler/8542",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/8542-1570439638.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:030fa64422b41daf2ddd9f5b",
+      "entityType": "player",
+      "name": "Hakan Şükür",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 187,
+        "externalId": "https://www.transfermarkt.com/hakan-sukur/profil/spieler/3363",
+        "profileUrl": "https://www.transfermarkt.com/hakan-sukur/profil/spieler/3363",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3363-1461241499.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:b4ebe0f92b5720e962ade704",
+      "entityType": "player",
+      "name": "Sonny Anderson",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 188,
+        "externalId": "https://www.transfermarkt.com/sonny-anderson/profil/spieler/3500",
+        "profileUrl": "https://www.transfermarkt.com/sonny-anderson/profil/spieler/3500",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/3500-1495636646.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:5bc64e03504f0f8435ed4109",
+      "entityType": "player",
+      "name": "Jackson Martínez",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 189,
+        "externalId": "https://www.transfermarkt.com/jackson-martinez/profil/spieler/74418",
+        "profileUrl": "https://www.transfermarkt.com/jackson-martinez/profil/spieler/74418",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/74418-1447152748.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:ad40746fae72e7e4ec43a730",
+      "entityType": "player",
+      "name": "Ciro Immobile",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 190,
+        "externalId": "https://www.transfermarkt.com/ciro-immobile/profil/spieler/105521",
+        "profileUrl": "https://www.transfermarkt.com/ciro-immobile/profil/spieler/105521",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/105521-1770718860.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:35644e9440344cb74a5b653a",
+      "entityType": "player",
+      "name": "Burak Yılmaz",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 191,
+        "externalId": "https://www.transfermarkt.com/burak-yilmaz/profil/spieler/34987",
+        "profileUrl": "https://www.transfermarkt.com/burak-yilmaz/profil/spieler/34987",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/34987-1622122750.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:b8437f336ea824638603c3d9",
+      "entityType": "player",
+      "name": "Antonis Antoniadis",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 192,
+        "externalId": "https://www.transfermarkt.com/antonis-antoniadis/profil/spieler/167217",
+        "profileUrl": "https://www.transfermarkt.com/antonis-antoniadis/profil/spieler/167217",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/default.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:a2eb3f63c98d1754c4db20ec",
+      "entityType": "player",
+      "name": "Torbjörn Nilsson",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 193,
+        "externalId": "https://www.transfermarkt.com/torbjorn-nilsson/profil/spieler/108301",
+        "profileUrl": "https://www.transfermarkt.com/torbjorn-nilsson/profil/spieler/108301",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/108301-1460647433.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:28416042ecf6258a2bc88b80",
+      "entityType": "player",
+      "name": "Willie Wallace",
+      "rawValue": 13,
+      "evidence": {
+        "sourceRank": 194,
+        "externalId": "https://www.transfermarkt.com/willie-wallace/profil/spieler/210159",
+        "profileUrl": "https://www.transfermarkt.com/willie-wallace/profil/spieler/210159",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/default.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:a452f267422c1e2c94cfc7ab",
+      "entityType": "player",
+      "name": "Dani Alves",
+      "rawValue": 12,
+      "evidence": {
+        "sourceRank": 195,
+        "externalId": "https://www.transfermarkt.com/dani-alves/profil/spieler/15951",
+        "profileUrl": "https://www.transfermarkt.com/dani-alves/profil/spieler/15951",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/15951-1635327520.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:eebd388987184e1e94d2b97f",
+      "entityType": "player",
+      "name": "Joshua Kimmich",
+      "rawValue": 12,
+      "evidence": {
+        "sourceRank": 196,
+        "externalId": "https://www.transfermarkt.com/joshua-kimmich/profil/spieler/161056",
+        "profileUrl": "https://www.transfermarkt.com/joshua-kimmich/profil/spieler/161056",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/161056-1700039639.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:d099d032fab60821c9e3b849",
+      "entityType": "player",
+      "name": "Wesley Sneijder",
+      "rawValue": 12,
+      "evidence": {
+        "sourceRank": 197,
+        "externalId": "https://www.transfermarkt.com/wesley-sneijder/profil/spieler/4673",
+        "profileUrl": "https://www.transfermarkt.com/wesley-sneijder/profil/spieler/4673",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/4673-1684166804.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:f8c1981c9f6ebfcf5adccfae",
+      "entityType": "player",
+      "name": "Mario Götze",
+      "rawValue": 12,
+      "evidence": {
+        "sourceRank": 198,
+        "externalId": "https://www.transfermarkt.com/mario-gotze/profil/spieler/74842",
+        "profileUrl": "https://www.transfermarkt.com/mario-gotze/profil/spieler/74842",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/74842-1787910660.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:5589b3cd7a1da7f97313eae5",
+      "entityType": "player",
+      "name": "Bastian Schweinsteiger",
+      "rawValue": 12,
+      "evidence": {
+        "sourceRank": 199,
+        "externalId": "https://www.transfermarkt.com/bastian-schweinsteiger/profil/spieler/2514",
+        "profileUrl": "https://www.transfermarkt.com/bastian-schweinsteiger/profil/spieler/2514",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/2514-1551256967.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    },
+    {
+      "entityId": "transfermarkt:european-cup-champions-league:player:11d7a3fe5e579b0c3e26afe3",
+      "entityType": "player",
+      "name": "Piet Keizer",
+      "rawValue": 12,
+      "evidence": {
+        "sourceRank": 200,
+        "externalId": "https://www.transfermarkt.com/piet-keizer/profil/spieler/142888",
+        "profileUrl": "https://www.transfermarkt.com/piet-keizer/profil/spieler/142888",
+        "sourceImageUrl": "https://img.a.transfermarkt.technology/portrait/small/s_142888_123_2012_1.jpg",
+        "sourceUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "scope": "Goles históricos de jugadores en European Cup / Champions League según la tabla histórica de Transfermarkt; top 200 visible; derechos y metodología sujetos a revisión antes de publicar"
+      }
+    }
+  ]
+}

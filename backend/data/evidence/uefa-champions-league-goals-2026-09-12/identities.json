@@ -1,0 +1,1616 @@
+{
+  "artifact": "rango90-identity-manifest",
+  "artifactVersion": 1,
+  "categorySlug": "uefa-champions-league-goals",
+  "dataVersion": "uefa-champions-league-goals-transfermarkt-top-200-2026-09-12",
+  "policy": {
+    "sourceKey": "transfermarkt-european-cup-champions-league-historical-goals",
+    "canonicalization": "source entity id remains canonical when no exact reviewed cross-provider link exists",
+    "fuzzyMatching": false,
+    "historicalAudience": "ranking rows retained; playable_default is not changed by this manifest",
+    "unresolvedCrossProviderLinks": 0
+  },
+  "entries": [
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:08acf787022849299b30ba6a",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:08acf787022849299b30ba6a",
+      "canonicalName": "Cristiano Ronaldo",
+      "providerExternalId": "https://www.transfermarkt.com/cristiano-ronaldo/profil/spieler/8198",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:e0cbd48e4220c983d0bc20e3",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:e0cbd48e4220c983d0bc20e3",
+      "canonicalName": "Lionel Messi",
+      "providerExternalId": "https://www.transfermarkt.com/lionel-messi/profil/spieler/28003",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:8714e706e9495653652bb741",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:8714e706e9495653652bb741",
+      "canonicalName": "Robert Lewandowski",
+      "providerExternalId": "https://www.transfermarkt.com/robert-lewandowski/profil/spieler/38253",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ad09e5098a5ab5a23eace5fd",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ad09e5098a5ab5a23eace5fd",
+      "canonicalName": "Karim Benzema",
+      "providerExternalId": "https://www.transfermarkt.com/karim-benzema/profil/spieler/18922",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:b8cc45b74357d05470f9fa6c",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b8cc45b74357d05470f9fa6c",
+      "canonicalName": "Raúl",
+      "providerExternalId": "https://www.transfermarkt.com/raul/profil/spieler/7349",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:a071134f4896322ba99edf15",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:a071134f4896322ba99edf15",
+      "canonicalName": "Kylian Mbappé",
+      "providerExternalId": "https://www.transfermarkt.com/kylian-mbappe/profil/spieler/342229",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:45fc6d44fb472d65f0da04cc",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:45fc6d44fb472d65f0da04cc",
+      "canonicalName": "Erling Haaland",
+      "providerExternalId": "https://www.transfermarkt.com/erling-haaland/profil/spieler/418560",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:70cc893c99cf8f0529a17150",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:70cc893c99cf8f0529a17150",
+      "canonicalName": "Thomas Müller",
+      "providerExternalId": "https://www.transfermarkt.com/thomas-muller/profil/spieler/58358",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:c8a6da224cb9c27fdfd3edb3",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:c8a6da224cb9c27fdfd3edb3",
+      "canonicalName": "Ruud van Nistelrooy",
+      "providerExternalId": "https://www.transfermarkt.com/ruud-van-nistelrooy/profil/spieler/3407",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:4a3c94c4023852ebc490ff8f",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:4a3c94c4023852ebc490ff8f",
+      "canonicalName": "Harry Kane",
+      "providerExternalId": "https://www.transfermarkt.com/harry-kane/profil/spieler/132098",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:140976132d8500a5497dccb9",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:140976132d8500a5497dccb9",
+      "canonicalName": "Thierry Henry",
+      "providerExternalId": "https://www.transfermarkt.com/thierry-henry/profil/spieler/3207",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:0c9e8a8ce10d0844b6f6f909",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:0c9e8a8ce10d0844b6f6f909",
+      "canonicalName": "Mohamed Salah",
+      "providerExternalId": "https://www.transfermarkt.com/mohamed-salah/profil/spieler/148455",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:103fe5079e6d2c71d79c3406",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:103fe5079e6d2c71d79c3406",
+      "canonicalName": "Alfredo di Stéfano",
+      "providerExternalId": "https://www.transfermarkt.com/alfredo-di-stefano/profil/spieler/135778",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:2ae2a8010ba024ac44267ca4",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:2ae2a8010ba024ac44267ca4",
+      "canonicalName": "Zlatan Ibrahimović",
+      "providerExternalId": "https://www.transfermarkt.com/zlatan-ibrahimovic/profil/spieler/3455",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:6fbe83e52fdb0cb098d50828",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:6fbe83e52fdb0cb098d50828",
+      "canonicalName": "Andriy Shevchenko",
+      "providerExternalId": "https://www.transfermarkt.com/andriy-shevchenko/profil/spieler/3522",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:85475889fed12b4ef7971029",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:85475889fed12b4ef7971029",
+      "canonicalName": "Eusébio",
+      "providerExternalId": "https://www.transfermarkt.com/eusebio/profil/spieler/89230",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:3818959882ab1ce74d4b1ddc",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:3818959882ab1ce74d4b1ddc",
+      "canonicalName": "Filippo Inzaghi",
+      "providerExternalId": "https://www.transfermarkt.com/filippo-inzaghi/profil/spieler/5821",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:2292035925a4f01a9f259b01",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:2292035925a4f01a9f259b01",
+      "canonicalName": "Antoine Griezmann",
+      "providerExternalId": "https://www.transfermarkt.com/antoine-griezmann/profil/spieler/125781",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:2e269fac2111f68c7f671272",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:2e269fac2111f68c7f671272",
+      "canonicalName": "Didier Drogba",
+      "providerExternalId": "https://www.transfermarkt.com/didier-drogba/profil/spieler/3924",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:3885ec2e25136d206ab6b3f2",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:3885ec2e25136d206ab6b3f2",
+      "canonicalName": "Neymar",
+      "providerExternalId": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:5d785e0e1fb9cc00a242678c",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:5d785e0e1fb9cc00a242678c",
+      "canonicalName": "Alessandro Del Piero",
+      "providerExternalId": "https://www.transfermarkt.com/alessandro-del-piero/profil/spieler/4289",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:4114012ea975e860718b8495",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:4114012ea975e860718b8495",
+      "canonicalName": "Sergio Agüero",
+      "providerExternalId": "https://www.transfermarkt.com/sergio-aguero/profil/spieler/26399",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:11ae6957792a3ecb9e63757a",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:11ae6957792a3ecb9e63757a",
+      "canonicalName": "Ferenc Puskás",
+      "providerExternalId": "https://www.transfermarkt.com/ferenc-puskas/profil/spieler/103092",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:79be8c1511fd0cc7c11467ac",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:79be8c1511fd0cc7c11467ac",
+      "canonicalName": "Edinson Cavani",
+      "providerExternalId": "https://www.transfermarkt.com/edinson-cavani/profil/spieler/48280",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:671f692c3c2848b0d5359401",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:671f692c3c2848b0d5359401",
+      "canonicalName": "Vinicius Junior",
+      "providerExternalId": "https://www.transfermarkt.com/vinicius-junior/profil/spieler/371998",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ba9459195f1c91f27eac05dc",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ba9459195f1c91f27eac05dc",
+      "canonicalName": "Gerd Müller",
+      "providerExternalId": "https://www.transfermarkt.com/gerd-muller/profil/spieler/35604",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:722a92320112224243ec9866",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:722a92320112224243ec9866",
+      "canonicalName": "Fernando Morientes",
+      "providerExternalId": "https://www.transfermarkt.com/fernando-morientes/profil/spieler/7531",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:e9d7950d0ea63a938f6b8787",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:e9d7950d0ea63a938f6b8787",
+      "canonicalName": "Arjen Robben",
+      "providerExternalId": "https://www.transfermarkt.com/arjen-robben/profil/spieler/4360",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:9e04a5413019590b969fbab6",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:9e04a5413019590b969fbab6",
+      "canonicalName": "Kaká",
+      "providerExternalId": "https://www.transfermarkt.com/kaka/profil/spieler/3366",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:bd82c469db6902349f8ec861",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:bd82c469db6902349f8ec861",
+      "canonicalName": "Ousmane Dembélé",
+      "providerExternalId": "https://www.transfermarkt.com/ousmane-dembele/profil/spieler/288230",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:1d75457e6355316d04c96e88",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:1d75457e6355316d04c96e88",
+      "canonicalName": "Wayne Rooney",
+      "providerExternalId": "https://www.transfermarkt.com/wayne-rooney/profil/spieler/3332",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:0861be2f76c2c3a92496e189",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:0861be2f76c2c3a92496e189",
+      "canonicalName": "Samuel Eto'o",
+      "providerExternalId": "https://www.transfermarkt.com/samuel-etoo/profil/spieler/4257",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:c257f639a09ac3a66feb9ed2",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:c257f639a09ac3a66feb9ed2",
+      "canonicalName": "Paco Gento",
+      "providerExternalId": "https://www.transfermarkt.com/paco-gento/profil/spieler/170723",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:720e8c2b3bea45b3082069d7",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:720e8c2b3bea45b3082069d7",
+      "canonicalName": "Edin Dzeko",
+      "providerExternalId": "https://www.transfermarkt.com/edin-dzeko/profil/spieler/28396",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:50776bce47b26846a30813ab",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:50776bce47b26846a30813ab",
+      "canonicalName": "Álvaro Morata",
+      "providerExternalId": "https://www.transfermarkt.com/alvaro-morata/profil/spieler/128223",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:8e0fb05f720a0ea6298df204",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:8e0fb05f720a0ea6298df204",
+      "canonicalName": "Patrick Kluivert",
+      "providerExternalId": "https://www.transfermarkt.com/patrick-kluivert/profil/spieler/4385",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:20722aac00cc408bee893d86",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:20722aac00cc408bee893d86",
+      "canonicalName": "David Trezeguet",
+      "providerExternalId": "https://www.transfermarkt.com/david-trezeguet/profil/spieler/4146",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ed90da5ec4a6d434fe48179b",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ed90da5ec4a6d434fe48179b",
+      "canonicalName": "Roy Makaay",
+      "providerExternalId": "https://www.transfermarkt.com/roy-makaay/profil/spieler/3994",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:39601d291975d8bb93bc8827",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:39601d291975d8bb93bc8827",
+      "canonicalName": "Ryan Giggs",
+      "providerExternalId": "https://www.transfermarkt.com/ryan-giggs/profil/spieler/3406",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:2a9034bdf715899d60b7f1e0",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:2a9034bdf715899d60b7f1e0",
+      "canonicalName": "Jean-Pierre Papin",
+      "providerExternalId": "https://www.transfermarkt.com/jean-pierre-papin/profil/spieler/17168",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:e21b55c76708759288909a81",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:e21b55c76708759288909a81",
+      "canonicalName": "Luis Suárez",
+      "providerExternalId": "https://www.transfermarkt.com/luis-suarez/profil/spieler/44352",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:f55b5e5bc2e3f930f1eca67e",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:f55b5e5bc2e3f930f1eca67e",
+      "canonicalName": "Raheem Sterling",
+      "providerExternalId": "https://www.transfermarkt.com/raheem-sterling/profil/spieler/134425",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:0062bc6c23db9c8738449bde",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:0062bc6c23db9c8738449bde",
+      "canonicalName": "Rivaldo",
+      "providerExternalId": "https://www.transfermarkt.com/rivaldo/profil/spieler/3372",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:1815a1cd3640f190856b0c73",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:1815a1cd3640f190856b0c73",
+      "canonicalName": "Sadio Mané",
+      "providerExternalId": "https://www.transfermarkt.com/sadio-mane/profil/spieler/200512",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:b34e9e1ce5e73658e0bb8f2f",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b34e9e1ce5e73658e0bb8f2f",
+      "canonicalName": "Gabriel Jesus",
+      "providerExternalId": "https://www.transfermarkt.com/gabriel-jesus/profil/spieler/363205",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:7baa2a9985f3a34762d00e71",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:7baa2a9985f3a34762d00e71",
+      "canonicalName": "Rodrygo",
+      "providerExternalId": "https://www.transfermarkt.com/rodrygo/profil/spieler/412363",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:d0ae526bc42b7b84d91abddd",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:d0ae526bc42b7b84d91abddd",
+      "canonicalName": "Mario Gómez",
+      "providerExternalId": "https://www.transfermarkt.com/mario-gomez/profil/spieler/6288",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:c00dfd6f1c291fb2fc7f1459",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:c00dfd6f1c291fb2fc7f1459",
+      "canonicalName": "Julián Alvarez",
+      "providerExternalId": "https://www.transfermarkt.com/julian-alvarez/profil/spieler/576024",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:2f6236e4bb66ff8b57fa120d",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:2f6236e4bb66ff8b57fa120d",
+      "canonicalName": "Lautaro Martínez",
+      "providerExternalId": "https://www.transfermarkt.com/lautaro-martinez/profil/spieler/406625",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ca6b25dba91ab7fe0f08c349",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ca6b25dba91ab7fe0f08c349",
+      "canonicalName": "Robin van Persie",
+      "providerExternalId": "https://www.transfermarkt.com/robin-van-persie/profil/spieler/4380",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:5599f6a1ea29294aeab477c2",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:5599f6a1ea29294aeab477c2",
+      "canonicalName": "Hernán Crespo",
+      "providerExternalId": "https://www.transfermarkt.com/hernan-crespo/profil/spieler/3410",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:978f4ca0e07ea33d2db445a5",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:978f4ca0e07ea33d2db445a5",
+      "canonicalName": "Jardel",
+      "providerExternalId": "https://www.transfermarkt.com/jardel/profil/spieler/3625",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:844931ba33eec4a36becfa6e",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:844931ba33eec4a36becfa6e",
+      "canonicalName": "Ángel Di María",
+      "providerExternalId": "https://www.transfermarkt.com/angel-di-maria/profil/spieler/45320",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:100474b3c575c3a8405cd15d",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:100474b3c575c3a8405cd15d",
+      "canonicalName": "Luís Figo",
+      "providerExternalId": "https://www.transfermarkt.com/luis-figo/profil/spieler/3446",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:7eb0104ea5b421533138fd66",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:7eb0104ea5b421533138fd66",
+      "canonicalName": "Marco Reus",
+      "providerExternalId": "https://www.transfermarkt.com/marco-reus/profil/spieler/35207",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:00c51b96627019c387ca002c",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:00c51b96627019c387ca002c",
+      "canonicalName": "Giovane Élber",
+      "providerExternalId": "https://www.transfermarkt.com/giovane-elber/profil/spieler/198",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:26a409822670baa279c616e8",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:26a409822670baa279c616e8",
+      "canonicalName": "Gonzalo Higuaín",
+      "providerExternalId": "https://www.transfermarkt.com/gonzalo-higuain/profil/spieler/39153",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:0d60e2d932cfc05fe25ad64f",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:0d60e2d932cfc05fe25ad64f",
+      "canonicalName": "Paul Scholes",
+      "providerExternalId": "https://www.transfermarkt.com/paul-scholes/profil/spieler/3397",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:50c9f264e5ab624c80015b3f",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:50c9f264e5ab624c80015b3f",
+      "canonicalName": "Marco Simone",
+      "providerExternalId": "https://www.transfermarkt.com/marco-simone/profil/spieler/3524",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:21bd9fdef58f02fcdae05ed1",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:21bd9fdef58f02fcdae05ed1",
+      "canonicalName": "Olivier Giroud",
+      "providerExternalId": "https://www.transfermarkt.com/olivier-giroud/profil/spieler/82442",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:6ba6f71581c8ba42e28f114a",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:6ba6f71581c8ba42e28f114a",
+      "canonicalName": "José Altafini",
+      "providerExternalId": "https://www.transfermarkt.com/jose-altafini/profil/spieler/31571",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:538edc1965fd336f219ed9b5",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:538edc1965fd336f219ed9b5",
+      "canonicalName": "Frank Lampard",
+      "providerExternalId": "https://www.transfermarkt.com/frank-lampard/profil/spieler/3163",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ea44080b2b099a504694fc16",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ea44080b2b099a504694fc16",
+      "canonicalName": "Leroy Sané",
+      "providerExternalId": "https://www.transfermarkt.com/leroy-sane/profil/spieler/192565",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:06741d6314ee2451fcbf63a8",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:06741d6314ee2451fcbf63a8",
+      "canonicalName": "Jari Litmanen",
+      "providerExternalId": "https://www.transfermarkt.com/jari-litmanen/profil/spieler/4675",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:09d5b47eb93b0cdd159441a9",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:09d5b47eb93b0cdd159441a9",
+      "canonicalName": "Roberto Firmino",
+      "providerExternalId": "https://www.transfermarkt.com/roberto-firmino/profil/spieler/131789",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ce78dc598483ffa13f2f4671",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ce78dc598483ffa13f2f4671",
+      "canonicalName": "José Torres",
+      "providerExternalId": "https://www.transfermarkt.com/jose-torres/profil/spieler/137747",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:21fcaf438867b086911dd488",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:21fcaf438867b086911dd488",
+      "canonicalName": "Santillana",
+      "providerExternalId": "https://www.transfermarkt.com/santillana/profil/spieler/135092",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:cc03ad2a940739eab2a6ba79",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:cc03ad2a940739eab2a6ba79",
+      "canonicalName": "Raphinha",
+      "providerExternalId": "https://www.transfermarkt.com/raphinha/profil/spieler/411295",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ed73e975e695a7db87c3a587",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ed73e975e695a7db87c3a587",
+      "canonicalName": "Steven Gerrard",
+      "providerExternalId": "https://www.transfermarkt.com/steven-gerrard/profil/spieler/3109",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:e173c123314a340136d8ff84",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:e173c123314a340136d8ff84",
+      "canonicalName": "Serhou Guirassy",
+      "providerExternalId": "https://www.transfermarkt.com/serhou-guirassy/profil/spieler/270541",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ee2be8dc224fef135ed15854",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ee2be8dc224fef135ed15854",
+      "canonicalName": "Claudio Pizarro",
+      "providerExternalId": "https://www.transfermarkt.com/claudio-pizarro/profil/spieler/532",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:590ebb4170b8acddb25e14d4",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:590ebb4170b8acddb25e14d4",
+      "canonicalName": "José Augusto",
+      "providerExternalId": "https://www.transfermarkt.com/jose-augusto/profil/spieler/153195",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:d91d0844bc1d9a2f83a3515c",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:d91d0844bc1d9a2f83a3515c",
+      "canonicalName": "Mario Mandžukić",
+      "providerExternalId": "https://www.transfermarkt.com/mario-mandzukic/profil/spieler/34572",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:3719479031baf6ea8652401c",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:3719479031baf6ea8652401c",
+      "canonicalName": "Ferran Torres",
+      "providerExternalId": "https://www.transfermarkt.com/ferran-torres/profil/spieler/398184",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:cb430b265c6e6abe0abd67d6",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:cb430b265c6e6abe0abd67d6",
+      "canonicalName": "Sergiy Rebrov",
+      "providerExternalId": "https://www.transfermarkt.com/sergiy-rebrov/profil/spieler/3122",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:20feea78db481fae3bf89149",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:20feea78db481fae3bf89149",
+      "canonicalName": "Amancio",
+      "providerExternalId": "https://www.transfermarkt.com/amancio/profil/spieler/135743",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:fd63bbea083b3aa0f322614d",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:fd63bbea083b3aa0f322614d",
+      "canonicalName": "Luiz Adriano",
+      "providerExternalId": "https://www.transfermarkt.com/luiz-adriano/profil/spieler/48974",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:a60b83ca1c772b4c35eff765",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:a60b83ca1c772b4c35eff765",
+      "canonicalName": "Cesc Fàbregas",
+      "providerExternalId": "https://www.transfermarkt.com/cesc-fabregas/profil/spieler/8806",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ddd55a138369257d07f08c69",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ddd55a138369257d07f08c69",
+      "canonicalName": "Gareth Bale",
+      "providerExternalId": "https://www.transfermarkt.com/gareth-bale/profil/spieler/39381",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:c0a1dea0b8c3a2c3a65bb1c0",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:c0a1dea0b8c3a2c3a65bb1c0",
+      "canonicalName": "Riyad Mahrez",
+      "providerExternalId": "https://www.transfermarkt.com/riyad-mahrez/profil/spieler/171424",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:999ae0c453a49590b2f3ed93",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:999ae0c453a49590b2f3ed93",
+      "canonicalName": "Phil Foden",
+      "providerExternalId": "https://www.transfermarkt.com/phil-foden/profil/spieler/406635",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:869fa22189bf547a773ee35a",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:869fa22189bf547a773ee35a",
+      "canonicalName": "Fernando Torres",
+      "providerExternalId": "https://www.transfermarkt.com/fernando-torres/profil/spieler/7767",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:4d8382467f787f2252c22209",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:4d8382467f787f2252c22209",
+      "canonicalName": "Pierre-Emerick Aubameyang",
+      "providerExternalId": "https://www.transfermarkt.com/pierre-emerick-aubameyang/profil/spieler/58864",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:9b1570b598de88c38feeb15e",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:9b1570b598de88c38feeb15e",
+      "canonicalName": "Nicolas Anelka",
+      "providerExternalId": "https://www.transfermarkt.com/nicolas-anelka/profil/spieler/3226",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:dadff30c4ed7d4afe5017e0d",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:dadff30c4ed7d4afe5017e0d",
+      "canonicalName": "Romário",
+      "providerExternalId": "https://www.transfermarkt.com/romario/profil/spieler/7942",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:3c4781c12e67778c41f0ad3f",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:3c4781c12e67778c41f0ad3f",
+      "canonicalName": "Paul Van Himst",
+      "providerExternalId": "https://www.transfermarkt.com/paul-van-himst/profil/spieler/101754",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:dedfc3f06218abcce21130f7",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:dedfc3f06218abcce21130f7",
+      "canonicalName": "Johan Cruyff",
+      "providerExternalId": "https://www.transfermarkt.com/johan-cruyff/profil/spieler/8021",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:e0f5732170afc3e77c24abb6",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:e0f5732170afc3e77c24abb6",
+      "canonicalName": "Ole Gunnar Solskjaer",
+      "providerExternalId": "https://www.transfermarkt.com/ole-gunnar-solskjaer/profil/spieler/3394",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:3303da5bd3ad0a8c75796eba",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:3303da5bd3ad0a8c75796eba",
+      "canonicalName": "Lisandro López",
+      "providerExternalId": "https://www.transfermarkt.com/lisandro-lopez/profil/spieler/27661",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:281bb8dd82feb72813b88374",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:281bb8dd82feb72813b88374",
+      "canonicalName": "Marco van Basten",
+      "providerExternalId": "https://www.transfermarkt.com/marco-van-basten/profil/spieler/74471",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:93ff0a0402b3fce7ea0d7bc2",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:93ff0a0402b3fce7ea0d7bc2",
+      "canonicalName": "Luis Enrique",
+      "providerExternalId": "https://www.transfermarkt.com/luis-enrique/profil/spieler/7601",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:6003fa4520c4a81ab58ebfe2",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:6003fa4520c4a81ab58ebfe2",
+      "canonicalName": "Julio Cruz",
+      "providerExternalId": "https://www.transfermarkt.com/julio-cruz/profil/spieler/6006",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:b8ac828f6f0aecc28b2f2097",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b8ac828f6f0aecc28b2f2097",
+      "canonicalName": "Heung-min Son",
+      "providerExternalId": "https://www.transfermarkt.com/heung-min-son/profil/spieler/91845",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:32b0da31b85c1614f5f26259",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:32b0da31b85c1614f5f26259",
+      "canonicalName": "Pirri",
+      "providerExternalId": "https://www.transfermarkt.com/pirri/profil/spieler/135098",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:9d4f22996a548097ae730b69",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:9d4f22996a548097ae730b69",
+      "canonicalName": "Franck Ribéry",
+      "providerExternalId": "https://www.transfermarkt.com/franck-ribery/profil/spieler/22068",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:bdccbe96ba73a65cb65372dd",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:bdccbe96ba73a65cb65372dd",
+      "canonicalName": "Juninho Pernambucano",
+      "providerExternalId": "https://www.transfermarkt.com/juninho-pernambucano/profil/spieler/5354",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:e662d9277be54e53546f8651",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:e662d9277be54e53546f8651",
+      "canonicalName": "Willian",
+      "providerExternalId": "https://www.transfermarkt.com/willian/profil/spieler/52769",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:5b177669f1010a64ba32b9de",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:5b177669f1010a64ba32b9de",
+      "canonicalName": "Serge Gnabry",
+      "providerExternalId": "https://www.transfermarkt.com/serge-gnabry/profil/spieler/159471",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:99da8725907b04c06e7642d5",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:99da8725907b04c06e7642d5",
+      "canonicalName": "Ronaldinho",
+      "providerExternalId": "https://www.transfermarkt.com/ronaldinho/profil/spieler/3373",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:b90d65912e3be54d94952b38",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b90d65912e3be54d94952b38",
+      "canonicalName": "Pedro",
+      "providerExternalId": "https://www.transfermarkt.com/pedro/profil/spieler/65278",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:50ca221ba9faa179b2c4e70d",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:50ca221ba9faa179b2c4e70d",
+      "canonicalName": "Lucho González",
+      "providerExternalId": "https://www.transfermarkt.com/lucho-gonzalez/profil/spieler/26244",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:5d74f0c5c3af9dae58dfc055",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:5d74f0c5c3af9dae58dfc055",
+      "canonicalName": "John Carew",
+      "providerExternalId": "https://www.transfermarkt.com/john-carew/profil/spieler/3570",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:6a52d77470b2995c479d2400",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:6a52d77470b2995c479d2400",
+      "canonicalName": "José Águas",
+      "providerExternalId": "https://www.transfermarkt.com/jose-aguas/profil/spieler/179147",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:a761e587d005937c6ff0b995",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:a761e587d005937c6ff0b995",
+      "canonicalName": "Romelu Lukaku",
+      "providerExternalId": "https://www.transfermarkt.com/romelu-lukaku/profil/spieler/96341",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:f656b4c17c22317e7a5862fe",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:f656b4c17c22317e7a5862fe",
+      "canonicalName": "Andy Cole",
+      "providerExternalId": "https://www.transfermarkt.com/andy-cole/profil/spieler/3238",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:0e8bdff09ca30c5e19281aac",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:0e8bdff09ca30c5e19281aac",
+      "canonicalName": "Javier Saviola",
+      "providerExternalId": "https://www.transfermarkt.com/javier-saviola/profil/spieler/7611",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:fcbb246d83ed8cf9b7510313",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:fcbb246d83ed8cf9b7510313",
+      "canonicalName": "Paulo Dybala",
+      "providerExternalId": "https://www.transfermarkt.com/paulo-dybala/profil/spieler/206050",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:522e52111fe262d01e4a32e8",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:522e52111fe262d01e4a32e8",
+      "canonicalName": "Alexis Sánchez",
+      "providerExternalId": "https://www.transfermarkt.com/alexis-sanchez/profil/spieler/40433",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:cddcdd65697d2e897c0893ac",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:cddcdd65697d2e897c0893ac",
+      "canonicalName": "Kingsley Coman",
+      "providerExternalId": "https://www.transfermarkt.com/kingsley-coman/profil/spieler/243714",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:088fbdd7eccff99768244a85",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:088fbdd7eccff99768244a85",
+      "canonicalName": "Bernardo Silva",
+      "providerExternalId": "https://www.transfermarkt.com/bernardo-silva/profil/spieler/241641",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:e89bb0a8c2a3716667ed75d0",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:e89bb0a8c2a3716667ed75d0",
+      "canonicalName": "Michel Platini",
+      "providerExternalId": "https://www.transfermarkt.com/michel-platini/profil/spieler/88994",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:5f92699dcae75a7473ecd508",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:5f92699dcae75a7473ecd508",
+      "canonicalName": "Francesco Totti",
+      "providerExternalId": "https://www.transfermarkt.com/francesco-totti/profil/spieler/5958",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:e15b1eedbbc04f94c3c14082",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:e15b1eedbbc04f94c3c14082",
+      "canonicalName": "Marcus Rashford",
+      "providerExternalId": "https://www.transfermarkt.com/marcus-rashford/profil/spieler/258923",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:77932ad813863168b52bab25",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:77932ad813863168b52bab25",
+      "canonicalName": "Sergio Ramos",
+      "providerExternalId": "https://www.transfermarkt.com/sergio-ramos/profil/spieler/25557",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:32bb42ea8758cb160b2b1bbf",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:32bb42ea8758cb160b2b1bbf",
+      "canonicalName": "Hulk",
+      "providerExternalId": "https://www.transfermarkt.com/hulk/profil/spieler/80562",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:50adcaa4ba00e7fdd79ea637",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:50adcaa4ba00e7fdd79ea637",
+      "canonicalName": "Hristo Stoichkov",
+      "providerExternalId": "https://www.transfermarkt.com/hristo-stoichkov/profil/spieler/7938",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:1f4497f998546dde0bb3376d",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:1f4497f998546dde0bb3376d",
+      "canonicalName": "Luis Díaz",
+      "providerExternalId": "https://www.transfermarkt.com/luis-diaz/profil/spieler/480692",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:c0d1335f38b89927eb6ccf0d",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:c0d1335f38b89927eb6ccf0d",
+      "canonicalName": "Timo Werner",
+      "providerExternalId": "https://www.transfermarkt.com/timo-werner/profil/spieler/170527",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:b49874ee5cf7e357f2a7ec5c",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b49874ee5cf7e357f2a7ec5c",
+      "canonicalName": "Karim Adeyemi",
+      "providerExternalId": "https://www.transfermarkt.com/karim-adeyemi/profil/spieler/496094",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ca513ad251933cf192a8d90e",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ca513ad251933cf192a8d90e",
+      "canonicalName": "Emilio Butragueño",
+      "providerExternalId": "https://www.transfermarkt.com/emilio-butragueno/profil/spieler/117598",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:f467825c681fc730143e64b5",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:f467825c681fc730143e64b5",
+      "canonicalName": "Hugo Sánchez",
+      "providerExternalId": "https://www.transfermarkt.com/hugo-sanchez/profil/spieler/84528",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:efdd7485000d6069a68e320f",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:efdd7485000d6069a68e320f",
+      "canonicalName": "Luc Nilis",
+      "providerExternalId": "https://www.transfermarkt.com/luc-nilis/profil/spieler/27656",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:b96b393ff8edbcd6f4930979",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b96b393ff8edbcd6f4930979",
+      "canonicalName": "Sandro Mazzola",
+      "providerExternalId": "https://www.transfermarkt.com/sandro-mazzola/profil/spieler/145344",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:d071bd4858af9c4ed0093e95",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:d071bd4858af9c4ed0093e95",
+      "canonicalName": "Bora Kostic",
+      "providerExternalId": "https://www.transfermarkt.com/bora-kostic/profil/spieler/215719",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:4ad4a27a4f97bf1d89ba3cd7",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:4ad4a27a4f97bf1d89ba3cd7",
+      "canonicalName": "Jozef Adamec",
+      "providerExternalId": "https://www.transfermarkt.com/jozef-adamec/profil/spieler/234403",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:c2504ce657a40a80dcbee59a",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:c2504ce657a40a80dcbee59a",
+      "canonicalName": "David Beckham",
+      "providerExternalId": "https://www.transfermarkt.com/david-beckham/profil/spieler/3139",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:cbd0dab8fb3857f41049bd66",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:cbd0dab8fb3857f41049bd66",
+      "canonicalName": "Kevin De Bruyne",
+      "providerExternalId": "https://www.transfermarkt.com/kevin-de-bruyne/profil/spieler/88755",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:9238a0209e3a367a120b1ee9",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:9238a0209e3a367a120b1ee9",
+      "canonicalName": "Roberto Carlos",
+      "providerExternalId": "https://www.transfermarkt.com/roberto-carlos/profil/spieler/7518",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:b5e8832733de68749b21748b",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b5e8832733de68749b21748b",
+      "canonicalName": "Guti",
+      "providerExternalId": "https://www.transfermarkt.com/guti/profil/spieler/7530",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:33b7a5e4ffdb5e94e38a2ae5",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:33b7a5e4ffdb5e94e38a2ae5",
+      "canonicalName": "Dries Mertens",
+      "providerExternalId": "https://www.transfermarkt.com/dries-mertens/profil/spieler/56416",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:3842e35b5760c484fc3122f0",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:3842e35b5760c484fc3122f0",
+      "canonicalName": "Michael Ballack",
+      "providerExternalId": "https://www.transfermarkt.com/michael-ballack/profil/spieler/63",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:195b9219ae8b3d2ceedaafbf",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:195b9219ae8b3d2ceedaafbf",
+      "canonicalName": "Victor Osimhen",
+      "providerExternalId": "https://www.transfermarkt.com/victor-osimhen/profil/spieler/401923",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:1773bb78557a07109f3c3f79",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:1773bb78557a07109f3c3f79",
+      "canonicalName": "Roberto Soldado",
+      "providerExternalId": "https://www.transfermarkt.com/roberto-soldado/profil/spieler/34870",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:5a47241d36547927451a82ca",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:5a47241d36547927451a82ca",
+      "canonicalName": "Gerard Piqué",
+      "providerExternalId": "https://www.transfermarkt.com/gerard-pique/profil/spieler/18944",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:68c6562d7b703b58b6cfda93",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:68c6562d7b703b58b6cfda93",
+      "canonicalName": "Nené",
+      "providerExternalId": "https://www.transfermarkt.com/nene/profil/spieler/116370",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:eee42901d8513910e7c90eb2",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:eee42901d8513910e7c90eb2",
+      "canonicalName": "Karl-Heinz Rummenigge",
+      "providerExternalId": "https://www.transfermarkt.com/karl-heinz-rummenigge/profil/spieler/72343",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:4d58e5f54424a8a751d9b581",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:4d58e5f54424a8a751d9b581",
+      "canonicalName": "Dieter Hoeneß",
+      "providerExternalId": "https://www.transfermarkt.com/dieter-hoeness/profil/spieler/72350",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ec618c7d0ad3dcfb19ac3364",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ec618c7d0ad3dcfb19ac3364",
+      "canonicalName": "Pavel Nedved",
+      "providerExternalId": "https://www.transfermarkt.com/pavel-nedved/profil/spieler/3603",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:f11cf1444f48c281dc7027f2",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:f11cf1444f48c281dc7027f2",
+      "canonicalName": "Kenny Dalglish",
+      "providerExternalId": "https://www.transfermarkt.com/kenny-dalglish/profil/spieler/135269",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:a678971779c74a1e16965cc4",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:a678971779c74a1e16965cc4",
+      "canonicalName": "Khvicha Kvaratskhelia",
+      "providerExternalId": "https://www.transfermarkt.com/khvicha-kvaratskhelia/profil/spieler/502670",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:0a8d62b0ccf68848360cf1c1",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:0a8d62b0ccf68848360cf1c1",
+      "canonicalName": "Sylvain Wiltord",
+      "providerExternalId": "https://www.transfermarkt.com/sylvain-wiltord/profil/spieler/3188",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:1d1414f5d3ddfc2e9a900ca3",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:1d1414f5d3ddfc2e9a900ca3",
+      "canonicalName": "Jude Bellingham",
+      "providerExternalId": "https://www.transfermarkt.com/jude-bellingham/profil/spieler/581678",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:3e78bbd7834aabd2465dab59",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:3e78bbd7834aabd2465dab59",
+      "canonicalName": "Theo Walcott",
+      "providerExternalId": "https://www.transfermarkt.com/theo-walcott/profil/spieler/33713",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:da4bda09786f7016d9ed33fd",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:da4bda09786f7016d9ed33fd",
+      "canonicalName": "Arturo Vidal",
+      "providerExternalId": "https://www.transfermarkt.com/arturo-vidal/profil/spieler/37666",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:9896a87ba7626173d883bffa",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:9896a87ba7626173d883bffa",
+      "canonicalName": "Wlodzimierz Lubanski",
+      "providerExternalId": "https://www.transfermarkt.com/wlodzimierz-lubanski/profil/spieler/141046",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:17f00ed22f9dd7c02e89b270",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:17f00ed22f9dd7c02e89b270",
+      "canonicalName": "Gheorghe Hagi",
+      "providerExternalId": "https://www.transfermarkt.com/gheorghe-hagi/profil/spieler/7939",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:99ed94b9e01e0551a9a8f941",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:99ed94b9e01e0551a9a8f941",
+      "canonicalName": "Marco Asensio",
+      "providerExternalId": "https://www.transfermarkt.com/marco-asensio/profil/spieler/296622",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:a47bea37d5903596f9b55a4d",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:a47bea37d5903596f9b55a4d",
+      "canonicalName": "Kai Havertz",
+      "providerExternalId": "https://www.transfermarkt.com/kai-havertz/profil/spieler/309400",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:9d81eef93e14d971f8deb97c",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:9d81eef93e14d971f8deb97c",
+      "canonicalName": "Iván Helguera",
+      "providerExternalId": "https://www.transfermarkt.com/ivan-helguera/profil/spieler/7514",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:53d34df70696e342eb18eb78",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:53d34df70696e342eb18eb78",
+      "canonicalName": "Simone Inzaghi",
+      "providerExternalId": "https://www.transfermarkt.com/simone-inzaghi/profil/spieler/5849",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:f64ea00457cf88ef2baa3f51",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:f64ea00457cf88ef2baa3f51",
+      "canonicalName": "Seydou Doumbia",
+      "providerExternalId": "https://www.transfermarkt.com/seydou-doumbia/profil/spieler/75287",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:6e56d82a0def42749c882a64",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:6e56d82a0def42749c882a64",
+      "canonicalName": "Diego Tristán",
+      "providerExternalId": "https://www.transfermarkt.com/diego-tristan/profil/spieler/7504",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:f6c2e2ad27896e0e948b7178",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:f6c2e2ad27896e0e948b7178",
+      "canonicalName": "Ferenc Bene",
+      "providerExternalId": "https://www.transfermarkt.com/ferenc-bene/profil/spieler/211551",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ab4df3b46476f8acba2f8450",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ab4df3b46476f8acba2f8450",
+      "canonicalName": "Zinédine Zidane",
+      "providerExternalId": "https://www.transfermarkt.com/zinedine-zidane/profil/spieler/3111",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:fbaf9dacaf35fb8db12fe313",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:fbaf9dacaf35fb8db12fe313",
+      "canonicalName": "Robert Pirès",
+      "providerExternalId": "https://www.transfermarkt.com/robert-pires/profil/spieler/3185",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ee353ea3ec0b143f6f5fb032",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ee353ea3ec0b143f6f5fb032",
+      "canonicalName": "Ronaldo",
+      "providerExternalId": "https://www.transfermarkt.com/ronaldo/profil/spieler/3140",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:50db3596ab98a240a328bc6c",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:50db3596ab98a240a328bc6c",
+      "canonicalName": "Héctor Rial",
+      "providerExternalId": "https://www.transfermarkt.com/hector-rial/profil/spieler/170719",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:c0f52715816313ac9f5d54b4",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:c0f52715816313ac9f5d54b4",
+      "canonicalName": "Sören Lerby",
+      "providerExternalId": "https://www.transfermarkt.com/soren-lerby/profil/spieler/95374",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:b9015506df7aea4a4548556a",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b9015506df7aea4a4548556a",
+      "canonicalName": "David Villa",
+      "providerExternalId": "https://www.transfermarkt.com/david-villa/profil/spieler/7980",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:3dbeed01709153cdbc046692",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:3dbeed01709153cdbc046692",
+      "canonicalName": "Roy Keane",
+      "providerExternalId": "https://www.transfermarkt.com/roy-keane/profil/spieler/3396",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:c6a4c0513984aaa61f716899",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:c6a4c0513984aaa61f716899",
+      "canonicalName": "Konstantinos Mitroglou",
+      "providerExternalId": "https://www.transfermarkt.com/konstantinos-mitroglou/profil/spieler/34944",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:22acbce556c6cfd85a0497e1",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:22acbce556c6cfd85a0497e1",
+      "canonicalName": "Ian Rush",
+      "providerExternalId": "https://www.transfermarkt.com/ian-rush/profil/spieler/145743",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:81941cb6e4c936dffa8c0d51",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:81941cb6e4c936dffa8c0d51",
+      "canonicalName": "Luuk de Jong",
+      "providerExternalId": "https://www.transfermarkt.com/luuk-de-jong/profil/spieler/72522",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:d3e3391703395371cff4c4ae",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:d3e3391703395371cff4c4ae",
+      "canonicalName": "Denis Law",
+      "providerExternalId": "https://www.transfermarkt.com/denis-law/profil/spieler/174867",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:142f3bb04550dc5e2f02bdd8",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:142f3bb04550dc5e2f02bdd8",
+      "canonicalName": "Miroslav Klose",
+      "providerExternalId": "https://www.transfermarkt.com/miroslav-klose/profil/spieler/10",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:12dd50c48a0350414d6b1d43",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:12dd50c48a0350414d6b1d43",
+      "canonicalName": "Adriano",
+      "providerExternalId": "https://www.transfermarkt.com/adriano/profil/spieler/5876",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:aba167bf651cd6f21093e403",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:aba167bf651cd6f21093e403",
+      "canonicalName": "Vincent Aboubakar",
+      "providerExternalId": "https://www.transfermarkt.com/vincent-aboubakar/profil/spieler/147487",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:a73d88888bf7a27bfd42e33f",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:a73d88888bf7a27bfd42e33f",
+      "canonicalName": "Marius Lăcătuş",
+      "providerExternalId": "https://www.transfermarkt.com/marius-lacatus/profil/spieler/103220",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:26318ed4ee708cfe04d03dbb",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:26318ed4ee708cfe04d03dbb",
+      "canonicalName": "Klaas-Jan Huntelaar",
+      "providerExternalId": "https://www.transfermarkt.com/klaas-jan-huntelaar/profil/spieler/4357",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:d36610c374a9cd5b095bd2f0",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:d36610c374a9cd5b095bd2f0",
+      "canonicalName": "Chicharito",
+      "providerExternalId": "https://www.transfermarkt.com/chicharito/profil/spieler/50935",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:677969b17a480979a89b8e93",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:677969b17a480979a89b8e93",
+      "canonicalName": "Jupp Heynckes",
+      "providerExternalId": "https://www.transfermarkt.com/jupp-heynckes/profil/spieler/97301",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:cc35c7f33c4e65f6e70f5614",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:cc35c7f33c4e65f6e70f5614",
+      "canonicalName": "Deco",
+      "providerExternalId": "https://www.transfermarkt.com/deco/profil/spieler/8564",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ae810cfbaad2e94d0b8a5185",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ae810cfbaad2e94d0b8a5185",
+      "canonicalName": "İlkay Gündoğan",
+      "providerExternalId": "https://www.transfermarkt.com/ilkay-gundogan/profil/spieler/53622",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:68880f9da8737a3131091cb2",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:68880f9da8737a3131091cb2",
+      "canonicalName": "Mehdi Taremi",
+      "providerExternalId": "https://www.transfermarkt.com/mehdi-taremi/profil/spieler/307058",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:33f1adc453d8ac8773e46f43",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:33f1adc453d8ac8773e46f43",
+      "canonicalName": "Bukayo Saka",
+      "providerExternalId": "https://www.transfermarkt.com/bukayo-saka/profil/spieler/433177",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:042732183f149f8cddfd5d98",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:042732183f149f8cddfd5d98",
+      "canonicalName": "Dominik Szoboszlai",
+      "providerExternalId": "https://www.transfermarkt.com/dominik-szoboszlai/profil/spieler/451276",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:8d8eb328172ae5ba7fbb5980",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:8d8eb328172ae5ba7fbb5980",
+      "canonicalName": "Sergey Yuran",
+      "providerExternalId": "https://www.transfermarkt.com/sergey-yuran/profil/spieler/85424",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:11b791c1a25525a50dd29cf3",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:11b791c1a25525a50dd29cf3",
+      "canonicalName": "Ronald Koeman",
+      "providerExternalId": "https://www.transfermarkt.com/ronald-koeman/profil/spieler/7940",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:baa7a2737e65070aaf1d54a1",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:baa7a2737e65070aaf1d54a1",
+      "canonicalName": "Jan Koller",
+      "providerExternalId": "https://www.transfermarkt.com/jan-koller/profil/spieler/1157",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:9cedfa171c797c38580df4b1",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:9cedfa171c797c38580df4b1",
+      "canonicalName": "Carlos Tévez",
+      "providerExternalId": "https://www.transfermarkt.com/carlos-tevez/profil/spieler/4276",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:318add5c479b4042418f540b",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:318add5c479b4042418f540b",
+      "canonicalName": "Dimitar Berbatov",
+      "providerExternalId": "https://www.transfermarkt.com/dimitar-berbatov/profil/spieler/65",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:62d21cc715868390654c8ac0",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:62d21cc715868390654c8ac0",
+      "canonicalName": "Lukas Podolski",
+      "providerExternalId": "https://www.transfermarkt.com/lukas-podolski/profil/spieler/15185",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:3900da72630c4d1d93fc1315",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:3900da72630c4d1d93fc1315",
+      "canonicalName": "Peter Crouch",
+      "providerExternalId": "https://www.transfermarkt.com/peter-crouch/profil/spieler/4072",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:bb92bf880be480b2c2a44476",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:bb92bf880be480b2c2a44476",
+      "canonicalName": "Dennis Viollet",
+      "providerExternalId": "https://www.transfermarkt.com/dennis-viollet/profil/spieler/289653",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:f352853d062fa03f278585f8",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:f352853d062fa03f278585f8",
+      "canonicalName": "Freddie Ljungberg",
+      "providerExternalId": "https://www.transfermarkt.com/freddie-ljungberg/profil/spieler/3134",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:d925145faa2d702f265a96bd",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:d925145faa2d702f265a96bd",
+      "canonicalName": "George Weah",
+      "providerExternalId": "https://www.transfermarkt.com/george-weah/profil/spieler/8542",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:030fa64422b41daf2ddd9f5b",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:030fa64422b41daf2ddd9f5b",
+      "canonicalName": "Hakan Şükür",
+      "providerExternalId": "https://www.transfermarkt.com/hakan-sukur/profil/spieler/3363",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:b4ebe0f92b5720e962ade704",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b4ebe0f92b5720e962ade704",
+      "canonicalName": "Sonny Anderson",
+      "providerExternalId": "https://www.transfermarkt.com/sonny-anderson/profil/spieler/3500",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:5bc64e03504f0f8435ed4109",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:5bc64e03504f0f8435ed4109",
+      "canonicalName": "Jackson Martínez",
+      "providerExternalId": "https://www.transfermarkt.com/jackson-martinez/profil/spieler/74418",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:ad40746fae72e7e4ec43a730",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:ad40746fae72e7e4ec43a730",
+      "canonicalName": "Ciro Immobile",
+      "providerExternalId": "https://www.transfermarkt.com/ciro-immobile/profil/spieler/105521",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:35644e9440344cb74a5b653a",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:35644e9440344cb74a5b653a",
+      "canonicalName": "Burak Yılmaz",
+      "providerExternalId": "https://www.transfermarkt.com/burak-yilmaz/profil/spieler/34987",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:b8437f336ea824638603c3d9",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b8437f336ea824638603c3d9",
+      "canonicalName": "Antonis Antoniadis",
+      "providerExternalId": "https://www.transfermarkt.com/antonis-antoniadis/profil/spieler/167217",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:a2eb3f63c98d1754c4db20ec",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:a2eb3f63c98d1754c4db20ec",
+      "canonicalName": "Torbjörn Nilsson",
+      "providerExternalId": "https://www.transfermarkt.com/torbjorn-nilsson/profil/spieler/108301",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:28416042ecf6258a2bc88b80",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:28416042ecf6258a2bc88b80",
+      "canonicalName": "Willie Wallace",
+      "providerExternalId": "https://www.transfermarkt.com/willie-wallace/profil/spieler/210159",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:a452f267422c1e2c94cfc7ab",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:a452f267422c1e2c94cfc7ab",
+      "canonicalName": "Dani Alves",
+      "providerExternalId": "https://www.transfermarkt.com/dani-alves/profil/spieler/15951",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:eebd388987184e1e94d2b97f",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:eebd388987184e1e94d2b97f",
+      "canonicalName": "Joshua Kimmich",
+      "providerExternalId": "https://www.transfermarkt.com/joshua-kimmich/profil/spieler/161056",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:d099d032fab60821c9e3b849",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:d099d032fab60821c9e3b849",
+      "canonicalName": "Wesley Sneijder",
+      "providerExternalId": "https://www.transfermarkt.com/wesley-sneijder/profil/spieler/4673",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:f8c1981c9f6ebfcf5adccfae",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:f8c1981c9f6ebfcf5adccfae",
+      "canonicalName": "Mario Götze",
+      "providerExternalId": "https://www.transfermarkt.com/mario-gotze/profil/spieler/74842",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:5589b3cd7a1da7f97313eae5",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:5589b3cd7a1da7f97313eae5",
+      "canonicalName": "Bastian Schweinsteiger",
+      "providerExternalId": "https://www.transfermarkt.com/bastian-schweinsteiger/profil/spieler/2514",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    },
+    {
+      "sourceEntityId": "transfermarkt:european-cup-champions-league:player:11d7a3fe5e579b0c3e26afe3",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:11d7a3fe5e579b0c3e26afe3",
+      "canonicalName": "Piet Keizer",
+      "providerExternalId": "https://www.transfermarkt.com/piet-keizer/profil/spieler/142888",
+      "resolution": "canonical_source_record",
+      "crossProviderLink": null
+    }
+  ]
+}
+

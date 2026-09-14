@@ -1,0 +1,44 @@
+{
+  "artifact": "rango90-source-contrast",
+  "artifactVersion": 1,
+  "categorySlug": "uefa-champions-league-goals",
+  "retrievedAt": "2026-09-12",
+  "primary": {
+    "key": "transfermarkt-european-cup-champions-league-historical-goals",
+    "url": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+    "archivedSnapshotId": "src_3d13003e2422e688ca3380ae",
+    "observedRows": 200
+  },
+  "officialContrast": {
+    "key": "uefa-champions-league-official",
+    "url": "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/",
+    "archivedSnapshotId": "src_c9359c9f91bba9215af8fef6",
+    "observedRows": 100
+  },
+  "comparison": {
+    "method": "case_and_diacritic_insensitive_name_match; no fuzzy surname matching; values never merged",
+    "observedPrimaryRows": 200,
+    "observedOfficialRows": 100,
+    "matchedNames": 24,
+    "equalValues": 12,
+    "valueDiscrepancies": 12,
+    "unmatchedOfficialRows": 76,
+    "unmatchedPrimaryRowsWithinFirst100": 76,
+    "usedToBuildRanking": false
+  },
+  "discrepancies": [
+    { "name": "Cristiano Ronaldo", "primaryRank": 1, "primaryGoals": 140, "officialRank": 1, "officialGoals": 141 },
+    { "name": "Eusébio", "primaryRank": 16, "primaryGoals": 46, "officialRank": 17, "officialGoals": 47 },
+    { "name": "Ferenc Puskás", "primaryRank": 23, "primaryGoals": 36, "officialRank": 24, "officialGoals": 35 },
+    { "name": "Luis Suárez", "primaryRank": 41, "primaryGoals": 27, "officialRank": 34, "officialGoals": 31 },
+    { "name": "Rivaldo", "primaryRank": 43, "primaryGoals": 27, "officialRank": 34, "officialGoals": 31 },
+    { "name": "Jardel", "primaryRank": 52, "primaryGoals": 25, "officialRank": 44, "officialGoals": 28 },
+    { "name": "Gonzalo Higuaín", "primaryRank": 57, "primaryGoals": 24, "officialRank": 55, "officialGoals": 25 },
+    { "name": "Marco Simone", "primaryRank": 59, "primaryGoals": 24, "officialRank": 55, "officialGoals": 25 },
+    { "name": "Claudio Pizarro", "primaryRank": 71, "primaryGoals": 21, "officialRank": 61, "officialGoals": 24 },
+    { "name": "Luiz Adriano", "primaryRank": 77, "primaryGoals": 21, "officialRank": 73, "officialGoals": 22 },
+    { "name": "Luis Enrique", "primaryRank": 91, "primaryGoals": 19, "officialRank": 91, "officialGoals": 20 },
+    { "name": "Heung-min Son", "primaryRank": 93, "primaryGoals": 19, "officialRank": 81, "officialGoals": 21 }
+  ],
+  "decision": "Do not blend or overwrite. Resolve the definition/cutoff discrepancy with the rights holder or a reviewed source before publication."
+}

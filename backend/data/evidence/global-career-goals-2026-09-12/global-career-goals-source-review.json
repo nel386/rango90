@@ -1,0 +1,136 @@
+{
+  "artifact": "global-career-goals-source-review",
+  "artifactVersion": 1,
+  "reviewedAt": "2026-09-12",
+  "target": {
+    "minimumUniquePlayers": 200,
+    "preferredDefinition": "One homogeneous senior-career total per player: official senior club competitions plus recognised senior A-international matches, with the source's inclusion and cutoff rules preserved.",
+    "requiredProperties": [
+      "at least 200 unique players",
+      "one documented definition for every row",
+      "stable player identity or enough provenance to reconcile it",
+      "published permission to use or redistribute the data in a commercial game"
+    ]
+  },
+  "decision": {
+    "usableSourceFound": false,
+    "imported": false,
+    "databaseChanged": false,
+    "reason": "No candidate currently proves both 200 homogeneous rows and a usable redistribution right. No source has been padded or mixed with another source.",
+    "apiFootballUsed": false
+  },
+  "sources": [
+    {
+      "key": "strikerduel",
+      "name": "StrikerDuel",
+      "dataUrl": "https://www.strikerduel.com/data",
+      "rankingUrl": "https://www.strikerduel.com/rankings",
+      "methodologyUrl": "https://www.strikerduel.com/about",
+      "license": {
+        "status": "commercial_license_offered_on_request_not_granted",
+        "documentedTerms": "Annual, non-exclusive licence delivered as a versioned API or scheduled feed; attribution required. Redistribution, sublicensing and building a competing derivative database are explicitly excluded without the licence arrangement.",
+        "licenseUrl": "https://www.strikerduel.com/data"
+      },
+      "definition": "Career totals are split into club, international and combined totals. The methodology says the records are compiled primarily from per-season club and international tables on Wikipedia, normalised, reviewed by hand, and that unofficial matches are excluded; official competition totals are preferred where sources disagree.",
+      "observedRows": {
+        "profiledPlayers": 134,
+        "publicAllTimeRankingRows": 50,
+        "meetsMinimum": false
+      },
+      "status": "rejected_insufficient_rows",
+      "evidence": "The licensing page reports 134 profiled players and the rankings page exposes a Top 50 goals list."
+    },
+    {
+      "key": "sportbaseline",
+      "name": "SportBaseline All-Time Record Book",
+      "dataUrl": "https://sportbaseline.com/records",
+      "methodologyUrl": null,
+      "license": {
+        "status": "not_located",
+        "documentedTerms": "The public record page does not state a data licence or redistribution permission. A direct retrieval on the review date returned HTTP 403, so no additional terms were assumed.",
+        "licenseUrl": null
+      },
+      "definition": "The page labels the metric as senior career goals across all club and international competitions in its dataset.",
+      "observedRows": {
+        "publicRankingRows": 50,
+        "datasetSeasonRowsClaimed": 1900000,
+        "meetsMinimum": false
+      },
+      "status": "rejected_no_license_and_insufficient_public_rows",
+      "evidence": "The page exposes ranks 1–50 for most career goals; the 1.9M season-stat claim is not itself a 200-row export or a redistribution licence."
+    },
+    {
+      "key": "rsssf-prolific-scorers",
+      "name": "RSSSF Prolific Scorers",
+      "dataUrl": "https://www.rsssf.org/players/prolific.html",
+      "methodologyUrl": "https://www.rsssf.org/players/prolific.html",
+      "license": {
+        "status": "reference_only_rights_not_cleared",
+        "documentedTerms": "The page identifies historical sources and editorial notes but does not grant Rango 90 a commercial redistribution licence.",
+        "licenseUrl": null
+      },
+      "definition": "Its broad Official Matches block includes regional, reserve and amateur leagues, national and international cups, A/B/Ol/U and other selections, select matches and other historical tournaments. Its separate Top level block is explicitly marked preliminary.",
+      "observedRows": {
+        "officialMatchesRows": 82,
+        "officialTopLevelRows": 29,
+        "meetsMinimum": false
+      },
+      "status": "rejected_insufficient_rows_and_scope_mismatch",
+      "evidence": "The page itself says it contains only famous players with verified statistics and notes that other players may have 500 or more goals."
+    },
+    {
+      "key": "iffhs-all-time-goals",
+      "name": "IFFHS all-time top-level goal scorers",
+      "dataUrl": "https://www.iffhs.com/posts/3879",
+      "methodologyUrl": "https://www.iffhs.com/posts/3879",
+      "license": {
+        "status": "all_rights_reserved_reference",
+        "documentedTerms": "The publisher's page is a reference ranking and does not grant a commercial redistribution licence to Rango 90.",
+        "licenseUrl": null
+      },
+      "definition": "Top-level senior club and national-team categories, with the published table restricted to players reaching the source's historical threshold of 500 or more top-level goals.",
+      "observedRows": {
+        "publishedScope": "500_plus_threshold_not_top_200",
+        "meetsMinimum": false
+      },
+      "status": "rejected_thresholded_reference_not_top_200",
+      "evidence": "The publication describes an inclusion threshold rather than an exhaustive 200-player export."
+    },
+    {
+      "key": "salimt-transfermarkt-datalake",
+      "name": "salimt/football-datasets",
+      "dataUrl": "https://github.com/salimt/football-datasets",
+      "license": {
+        "status": "missing_or_unverifiable",
+        "documentedTerms": "The repository README advertises a licence badge, but the referenced LICENSE file and GitHub licence endpoint were not present/retrievable on the review date. The data is described as sourced from Transfermarkt, so repository code/data availability is not treated as permission to redistribute the underlying data.",
+        "licenseUrl": "https://raw.githubusercontent.com/salimt/football-datasets/main/LICENSE"
+      },
+      "definition": "The repository contains per-season player performance rows and national-team performance rows, but it does not publish an exhaustive global career-goals ranking with a single senior-career inclusion rule.",
+      "observedRows": {
+        "playerProfilesClaimed": 92671,
+        "playerPerformanceRowsClaimed": 1878719,
+        "publicGlobalCareerRankingRows": null,
+        "meetsMinimum": false
+      },
+      "status": "rejected_no_redistribution_right_and_no_target_ranking",
+      "evidence": "The repository schema is useful for research, but its source, licence and coverage do not establish a publishable 200-row career-goals ranking."
+    },
+    {
+      "key": "football-db",
+      "name": "football.db / Open Football Data",
+      "dataUrl": "https://openfootball.github.io/",
+      "license": {
+        "status": "public_domain",
+        "documentedTerms": "The schema, data and scripts are dedicated to the public domain.",
+        "licenseUrl": "https://openfootball.github.io/"
+      },
+      "definition": "Open match schedules/results and selected scorer lines in Football.TXT; it is not an exhaustive player career-statistics feed.",
+      "observedRows": {
+        "publicGlobalCareerRankingRows": null,
+        "meetsMinimum": false
+      },
+      "status": "rejected_not_a_career_statistics_source",
+      "evidence": "The project documents fixtures/results and a public-domain schema, not a complete all-competition senior player-goals table."
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+import type { MockChallenge, MockEntity } from "./game-types";
+
+export type AssignmentClaim = { ordinal: number; entityId: string; categorySlug: string; timedOut?: boolean };
+export type OfficialAssignment = AssignmentClaim & { scoreValue: number };
+export type GameResult = {
+  challengeId: string; sourceVersion: string; challengeSha256?: string; engineVersion: string; startedAtMs: number; finishedAtMs: number;
+  elapsedMilliseconds: number; elapsedSeconds: number; timedOut: boolean; assignments: OfficialAssignment[]; totalScore: number; resultHash: string;
+};
+export type GameSession = {
+  id: string; challengeId: string; status: "active" | "completed" | "expired" | "abandoned";
+  startedAt: string; deadlineAt: string; currentOrdinal: number; sessionToken: string; challenge: MockChallenge;
+};
+export type ResultResponse = { accepted: boolean; duplicate: boolean; leaderboardEligible: boolean; resultId: string; result: GameResult };
+export type LeaderboardEntry = { rank: number; playerId?: string; displayName: string; totalScore: number; elapsedSeconds?: number; timedOut?: boolean };
+export type DuelParticipant = { slot: number; status: string; joinedAt?: string; hasResult: boolean; totalScore: number | null; elapsedSeconds: number | null; timedOut: boolean | null };
+export type DuelState = {
+  id: string; code: string; status: "open" | "active" | "completed" | "expired"; challengeId: string; expiresAt: string; joinable: boolean;
+  challenge?: MockChallenge; participants?: DuelParticipant[]; participantToken?: string;
+};
+export type AuthUser = { id: string; email: string; displayName: string; emailVerified: boolean };
+export type RepositoryErrorKind = "offline" | "auth" | "session" | "not_found" | "expired" | "conflict" | "invalid" | "server";
+
+export class RepositoryError extends Error {
+  constructor(message: string, readonly kind: RepositoryErrorKind, readonly status?: number, readonly code?: string) {
+    super(message); this.name = "RepositoryError";
+  }
+}
+
+export interface GameRepository {
+  getCurrentUser(): Promise<AuthUser | null>;
+  login(email: string, password: string): Promise<AuthUser>;
+  register(email: string, password: string, displayName: string): Promise<AuthUser>;
+  logout(): Promise<void>;
+  getDailyChallenge(): Promise<MockChallenge>;
+  startGame(challengeId: string): Promise<GameSession>;
+  submitResult(session: GameSession, assignments: AssignmentClaim[]): Promise<ResultResponse>;
+  expireGame(session: GameSession, knownAssignments?: AssignmentClaim[]): Promise<ResultResponse>;
+  getLeaderboard(challengeId: string): Promise<LeaderboardEntry[]>;
+  createDuel(challengeId: string): Promise<DuelState>;
+  getDuel(code: string): Promise<DuelState>;
+  joinDuel(code: string): Promise<DuelState>;
+  submitDuelResult(code: string, participantToken: string, assignments: AssignmentClaim[]): Promise<ResultResponse>;
+  replayDuel(code: string, participantToken: string): Promise<DuelState>;
+}
+
+type ApiChallenge = {
+  id: string; kind: "daily" | "weekly" | "duel"; challengeDate: string | null; sourceVersion: string; challengeSha256: string; engineVersion: string; timeLimitSeconds: number; scoreCap: number;
+  categories: Array<{ ordinal: number; id: string; rankingSnapshotId: string; slug: string; labelEs: string; labelEn: string }>;
+  decisions: Array<{ ordinal: number; entityId: string; name: string; shortName: string | null; entityType: string; imageUrl?: string; imageStatus?: "licensed" | "fallback" }>;
+};
+
+function resolveApiAssetUrl(baseUrl: string, path?: string): string | undefined {
+  if (!path) return undefined;
+  try {
+    return new URL(path, baseUrl).toString();
+  } catch {
+    return path;
+  }
+}
+
+function normalizeChallenge(raw: ApiChallenge, baseUrl = ""): MockChallenge {
+  return {
+    id: raw.id, kind: raw.kind === "duel" ? "duel" : "daily",
+    title: { es: raw.challengeDate ? `Reto diario · ${raw.challengeDate}` : "Reto publicado", en: raw.challengeDate ? `Daily challenge · ${raw.challengeDate}` : "Published challenge" },
+    subtitle: { es: "Una combinación publicada y auditada.", en: "A published and audited combination." },
+    entityType: raw.decisions[0]?.entityType === "club" || raw.decisions[0]?.entityType === "national_team" ? raw.decisions[0].entityType : "player",
+    timeLimitSeconds: raw.timeLimitSeconds, qualificationScore: 250, scoreCap: raw.scoreCap, sourceVersion: raw.sourceVersion, challengeSha256: raw.challengeSha256, engineVersion: raw.engineVersion, difficulty: "balanced",
+    categories: raw.categories.map((category) => ({ slug: category.slug, code: category.slug.slice(0, 2).toUpperCase(), id: category.id, ordinal: category.ordinal, label: { es: category.labelEs, en: category.labelEn }, definition: { es: "Ranking publicado para este reto.", en: "Published ranking for this challenge." } })),
+    entities: raw.decisions.map((decision) => ({ id: decision.entityId, name: decision.name, shortName: decision.shortName ?? decision.name.slice(0, 2).toUpperCase(), entityType: decision.entityType === "club" || decision.entityType === "national_team" ? decision.entityType : "player", position: "", imageUrl: resolveApiAssetUrl(baseUrl, decision.imageUrl), imageFallbackUrl: resolveApiAssetUrl(baseUrl, `/v1/media/${encodeURIComponent(decision.entityId)}/fallback`), imageStatus: decision.imageStatus, ordinal: decision.ordinal, scores: {} })),
+  };
+}
+
+function errorKind(status: number, code?: string): RepositoryErrorKind {
+  if (status === 401 || status === 403 || code?.includes("auth") || code?.includes("forbidden")) return "auth";
+  if (code?.includes("session") || code?.includes("deadline") || code === "time_expired" || code === "time_not_expired") return "session";
+  if (status === 404 || code?.includes("not_found")) return "not_found";
+  if (status === 410 || code?.includes("expired")) return "expired";
+  if (status === 409 || code?.includes("conflict")) return "conflict";
+  if (status === 422 || code?.includes("invalid")) return "invalid";
+  return status >= 500 ? "server" : "offline";
+}
+
+export class HttpGameRepository implements GameRepository {
+  constructor(private readonly baseUrl: string) {}
+
+  private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
+    try {
+      const response = await fetch(`${this.baseUrl.replace(/\/$/, "")}${path}`, { ...init, credentials: "include", headers: { accept: "application/json", ...(init.body ? { "content-type": "application/json" } : {}), ...init.headers } });
+      const body = await response.json().catch(() => ({})) as { error?: string; message?: string; [key: string]: unknown };
+      if (!response.ok) throw new RepositoryError(body.message ?? body.error ?? "Request failed", errorKind(response.status, body.error), response.status, body.error);
+      return body as T;
+    } catch (error) {
+      if (error instanceof RepositoryError) throw error;
+      throw new RepositoryError("Backend unavailable", "offline");
+    }
+  }
+
+  async getCurrentUser() {
+    const response = await this.request<{ user: AuthUser | null }>("/v1/auth/session");
+    return response.user;
+  }
+
+  async login(email: string, password: string) {
+    const response = await this.request<{ user: AuthUser }>("/v1/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
+    return response.user;
+  }
+
+  async register(email: string, password: string, displayName: string) {
+    const response = await this.request<{ user: AuthUser }>("/v1/auth/register", { method: "POST", body: JSON.stringify({ email, password, displayName }) });
+    return response.user;
+  }
+
+  async logout() {
+    await this.request<{ ok: boolean }>("/v1/auth/logout", { method: "POST", body: "{}" });
+  }
+
+  async getDailyChallenge() {
+    const response = await this.request<{ challenge: ApiChallenge }>("/v1/challenges/daily");
+    return normalizeChallenge(response.challenge, this.baseUrl);
+  }
+
+  async startGame(challengeId: string) {
+    const response = await this.request<{ sessionToken: string; game: Omit<GameSession, "sessionToken" | "challenge">; challenge: ApiChallenge }>("/v1/games", { method: "POST", body: JSON.stringify({ challengeId }) });
+    return { ...response.game, sessionToken: response.sessionToken, challenge: normalizeChallenge(response.challenge, this.baseUrl) };
+  }
+
+  async submitResult(session: GameSession, assignments: AssignmentClaim[]) {
+    return this.request<ResultResponse>(`/v1/games/${encodeURIComponent(session.id)}/result`, { method: "POST", headers: { "Idempotency-Key": `rango90-${session.id}-${assignments.length}` }, body: JSON.stringify({ sessionToken: session.sessionToken, result: { assignments } }) });
+  }
+
+  async expireGame(session: GameSession, knownAssignments = []) {
+    const payload = knownAssignments.length > 0 ? { sessionToken: session.sessionToken, result: { assignments: knownAssignments } } : { sessionToken: session.sessionToken };
+    return this.request<ResultResponse>(`/v1/games/${encodeURIComponent(session.id)}/expire`, { method: "POST", body: JSON.stringify(payload) });
+  }
+
+  async getLeaderboard(challengeId: string) {
+    const response = await this.request<{ entries: LeaderboardEntry[] }>(`/v1/challenges/${encodeURIComponent(challengeId)}/leaderboard?limit=100`);
+    return response.entries;
+  }
+
+  async createDuel(challengeId: string) {
+    const response = await this.request<{ duel: Omit<DuelState, "joinable" | "participantToken">; participantToken: string }>("/v1/duels", { method: "POST", body: JSON.stringify({ challengeId }) });
+    const duel = await this.getDuel(response.duel.code);
+    return { ...duel, id: response.duel.id, challengeId: response.duel.challengeId, expiresAt: response.duel.expiresAt, participantToken: response.participantToken };
+  }
+
+  async getDuel(code: string) {
+    const response = await this.request<{ duel: Omit<DuelState, "challenge">; challenge: ApiChallenge; participants: DuelParticipant[] }>(`/v1/duels/${encodeURIComponent(code)}`);
+    return { ...response.duel, challenge: normalizeChallenge(response.challenge, this.baseUrl), participants: response.participants };
+  }
+
+  async joinDuel(code: string) {
+    const response = await this.request<{ duelId: string; challengeId: string; participantToken: string }>(`/v1/duels/${encodeURIComponent(code)}/join`, { method: "POST", body: "{}" });
+    const duel = await this.getDuel(code);
+    return { ...duel, id: response.duelId, challengeId: response.challengeId, participantToken: response.participantToken };
+  }
+
+  async submitDuelResult(code: string, participantToken: string, assignments: AssignmentClaim[]) {
+    return this.request<ResultResponse>(`/v1/duels/${encodeURIComponent(code)}/result`, { method: "POST", headers: { "Idempotency-Key": `rango90-duel-${code}-${assignments.length}` }, body: JSON.stringify({ participantToken, result: { assignments } }) });
+  }
+
+  async replayDuel(code: string, participantToken: string) {
+    const response = await this.request<{ duel: Omit<DuelState, "joinable" | "participantToken">; participantToken: string }>(`/v1/duels/${encodeURIComponent(code)}/replay`, { method: "POST", body: JSON.stringify({ participantToken }) });
+    const duel = await this.getDuel(response.duel.code);
+    return { ...duel, id: response.duel.id, challengeId: response.duel.challengeId, expiresAt: response.duel.expiresAt, participantToken: response.participantToken };
+  }
+}
+
+export function createGameRepository(): GameRepository {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  if (baseUrl) return new HttpGameRepository(baseUrl);
+  const unavailable = async (): Promise<never> => {
+    throw new RepositoryError("Frontend API is not configured", "server", 500, "api_not_configured");
+  };
+  return {
+    getCurrentUser: unavailable,
+    login: unavailable,
+    register: unavailable,
+    logout: unavailable,
+    getDailyChallenge: unavailable,
+    startGame: unavailable,
+    submitResult: unavailable,
+    expireGame: unavailable,
+    getLeaderboard: unavailable,
+    createDuel: unavailable,
+    getDuel: unavailable,
+    joinDuel: unavailable,
+    submitDuelResult: unavailable,
+    replayDuel: unavailable,
+  };
+}
+
+export function getEntityById(challenge: MockChallenge, entityId: string): MockEntity | undefined {
+  return challenge.entities.find((entity) => entity.id === entityId);
+}

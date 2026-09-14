@@ -1,0 +1,23 @@
+{
+  "artifact": "rango90-challenge-compatibility",
+  "artifactVersion": 1,
+  "categorySlug": "uefa-champions-league-goals",
+  "engineVersion": "game-engine-v1",
+  "draftMaterialization": {
+    "challengeId": "daily_2026-09-13_uefa-champions-league-goals",
+    "model": "challenges",
+    "status": "draft",
+    "sourceSnapshotId": "rs_870f1dff967bb160f2d132cc",
+    "sourceRankingRows": 200,
+    "activePlayableRows": 80,
+    "historicalRowsExcluded": true
+  },
+  "onlineMulticategory": {
+    "compatibleAsFutureCategory": true,
+    "currentlyPublishable": false,
+    "requiredCategoryCount": 2,
+    "availableRealCategoriesForThisClosure": 1,
+    "reason": "El contrato online exige una matriz cuadrada de categorías y decisiones. No se duplica esta categoría ni se fabrica una segunda categoría para cumplir la forma.",
+    "nextGate": "Otra categoría real e independiente, con snapshot publicado y derechos aprobados"
+  }
+}

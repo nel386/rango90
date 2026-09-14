@@ -1,0 +1,23 @@
+{
+  "categorySlug": "premier-league-club-titles",
+  "source": {
+    "key": "premier-league-honours-official",
+    "name": "Premier League official champions history",
+    "sourceType": "official",
+    "baseUrl": "https://www.premierleague.com/en/news/4288492",
+    "rightsStatus": "review_required"
+  },
+  "dataVersion": "premier-league-club-titles-2026-09-08",
+  "coverageComplete": true,
+  "allowPartialDraft": false,
+  "reviewed": false,
+  "entries": [
+    { "entityId": "pl:club:12", "entityType": "club", "name": "Manchester United", "rawValue": 13, "evidence": { "sourceRank": 1, "sourceName": "Man Utd", "externalId": "premier-league:club:man-utd", "seasonStart": "1992/93", "seasonEnd": "2025/26" } },
+    { "entityId": "pl:club:11", "entityType": "club", "name": "Manchester City", "rawValue": 8, "evidence": { "sourceRank": 2, "sourceName": "Man City", "externalId": "premier-league:club:man-city", "seasonStart": "1992/93", "seasonEnd": "2025/26" } },
+    { "entityId": "pl:club:4", "entityType": "club", "name": "Chelsea", "rawValue": 5, "evidence": { "sourceRank": 3, "externalId": "premier-league:club:chelsea", "seasonStart": "1992/93", "seasonEnd": "2025/26" } },
+    { "entityId": "pl:club:1", "entityType": "club", "name": "Arsenal", "rawValue": 4, "evidence": { "sourceRank": 4, "externalId": "premier-league:club:arsenal", "seasonStart": "1992/93", "seasonEnd": "2025/26" } },
+    { "entityId": "pl:club:10", "entityType": "club", "name": "Liverpool", "rawValue": 2, "evidence": { "sourceRank": 5, "externalId": "premier-league:club:liverpool", "seasonStart": "1992/93", "seasonEnd": "2025/26" } },
+    { "entityId": "pl:club:blackburn-rovers", "entityType": "club", "name": "Blackburn Rovers", "rawValue": 1, "evidence": { "sourceRank": 6, "externalId": "premier-league:club:blackburn-rovers", "seasonStart": "1992/93", "seasonEnd": "2025/26" } },
+    { "entityId": "pl:club:leicester-city", "entityType": "club", "name": "Leicester City", "rawValue": 1, "evidence": { "sourceRank": 7, "externalId": "premier-league:club:leicester-city", "seasonStart": "1992/93", "seasonEnd": "2025/26" } }
+  ]
+}

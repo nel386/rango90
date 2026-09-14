@@ -1,0 +1,42 @@
+{
+  "name": "rango90",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:pages": "node scripts/build-frontend.mjs pages",
+    "build:android": "node scripts/build-frontend.mjs android",
+    "verify:pages": "node scripts/verify-static-build.mjs pages",
+    "verify:android": "node scripts/verify-static-build.mjs android",
+    "cap:sync": "npm run build:android && npx cap sync android",
+    "cap:copy": "npx cap copy android",
+    "cap:open:android": "npx cap open android",
+    "cap:build:debug": "npm run cap:sync && cd android && ./gradlew assembleDebug",
+    "cap:build:release": "npm run cap:sync && cd android && ./gradlew assembleRelease",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run typecheck && npm run build"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/core": "^7.6.9",
+    "next": "16.3.4",
+    "next-intl": "^4.14.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.6.9",
+    "@types/node": "26.5.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.3.4",
+    "typescript": "6.0.3"
+  }
+}

@@ -1,0 +1,33 @@
+-- RSSSF uses abbreviated names and transliterations that are not suitable
+-- as the only search key for licensed/open media discovery.
+INSERT INTO entity_aliases (entity_id, alias, source_key) VALUES
+  ('rsssf:international:player:af3a98297a3a0a53985b3a85', 'Mokhtar Dahari', 'rsssf-international-records'),
+  ('rsssf:international:player:af3a98297a3a0a53985b3a85', 'Mohd Mokhtar Dahari', 'rsssf-international-records'),
+  ('rsssf:international:player:f5b3a958d78d1686e3894a11', 'Bashar Abdulla', 'rsssf-international-records'),
+  ('rsssf:international:player:06b9550bc520f918c72d0c23', 'Kinnah Phiri', 'rsssf-international-records'),
+  ('rsssf:international:player:2b8bc6d82f17c3d5ae9fbfa1', 'Jassem Al-Huwaidi', 'rsssf-international-records'),
+  ('rsssf:international:player:bb0840d319b91147ed89da99', 'Ronaldo Nazário', 'rsssf-international-records'),
+  ('rsssf:international:player:bb0840d319b91147ed89da99', 'Ronaldo Luís Nazário de Lima', 'rsssf-international-records'),
+  ('rsssf:international:player:66c51a208d202684216e67d6', 'Almoez Ali', 'rsssf-international-records'),
+  ('rsssf:international:player:86fa3bd44c3c3c16046598c7', 'Sardar Azmoun', 'rsssf-international-records'),
+  ('rsssf:international:player:ace0a44e29a7d54c849c458e', 'Younis Mahmoud', 'rsssf-international-records'),
+  ('rsssf:international:player:a94e77f564deae98629f5ad7', 'Yousef Al Sulaiman', 'rsssf-international-records'),
+  ('rsssf:international:player:3fc81e324443706b76be8e8d', 'Bader Al-Mutawa', 'rsssf-international-records'),
+  ('rsssf:international:player:99aa7e30d94eb3014c0a2da3', 'Fandi Ahmad', 'rsssf-international-records'),
+  ('rsssf:international:player:d2dea9babfad8c25e0bbb6dc', 'Kylian Mbappé', 'rsssf-international-records'),
+  ('rsssf:international:player:d2dea9babfad8c25e0bbb6dc', 'Kylian Mbappe', 'rsssf-international-records'),
+  ('rsssf:international:player:a3d8779ea1ba595c4f1032b8', 'Memphis Depay', 'rsssf-international-records'),
+  ('rsssf:international:player:aec1ba7303bbf9b21bf4c225', 'Adnan Al-Talyani', 'rsssf-international-records'),
+  ('rsssf:international:player:aec1ba7303bbf9b21bf4c225', 'Adnan Al Talyani', 'rsssf-international-records'),
+  ('rsssf:international:player:f52d60da4e277f58de4dc77a', 'Hakan Şükür', 'rsssf-international-records'),
+  ('rsssf:international:player:f52d60da4e277f58de4dc77a', 'Hakan Sukur', 'rsssf-international-records'),
+  ('rsssf:international:player:b0779271f54447c3d4b00de1', 'Lajos Tichy', 'rsssf-international-records'),
+  ('rsssf:international:player:77d704a8287660327dd949b2', 'Hwang Sun-hong', 'rsssf-international-records'),
+  ('rsssf:international:player:503a6707527c5c05b8ce828e', 'Zainal Abidin Hassan', 'rsssf-international-records'),
+  ('rsssf:international:player:12dcb17829b94cb24052e996', 'Sven Rydell', 'rsssf-international-records'),
+  ('rsssf:international:player:0064784724faebdba2002705', 'Ahmed Khalil', 'rsssf-international-records'),
+  ('rsssf:international:player:0064784724faebdba2002705', 'Ahmed Khalil Al-Junaibi', 'rsssf-international-records'),
+  ('rsssf:international:player:33c8d6e62000490cc63ccf45', 'Mansour Meftah', 'rsssf-international-records'),
+  ('rsssf:international:player:2085afc830a5ca791e641882', 'Ismail Abdullatif', 'rsssf-international-records'),
+  ('rsssf:international:player:0092d3428046e526354b8b6b', 'Aleksandar Mitrović', 'rsssf-international-records')
+ON CONFLICT (entity_id, alias) DO NOTHING;

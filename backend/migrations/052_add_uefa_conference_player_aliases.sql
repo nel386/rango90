@@ -1,0 +1,66 @@
+-- UEFA's ranking feed often displays only a surname. These aliases come from
+-- the canonical UEFA player profile URL identified by the stable UEFA player
+-- identifier in the ranking feed. They are identity/search data only; they
+-- do not grant any licence to use UEFA imagery.
+BEGIN;
+
+INSERT INTO entity_aliases (entity_id, alias, source_key)
+VALUES
+  ('uefa:player:d7938d2fa6b1ebfcf687621d', 'Matheus Aias', 'uefa-conference-league-official'),
+  ('uefa:player:60eb96a6789c73e1560987a8', 'Aitor Ruibal', 'uefa-conference-league-official'),
+  ('uefa:player:a3457a99bea3f61408726281', 'Zeki Amdouni', 'uefa-conference-league-official'),
+  ('uefa:player:a3234260d16950158c81920a', 'Armend Thaqi', 'uefa-conference-league-official'),
+  ('uefa:player:8ddcf9b48d4d8a870159dc5a', 'Emil Atlason', 'uefa-conference-league-official'),
+  ('uefa:player:c7556b89d2e61917850e05d4', 'Karlo Bartolec', 'uefa-conference-league-official'),
+  ('uefa:player:4a444269c79e338d21f0812d', 'Patrick Berg', 'uefa-conference-league-official'),
+  ('uefa:player:02fd7e7bc2f60b3f75aba792', 'Uran Bislimi', 'uefa-conference-league-official'),
+  ('uefa:player:0932318b1408ea4b9a865c71', 'Emil Breivik', 'uefa-conference-league-official'),
+  ('uefa:player:e9dbda1adeb3d277f483d60a', 'Ola Brynhildsen', 'uefa-conference-league-official'),
+  ('uefa:player:d36263fbe607b4a2d4dde215', 'Graham Burke', 'uefa-conference-league-official'),
+  ('uefa:player:3fe36d1b9893ef73d5a73002', 'Tedi Cara', 'uefa-conference-league-official'),
+  ('uefa:player:1e22fd98305a1681ca754d11', 'Giorgi Chakvetadze', 'uefa-conference-league-official'),
+  ('uefa:player:2d38648b577a5c44a471c66b', 'Emerson', 'uefa-conference-league-official'),
+  ('uefa:player:fb2f89137e3ea71a4e80ecfb', 'Magnus Eriksson', 'uefa-conference-league-official'),
+  ('uefa:player:0621f53199f552651ebc8ab3', 'Fabio Fehr', 'uefa-conference-league-official'),
+  ('uefa:player:2821e0c848f07483b544cab3', 'Djú Franculino', 'uefa-conference-league-official'),
+  ('uefa:player:b6420f84798ee701f6f23def', 'Árni Frederiksberg', 'uefa-conference-league-official'),
+  ('uefa:player:61c9011f16a02126c4492216', 'Martial Godo', 'uefa-conference-league-official'),
+  ('uefa:player:665065cd7df70e0a17890abe', 'Jake Grech', 'uefa-conference-league-official'),
+  ('uefa:player:8ee3e13096647faf5fbe4089', 'Samir Hadji', 'uefa-conference-league-official'),
+  ('uefa:player:5afb61e3bdc8b581daa2038e', 'Tryggvi Hrafn Haraldsson', 'uefa-conference-league-official'),
+  ('uefa:player:4eaf83557e78d1a1d442a3cc', 'Hélder Ferreira', 'uefa-conference-league-official'),
+  ('uefa:player:cef4409b356025ae4e038e90', 'Dino Islamović', 'uefa-conference-league-official'),
+  ('uefa:player:a578eacdf6dfffc4087607b9', 'Kady', 'uefa-conference-league-official'),
+  ('uefa:player:0ea91884e1c48cee54698064', 'Andronikos Kakoulli', 'uefa-conference-league-official'),
+  ('uefa:player:40438ba3c70850980e63a4a1', 'Kauã Elias', 'uefa-conference-league-official'),
+  ('uefa:player:2605bbb79dc88b94341ae132', 'Páll Klettskarð', 'uefa-conference-league-official'),
+  ('uefa:player:5fed51cdd7338a730755daac', 'Jan Krob', 'uefa-conference-league-official'),
+  ('uefa:player:b74dde99ecb652d2dbca5b8d', 'Armandas Kučys', 'uefa-conference-league-official'),
+  ('uefa:player:e9dc1b7d92bc8907ac4f7ab5', 'Darko Lemajič', 'uefa-conference-league-official'),
+  ('uefa:player:4f1705002c501a1e8910ab4f', 'Guillaume Lopez', 'uefa-conference-league-official'),
+  ('uefa:player:8c21b61a1f0aa648a83f4eef', 'Marcos López', 'uefa-conference-league-official'),
+  ('uefa:player:d95e0172adf7669e9dda4f48', 'Darian Males', 'uefa-conference-league-official'),
+  ('uefa:player:4c1bb659edf08e9acfd1bdd9', 'Marc Gual', 'uefa-conference-league-official'),
+  ('uefa:player:16c733e1d39e9184a7c8caa4', 'Declan McManus', 'uefa-conference-league-official'),
+  ('uefa:player:ed98fffcb61a4199d9020451', 'Tokmac Nguen', 'uefa-conference-league-official'),
+  ('uefa:player:56ac034b27659948c16caae6', 'Gift Orban', 'uefa-conference-league-official'),
+  ('uefa:player:f81c98ec9e5b37e5c62906a8', 'Luis Palma', 'uefa-conference-league-official'),
+  ('uefa:player:31d29cc07c11bdfeb78dbd5d', 'Palkó Dárdai', 'uefa-conference-league-official'),
+  ('uefa:player:307dfe0556d8db6a7e4f96e8', 'Amahl Pellegrino', 'uefa-conference-league-official'),
+  ('uefa:player:4dc8a60069c28ed4e1c9439e', 'Nikola Petković', 'uefa-conference-league-official'),
+  ('uefa:player:a11917043cadfe40a054d885', 'Virgile Pinson', 'uefa-conference-league-official'),
+  ('uefa:player:2a97eff4bd309bff82857142', 'Michał Przybylski', 'uefa-conference-league-official'),
+  ('uefa:player:6e85f6661485efd054ef1aa0', 'Luca Ranieri', 'uefa-conference-league-official'),
+  ('uefa:player:10ea4767b8295021ef6a5397', 'Ricardo Gomes', 'uefa-conference-league-official'),
+  ('uefa:player:101d13680c9b166179b3be8b', 'Albion Rrahmani', 'uefa-conference-league-official'),
+  ('pl:player:20171', 'Rúben Vinagre', 'uefa-conference-league-official'),
+  ('uefa:player:3477094bda734052d85308dd', 'Andreas Skov Olsen', 'uefa-conference-league-official'),
+  ('uefa:player:92b4e8ff443d62879bb70dcf', 'Leo Smith', 'uefa-conference-league-official'),
+  ('uefa:player:119ef9572a24897f72ce9929', 'Yira Sor', 'uefa-conference-league-official'),
+  ('uefa:player:769e242d3c23b23dee822f5b', 'Viktor Karl Einarsson', 'uefa-conference-league-official'),
+  ('uefa:player:23f8adede091bca913bd32d9', 'Tomer Yosefi', 'uefa-conference-league-official'),
+  ('uefa:player:abbb901952dc98cc287ca7c9', 'Nicolò Zaniolo', 'uefa-conference-league-official'),
+  ('uefa:player:f583e21acf4a593177468dce', 'Mattia Zanotti', 'uefa-conference-league-official')
+ON CONFLICT (entity_id, alias) DO NOTHING;
+
+COMMIT;

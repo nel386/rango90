@@ -248,7 +248,8 @@ export function Rango90App({ locale }: { locale: Locale }) {
     const entities = mockDailyChallenge.entities.slice(assignments.length);
     const timeoutAssignments: Assignment[] = [];
     entities.forEach((entity, index) => {
-      const category = categories[index];
+      const categoryIndex = categories.findIndex((category) => !category.entityType || category.entityType === entity.entityType);
+      const category = categoryIndex >= 0 ? categories.splice(categoryIndex, 1)[0] : undefined;
       if (category) timeoutAssignments.push({ ordinal: entity.ordinal ?? assignments.length + index, entity, category, score: null, timedOut: true });
     });
     const claims = assignments.map((assignment) => ({ ordinal: assignment.ordinal, entityId: assignment.entity.id, categorySlug: assignment.category.slug, ...(assignment.timedOut ? { timedOut: true } : {}) }));

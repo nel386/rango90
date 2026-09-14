@@ -116,6 +116,8 @@ Proyecto base inicializado con Next.js, TypeScript, App Router, exportación est
 
 El estado cuantitativo vigente de la BBDD y la definición de cobertura están en [`DATA_CURRENT_STATUS.md`](./DATA_CURRENT_STATUS.md). Ese documento es la referencia para no mezclar auditorías históricas con el estado operativo actual.
 
+La combinación candidata de siete categorías y su intersección 7×7 están documentadas en [`DATA_7X7_CANDIDATE.md`](./DATA_7X7_CANDIDATE.md). Es una ruta de trabajo en estado `draft`, no un conjunto autorizado para publicar.
+
 La revisión arquitectónica inicial está documentada en [`ARCHITECTURE_REVIEW.md`](./ARCHITECTURE_REVIEW.md). La decisión actual es conservar Next.js para el frontend estático y mantener el backend como servicio independiente. La capa inicial de datos ya está preparada en [`backend/`](./backend/); la plataforma Android nativa ya está inicializada con Capacitor.
 
 ## Comprobaciones locales

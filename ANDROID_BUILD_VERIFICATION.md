@@ -42,7 +42,7 @@ JAVA_HOME=/usr/lib/jvm/java-21-openjdk-arm64 \
   android/app/build/outputs/apk/release/app-release-unsigned.apk
 ```
 
-Resultado: `BUILD SUCCESSFUL`; el manifiesto confirma `com.rango90.app`, `versionCode=1`, `versionName=1.0`, `compileSdkVersion=35`, `targetSdkVersion=35` y `sdkVersion=23`. El SHA-256 del artefacto unsigned es `46338ceffe5020053050110f162caadb37a615adb937cd12da16a941d774e7eb`.
+Resultado: `BUILD SUCCESSFUL`; el manifiesto confirma `com.rango90.app`, `versionCode=1`, `versionName=1.0`, `compileSdkVersion=35`, `targetSdkVersion=35` y `sdkVersion=23`. El SHA-256 del artefacto unsigned actual es `25f7b9e0636c0bfecacf5f2d8ed362da7ca667d7015385c890b7078a3424e278`.
 
 `apksigner verify` devuelve correctamente un fallo para este archivo porque no contiene `META-INF/MANIFEST.MF`: es una compilación release sin firma, no una APK distribuible.
 
@@ -63,7 +63,7 @@ La clave oficial la crea el titular del proyecto o de la cuenta de distribución
 
 ## Prueba del circuito de firma
 
-Se generó un keystore temporal de QA fuera del repositorio y se ejecutó `assembleRelease` pasando las cuatro variables anteriores. El artefacto firmado produjo el SHA-256 `7e87fef544c4945ebc20ff1a02cc888b232fcede047317783e93b9f8dfccd450`; `apksigner verify --verbose` confirmó:
+Se generó un keystore temporal de QA fuera del repositorio y se ejecutó `assembleRelease` pasando las cuatro variables anteriores, con `NEXT_PUBLIC_API_BASE_URL=https://qa.invalid` como origen HTTPS sintético de compilación. El artefacto firmado actual produjo el SHA-256 `790530dae5b0988ccfb289330e88a8691c94545b364b7920cdb6e70a0d82eb8c`; `apksigner verify --verbose` confirmó:
 
 ```text
 Verified using v1 scheme (JAR signing): true
@@ -78,6 +78,6 @@ El workflow de CI versionado en `.github/workflows/ci.yml` reproduce ahora las d
 
 ## Alcance pendiente
 
-Esta evidencia demuestra que el proyecto puede producir una APK debug válida y compilar la variante release. No se ha instalado en un dispositivo o emulador. Antes de una distribución pública todavía se necesita firmar la variante `release` con una clave protegida, verificar la firma resultante y ejecutar QA funcional de la aplicación contra un backend real autorizado.
+Esta evidencia demuestra que el proyecto puede producir una APK debug válida y una APK release firmada con un certificado temporal de QA. La compilación actual usa un origen HTTPS sintético y no es una build distribuible contra un backend real. No se ha instalado en un dispositivo o emulador. Antes de una distribución pública todavía se necesita firmar la variante `release` con una clave protegida del proyecto, verificar la firma resultante y ejecutar QA funcional contra un backend real autorizado.
 
-El emulador no crea la clave oficial: es solo un dispositivo virtual para QA. En este entorno ARM64 están disponibles `adb`, `sdkmanager` y `avdmanager`, pero el repositorio de paquetes no ofrece un binario `emulator` instalable para esta arquitectura; tampoco se pudo instalar automáticamente la imagen ARM64 al depender de ese paquete. La prueba pendiente es, por tanto, una limitación de infraestructura y no una decisión del proyecto.
+El emulador no crea la clave oficial: es solo un dispositivo virtual para QA. En este entorno ARM64 están disponibles `adb`, las plataformas Android 23/35 y build-tools 34, pero no están disponibles los ejecutables `emulator`, `sdkmanager` ni `avdmanager`; tampoco se ha instalado una imagen de dispositivo virtual. La prueba pendiente es, por tanto, una limitación de infraestructura y no una decisión del proyecto.

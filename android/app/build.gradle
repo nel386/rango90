@@ -1,5 +1,14 @@
 apply plugin: 'com.android.application'
 
+def releaseSigningValue = { String name ->
+    System.getenv(name)?.trim() ?: project.findProperty(name)?.toString()?.trim()
+}
+def releaseStoreFile = releaseSigningValue('RANGO90_RELEASE_STORE_FILE')
+def releaseStorePassword = releaseSigningValue('RANGO90_RELEASE_STORE_PASSWORD')
+def releaseKeyAlias = releaseSigningValue('RANGO90_RELEASE_KEY_ALIAS')
+def releaseKeyPassword = releaseSigningValue('RANGO90_RELEASE_KEY_PASSWORD')
+def releaseSigningConfigured = [releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword].every { it }
+
 android {
     namespace "com.rango90.app"
     compileSdk rootProject.ext.compileSdkVersion
@@ -16,12 +25,29 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    if (releaseSigningConfigured) {
+        signingConfigs {
+            release {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (releaseSigningConfigured) {
+                signingConfig signingConfigs.release
+            }
         }
     }
+}
+
+if (!releaseSigningConfigured) {
+    logger.lifecycle('Rango90 release APK: no signing credentials configured; building unsigned artifact')
 }
 
 repositories {

@@ -534,6 +534,7 @@ export async function verifyGameCatalogBoundary(): Promise<Record<string, unknow
          LEFT JOIN resolved_identity ri ON ri.source_entity_id = ia.entity_id
          WHERE ia.asset_kind = 'portrait'
            AND ia.review_status = 'pending'
+           AND COALESCE(ia.media_status, 'required') = 'required'
            AND NOT EXISTS (
              SELECT 1 FROM top200_players top200
              WHERE top200.canonical_id = COALESCE(ri.canonical_entity_id, ia.entity_id)

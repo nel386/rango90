@@ -2007,6 +2007,122 @@ try {
       results.push({ metric, rankingId, entries: rows.rows.length, availableSeasons });
     }
     console.log(JSON.stringify({ source: 'api-football', scope: 'imported-club-competitions', excludedCompetitionType: 'national_team', requestedWindow: { fromSeason, toSeason }, competitions, results, coverageComplete: false, note: 'Snapshots globales de las competiciones de clubes API-Football importadas; permanecen en draft hasta completar el histórico y revisar derechos.' }, null, 2));
+  } else if (command === 'build-player-career-goals') {
+    const categorySlug = 'player-career-goals';
+    const nationalSnapshot = await pool.query<{ id: string; data_version: string }>(
+      `SELECT rs.id, rs.data_version
+         FROM ranking_snapshots rs
+         JOIN category_definitions c ON c.id = rs.category_id
+        WHERE c.slug = 'national-team-official-goals'
+          AND rs.status IN ('draft', 'approved', 'published')
+        ORDER BY rs.status = 'published' DESC, rs.status = 'approved' DESC,
+                 rs.generated_at DESC, rs.id DESC
+        LIMIT 1`
+    );
+    const selectedNationalSnapshot = nationalSnapshot.rows[0];
+    if (!selectedNationalSnapshot) throw new Error('No hay snapshot de goles con selección para construir la carrera global');
+    const rows = await pool.query<{
+      entity_id: string;
+      canonical_name: string;
+      club_goals: string;
+      national_goals: string;
+      source_snapshots: string[];
+    }>(
+      `WITH playable_players AS (
+         SELECT DISTINCT COALESCE(link.canonical_entity_id, source_entity.id) AS entity_id
+           FROM entity_game_profiles egp
+           JOIN entities source_entity
+             ON source_entity.id = egp.entity_id
+            AND source_entity.entity_type = 'player'
+            AND source_entity.catalog_status = 'active'
+           LEFT JOIN entity_identity_links link ON link.source_entity_id = source_entity.id
+          WHERE egp.playable_default = TRUE
+       ), club_totals AS (
+         SELECT COALESCE(link.canonical_entity_id, stats.entity_id) AS entity_id,
+                SUM(stats.goals)::numeric AS club_goals,
+                ARRAY_AGG(DISTINCT stats.source_snapshot_id ORDER BY stats.source_snapshot_id)
+                  FILTER (WHERE stats.source_snapshot_id IS NOT NULL) AS source_snapshots
+           FROM player_season_stats stats
+           JOIN competitions competition
+             ON competition.id = stats.competition_id
+            AND competition.competition_type <> 'national_team'
+           LEFT JOIN entity_identity_links link ON link.source_entity_id = stats.entity_id
+          WHERE stats.source_key = 'api-football'
+          GROUP BY COALESCE(link.canonical_entity_id, stats.entity_id)
+       ), national_totals AS (
+         SELECT COALESCE(link.canonical_entity_id, entries.entity_id) AS entity_id,
+                MAX(entries.raw_value)::numeric AS national_goals,
+                ARRAY_AGG(DISTINCT entries.snapshot_id ORDER BY entries.snapshot_id) AS source_snapshots
+           FROM ranking_entries entries
+           JOIN ranking_snapshots snapshot ON snapshot.id = entries.snapshot_id
+           JOIN category_definitions category
+             ON category.id = snapshot.category_id
+            AND category.slug = 'national-team-official-goals'
+           LEFT JOIN entity_identity_links link ON link.source_entity_id = entries.entity_id
+          WHERE entries.snapshot_id = $1
+          GROUP BY COALESCE(link.canonical_entity_id, entries.entity_id)
+       )
+       SELECT playable.entity_id,
+              entity.canonical_name,
+              COALESCE(club.club_goals, 0)::text AS club_goals,
+              COALESCE(national.national_goals, 0)::text AS national_goals,
+              ARRAY_REMOVE(ARRAY_CAT(
+                COALESCE(club.source_snapshots, '{}'::text[]),
+                COALESCE(national.source_snapshots, '{}'::text[])
+              ), NULL) AS source_snapshots
+         FROM playable_players playable
+         JOIN entities entity
+           ON entity.id = playable.entity_id
+          AND entity.entity_type = 'player'
+          AND entity.catalog_status = 'active'
+         LEFT JOIN club_totals club ON club.entity_id = playable.entity_id
+         LEFT JOIN national_totals national ON national.entity_id = playable.entity_id
+        WHERE COALESCE(club.club_goals, 0) + COALESCE(national.national_goals, 0) > 0
+        ORDER BY COALESCE(club.club_goals, 0) + COALESCE(national.national_goals, 0) DESC,
+                 entity.canonical_name, playable.entity_id
+        LIMIT 200`,
+      [selectedNationalSnapshot.id]
+    );
+    if (rows.rows.length < 200) throw new Error(`Se necesitan 200 jugadores jugables con goles observados; disponibles ${rows.rows.length}`);
+    const rankingId = await importRankingInput({
+      categorySlug,
+      source: {
+        key: 'rango90-global-career-goals-derived',
+        name: 'Agregado Rango90 de goles de clubes y selección absoluta',
+        sourceType: 'reference',
+        baseUrl: 'https://www.rango90.local/data/global-career-goals',
+        rightsStatus: 'review_required'
+      },
+      dataVersion: `rango90-player-career-goals-${new Date().toISOString().slice(0, 10)}`,
+      coverageComplete: false,
+      allowPartialDraft: true,
+      partialDraftReason: 'El componente de clubes procede de las temporadas y competiciones API-Football actualmente importadas; el componente internacional procede del snapshot RSSSF disponible. El agregado no demuestra todavía una carrera mundial completa ni derechos de redistribución.',
+      reviewed: false,
+      entries: rows.rows.map((row, index) => ({
+        entityId: row.entity_id,
+        entityType: 'player' as const,
+        name: row.canonical_name,
+        rawValue: Number(row.club_goals) + Number(row.national_goals),
+        evidence: {
+          sourceRank: index + 1,
+          clubGoals: Number(row.club_goals),
+          nationalTeamGoals: Number(row.national_goals),
+          sourceSnapshotIds: row.source_snapshots,
+          nationalGoalsSnapshotId: selectedNationalSnapshot.id,
+          definition: 'Suma provisional de goles observados en competiciones de clubes API-Football importadas y goles internacionales del snapshot RSSSF seleccionado; clubes + selección absoluta, sin afirmar cobertura completa de todas las temporadas o competiciones.'
+        }
+      }))
+    });
+    console.log(JSON.stringify({
+      source: 'rango90-global-career-goals-derived',
+      categorySlug,
+      rankingId,
+      entries: rows.rows.length,
+      nationalSnapshotId: selectedNationalSnapshot.id,
+      coverageComplete: false,
+      published: false,
+      note: 'Snapshot draft provisional; requiere ampliar el histórico, revisar identidades y obtener derechos abiertos o permiso escrito antes de cualquier publicación.'
+    }, null, 2));
   } else if (command === 'build-global-goalkeeper-clean-sheets') {
     const categorySlug = 'goalkeeper-career-clean-sheets';
     const rows = await pool.query<{ entity_id: string; canonical_name: string; raw_value: string; source_snapshots: string[] }>(

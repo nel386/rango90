@@ -33,9 +33,9 @@ Para la matriz elegida, `player-career-goals` significa goles oficiales de carre
 ## Evidencia local actual
 
 - `sources` contiene 0 fuentes con `rights_status = approved`.
-- Las siete categorías candidatas 7×7 y sus snapshots continúan en `draft`.
+- Las categorías y snapshots candidatos continúan en `draft`; además existe un snapshot provisional de `player-career-goals` (`rs_c2c4a7942b4f8d2bd156306c`) con `coverage_complete=false`, que no es publicable.
 - Los activos de retratos y escudos no se consideran publicables solo por estar descargados o por tener un fallback visual.
-- El validador `validate:evidence:global-career-goals` informa que no hay fuente válida y cierra el expediente sin importación insegura.
+- El validador `validate:evidence:global-career-goals` informa que no hay fuente válida para publicar. El agregado provisional existente se mantiene explícitamente en `draft` y no cambia esa decisión.
 
 ## Candidato adicional revisado — Football API / Roanuz
 

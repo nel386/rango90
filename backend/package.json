@@ -152,6 +152,7 @@
     "import:api-football:player-trophies": "tsx src/cli.ts import-api-football-player-trophies",
     "backfill:api-football:goalkeeper-stats": "tsx src/cli.ts backfill-api-football-goalkeeper-stats",
     "build:rankings:api-football:career": "tsx src/cli.ts build-api-football-career-rankings",
+    "build:rankings:player-career-goals": "tsx src/cli.ts build-player-career-goals",
   "build:rankings:euro-assists": "tsx src/cli.ts build-euro-assists",
   "import:uefa-euro:global": "tsx src/cli.ts import-uefa-euro-global",
     "build:rankings:club-career-titles": "tsx src/cli.ts build-club-career-titles",

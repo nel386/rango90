@@ -12,6 +12,7 @@
     "build:android": "node scripts/build-frontend.mjs android",
     "verify:pages": "node scripts/verify-static-build.mjs pages",
     "verify:android": "node scripts/verify-static-build.mjs android",
+    "smoke:public": "node scripts/smoke-public.mjs",
     "verify:i18n": "node scripts/verify-messages.mjs",
     "cap:sync": "npm run build:android && npx cap sync android",
     "cap:copy": "npx cap copy android",

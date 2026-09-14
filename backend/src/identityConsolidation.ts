@@ -118,6 +118,34 @@ const curatedBdfutbolCanonicalIds: Record<string, string> = {
   'bdfutbol:ligue-1:player:3ca0f95619da2ef6c6a8f34e': 'rsssf:international:player:d2dea9babfad8c25e0bbb6dc' // Kylian Mbappé Lottin -> Kylian Mbappé
 };
 
+// goals_time2 has no player IDs and its `Surname Initial` labels can be
+// ambiguous in isolation. These five rows are therefore explicit, reviewed
+// exceptions backed by the competition/season footprint preserved in the
+// ranking evidence: the footprint matches the known senior career of the
+// target. Do not expand this map from a name-only match.
+const curatedFootballDataIncidentCanonicalIds: Record<string, { canonicalEntityId: string; reason: string }> = {
+  'football-data:player:ramos-s': {
+    canonicalEntityId: 'uefa:player:04cf3fda53c4035a29db57f9',
+    reason: 'Etiqueta Ramos S. revisada contra el recorrido de Sergio Ramos en LaLiga 2003-2021 y Ligue 1 2021-2023; el contexto de temporadas y competiciones descarta el enlace por nombre aislado.'
+  },
+  'football-data:player:ronaldo-c': {
+    canonicalEntityId: 'pl:player:2522',
+    reason: 'Etiqueta Ronaldo C. revisada contra Cristiano Ronaldo en Premier League 2003-2009 y LaLiga 2009-2018; el contexto de temporadas y competiciones identifica el registro.'
+  },
+  'football-data:player:villa-d': {
+    canonicalEntityId: 'rsssf:international:player:f99ff9fb513907a5537ff5a1',
+    reason: 'Etiqueta Villa D. revisada contra David Villa en LaLiga 2005-2011; el contexto de temporadas y competición coincide con su carrera de club.'
+  },
+  'football-data:player:motta-t': {
+    canonicalEntityId: 'api-football:player:85062',
+    reason: 'Etiqueta Motta T. revisada contra Thiago Motta en LaLiga 2003-2008, Serie A 2008-2012 y Ligue 1 2012-2018; el recorrido competitivo permite distinguirlo de homónimos.'
+  },
+  'football-data:player:suarez-l': {
+    canonicalEntityId: 'pl:player:4138',
+    reason: 'Etiqueta Suarez L. revisada contra Luis Suárez en Premier League 2010-2014, LaLiga 2014-2021 y Ligue 1 2022-2023; el contexto de temporadas y competiciones identifica el registro.'
+  }
+};
+
 // Club rankings use a separate UEFA namespace from the current league
 // catalogue. These are only clubs with an unambiguous canonical Premier
 // League record already present; other European clubs remain in their UEFA
@@ -507,16 +535,29 @@ export async function consolidateFootballDataIncidentIdentities(client: PoolClie
   let linked = 0;
   let skipped = 0;
   for (const source of sourceEntities.rows) {
-    const matches = [...(candidateKeys.get(compactKey(source.canonical_name) ?? '') ?? [])]
-      .filter((id) => id !== source.id)
-      .map((id) => resolveCanonicalEntityId(client, id));
-    const resolvedMatches = [...new Set(await Promise.all(matches))];
-    if (resolvedMatches.length !== 1) {
+    const curated = curatedFootballDataIncidentCanonicalIds[source.id];
+    let resolvedCanonical: string | null = curated?.canonicalEntityId ?? null;
+    if (!resolvedCanonical) {
+      const matches = [...(candidateKeys.get(compactKey(source.canonical_name) ?? '') ?? [])]
+        .filter((id) => id !== source.id);
+      const resolvedMatches: string[] = [];
+      for (const match of matches) {
+        const resolved = await resolveCanonicalEntityId(client, match);
+        if (!resolvedMatches.includes(resolved)) resolvedMatches.push(resolved);
+      }
+      resolvedCanonical = resolvedMatches.length === 1 ? resolvedMatches[0] ?? null : null;
+    }
+    if (!resolvedCanonical || resolvedCanonical === source.id) {
       skipped += 1;
       continue;
     }
-    const canonical = resolvedMatches[0];
-    if (!canonical || canonical === source.id) {
+    const canonicalEntity = await client.query<{ entity_type: 'player' }>(
+      `SELECT entity_type
+       FROM entities
+       WHERE id = $1 AND entity_type = 'player' AND catalog_status = 'active'`,
+      [resolvedCanonical]
+    );
+    if (!canonicalEntity.rows[0]) {
       skipped += 1;
       continue;
     }
@@ -525,11 +566,11 @@ export async function consolidateFootballDataIncidentIdentities(client: PoolClie
       await recordIdentityLink(
         client,
         source.id,
-        canonical,
+        resolvedCanonical,
         sourceKey,
-        'Coincidencia única de etiqueta Surname Initial con apellido e inicial del nombre canónico; se omiten homónimos ambiguos'
+        curated?.reason ?? 'Coincidencia única de etiqueta Surname Initial con apellido e inicial del nombre canónico; se omiten homónimos ambiguos'
       );
-      addMoveCounts(moved, await moveEntityDataToCanonical(client, source.id, canonical));
+      addMoveCounts(moved, await moveEntityDataToCanonical(client, source.id, resolvedCanonical));
       await client.query('RELEASE SAVEPOINT football_data_incident_identity');
       linked += 1;
     } catch (error) {
@@ -537,7 +578,7 @@ export async function consolidateFootballDataIncidentIdentities(client: PoolClie
       await client.query('RELEASE SAVEPOINT football_data_incident_identity');
       conflicts.push({
         sourceEntityId: source.id,
-        canonicalEntityId: canonical,
+        canonicalEntityId: resolvedCanonical,
         error: error instanceof Error ? error.message : String(error)
       });
     }

@@ -75,7 +75,38 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
   registerAuthRoutes(app);
   registerGameContractRoutes(app, { db: options.gameDb, clock: options.clock });
 
-  app.get('/health', async () => ({ ok: true, service: 'rango90-backend' }));
+  app.get('/health', async (_request, reply) => {
+    const requiredTables = [
+      'entities',
+      'entity_game_profiles',
+      'entity_identity_links',
+      'ranking_entries',
+      'ranking_snapshots',
+      'category_definitions',
+      'game_challenges',
+      'game_challenge_categories',
+      'game_challenge_decisions',
+      'game_challenge_answers'
+    ];
+    try {
+      const result = await pool.query<{ table_name: string }>(
+        `SELECT table_name
+           FROM information_schema.tables
+          WHERE table_schema = 'public'
+            AND table_name = ANY($1::text[])`,
+        [requiredTables]
+      );
+      const existingTables = new Set(result.rows.map((row) => row.table_name));
+      const missingTables = requiredTables.filter((table) => !existingTables.has(table));
+      return {
+        ok: missingTables.length === 0,
+        service: 'rango90-backend',
+        database: { connected: true, schemaReady: missingTables.length === 0, missingTables }
+      };
+    } catch {
+      return reply.code(503).send({ ok: false, service: 'rango90-backend', database: { connected: false } });
+    }
+  });
 
   app.get('/v1/categories', async (request) => {
     z.object({}).parse(request.query);

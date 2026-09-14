@@ -10,6 +10,11 @@ on:
         options:
           - daily
           - weekly
+      dry_run:
+        description: "Validate the plan without API calls or database writes"
+        required: true
+        default: false
+        type: boolean
   schedule:
     - cron: "15 3 * * *"
     - cron: "30 4 * * 0"
@@ -45,6 +50,7 @@ jobs:
           echo "frequency=$frequency" >> "$GITHUB_OUTPUT"
 
       - name: Require private refresh credentials
+        if: ${{ inputs.dry_run != true }}
         shell: bash
         run: |
           test -n "$DATABASE_URL" || { echo "Falta el secreto RANGO90_DATABASE_URL (External Database URL de Render)." >&2; exit 1; }
@@ -65,4 +71,9 @@ jobs:
         working-directory: backend
         env:
           RANGO90_API_REFRESH_FREQUENCY: ${{ steps.cadence.outputs.frequency }}
-        run: npm run refresh:api-football:scheduled -- "$RANGO90_API_REFRESH_FREQUENCY"
+        run: |
+          args=("$RANGO90_API_REFRESH_FREQUENCY")
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            args+=(--dry-run)
+          fi
+          npm run refresh:api-football:scheduled -- "${args[@]}"

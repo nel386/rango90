@@ -88,7 +88,7 @@ Render no ofrece Cron Jobs en el plan gratuito: la documentación actual indica 
 
 - diario a las 03:15 UTC: seis ligas activas;
 - semanal los domingos a las 04:30 UTC: Champions/Mundial y reconstrucciones semanales previstas;
-- ejecución manual mediante **Actions → Refresh API-Football data → Run workflow**.
+- ejecución manual mediante **Actions → Refresh API-Football data → Run workflow**; marca `dry_run` para validar el plan sin consumir cuota ni escribir en la base.
 
 Configura una sola vez estos dos secretos privados del repositorio `nel386/rango90`:
 

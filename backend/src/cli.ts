@@ -71,6 +71,7 @@ import { calculateChallengeSha256 } from './game-contract.js';
 import { selectCommonDailyEntities, type DailyChallengeCandidate } from './dailyChallengeSelection.js';
 import { SELECTED_DAILY_CATEGORY_SLUGS } from './dailyMatrix.js';
 import { buildOpenFootballClubTitleRanking, openFootballLeaguesUrl, parseFootballTxtResults, type OpenFootballSeasonSource } from './providers/openFootballClient.js';
+import { buildFootballDataNationalLeagueRanking, fetchFootballDataResults, footballDataResultsUrl } from './providers/footballDataResultsClient.js';
 
 const [command, ...args] = process.argv.slice(2);
 const argument = (name: string): string | undefined => {
@@ -2656,6 +2657,25 @@ try {
       }))
     });
     console.log(JSON.stringify({ source: 'rango90-club-title-facts', categorySlug, rankingId, entries: rows.rows.length, coverageComplete: false, note: 'Snapshot provisional: solo incluye palmarés de clubes importados y deduplicados.' }, null, 2));
+  } else if (command === 'build-football-data-national-league-club-titles') {
+    const sourceUrl = argument('url') ?? footballDataResultsUrl;
+    const sourceVersion = argument('version');
+    if (!/^https:\/\//i.test(sourceUrl)) throw new Error('La fuente football-data requiere una URL HTTPS');
+    const results = await fetchFootballDataResults(sourceUrl);
+    const input = buildFootballDataNationalLeagueRanking(results, { sourceUrl, sourceVersion });
+    const rankingId = await importRankingInput(input);
+    console.log(JSON.stringify({
+      source: 'schochastics-football-data',
+      categorySlug: input.categorySlug,
+      rankingId,
+      sourceUrl,
+      sourceVersion: sourceVersion ?? null,
+      sourceRows: results.length,
+      entries: input.entries.length,
+      coverageComplete: input.coverageComplete,
+      published: false,
+      note: 'Snapshot draft provisional: los resultados tienen licencia de atribución y advertencias históricas; falta contraste de campeones, identidades, cobertura y derechos antes de aprobar o publicar.'
+    }, null, 2));
   } else if (command === 'build-openfootball-national-league-club-titles') {
     const manifestPath = argument('manifest');
     if (!manifestPath) throw new Error('Se requiere --manifest con las temporadas Football.TXT a importar');

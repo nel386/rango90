@@ -4,6 +4,7 @@ set -euo pipefail
 season=""
 dry_run=false
 skip_media=false
+only_competitions=""
 while (($# > 0)); do
   case "$1" in
     --season)
@@ -19,8 +20,13 @@ while (($# > 0)); do
       skip_media=true
       shift
       ;;
+    --only)
+      [[ $# -ge 2 ]] || { echo "Falta el valor de --only" >&2; exit 2; }
+      only_competitions="$2"
+      shift 2
+      ;;
     *)
-      echo "Uso: $0 --season YYYY [--dry-run] [--skip-media]" >&2
+      echo "Uso: $0 --season YYYY [--dry-run] [--skip-media] [--only id1,id2,...]" >&2
       exit 2
       ;;
   esac
@@ -42,7 +48,7 @@ if ! flock -n 9; then
   exit 3
 fi
 
-declare -a leagues=(
+declare -a default_leagues=(
   "premier-league:premier"
   "la-liga:140"
   "bundesliga:78"
@@ -50,6 +56,37 @@ declare -a leagues=(
   "ligue-1:61"
   "primeira-liga:94"
 )
+declare -a supported_leagues=(
+  "${default_leagues[@]}"
+  "european-cup-champions-league:2"
+  "world-cup:1"
+)
+leagues=("${default_leagues[@]}")
+
+declare -a requested_competitions=()
+if [[ -n "$only_competitions" ]]; then
+  IFS=',' read -r -a requested_competitions <<< "$only_competitions"
+  declare -A allowed_competitions=()
+  for item in "${supported_leagues[@]}"; do
+    allowed_competitions["${item%%:*}"]=1
+  done
+  for competition in "${requested_competitions[@]}"; do
+    if [[ -z "${allowed_competitions[$competition]:-}" ]]; then
+      echo "Competición no soportada por este sincronizador: $competition" >&2
+      exit 2
+    fi
+  done
+  selected_leagues=()
+  for item in "${supported_leagues[@]}"; do
+    competition="${item%%:*}"
+    for requested in "${requested_competitions[@]}"; do
+      if [[ "$competition" == "$requested" ]]; then
+        selected_leagues+=("$item")
+      fi
+    done
+  done
+  leagues=("${selected_leagues[@]}")
+fi
 
 declare -a import_media_args=()
 if [[ "$skip_media" == true ]]; then

@@ -30,4 +30,9 @@ npm run --silent build:rankings:api-football:career -- \
   --to-season "$season" \
   --metric goals,assists,yellow_cards,red_cards
 
+# The selected career-goals category is global: it combines the refreshed
+# API-Football club component with the latest reviewed senior-national-team
+# snapshot. It remains a draft until coverage and rights review are complete.
+npm run --silent build:rankings:player-career-goals
+
 npm run --silent audit:data-readiness | jq '.summary'

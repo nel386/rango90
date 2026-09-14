@@ -89,6 +89,7 @@ jobs:
             migrations/073_allow_approved_categories_in_game_challenges.sql
             migrations/074_validate_published_game_ranking_values.sql
             migrations/075_source_rights_ledger.sql
+            migrations/076_require_https_rights_evidence.sql
           )
           for migration in "${migrations[@]}"; do
             docker exec -i "$postgres_container" psql -v ON_ERROR_STOP=1 -q -U rango90 -d rango90 < "$migration"

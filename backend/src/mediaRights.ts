@@ -83,9 +83,9 @@ function assertRightsEvidenceUrl(value: string | undefined): string {
   if (!value) throw new Error('La revisión legal requiere --rights-evidence-url');
   try {
     const url = new URL(value);
-    if (!['http:', 'https:'].includes(url.protocol)) throw new Error('protocolo no permitido');
+    if (url.protocol !== 'https:') throw new Error('la evidencia debe usar HTTPS');
   } catch {
-    throw new Error('--rights-evidence-url debe ser una URL http(s) verificable');
+    throw new Error('--rights-evidence-url debe ser una URL HTTPS verificable');
   }
   return value;
 }

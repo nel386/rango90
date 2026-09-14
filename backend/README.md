@@ -6,7 +6,7 @@ Las reglas del motor están documentadas en [GAME_ENGINE.md](GAME_ENGINE.md) y e
 
 La fixture publicada exclusivamente para integración está documentada en [INTEGRATION_FIXTURE.md](INTEGRATION_FIXTURE.md). Tras levantar PostgreSQL y aplicar las migraciones, `npm run seed:integration -- --date YYYY-MM-DD` elimina el 404 de `/v1/challenges/daily` en el entorno local sin publicar datos reales ni habilitarse en producción.
 
-La lista de migraciones incluye cambios estructurales y reparaciones sobre datos ya importados. Las reparaciones de identidad y media (`012`–`071`) presuponen que existen las entidades o activos descritos en su expediente; no forman por sí solas un bootstrap vacío y no deben ejecutarse sobre una base nueva antes de importar esos datos. La CI usa un subconjunto estructural explícito (`001`–`011`, `019`, `026`–`028`, `053`, `072`–`075`) para probar el contrato HTTP desde cero; una instalación de producción debe aplicar las reparaciones únicamente en el orden documentado sobre su base de datos respaldada.
+La lista de migraciones incluye cambios estructurales y reparaciones sobre datos ya importados. Las reparaciones de identidad y media (`012`–`071`) presuponen que existen las entidades o activos descritos en su expediente; no forman por sí solas un bootstrap vacío y no deben ejecutarse sobre una base nueva antes de importar esos datos. La CI usa un subconjunto estructural explícito (`001`–`011`, `019`, `026`–`028`, `053`, `072`–`076`) para probar el contrato HTTP desde cero; una instalación de producción debe aplicar las reparaciones únicamente en el orden documentado sobre su base de datos respaldada.
 
 ## Requisitos
 
@@ -96,6 +96,7 @@ psql "$DATABASE_URL" -f migrations/072_freeze_published_ranking_snapshots.sql
 psql "$DATABASE_URL" -f migrations/073_allow_approved_categories_in_game_challenges.sql
 psql "$DATABASE_URL" -f migrations/074_validate_published_game_ranking_values.sql
 psql "$DATABASE_URL" -f migrations/075_source_rights_ledger.sql
+psql "$DATABASE_URL" -f migrations/076_require_https_rights_evidence.sql
 
 Para casos de homónimos de Wikidata, el enriquecedor admite un `--qid` explícito; valida que la etiqueta coincida y que la descripción sea futbolística antes de aplicar la fecha.
 npm run seed
@@ -384,7 +385,7 @@ npm run review:source -- --key thesportsdb-artwork --status approved \
   --rights-notes "Contrato y alcance comercial revisados para datos/medios de Rango90."
 ```
 
-Con `review_required` o `unknown`, el backend rechaza la aprobación de activos de forma intencionada. La migración `075_source_rights_ledger.sql` añade además un trigger de base de datos para impedir que una actualización SQL omita ese expediente.
+Con `review_required` o `unknown`, el backend rechaza la aprobación de activos de forma intencionada. Las migraciones `075_source_rights_ledger.sql` y `076_require_https_rights_evidence.sql` añaden además triggers y restricciones de base de datos para impedir que una actualización SQL omita ese expediente o use una evidencia legal HTTP.
 
 ```bash
 npm run media:stage:thesportsdb -- --limit 20 --delay-ms 2100

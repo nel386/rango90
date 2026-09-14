@@ -221,7 +221,7 @@ async function assertSourceApprovalRequiresEvidence(): Promise<void> {
       async () => {
         await client.query(`UPDATE sources SET rights_status = 'approved' WHERE key = $1`, [sourceRightsKey]);
       },
-      /cannot be approved without commercial evidence and a registered review|no puede aprobarse sin evidencia comercial y revisión registrada/u
+      /cannot be approved without commercial evidence and a registered review|no puede aprobarse sin evidencia comercial(?: HTTPS)? y revisión registrada/u
     );
   } finally {
     await client.query('ROLLBACK').catch(() => undefined);

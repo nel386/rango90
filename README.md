@@ -224,6 +224,7 @@ psql "$DATABASE_URL" -f migrations/072_freeze_published_ranking_snapshots.sql
 psql "$DATABASE_URL" -f migrations/073_allow_approved_categories_in_game_challenges.sql
 psql "$DATABASE_URL" -f migrations/074_validate_published_game_ranking_values.sql
 psql "$DATABASE_URL" -f migrations/075_source_rights_ledger.sql
+psql "$DATABASE_URL" -f migrations/076_require_https_rights_evidence.sql
 npm run seed
 npm run seed:game-audience
 npm run entity:consolidate:uefa-shared-clubs

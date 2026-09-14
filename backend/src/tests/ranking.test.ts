@@ -399,6 +399,11 @@ assert.throws(() => assertSourceRightsApproval({
   rightsEvidenceUrl: rightsEvidence, usageScope: 'web,pwa,android,local_storage',
   rightsNotes: 'Contrato revisado.'
 }));
+assert.throws(() => assertSourceRightsApproval({
+  rightsBasis: 'direct_license', commercialUse: true, reviewer: 'legal-review-1',
+  rightsEvidenceUrl: 'http://example.test/licence', usageScope: rightsScope,
+  rightsNotes: 'Contrato revisado.'
+}), /HTTPS/);
 assert.deepEqual(assertRightsApproval({
   assetKind: 'portrait', entityType: 'player', provider: 'wikimedia-commons',
   licenseName: 'CC BY 4.0', licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',

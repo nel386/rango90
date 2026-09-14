@@ -21,8 +21,5 @@ out/
 
 # Almacenamiento local del backend
 backend/storage/
-# This small source fixture is required by the AFC parser test; runtime
-# snapshots, media and provider caches remain local-only.
-!backend/storage/
-!backend/storage/rankings/
-!backend/storage/rankings/afc-champions-league-club-titles.json
+# The AFC parser fixture is force-added to Git; runtime snapshots, media and
+# provider caches remain local-only.

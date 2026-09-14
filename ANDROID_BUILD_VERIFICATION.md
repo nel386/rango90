@@ -59,6 +59,8 @@ RANGO90_RELEASE_KEY_PASSWORD
 
 Cuando las cuatro están presentes, `assembleRelease` usa esa configuración y produce una APK firmada. Si falta alguna, el build continúa explícitamente como `unsigned` y lo registra en la salida de Gradle. La clave oficial debe almacenarse en el gestor de secretos de la infraestructura de distribución; no se debe reutilizar el keystore temporal de QA.
 
+La clave oficial la crea el titular del proyecto o de la cuenta de distribución con `keytool` del JDK y la custodia fuera del repositorio. El emulador no crea ni custodia claves: únicamente simula un dispositivo para probar la APK. Codex puede comprobar el alias, certificado y firma de un keystore que se entregue por el canal seguro elegido, pero la propiedad y la custodia deben quedar en manos del titular.
+
 ## Prueba del circuito de firma
 
 Se generó un keystore temporal de QA fuera del repositorio y se ejecutó `assembleRelease` pasando las cuatro variables anteriores. El artefacto firmado produjo el SHA-256 `7e87fef544c4945ebc20ff1a02cc888b232fcede047317783e93b9f8dfccd450`; `apksigner verify --verbose` confirmó:
@@ -77,3 +79,5 @@ El workflow de CI versionado en `.github/workflows/ci.yml` reproduce ahora las d
 ## Alcance pendiente
 
 Esta evidencia demuestra que el proyecto puede producir una APK debug válida y compilar la variante release. No se ha instalado en un dispositivo o emulador. Antes de una distribución pública todavía se necesita firmar la variante `release` con una clave protegida, verificar la firma resultante y ejecutar QA funcional de la aplicación contra un backend real autorizado.
+
+El emulador no crea la clave oficial: es solo un dispositivo virtual para QA. En este entorno ARM64 están disponibles `adb`, `sdkmanager` y `avdmanager`, pero el repositorio de paquetes no ofrece un binario `emulator` instalable para esta arquitectura; tampoco se pudo instalar automáticamente la imagen ARM64 al depender de ese paquete. La prueba pendiente es, por tanto, una limitación de infraestructura y no una decisión del proyecto.

@@ -8,6 +8,17 @@ Este documento es un registro técnico de diligencia, no una opinión jurídica.
 
 La existencia de una API, un plan gratuito o una respuesta con imágenes no demuestra que Rango90 pueda redistribuir esos contenidos. La fuente solo podrá pasar a `approved` cuando el expediente incluya proveedor, competición, campos autorizados, territorios, duración, uso web/Android, atribución, almacenamiento/cache, sublicencia o redistribución y tratamiento de imágenes/logos.
 
+## Decisión de producto declarada
+
+El proyecto no contratará una licencia comercial de proveedor de datos. En consecuencia:
+
+- Solo se podrán publicar estadísticas cuya fuente tenga términos públicos verificables que permitan expresamente el uso previsto, o una autorización escrita gratuita que cubra ese uso.
+- Una API gratuita, una página pública o la mera posibilidad técnica de descargar datos no se considerarán autorización de redistribución.
+- Para retratos y otros recursos visuales se usarán únicamente activos con licencia abierta verificable, registrada por activo. La disponibilidad en Wikimedia Commons no sustituye la comprobación de la licencia concreta, sus obligaciones de atribución y, cuando aplique, ShareAlike.
+- Los escudos, logos y marcas oficiales quedan fuera salvo que exista una autorización específica. Puede usarse un identificador visual propio como fallback.
+
+Esta decisión permite continuar con el desarrollo local y con datos `draft`, pero no convierte automáticamente las fuentes actualmente revisadas en `approved` ni permite presentar el producto como legalmente listo para publicación.
+
 ## Fuentes revisadas
 
 | Fuente | Lo que permiten inferir sus condiciones públicas | Decisión para Rango90 |

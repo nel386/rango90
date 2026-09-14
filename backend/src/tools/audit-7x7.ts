@@ -37,6 +37,19 @@ type CategoryDiagnostic = {
   blockingReasons: string[];
 };
 
+type SelectedDataIntersection = {
+  categoryCount: number;
+  requiredCategoryCount: number;
+  commonTop200Count: number;
+  commonCandidateBandCount: number;
+  commonCandidateBandEntityIds: string[];
+};
+
+function intersectSets(sets: ReadonlySet<string>[]): Set<string> {
+  if (sets.length === 0) return new Set();
+  return sets.slice(1).reduce<Set<string>>((common, current) => new Set([...common].filter((entityId) => current.has(entityId))), new Set(sets[0]));
+}
+
 try {
   const snapshotRows = await pool.query<SnapshotRow>(
       `SELECT DISTINCT ON (c.id)
@@ -112,6 +125,30 @@ try {
       blockingReasons
     };
   });
+
+  const selectedDataIntersection = (entityType: SnapshotRow['entity_type'], requiredCategoryCount: number): SelectedDataIntersection => {
+    const selectedCategories = SELECTED_DAILY_CATEGORY_SLUGS
+      .map((slug) => snapshotRows.rows.find((row) => row.slug === slug))
+      .filter((row): row is SnapshotRow => row?.entity_type === entityType)
+      .map((row) => {
+        const snapshotEntries = bySnapshot.get(row.snapshot_id) ?? new Map<string, number>();
+        return {
+          top200EntityIds: new Set(snapshotEntries.keys()),
+          candidateBandEntityIds: new Set([...snapshotEntries.entries()]
+            .filter(([, rank]) => rank <= DAILY_CHALLENGE_CANDIDATE_RANK)
+            .map(([entityId]) => entityId))
+        };
+      });
+    const commonTop200 = intersectSets(selectedCategories.map((category) => category.top200EntityIds));
+    const commonCandidateBand = intersectSets(selectedCategories.map((category) => category.candidateBandEntityIds));
+    return {
+      categoryCount: selectedCategories.length,
+      requiredCategoryCount,
+      commonTop200Count: commonTop200.size,
+      commonCandidateBandCount: commonCandidateBand.size,
+      commonCandidateBandEntityIds: [...commonCandidateBand].sort()
+    };
+  };
 
   const candidates: SevenBySevenCategory[] = snapshotRows.rows
     .filter((row) => diagnostics.find((diagnostic) => diagnostic.snapshotId === row.snapshot_id)?.blockingReasons.length === 0)
@@ -209,6 +246,10 @@ try {
       slugs: SELECTED_DAILY_CATEGORY_SLUGS,
       player: selectedPlayerAudit,
       club: selectedClubAudit,
+      dataIntersection: {
+        player: selectedDataIntersection('player', SELECTED_DAILY_CATEGORY_COUNTS.player),
+        club: selectedDataIntersection('club', SELECTED_DAILY_CATEGORY_COUNTS.club)
+      },
       categories: selectedMatrix
     },
     closestCategoryDiagnostics: diagnostics

@@ -69,6 +69,7 @@ import { assertPublishableImageLicense, assertRightsApproval, assertSourceRights
 import { MAX_GAME_RANKING_ENTRIES, runDataCatalogCleanup, verifyGameCatalogBoundary } from './catalogCleanup.js';
 import { calculateChallengeSha256 } from './game-contract.js';
 import { selectCommonDailyEntities, type DailyChallengeCandidate } from './dailyChallengeSelection.js';
+import { SELECTED_DAILY_CATEGORY_SLUGS } from './dailyMatrix.js';
 
 const [command, ...args] = process.argv.slice(2);
 const argument = (name: string): string | undefined => {
@@ -83,15 +84,6 @@ const argument = (name: string): string | undefined => {
  * while the typed common-entity rule guarantees a true 7×7 matrix.
  */
 export const DAILY_CHALLENGE_CANDIDATE_RANK = 90;
-export const SELECTED_DAILY_CATEGORY_SLUGS = [
-  'club-career-yellow-cards',
-  'club-career-red-cards',
-  'club-career-titles',
-  'world-cup-goals',
-  'player-career-goals',
-  'national-league-club-titles',
-  'european-cup-champions-league-club-titles'
-] as const;
 
 type DailyChallengeCategorySelection = {
   category_id: string;

@@ -1,5 +1,6 @@
 import { closeDb, pool } from '../db.js';
 import { auditSevenBySeven, type SevenBySevenCategory } from '../sevenBySevenAudit.js';
+import { SELECTED_DAILY_CATEGORY_COUNTS, SELECTED_DAILY_CATEGORY_SLUGS } from '../dailyMatrix.js';
 
 const MAX_GAME_RANKING_ENTRIES = 200;
 const DAILY_CHALLENGE_CANDIDATE_RANK = 90;
@@ -7,7 +8,9 @@ const DAILY_CHALLENGE_CANDIDATE_RANK = 90;
 type SnapshotRow = {
   category_id: string;
   slug: string;
+  category_status: string;
   snapshot_id: string;
+  snapshot_status: string;
   entity_type: 'player' | 'club' | 'national_team';
   closed_universe: boolean;
   coverage_complete: boolean;
@@ -37,7 +40,8 @@ type CategoryDiagnostic = {
 try {
   const snapshotRows = await pool.query<SnapshotRow>(
       `SELECT DISTINCT ON (c.id)
-            c.id AS category_id, c.slug, rs.id AS snapshot_id, c.entity_type,
+            c.id AS category_id, c.slug, c.status AS category_status,
+            rs.id AS snapshot_id, rs.status AS snapshot_status, c.entity_type,
             COALESCE((c.scope->>'closedUniverse')::boolean, FALSE) AS closed_universe,
             rs.coverage_complete, rs.unresolved_conflicts, rs.eligible_count, c.score_cap
        FROM category_definitions c
@@ -145,8 +149,48 @@ try {
       commonClubs: clubMatch.commonCandidateBandCount
     })))
   };
+  const selectedPlayerCandidates = candidates.filter((candidate) =>
+    SELECTED_DAILY_CATEGORY_SLUGS.slice(0, SELECTED_DAILY_CATEGORY_COUNTS.player)
+      .includes(candidate.slug as typeof SELECTED_DAILY_CATEGORY_SLUGS[number])
+  );
+  const selectedClubCandidates = candidates.filter((candidate) =>
+    SELECTED_DAILY_CATEGORY_SLUGS.slice(SELECTED_DAILY_CATEGORY_COUNTS.player)
+      .includes(candidate.slug as typeof SELECTED_DAILY_CATEGORY_SLUGS[number])
+  );
+  const selectedPlayerAudit = auditSevenBySeven(
+    selectedPlayerCandidates,
+    SELECTED_DAILY_CATEGORY_COUNTS.player,
+    SELECTED_DAILY_CATEGORY_COUNTS.player,
+    DAILY_CHALLENGE_CANDIDATE_RANK,
+    1
+  );
+  const selectedClubAudit = auditSevenBySeven(
+    selectedClubCandidates,
+    SELECTED_DAILY_CATEGORY_COUNTS.club,
+    SELECTED_DAILY_CATEGORY_COUNTS.club,
+    DAILY_CHALLENGE_CANDIDATE_RANK,
+    1
+  );
+  const selectedMatrix = SELECTED_DAILY_CATEGORY_SLUGS.map((slug) => {
+    const snapshot = snapshotRows.rows.find((row) => row.slug === slug);
+    const diagnostic = diagnostics.find((item) => item.slug === slug);
+    return {
+      slug,
+      entityType: snapshot?.entity_type ?? null,
+      categoryStatus: snapshot?.category_status ?? 'missing',
+      snapshotId: snapshot?.snapshot_id ?? null,
+      snapshotStatus: snapshot?.snapshot_status ?? 'missing',
+      coverageComplete: snapshot?.coverage_complete ?? false,
+      unresolvedConflicts: snapshot?.unresolved_conflicts ?? null,
+      eligibleCount: snapshot?.eligible_count ?? null,
+      playableTop200: diagnostic?.playableTop200 ?? 0,
+      playableTop90: diagnostic?.playableTop90 ?? 0,
+      blockingReasons: diagnostic?.blockingReasons ?? ['missing_snapshot']
+    };
+  });
+  const selectedMatrixReady = selectedPlayerAudit.matches.length > 0 && selectedClubAudit.matches.length > 0;
   console.log(JSON.stringify({
-    ready: audit.matches.length > 0,
+    ready: selectedMatrixReady,
     requirements: {
       categories: 7,
       playerCategories: 5,
@@ -161,13 +205,19 @@ try {
     },
     activeCategoriesByEntityType: Object.fromEntries([...candidatesByEntityType.entries()].map(([entityType, group]) => [entityType, group.length])),
     individuallyEligibleCategories: candidates.map((category) => ({ slug: category.slug, snapshotId: category.snapshotId })),
+    selectedMatrix: {
+      slugs: SELECTED_DAILY_CATEGORY_SLUGS,
+      player: selectedPlayerAudit,
+      club: selectedClubAudit,
+      categories: selectedMatrix
+    },
     closestCategoryDiagnostics: diagnostics
       .sort((left, right) => right.playableTop200 - left.playableTop200 || right.playableTop90 - left.playableTop90 || left.slug.localeCompare(right.slug))
       .slice(0, 20),
     typedAudit: audit,
     note: 'Esta auditoría valida datos locales y no aprueba derechos de redistribución ni activos visuales.'
   }, null, 2));
-  if (audit.matches.length === 0) process.exitCode = 1;
+  if (!selectedMatrixReady) process.exitCode = 1;
 } catch (error) {
   console.error(error);
   process.exitCode = 1;

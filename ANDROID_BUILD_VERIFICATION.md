@@ -30,4 +30,4 @@ Resultado: `BUILD SUCCESSFUL`, firma v1 y v2 verificadas y manifiesto inspeccion
 
 ## Alcance pendiente
 
-Esta evidencia demuestra que el proyecto puede producir una APK debug instalable. Antes de una distribución pública todavía se necesita una variante `release` con clave de firma protegida, pruebas en dispositivo/emulador y QA funcional de la aplicación contra un backend real autorizado.
+Esta evidencia demuestra que el proyecto puede producir una APK debug firmada y válida como artefacto. No se ha instalado en un dispositivo o emulador. Antes de una distribución pública todavía se necesita una variante `release` con clave de firma protegida, pruebas en dispositivo/emulador y QA funcional de la aplicación contra un backend real autorizado.

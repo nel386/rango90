@@ -70,6 +70,7 @@ import { MAX_GAME_RANKING_ENTRIES, runDataCatalogCleanup, verifyGameCatalogBound
 import { calculateChallengeSha256 } from './game-contract.js';
 import { selectCommonDailyEntities, type DailyChallengeCandidate } from './dailyChallengeSelection.js';
 import { SELECTED_DAILY_CATEGORY_SLUGS } from './dailyMatrix.js';
+import { buildOpenFootballClubTitleRanking, openFootballLeaguesUrl, parseFootballTxtResults, type OpenFootballSeasonSource } from './providers/openFootballClient.js';
 
 const [command, ...args] = process.argv.slice(2);
 const argument = (name: string): string | undefined => {
@@ -2655,6 +2656,52 @@ try {
       }))
     });
     console.log(JSON.stringify({ source: 'rango90-club-title-facts', categorySlug, rankingId, entries: rows.rows.length, coverageComplete: false, note: 'Snapshot provisional: solo incluye palmarés de clubes importados y deduplicados.' }, null, 2));
+  } else if (command === 'build-openfootball-national-league-club-titles') {
+    const manifestPath = argument('manifest');
+    if (!manifestPath) throw new Error('Se requiere --manifest con las temporadas Football.TXT a importar');
+    const manifest = JSON.parse(await readFile(resolve(manifestPath), 'utf8')) as {
+      sourceVersion?: string;
+      seasons?: OpenFootballSeasonSource[];
+    };
+    if (!Array.isArray(manifest.seasons) || manifest.seasons.length === 0) {
+      throw new Error('El manifiesto OpenFootball debe contener al menos una temporada');
+    }
+    if (manifest.seasons.length > 10_000) throw new Error('El manifiesto OpenFootball supera el límite de temporadas');
+    const sources = manifest.seasons.map((season) => {
+      if (!season || typeof season.competition !== 'string' || !season.competition.trim() || typeof season.season !== 'string' || !season.season.trim() || typeof season.url !== 'string' || !/^https:\/\//i.test(season.url)) {
+        throw new Error('Cada temporada OpenFootball requiere competition, season y una URL HTTPS');
+      }
+      return { competition: season.competition.trim(), season: season.season.trim(), url: season.url };
+    });
+    const fetchedSeasons = [];
+    for (const source of sources) {
+      const response = await fetch(source.url, { headers: { 'User-Agent': 'Rango90-openfootball-import/0.1' }, signal: AbortSignal.timeout(30_000) });
+      if (!response.ok) throw new Error(`OpenFootball ${source.url}: HTTP ${response.status}`);
+      const content = await response.text();
+      const matches = parseFootballTxtResults(content, source.season);
+      fetchedSeasons.push({ ...source, matches });
+    }
+    const input = buildOpenFootballClubTitleRanking(fetchedSeasons);
+    input.audit = {
+      sourceRepository: openFootballLeaguesUrl,
+      sourceLicense: 'public-domain-dedication',
+      sourceVersion: manifest.sourceVersion ?? null,
+      manifestPath,
+      seasonSources: sources,
+      fetchedSeasonCount: fetchedSeasons.length,
+      fetchedMatchCount: fetchedSeasons.reduce((total, season) => total + season.matches.length, 0)
+    };
+    const rankingId = await importRankingInput(input);
+    console.log(JSON.stringify({
+      source: 'openfootball-leagues',
+      categorySlug: input.categorySlug,
+      rankingId,
+      entries: input.entries.length,
+      seasons: sources.length,
+      coverageComplete: input.coverageComplete,
+      published: false,
+      note: 'Snapshot draft provisional: el manifiesto y los resultados deben auditarse para cobertura mundial, formato histórico, identidades y derechos antes de aprobar o publicar.'
+    }, null, 2));
   } else if (command === 'build-national-league-club-titles') {
     const categorySlug = 'national-league-club-titles';
     const domesticCategorySlugs = [

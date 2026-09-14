@@ -30,6 +30,12 @@ export type OpenFootballWinner = {
   ambiguous: boolean;
 };
 
+export type OpenFootballSeasonSource = {
+  competition: string;
+  season: string;
+  url: string;
+};
+
 const monthByName: Record<string, number> = {
   Jan: 1,
   Feb: 2,
@@ -166,10 +172,10 @@ export function calculateOpenFootballWinner(matches: OpenFootballMatch[]): OpenF
 }
 
 export function buildOpenFootballClubTitleRanking(
-  seasons: Array<{ competition: string; season: string; matches: OpenFootballMatch[] }>
+  seasons: Array<{ competition: string; season: string; matches: OpenFootballMatch[]; sourceUrl?: string }>
 ): RankingInput {
   if (seasons.length === 0) throw new Error('OpenFootball: no hay temporadas para construir el ranking');
-  const titleCounts = new Map<string, { clubName: string; titles: number; seasons: string[]; competition: string }>();
+  const titleCounts = new Map<string, { clubName: string; titles: number; seasons: string[]; sourceUrls: string[]; competition: string }>();
   const ambiguousSeasons: string[] = [];
   for (const season of seasons) {
     const result = calculateOpenFootballWinner(season.matches);
@@ -182,9 +188,10 @@ export function buildOpenFootballClubTitleRanking(
     // different national competitions; merging them here would corrupt the
     // title total before identity review.
     const clubKey = `${season.competition}:${result.winner}`;
-    const current = titleCounts.get(clubKey) ?? { clubName: result.winner, titles: 0, seasons: [], competition: season.competition };
+    const current = titleCounts.get(clubKey) ?? { clubName: result.winner, titles: 0, seasons: [], sourceUrls: [], competition: season.competition };
     current.titles += 1;
     current.seasons.push(season.season);
+    if (season.sourceUrl) current.sourceUrls.push(season.sourceUrl);
     titleCounts.set(result.winner, current);
   }
   const entries = [...titleCounts.entries()]
@@ -198,6 +205,7 @@ export function buildOpenFootballClubTitleRanking(
         sourceRank: index + 1,
         competition: value.competition,
         titleSeasons: value.seasons,
+        sourceUrls: value.sourceUrls,
         attributionRequired: false,
         calculation: 'Tabla 3 puntos: puntos, diferencia de goles, goles a favor; empates restantes excluidos para revisión manual.'
       }

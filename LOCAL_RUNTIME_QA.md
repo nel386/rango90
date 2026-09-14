@@ -17,9 +17,21 @@ También pasaron las regresiones automatizadas del frontend y backend, incluyend
 
 La prueba `npm run test:integration` también pasó y limpió su fixture sintético: verificó sesión, inicio de partida, cálculo de resultado, idempotencia, conflicto de resultados, intento de manipulación, expiración, leaderboard, duelos y replay.
 
+## Smoke manual de navegador
+
+Se sirvió el build estático Android en `127.0.0.1:4174` y se abrió con Chromium headless. Se comprobó el DOM resultante en viewport de escritorio (`1280x900`) y móvil emulado (`390x844`), para ambos idiomas.
+
+| Caso | Resultado observado | Evaluación |
+| --- | --- | --- |
+| `/es/` | `lang=es`, título en español, encabezado `La tabla no ha cargado.`, estado `role=alert`, navegación etiquetada y enlace `/en/` | Correcto para estado sin backend/reto publicado |
+| `/en/` | `lang=en`, título en inglés, encabezado `The table did not load.`, estado `role=alert`, navegación etiquetada y enlace `/es/` | Correcto para estado sin backend/reto publicado |
+| `/es/` y `/en/` a `390x844` | Misma estructura accesible; no hubo error de renderizado ni HTML de fallback 404 | Smoke móvil correcto |
+
+El flujo interactivo de partida, ranking, duelos y resultado no puede probarse desde este entorno porque no hay un reto diario publicado ni una API de producción configurada. Esta prueba tampoco sustituye la comprobación en un dispositivo Android físico.
+
 ## Límites de esta evidencia
 
 - No existe todavía un reto o snapshot publicado contra el que probar el flujo completo de partida.
 - No hay dispositivo ni emulador conectado para una prueba de instalación e interacción Android.
-- No sustituye QA visual/manual en navegador, móvil, español, inglés y accesibilidad.
+- No sustituye QA visual exhaustivo ni una prueba en un dispositivo Android físico; el smoke de navegador anterior cubre arranque, estados de error, idiomas, estructura accesible y viewport móvil emulado.
 - La base local contiene datos draft y fuentes sin derechos aprobados; no se alteró ese estado para forzar un resultado positivo.

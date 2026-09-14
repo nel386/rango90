@@ -156,6 +156,8 @@ npx cap sync android
 
 Capacitor está preparado con `webDir: out`, `com.rango90.app` y pantalla de arranque. No se han añadido SDKs de anuncios ni plugins de notificaciones: se incorporarán después de validar una APK instalable y funcional.
 
+La primera APK debug se generó y verificó localmente; el detalle reproducible está en [`ANDROID_BUILD_VERIFICATION.md`](./ANDROID_BUILD_VERIFICATION.md). Este artefacto no equivale todavía a una release firmada para distribución pública.
+
 ## Backend de datos
 
 La base inicial del backend está en [`backend/`](./backend/). Usa Node.js/TypeScript, PostgreSQL y snapshots inmutables de rankings. El catálogo genera las competiciones y categorías iniciales; los datos reales se incorporarán mediante archivos revisables o un adaptador de fuente autorizado.

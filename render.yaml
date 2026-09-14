@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: rango90-api
+    name: rango90
     runtime: node
     rootDir: backend
     region: frankfurt
@@ -21,7 +21,7 @@ services:
       - key: AUTH_FRONTEND_ORIGIN
         value: https://nel386.github.io/rango90/es/
       - key: AUTH_VERIFICATION_BASE_URL
-        value: https://rango90-api.onrender.com/v1/auth/verify-email
+        value: https://rango90.onrender.com/v1/auth/verify-email
       - key: AUTH_COOKIE_SAMESITE
         value: none
       - key: API_FOOTBALL_KEY

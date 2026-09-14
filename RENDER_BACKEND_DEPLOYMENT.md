@@ -1,6 +1,6 @@
 # Backend de Rango90 en Render
 
-La configuración del Blueprint está en [`render.yaml`](./render.yaml). Crea un Web Service gratuito llamado `rango90-api`, con PostgreSQL gratuito y la comprobación `GET /health`.
+La configuración del Blueprint está en [`render.yaml`](./render.yaml). Crea un Web Service gratuito llamado `rango90`, con PostgreSQL gratuito y la comprobación `GET /health`.
 
 ## Valores elegidos
 
@@ -32,12 +32,12 @@ El Web Service y PostgreSQL deben permanecer en Frankfurt para que el backend ut
 6. Abre la URL pública del Web Service y comprueba:
 
    ```text
-   https://rango90-api.onrender.com/health
+   https://rango90.onrender.com/health
    ```
 
    La respuesta esperada contiene `"service":"rango90-backend"`.
 
-Si Render asigna una URL distinta, esa URL real sustituye a `https://rango90-api.onrender.com` también en `AUTH_VERIFICATION_BASE_URL`.
+Si Render asigna una URL distinta, esa URL real sustituye a `https://rango90.onrender.com` también en `AUTH_VERIFICATION_BASE_URL`.
 
 ## Variables de aplicación
 
@@ -48,7 +48,7 @@ NODE_ENV=production
 CORS_ORIGIN=https://nel386.github.io
 AUTH_FRONTEND_ORIGIN=https://nel386.github.io/rango90/es/
 AUTH_COOKIE_SAMESITE=none
-AUTH_VERIFICATION_BASE_URL=https://rango90-api.onrender.com/v1/auth/verify-email
+AUTH_VERIFICATION_BASE_URL=https://rango90.onrender.com/v1/auth/verify-email
 DATABASE_URL=(generada por Render desde rango90-db)
 ```
 
@@ -95,7 +95,7 @@ En el repositorio de GitHub, crea una variable de Actions —no un secret— con
 
 ```text
 Name:  NEXT_PUBLIC_API_BASE_URL
-Value: https://rango90-api.onrender.com
+Value: https://rango90.onrender.com
 ```
 
 El valor debe ser únicamente el origen HTTPS del backend: sin `/health`, sin `/v1` y sin barra final. Si Render asigna otro hostname, usa ese hostname real.

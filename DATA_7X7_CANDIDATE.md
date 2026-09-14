@@ -31,6 +31,12 @@ Los ocho jugadores comunes encontrados son:
 
 La intersección se calculó sobre `ranking_entries.entity_id` de los snapshots draft más recientes de cada categoría, sin rellenar filas ni fusionar homónimos durante el cálculo.
 
+## Auditoría de combinaciones
+
+En la verificación del 14 de septiembre de 2026 se reexaminaron las categorías de jugadores activas usando sus snapshots vigentes. No existe ninguna combinación de siete que cumpla simultáneamente `coverage_complete=true`, cero conflictos, al menos 200 entradas y al menos 200 jugadores canónicos activos y jugables dentro del top 200. Las categorías que sí tienen cobertura histórica validada todavía pierden jugadores históricos al aplicar la política de catálogo; las que conservan 200 jugables siguen siendo parciales o tienen derechos pendientes.
+
+Por tanto, los ocho jugadores comunes del bloque anterior demuestran únicamente que el selector puede construir una matriz técnica con el candidato actual. No demuestran que exista todavía un conjunto 7×7 publicable ni autorizado.
+
 ## Bloqueos para convertirlo en reto real
 
 1. Conseguir y registrar derechos de redistribución comercial para las siete fuentes.

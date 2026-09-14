@@ -1,5 +1,6 @@
 import type { PoolClient } from 'pg';
 import { MAX_GAME_RANKING_ENTRIES } from './catalogCleanup.js';
+import { SELECTED_DAILY_PLAYER_CATEGORY_SLUGS } from './dailyMatrix.js';
 
 type AudienceSeed = {
   entityId: string;
@@ -17,7 +18,7 @@ export const MODERN_AUDIENCE_POLICY = {
   historicalBirthCutoffYear: 1960,
   pre1930AudienceCutoffYear: 1930,
   defaultHistoricalPlayable: false,
-  note: 'Los jugadores retirados antes de 1990 solo entran mediante una excepción icónica revisada; una fecha de nacimiento anterior a 1960 activa una exclusión conservadora si no hay excepción. Los nacidos antes de 1930 quedan siempre fuera del catálogo jugable actual.',
+  note: 'Los jugadores retirados antes de 1990 solo entran mediante una excepción icónica revisada; una fecha de nacimiento anterior a 1960 activa una exclusión conservadora si no hay excepción. Las cinco categorías históricas de la matriz diaria elegida tienen una excepción explícita y acotada para sus entidades canónicas del top-200.',
 } as const;
 
 // The goalkeeper launch category is intentionally a top-200 historical list,
@@ -146,12 +147,12 @@ const curatedSerieAPlayableNames = [
 export async function seedGameAudienceProfiles(
   client: PoolClient,
   options: { expand?: boolean } = {}
-): Promise<{ applied: number; missing: string[]; expansionApplied: boolean }> {
+): Promise<{ applied: number; missing: string[]; expansionApplied: boolean; historicalMatrixApplied: number }> {
   // Re-seeding is a potentially broad catalog operation. Keep the existing
   // game roster stable unless an operator explicitly opts into expansion;
   // otherwise a new ranking import can silently change image/licensing scope
   // and make progress percentages incomparable.
-  if (!options.expand) return { applied: 0, missing: [], expansionApplied: false };
+  if (!options.expand) return { applied: 0, missing: [], expansionApplied: false, historicalMatrixApplied: 0 };
   // Only the reviewed Champions League pilot rankings are opened initially.
   // New entities remain outside the game until an importer or curator assigns
   // them a profile.
@@ -539,11 +540,87 @@ export async function seedGameAudienceProfiles(
             ON ranking_identity.source_entity_id = re.entity_id
           WHERE re.rank <= ${MAX_GAME_RANKING_ENTRIES}
             AND COALESCE(ranking_identity.canonical_entity_id, re.entity_id) = e.id
-        )`
+       )`
+  );
+  // The selected matrix contains all-time categories. Its historical players
+  // must be playable when they have a canonical identity in one of those
+  // top-200 snapshots, even if the default modern-audience policy would have
+  // excluded them by age or missing birth date. This is a scoped, explicit
+  // exception; it does not reopen unrelated categories or entities.
+  const historicalCatalog = await client.query<{ id: string }>(
+    `WITH selected_entities AS (
+       SELECT DISTINCT COALESCE(identity_link.canonical_entity_id, re.entity_id) AS entity_id
+       FROM ranking_entries re
+       JOIN ranking_snapshots rs ON rs.id = re.snapshot_id AND rs.status <> 'superseded'
+       JOIN category_definitions c
+         ON c.id = rs.category_id
+        AND c.slug = ANY($1::text[])
+        AND c.entity_type = 'player'
+        AND c.status <> 'retired'
+       LEFT JOIN entity_identity_links identity_link
+         ON identity_link.source_entity_id = re.entity_id
+       JOIN entities e
+         ON e.id = COALESCE(identity_link.canonical_entity_id, re.entity_id)
+        AND e.entity_type = 'player'
+       WHERE re.rank <= ${MAX_GAME_RANKING_ENTRIES}
+     )
+     UPDATE entities e
+        SET catalog_status = 'active',
+            metadata = e.metadata || jsonb_build_object(
+              'selectedHistoricalMatrix', TRUE,
+              'selectedHistoricalMatrixAt', NOW()
+            ),
+            updated_at = NOW()
+       FROM selected_entities selected
+      WHERE e.id = selected.entity_id
+        AND e.catalog_status <> 'active'
+     RETURNING e.id`,
+    [SELECTED_DAILY_PLAYER_CATEGORY_SLUGS]
+  );
+  const historicalProfiles = await client.query<{ id: string }>(
+    `WITH selected_entities AS (
+       SELECT COALESCE(identity_link.canonical_entity_id, re.entity_id) AS entity_id,
+              ARRAY_AGG(DISTINCT c.slug ORDER BY c.slug) AS category_slugs
+       FROM ranking_entries re
+       JOIN ranking_snapshots rs ON rs.id = re.snapshot_id AND rs.status <> 'superseded'
+       JOIN category_definitions c
+         ON c.id = rs.category_id
+        AND c.slug = ANY($1::text[])
+        AND c.entity_type = 'player'
+        AND c.status <> 'retired'
+       LEFT JOIN entity_identity_links identity_link
+         ON identity_link.source_entity_id = re.entity_id
+       JOIN entities e
+         ON e.id = COALESCE(identity_link.canonical_entity_id, re.entity_id)
+        AND e.entity_type = 'player'
+       WHERE re.rank <= ${MAX_GAME_RANKING_ENTRIES}
+       GROUP BY COALESCE(identity_link.canonical_entity_id, re.entity_id)
+     )
+     INSERT INTO entity_game_profiles (entity_id, legacy_tier, playable_default, reason, metadata)
+     SELECT selected.entity_id,
+            'iconic_legacy',
+            TRUE,
+            'Jugador histórico presente en el top-200 de la matriz diaria elegida',
+            jsonb_build_object(
+              'policy', 'modern-audience-v1',
+              'curated', TRUE,
+              'selectedHistoricalMatrix', TRUE,
+              'selectedMatrixCategories', selected.category_slugs,
+              'requiresOpenDataRights', TRUE
+            )
+       FROM selected_entities selected
+     ON CONFLICT (entity_id) DO UPDATE SET
+       legacy_tier = 'iconic_legacy',
+       playable_default = TRUE,
+       reason = EXCLUDED.reason,
+       reviewed_at = NOW(),
+       metadata = entity_game_profiles.metadata || EXCLUDED.metadata
+     RETURNING entity_game_profiles.entity_id AS id`,
+    [SELECTED_DAILY_PLAYER_CATEGORY_SLUGS]
   );
   // Product policy: the current game does not include players born before
-  // 1930, including any legacy profile that may have been curated in an older
-  // seed. Historical facts remain stored for audit and future modes.
+  // 1930 unless they are explicitly admitted by the selected all-time daily
+  // matrix. Historical facts remain stored for audit and future modes.
   await client.query(
     `UPDATE entity_game_profiles egp
         SET legacy_tier = 'classic_legacy',
@@ -553,8 +630,14 @@ export async function seedGameAudienceProfiles(
             metadata = egp.metadata || '{"historicalExclusion":true,"exclusionBasis":"pre_1930_audience_policy"}'::jsonb
        FROM entities e
       WHERE e.id = egp.entity_id
-        AND e.entity_type = 'player'
-        AND e.birth_date < DATE '1930-01-01'`
+       AND e.entity_type = 'player'
+       AND e.birth_date < DATE '1930-01-01'
+       AND COALESCE(egp.metadata->>'selectedHistoricalMatrix', 'false') <> 'true'`
   );
-  return { applied, missing, expansionApplied: true };
+  return {
+    applied,
+    missing,
+    expansionApplied: true,
+    historicalMatrixApplied: (historicalCatalog.rowCount ?? 0) + (historicalProfiles.rowCount ?? 0)
+  };
 }

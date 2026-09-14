@@ -4,7 +4,7 @@
 
 ## Regla del circuito jugable
 
-Solo se consideran jugables los jugadores con al menos una entrada en un snapshot activo y no superseded con `rank <= 200`. Las entidades restantes se conservan como raw/histórico para auditoría, pero no generan retos, selecciones aleatorias, rankings visibles ni trabajo de imágenes.
+Solo se consideran jugables los jugadores con al menos una entrada en un snapshot activo y no superseded con `rank <= 200`. Las cinco categorías de jugadores de la matriz diaria elegida tienen además una admisión histórica explícita y acotada: sus entidades canónicas del top 200 pueden jugar aunque la política de audiencia moderna las excluiría por edad o fecha ausente. Las entidades restantes se conservan como raw/histórico para auditoría, pero no generan retos, selecciones aleatorias, rankings visibles ni trabajo de imágenes.
 
 Un jugador canónico cuenta una sola vez aunque aparezca en varias categorías.
 
@@ -17,12 +17,12 @@ La auditoría `npm run audit:7x7` valida ahora exclusivamente las siete categor�
 | `club-career-yellow-cards` | `rs_d4763396b3eecd9d94a49831` | draft | 200 | 200 | 91 | cobertura incompleta |
 | `club-career-red-cards` | `rs_1ff5a575c51e9641ac0ba0d8` | draft | 200 | 200 | 120 | cobertura incompleta |
 | `club-career-titles` | `rs_9db3675a17b09bda84327786` | draft | 200 | 200 | 109 | cobertura incompleta |
-| `world-cup-goals` | `rs_7cc0d9cf795a275b93106c43` | draft | 200 | 82 | 61 | faltan jugadores canónicos jugables |
+| `world-cup-goals` | `rs_7cc0d9cf795a275b93106c43` | draft | 200 | 200 | 111 | ninguno de audiencia; faltan cobertura legal/publicación |
 | `player-career-goals` | `rs_c2c4a7942b4f8d2bd156306c` | draft | 200 | 200 | 92 | cobertura incompleta |
 | `national-league-club-titles` | `rs_5943de063ce56ca0b02a48ab` | draft | 69 | 69 | 69 | universo abierto incompleto |
 | `european-cup-champions-league-club-titles` | `rs_a5608e2d2d543e7e8a25e045` | draft | 24 | 24 | 24 | ninguno estadístico; faltan derechos/publicación |
 
-Resultado verificado el 14 de septiembre de 2026: `ready=false`, sin combinación común válida de cinco jugadores y dos equipos para esta matriz. Los números de esta tabla son una fotografía de la auditoría; deben regenerarse tras cada nueva carga o consolidación.
+Resultado verificado el 14 de septiembre de 2026 tras aplicar la migración `078_admit_selected_historical_daily_matrix_players.sql`: `ready=false`, sin combinación común válida de cinco jugadores y dos equipos para esta matriz. Los números de esta tabla son una fotografía de la auditoría; deben regenerarse tras cada nueva carga o consolidación.
 
 ## Contadores verificados
 

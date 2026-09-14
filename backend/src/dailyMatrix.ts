@@ -18,3 +18,8 @@ export const SELECTED_DAILY_CATEGORY_COUNTS = {
   club: 2,
   national_team: 0
 } as const;
+
+export const SELECTED_DAILY_PLAYER_CATEGORY_SLUGS = SELECTED_DAILY_CATEGORY_SLUGS.slice(
+  0,
+  SELECTED_DAILY_CATEGORY_COUNTS.player
+);

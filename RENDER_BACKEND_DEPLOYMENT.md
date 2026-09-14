@@ -87,7 +87,7 @@ La clave de Datadog es independiente de API-Football. Si no vas a usar Datadog, 
 - **Base limpia:** crear el PostgreSQL, ejecutar las migraciones y después los comandos de seed/import del README. Es la opción inicial más sencilla y no copia credenciales ni datos desde Ubuntu.
 - **Copia de la base local:** crear primero el PostgreSQL en Render y restaurar un `pg_dump` usando su URL externa. La aplicación debe seguir usando la URL interna que Render inyecta como `DATABASE_URL`.
 
-El Blueprint crea la infraestructura, pero no publica automáticamente los datos actuales ni ejecuta todavía toda la secuencia histórica de migraciones. Antes de probar rankings o retos habrá que inicializar/restaurar la base y comprobar que `/health` y un endpoint de lectura responden correctamente.
+El arranque del backend ejecuta ahora las migraciones idempotentes y siembra el catálogo automáticamente. Esto crea la estructura y las categorías base, pero no publica automáticamente los rankings históricos actuales ni un reto diario: esos datos requieren sus importaciones y la validación editorial correspondiente.
 
 ## Variable para GitHub Pages
 

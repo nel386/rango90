@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "migrate": "tsx src/migrate.ts",
+    "prestart": "npm run migrate && npm run seed",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "test": "tsx src/tests/ranking.test.ts && tsx src/tests/rsssf-international.test.ts && tsx src/tests/uefa-euro-historical.test.ts && tsx src/tests/france-football.test.ts && tsx src/tests/catalog-cleanup.test.ts && tsx src/tests/game-engine.test.ts && tsx src/tests/daily-challenge-selection.test.ts && tsx src/tests/daily-matrix.test.ts && tsx src/tests/seven-by-seven-audit.test.ts && tsx src/tests/phase5-premier-league.test.ts && tsx src/tests/ligue1-titles.test.ts && tsx src/tests/trophee-champions-titles.test.ts && tsx src/tests/taca-portugal-titles.test.ts && tsx src/tests/supercopa-espana-titles.test.ts && tsx src/tests/coupe-france-titles.test.ts && tsx src/tests/primeira-liga-titles.test.ts && tsx src/tests/supertaca-portugal-titles.test.ts && tsx src/tests/community-shield-titles.test.ts && tsx src/tests/afc-champions-league-titles.test.ts && tsx src/tests/national-team-assists.test.ts && tsx src/tests/copa-sudamericana-clean-sheets.test.ts && tsx src/tests/api-football-copa-sudamericana-clean-sheets.test.ts && tsx src/tests/api-football-player-trophies-cli.test.ts && tsx src/tests/la-liga-assists.test.ts && tsx src/tests/bundesliga-assists.test.ts && tsx src/tests/serie-a-assists.test.ts && tsx src/tests/openverse-cli.test.ts && tsx src/tests/media-fallback.test.ts && tsx src/tests/openfootball.test.ts && tsx src/tests/openfootball-manifest.test.ts && tsx src/tests/football-data-results.test.ts && tsx src/tests/football-data-incidents.test.ts && tsx src/tests/api-football-refresh-policy.test.ts",

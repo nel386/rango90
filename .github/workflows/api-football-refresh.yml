@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: ${{ secrets.RANGO90_DATABASE_URL }}
+      DATABASE_SSL: 'true'
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
     steps:
       - name: Checkout

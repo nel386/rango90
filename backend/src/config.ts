@@ -4,6 +4,10 @@ export const config = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 4000),
   databaseUrl: process.env.DATABASE_URL ?? '',
+  // Render PostgreSQL requires TLS for external connections. Keep local
+  // development databases on their usual non-TLS default unless explicitly
+  // requested through DATABASE_SSL=true.
+  databaseSsl: process.env.DATABASE_SSL === 'true' || process.env.NODE_ENV === 'production',
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
   rateLimitWindowMs: Math.min(Math.max(Number(process.env.RATE_LIMIT_WINDOW_MS ?? 60_000) || 60_000, 1_000), 3_600_000),
   rateLimitAuthMax: Math.min(Math.max(Number(process.env.RATE_LIMIT_AUTH_MAX ?? 10) || 10, 1), 1_000),

@@ -55,7 +55,10 @@ const dataDependentMigrations = new Set([
 async function main(): Promise<void> {
   if (!config.databaseUrl) throw new Error('DATABASE_URL es obligatoria para ejecutar migraciones');
 
-  const client = new pg.Client({ connectionString: config.databaseUrl });
+  const client = new pg.Client({
+    connectionString: config.databaseUrl,
+    ssl: config.databaseSsl ? { rejectUnauthorized: false } : undefined
+  });
   await client.connect();
   try {
     await client.query(`SELECT pg_advisory_lock(hashtext('rango90-schema-migrations'))`);

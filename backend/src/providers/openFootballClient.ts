@@ -59,20 +59,22 @@ function parseSeasonStartYear(seasonLabel: string): number {
   return year;
 }
 
-function parseDateLine(line: string, seasonStartYear: number): { month: number; day: number } | null {
-  const match = line.trim().match(/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Z][a-z]{2})\s+(\d{1,2})$/);
+function parseDateLine(line: string, seasonStartYear: number): { month: number; day: number; year?: number } | null {
+  const match = line.trim().match(/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Z][a-z]{2})\s+(\d{1,2})(?:\s+(\d{4}))?$/);
   if (!match) return null;
   const month = monthByName[match[1]!];
   const day = Number(match[2]);
   if (!month || !Number.isInteger(day) || day < 1 || day > 31) return null;
-  return { month, day };
+  const explicitYear = match[3] ? Number(match[3]) : undefined;
+  if (explicitYear !== undefined && (!Number.isInteger(explicitYear) || explicitYear < 1800 || explicitYear > 2200)) return null;
+  return { month, day, ...(explicitYear === undefined ? {} : { year: explicitYear }) };
 }
 
-function isoDate(dateParts: { month: number; day: number }, seasonStartYear: number): string {
+function isoDate(dateParts: { month: number; day: number; year?: number }, seasonStartYear: number): string {
   // Football.TXT seasonal files use the first year for July–December and the
   // second year for January–June. Calendar-year competitions pass a one-year
   // season label, for which this still produces the expected year.
-  const year = dateParts.month < 7 ? seasonStartYear + 1 : seasonStartYear;
+  const year = dateParts.year ?? (dateParts.month < 7 ? seasonStartYear + 1 : seasonStartYear);
   const month = String(dateParts.month).padStart(2, '0');
   const day = String(dateParts.day).padStart(2, '0');
   return `${year}-${month}-${day}`;
@@ -109,12 +111,13 @@ export function parseFootballTxtResults(text: string, seasonLabel: string): Open
     // Football.TXT places the score between the home and away team names.
     // Require a final score with an optional half-time parenthesis; this
     // avoids accidentally parsing metadata, tables or postponed fixtures.
-    const score = line.match(/^\s*(?:\d{1,2}:\d{2}\s+)?(.+?)\s+(\d{1,3})-(\d{1,3})(?:\s+\([^)]*\))?\s+(.+?)\s*$/);
+    const versusScore = line.match(/^\s*(?:\d{1,2}:\d{2}\s+)?(.+?)\s+v\s+(.+?)\s+(\d{1,3})-(\d{1,3})(?:\s+\([^)]*\))?\s*$/i);
+    const score = versusScore ?? line.match(/^\s*(?:\d{1,2}:\d{2}\s+)?(.+?)\s+(\d{1,3})-(\d{1,3})(?:\s+\([^)]*\))?\s+(.+?)\s*$/);
     if (!score) continue;
     const home = cleanTeamName(score[1]!);
-    const homeGoals = Number(score[2]);
-    const awayGoals = Number(score[3]);
-    const away = cleanTeamName(score[4]!);
+    const homeGoals = Number(versusScore ? score[3] : score[2]);
+    const awayGoals = Number(versusScore ? score[4] : score[3]);
+    const away = cleanTeamName(versusScore ? score[2]! : score[4]!);
     if (!home || !away || home === away || !Number.isInteger(homeGoals) || !Number.isInteger(awayGoals) || homeGoals < 0 || awayGoals < 0) {
       throw new Error(`OpenFootball: partido inválido en la línea ${lineNumber + 1}`);
     }

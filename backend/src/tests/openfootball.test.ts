@@ -24,6 +24,20 @@ assert.deepEqual(matches, [
   { date: '2024-01-13', home: 'Delta FC', away: 'Alpha FC', homeGoals: 1, awayGoals: 2 }
 ]);
 
+const explicitDateMatches = parseFootballTxtResults(`
+= Example League 2024/25
+  Sat Sep 7 2024
+           Dreams FC                  v FC Samartex 1996           0-0
+           Vision FC                  v Berekum Chelsea FC         0-0
+  Sun Jun 8 2025
+           FC Samartex 1996           v Dreams FC                   1-2
+`, '2024-25');
+assert.deepEqual(explicitDateMatches, [
+  { date: '2024-09-07', home: 'Dreams FC', away: 'FC Samartex 1996', homeGoals: 0, awayGoals: 0 },
+  { date: '2024-09-07', home: 'Vision FC', away: 'Berekum Chelsea FC', homeGoals: 0, awayGoals: 0 },
+  { date: '2025-06-08', home: 'FC Samartex 1996', away: 'Dreams FC', homeGoals: 1, awayGoals: 2 }
+]);
+
 const winner = calculateOpenFootballWinner(matches);
 assert.equal(winner.winner, 'Alpha FC');
 assert.equal(winner.ambiguous, false);

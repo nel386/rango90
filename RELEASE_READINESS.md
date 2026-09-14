@@ -6,7 +6,7 @@ Este documento es una lista de control, no una autorización de publicación. La
 
 ## Objetivo acordado
 
-Preparar una versión local web/PWA/Android de Rango90 sin remote Git y sin contratar una licencia comercial de proveedor. Solo se publicarán datos con permiso de redistribución verificable y recursos visuales con licencia abierta comprobada por activo; los demás datos seguirán siendo `draft` y el guard no se relajará. La matriz 7×7 concreta queda pendiente de elección entre las opciones entregadas al usuario.
+Preparar una versión local web/PWA/Android de Rango90 sin remote Git y sin contratar una licencia comercial de proveedor. Solo se publicarán datos con permiso de redistribución verificable y recursos visuales con licencia abierta comprobada por activo; los demás datos seguirán siendo `draft` y el guard no se relajará. La matriz elegida es la documentada en `DATA_7X7_OPTIONS.md`: tarjetas amarillas y rojas, títulos de club, goles en Mundiales, goles de carrera de clubes, asistencias de Champions y goles de Champions.
 
 | Requisito de salida | Evidencia autoritativa | Estado observado |
 | --- | --- | --- |

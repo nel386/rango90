@@ -44,6 +44,16 @@ Mantener una matriz de siete categorías, pero cambiar mediante decisión de pro
 
 Ventaja: reduce el trabajo de cobertura. Coste: cambia la dificultad, la comparabilidad y los guards del juego; requiere modificar especificación, validadores, interfaz y documentación.
 
-## Elección solicitada
+## Matriz elegida
 
-Responder con `A`, `B`, `C` o `D`. Si se elige `C`, indicar también las siete métricas/competiciones. Si se elige `D`, indicar qué límite se quiere cambiar. Hasta recibir esa elección, se conserva A como candidato técnico y no se publica nada.
+La selección recibida queda fijada así:
+
+1. `club-career-yellow-cards` — jugadores con más tarjetas amarillas.
+2. `club-career-red-cards` — jugadores con más tarjetas rojas.
+3. `club-career-titles` — jugadores con más títulos de club.
+4. `world-cup-goals` — jugadores con más goles en Mundiales.
+5. `club-career-goals` — jugadores con más goles en carrera de clubes.
+6. `uefa-champions-league-assists` — jugadores con más asistencias en Champions League.
+7. `uefa-champions-league-goals` — categoría añadida para completar la matriz y mantener el bloque de Champions coherente.
+
+Las dos menciones a “goles en carrera” se han contado como una sola categoría. Esta matriz sustituye como objetivo de producto al candidato anterior; todavía hay que generar/validar sus snapshots, resolver identidades y derechos, y pasar el guard antes de publicarla.

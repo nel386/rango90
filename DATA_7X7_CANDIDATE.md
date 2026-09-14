@@ -4,6 +4,8 @@ Fecha de verificación: 14 de septiembre de 2026 (UTC)
 
 ## Resultado
 
+Este documento conserva la auditoría del candidato técnico anterior. La matriz elegida para el producto es ahora la de [DATA_7X7_OPTIONS.md](/home/ubuntu/rango90/DATA_7X7_OPTIONS.md) y requiere una nueva generación de snapshots antes de sustituir esta evidencia.
+
 La base local contiene un conjunto candidato de siete categorías homogéneas de jugadores. Cada snapshot tiene 200 entradas y las siete categorías comparten ocho jugadores canónicos; por tanto, existe margen para seleccionar los siete comunes exigidos por el reto.
 
 | Categoría | Snapshot | 200 entradas | Datos completos | Conflictos | Estado | Derechos de fuente |

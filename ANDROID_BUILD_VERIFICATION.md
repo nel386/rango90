@@ -72,6 +72,8 @@ El keystore temporal no es una clave de distribución y no debe instalarse ni pu
 
 Como regresión del fallback, se repitió `assembleRelease` sin las cuatro variables: Gradle registró `no signing credentials configured; building unsigned artifact`, terminó con `BUILD SUCCESSFUL` y produjo únicamente `app-release-unsigned.apk`.
 
+El workflow de CI versionado en `.github/workflows/ci.yml` reproduce ahora las dos variantes: publica el artefacto debug y compila/verifica que la variante release sin credenciales sea explícitamente `app-release-unsigned.apk`. No intenta convertir ese artefacto en una release distribuible.
+
 ## Alcance pendiente
 
 Esta evidencia demuestra que el proyecto puede producir una APK debug válida y compilar la variante release. No se ha instalado en un dispositivo o emulador. Antes de una distribución pública todavía se necesita firmar la variante `release` con una clave protegida, verificar la firma resultante y ejecutar QA funcional de la aplicación contra un backend real autorizado.

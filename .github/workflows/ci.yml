@@ -103,7 +103,7 @@ jobs:
         working-directory: backend
         run: npm audit --omit=dev --audit-level=high
 
-  android-debug:
+  android-artifacts:
     runs-on: ubuntu-latest
     needs: web-and-backend
     steps:
@@ -134,9 +134,23 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
+      - name: Assemble unsigned release APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Verify release artifact is explicitly unsigned
+        run: test -f android/app/build/outputs/apk/release/app-release-unsigned.apk
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: rango90-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: Upload unsigned release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: rango90-release-unsigned-apk
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
           if-no-files-found: error

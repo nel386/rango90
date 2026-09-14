@@ -68,6 +68,7 @@ import { findUniqueCanonicalEntity, moveEntityDataToCanonical, recordIdentityLin
 import { assertPublishableImageLicense, assertRightsApproval } from './mediaRights.js';
 import { MAX_GAME_RANKING_ENTRIES, runDataCatalogCleanup, verifyGameCatalogBoundary } from './catalogCleanup.js';
 import { calculateChallengeSha256 } from './game-contract.js';
+import { selectCommonDailyEntities } from './dailyChallengeSelection.js';
 
 const [command, ...args] = process.argv.slice(2);
 const argument = (name: string): string | undefined => {
@@ -76,10 +77,10 @@ const argument = (name: string): string | undefined => {
 };
 
 /**
- * The catalogue remains a 200-entry ranking, but daily decisions are drawn
- * from the stronger top-90 band of at least one selected category. A missing
- * category answer is represented by scoreCap (100), just like any rank at or
- * beyond the cap. The seed keeps the daily draw random-looking but replayable.
+ * The catalogue remains a 200-entry ranking, and daily decisions are drawn
+ * only from entities common to all seven selected categories. The stronger
+ * top-90 band of at least one category keeps the daily draw varied while the
+ * common-entity rule guarantees a true 7×7 matrix.
  */
 export const DAILY_CHALLENGE_CANDIDATE_RANK = 90;
 
@@ -234,23 +235,21 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
         ORDER BY re.snapshot_id, canonical_entity.id, re.rank, re.entity_id`,
       [snapshotIds, entityType]
     );
-    const byEntity = new Map<string, Map<string, DailyChallengeRankingEntry>>();
-    for (const entry of entriesResult.rows) {
-      const bySnapshot = byEntity.get(entry.entity_id) ?? new Map<string, DailyChallengeRankingEntry>();
-      bySnapshot.set(entry.snapshot_id, entry);
-      byEntity.set(entry.entity_id, bySnapshot);
-    }
     const challengeSeed = `${date}|${snapshotIds.join('|')}`;
-    const candidateEntities = [...byEntity.entries()]
-      .filter(([, bySnapshot]) => [...bySnapshot.values()].some((entry) => entry.rank <= DAILY_CHALLENGE_CANDIDATE_RANK))
-      .map(([entityId, bySnapshot]) => ({
-        entityId,
-        bySnapshot,
-        selectionKey: createHash('sha256').update(`${challengeSeed}|${entityId}`).digest('hex')
-      }))
-      .sort((left, right) => left.selectionKey.localeCompare(right.selectionKey) || left.entityId.localeCompare(right.entityId));
+    const candidateEntities = selectCommonDailyEntities(
+      entriesResult.rows.map((entry) => ({
+        snapshotId: entry.snapshot_id,
+        entityId: entry.entity_id,
+        rank: entry.rank,
+        scoreValue: entry.score_value
+      })),
+      snapshotIds,
+      challengeSeed,
+      DAILY_CHALLENGE_CANDIDATE_RANK,
+      7
+    );
     if (candidateEntities.length < 7) {
-      throw new Error(`No hay siete entidades jugables dentro del top ${DAILY_CHALLENGE_CANDIDATE_RANK} de al menos una categoría; solo hay ${candidateEntities.length}`);
+      throw new Error(`No hay siete entidades jugables comunes a las siete categorías (con al menos una posición dentro del top ${DAILY_CHALLENGE_CANDIDATE_RANK}); solo hay ${candidateEntities.length}`);
     }
     const decisions = candidateEntities.slice(0, 7);
     const challengeKey = `${date}|${categories.map((category) => `${category.slug}:${category.snapshot_id}`).join('|')}`;
@@ -269,7 +268,7 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
       answers: decisions.flatMap((decision, decisionOrdinal) => categories.map((category) => ({
         decisionOrdinal,
         categoryId: category.category_id,
-        scoreValue: decision.bySnapshot.get(category.snapshot_id)?.score_value ?? 100
+        scoreValue: decision.bySnapshot.get(category.snapshot_id)?.scoreValue ?? 100
       })))
     });
     const existing = await client.query<{ status: string }>('SELECT status FROM game_challenges WHERE id = $1 FOR UPDATE', [challengeId]);
@@ -284,7 +283,7 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
          engine_version = EXCLUDED.engine_version, time_limit_seconds = EXCLUDED.time_limit_seconds,
          score_cap = EXCLUDED.score_cap, challenge_sha256 = EXCLUDED.challenge_sha256,
          published_at = NULL, retired_at = NULL, metadata = EXCLUDED.metadata, updated_at = NOW()`,
-      [challengeId, date, sourceVersion, challengeSha256, JSON.stringify({ materialization: 'daily-multicategory-v2', categories: categorySlugs, snapshotIds, decisionCount: decisions.length, entityType, candidateRankLimit: DAILY_CHALLENGE_CANDIDATE_RANK, missingCategoryScore: 100, selection: 'deterministic-shuffle-v1', selectionSeed: challengeSeed })]
+      [challengeId, date, sourceVersion, challengeSha256, JSON.stringify({ materialization: 'daily-multicategory-v3-common-entities', categories: categorySlugs, snapshotIds, decisionCount: decisions.length, entityType, candidateRankLimit: DAILY_CHALLENGE_CANDIDATE_RANK, selection: 'deterministic-shuffle-v2', selectionSeed: challengeSeed, commonAcrossAllCategories: true })]
     );
     await client.query('DELETE FROM game_challenge_answers WHERE game_challenge_id = $1', [challengeId]);
     await client.query('DELETE FROM game_challenge_decisions WHERE game_challenge_id = $1', [challengeId]);
@@ -303,7 +302,7 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
       for (const category of categories) {
         await client.query(
           `INSERT INTO game_challenge_answers (game_challenge_id, decision_ordinal, category_id, score_value) VALUES ($1, $2, $3, $4)`,
-          [challengeId, ordinal, category.category_id, decision.bySnapshot.get(category.snapshot_id)?.score_value]
+          [challengeId, ordinal, category.category_id, decision.bySnapshot.get(category.snapshot_id)?.scoreValue]
         );
       }
     }

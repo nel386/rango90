@@ -85,7 +85,7 @@ export class HttpGameRepository implements GameRepository {
 
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
     try {
-      const response = await fetch(`${this.baseUrl.replace(/\/$/, "")}${path}`, { ...init, credentials: "include", headers: { accept: "application/json", ...(init.body ? { "content-type": "application/json" } : {}), ...init.headers } });
+      const response = await fetch(`${this.baseUrl.replace(/\/$/, "")}${path}`, { ...init, credentials: "include", signal: init.signal ?? AbortSignal.timeout(30_000), headers: { accept: "application/json", ...(init.body ? { "content-type": "application/json" } : {}), ...init.headers } });
       const body = await response.json().catch(() => ({})) as { error?: string; message?: string; [key: string]: unknown };
       if (!response.ok) throw new RepositoryError(body.message ?? body.error ?? "Request failed", errorKind(response.status, body.error), response.status, body.error);
       return body as T;
@@ -116,7 +116,11 @@ export class HttpGameRepository implements GameRepository {
 
   async getDailyChallenge() {
     const response = await this.request<{ challenge: ApiChallenge }>("/v1/challenges/daily");
-    return normalizeChallenge(response.challenge, this.baseUrl);
+    const challenge = normalizeChallenge(response.challenge, this.baseUrl);
+    if (challenge.categories.length !== 7 || challenge.entities.length !== 7) {
+      throw new RepositoryError("The published challenge is incomplete", "invalid", 422, "challenge_invalid");
+    }
+    return challenge;
   }
 
   async startGame(challengeId: string) {

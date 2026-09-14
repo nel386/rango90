@@ -1,7 +1,7 @@
--- A square answer matrix alone does not prove that a published challenge is
--- backed by the selected ranking snapshots. Validate the common-entity and
--- score invariants at the database publication boundary as well as in the
--- read-only release guard.
+-- Independent category selection: a decision entity must be backed by at
+-- least one compatible ranking snapshot, while an absent entry in another
+-- compatible category receives that category's score cap. This is a new
+-- migration because 074/077 may already be applied in existing databases.
 
 CREATE OR REPLACE FUNCTION rango90_validate_published_game_challenge()
 RETURNS trigger
@@ -12,9 +12,9 @@ DECLARE
   decision_count INTEGER;
   answer_count INTEGER;
   expected_answer_count INTEGER;
+  invalid_answer_count INTEGER;
   unpublished_snapshots INTEGER;
   unapproved_categories INTEGER;
-  entity_type_count INTEGER;
   unbacked_decisions INTEGER;
   score_mismatches INTEGER;
 BEGIN
@@ -26,18 +26,31 @@ BEGIN
     FROM game_challenge_decisions WHERE game_challenge_id = NEW.id;
   SELECT COUNT(*) INTO answer_count
     FROM game_challenge_answers WHERE game_challenge_id = NEW.id;
-  expected_answer_count := category_count * decision_count;
 
-  IF category_count = 0 OR category_count <> decision_count OR answer_count <> expected_answer_count THEN
-    RAISE EXCEPTION 'published game challenge must have a complete square answer matrix' USING ERRCODE = '23514';
-  END IF;
-
-  SELECT COUNT(DISTINCT cd.entity_type) INTO entity_type_count
-    FROM game_challenge_categories gcc
+  SELECT COUNT(*) INTO expected_answer_count
+    FROM game_challenge_decisions gcd
+    JOIN entities decision_entity ON decision_entity.id = gcd.entity_id
+    CROSS JOIN game_challenge_categories gcc
     JOIN category_definitions cd ON cd.id = gcc.category_id
-   WHERE gcc.game_challenge_id = NEW.id;
-  IF NEW.challenge_kind = 'daily' AND entity_type_count <> 1 THEN
-    RAISE EXCEPTION 'published daily challenge categories must share an entity type' USING ERRCODE = '23514';
+   WHERE gcd.game_challenge_id = NEW.id
+     AND gcc.game_challenge_id = NEW.id
+     AND decision_entity.entity_type = cd.entity_type;
+
+  SELECT COUNT(*) INTO invalid_answer_count
+    FROM game_challenge_answers gca
+    JOIN game_challenge_decisions gcd
+      ON gcd.game_challenge_id = gca.game_challenge_id
+     AND gcd.decision_ordinal = gca.decision_ordinal
+    JOIN game_challenge_categories gcc
+      ON gcc.game_challenge_id = gca.game_challenge_id
+     AND gcc.category_id = gca.category_id
+    JOIN category_definitions cd ON cd.id = gcc.category_id
+    JOIN entities decision_entity ON decision_entity.id = gcd.entity_id
+   WHERE gca.game_challenge_id = NEW.id
+     AND decision_entity.entity_type <> cd.entity_type;
+
+  IF category_count = 0 OR category_count <> decision_count OR answer_count <> expected_answer_count OR invalid_answer_count > 0 THEN
+    RAISE EXCEPTION 'published game challenge must have a complete compatible answer matrix' USING ERRCODE = '23514';
   END IF;
 
   SELECT COUNT(*) INTO unpublished_snapshots
@@ -58,14 +71,17 @@ BEGIN
 
   SELECT COUNT(*) INTO unbacked_decisions
     FROM game_challenge_decisions gcd
+    JOIN entities decision_entity ON decision_entity.id = gcd.entity_id
    WHERE gcd.game_challenge_id = NEW.id
      AND NOT EXISTS (
        SELECT 1
          FROM game_challenge_categories gcc
+         JOIN category_definitions cd ON cd.id = gcc.category_id
          JOIN ranking_entries re ON re.snapshot_id = gcc.ranking_snapshot_id
          LEFT JOIN entity_identity_links identity_link
            ON identity_link.source_entity_id = re.entity_id
         WHERE gcc.game_challenge_id = NEW.id
+          AND decision_entity.entity_type = cd.entity_type
           AND COALESCE(identity_link.canonical_entity_id, re.entity_id) = gcd.entity_id
      );
   IF unbacked_decisions > 0 THEN
@@ -74,7 +90,9 @@ BEGIN
 
   SELECT COUNT(*) INTO score_mismatches
     FROM game_challenge_decisions gcd
+    JOIN entities decision_entity ON decision_entity.id = gcd.entity_id
     JOIN game_challenge_categories gcc ON gcc.game_challenge_id = gcd.game_challenge_id
+    JOIN category_definitions cd ON cd.id = gcc.category_id
     JOIN game_challenge_answers gca
       ON gca.game_challenge_id = gcd.game_challenge_id
      AND gca.decision_ordinal = gcd.decision_ordinal
@@ -90,9 +108,10 @@ BEGIN
        LIMIT 1
     ) re ON TRUE
    WHERE gcd.game_challenge_id = NEW.id
-     AND gca.score_value IS DISTINCT FROM COALESCE(re.score_value, NEW.score_cap);
+     AND decision_entity.entity_type = cd.entity_type
+     AND gca.score_value IS DISTINCT FROM COALESCE(re.score_value, cd.score_cap);
   IF score_mismatches > 0 THEN
-    RAISE EXCEPTION 'published game challenge answers must match ranking snapshot score values' USING ERRCODE = '23514';
+    RAISE EXCEPTION 'published game challenge answers must match ranking snapshot score values or the category score cap' USING ERRCODE = '23514';
   END IF;
 
   RETURN NEW;

@@ -92,6 +92,9 @@ jobs:
             migrations/074_validate_published_game_ranking_values.sql
             migrations/075_source_rights_ledger.sql
             migrations/076_require_https_rights_evidence.sql
+            migrations/077_allow_typed_daily_challenges.sql
+            migrations/078_admit_selected_historical_daily_matrix_players.sql
+            migrations/079_allow_independent_category_ranking_entries.sql
           )
           for migration in "${migrations[@]}"; do
             docker exec -i "$postgres_container" psql -v ON_ERROR_STOP=1 -q -U rango90 -d rango90 < "$migration"

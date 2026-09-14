@@ -19,6 +19,9 @@ const eligibleUserId = `it-eligible-${suffix}`;
 const cutoffUserId = `it-cutoff-${suffix}`;
 const validationChallengeId = `it-validation-${suffix}`;
 const missingRankingEntityId = `it-missing-ranking-entity-${suffix}`;
+const partiallyBackedEntityId = `it-partially-backed-entity-${suffix}`;
+const partialValidationChallengeId = `it-partial-validation-${suffix}`;
+const partialSnapshotA = `it-partial-snapshot-a-${suffix}`;
 const sourceRightsKey = `it-source-rights-${suffix}`;
 const thresholdSession249 = `it-session-249-${suffix}`;
 const thresholdSession250 = `it-session-250-${suffix}`;
@@ -201,8 +204,65 @@ async function assertPublishedChallengeRejectsUnbackedEntity(): Promise<void> {
         );
         await client.query('COMMIT');
       },
-    /published game challenge requires every compatible decision entity in its ranking snapshot/u
+    /published game challenge requires every decision entity in at least one compatible ranking snapshot/u
     );
+  } finally {
+    await client.query('ROLLBACK').catch(() => undefined);
+    client.release();
+  }
+}
+
+async function assertPublishedChallengeAllowsAbsentCompatibleEntityWithScoreCap(): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(
+      `INSERT INTO entities (id, entity_type, canonical_name, short_name)
+       VALUES ($1, 'player', 'Partially Backed Integration Player', 'PBIP')`,
+      [partiallyBackedEntityId]
+    );
+    await client.query(
+      `INSERT INTO entity_game_profiles (entity_id, legacy_tier, playable_default, reason)
+       VALUES ($1, 'modern', TRUE, 'integration test')`,
+      [partiallyBackedEntityId]
+    );
+    await client.query(
+      `INSERT INTO ranking_snapshots (id, category_id, data_version, algorithm_version, content_sha256, status, coverage_complete, eligible_count)
+       VALUES ($1, $2, 'it-partial-v1', 'ranking-v1', $3, 'draft', TRUE, 3)`,
+      [partialSnapshotA, categoryA, 'd'.repeat(64)]
+    );
+    await client.query(
+      `INSERT INTO ranking_entries (snapshot_id, entity_id, raw_value, rank, score_value, tie_group)
+       VALUES ($1, $2, 10, 1, 1, 1), ($1, $3, 7, 3, 3, 3)`,
+      [partialSnapshotA, entityA, partiallyBackedEntityId]
+    );
+    await client.query(`UPDATE ranking_snapshots SET status = 'published' WHERE id = $1`, [partialSnapshotA]);
+    await client.query(
+      `INSERT INTO game_challenges
+         (id, challenge_kind, challenge_date, status, source_version, engine_version, time_limit_seconds, score_cap, challenge_sha256)
+       VALUES ($1, 'daily', '2026-09-11', 'draft', 'it-v1', 'game-engine-v1', 10, 100, $2)`,
+      [partialValidationChallengeId, 'f'.repeat(64)]
+    );
+    await client.query(
+      `INSERT INTO game_challenge_categories (game_challenge_id, category_id, category_ordinal, ranking_snapshot_id)
+       VALUES ($1, $2, 0, $4), ($1, $3, 1, $5)`,
+      [partialValidationChallengeId, categoryA, categoryB, partialSnapshotA, snapshotB]
+    );
+    await client.query(
+      `INSERT INTO game_challenge_decisions (game_challenge_id, decision_ordinal, entity_id)
+       VALUES ($1, 0, $2), ($1, 1, $3)`,
+      [partialValidationChallengeId, entityA, partiallyBackedEntityId]
+    );
+    await client.query(
+      `INSERT INTO game_challenge_answers (game_challenge_id, decision_ordinal, category_id, score_value)
+       VALUES ($1, 0, $2, 1), ($1, 0, $3, 1), ($1, 1, $2, 3), ($1, 1, $3, 100)`,
+      [partialValidationChallengeId, categoryA, categoryB]
+    );
+    await client.query(
+      `UPDATE game_challenges SET status = 'published', published_at = $2 WHERE id = $1`,
+      [partialValidationChallengeId, startedAt]
+    );
+    await client.query('SET CONSTRAINTS game_challenge_publish_validation_trigger IMMEDIATE');
   } finally {
     await client.query('ROLLBACK').catch(() => undefined);
     client.release();
@@ -234,6 +294,7 @@ async function run(): Promise<void> {
   await setup();
   await assertSourceApprovalRequiresEvidence();
   await assertPublishedChallengeRejectsUnbackedEntity();
+  await assertPublishedChallengeAllowsAbsentCompatibleEntityWithScoreCap();
   let app: FastifyInstance | undefined;
   try {
     app = buildApp({ gameDb: pool, clock: () => clockTime });

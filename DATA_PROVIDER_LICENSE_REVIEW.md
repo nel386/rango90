@@ -19,6 +19,8 @@ El proyecto no contratará una licencia comercial de proveedor de datos. En cons
 
 Esta decisión permite continuar con el desarrollo local y con datos `draft`, pero no convierte automáticamente las fuentes actualmente revisadas en `approved` ni permite presentar el producto como legalmente listo para publicación.
 
+Para la matriz elegida, `player-career-goals` significa goles oficiales de carrera global, sumando clubes y selección absoluta con una definición y una procedencia homogéneas. `world-cup-goals` es una categoría separada y no sustituye ese total.
+
 ## Fuentes revisadas
 
 | Fuente | Lo que permiten inferir sus condiciones públicas | Decisión para Rango90 |

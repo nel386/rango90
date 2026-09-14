@@ -10,6 +10,20 @@ permissions:
 jobs:
   web-and-backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: rango90
+          POSTGRES_USER: rango90
+          POSTGRES_PASSWORD: rango90-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rango90 -d rango90"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,6 +57,44 @@ jobs:
       - name: Verify backend
         working-directory: backend
         run: npm run build && npm test && npm run test:rate-limit
+
+      - name: Prepare empty integration schema
+        working-directory: backend
+        run: |
+          postgres_container="$(docker ps --filter ancestor=postgres:16 --format '{{.ID}}' | head -n 1)"
+          test -n "$postgres_container"
+          migrations=(
+            migrations/001_initial.sql
+            migrations/002_media_asset_kind.sql
+            migrations/003_entity_external_ids.sql
+            migrations/004_fact_assertion_indexes.sql
+            migrations/005_source_api_type.sql
+            migrations/006_entity_game_profiles.sql
+            migrations/007_player_season_stats.sql
+            migrations/008_entity_identity_links.sql
+            migrations/009_remove_invalid_national_team_club_categories.sql
+            migrations/010_repair_goalkeeper_flags.sql
+            migrations/011_reject_dead_uefa_media.sql
+            migrations/019_auth.sql
+            migrations/026_media_rights_ledger.sql
+            migrations/027_media_usage_scope.sql
+            migrations/028_game_contract.sql
+            migrations/053_deep_catalog_cleanup.sql
+            migrations/072_freeze_published_ranking_snapshots.sql
+            migrations/073_allow_approved_categories_in_game_challenges.sql
+            migrations/074_validate_published_game_ranking_values.sql
+          )
+          for migration in "${migrations[@]}"; do
+            docker exec -i "$postgres_container" psql -v ON_ERROR_STOP=1 -q -U rango90 -d rango90 < "$migration"
+          done
+
+      - name: Verify HTTP game integration
+        working-directory: backend
+        env:
+          DATABASE_URL: postgres://rango90:rango90-ci@localhost:5432/rango90
+          CORS_ORIGIN: http://localhost:3000
+          AUTH_FRONTEND_ORIGIN: http://localhost:3000/es/
+        run: npm run test:integration
 
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high

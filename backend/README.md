@@ -6,6 +6,8 @@ Las reglas del motor están documentadas en [GAME_ENGINE.md](GAME_ENGINE.md) y e
 
 La fixture publicada exclusivamente para integración está documentada en [INTEGRATION_FIXTURE.md](INTEGRATION_FIXTURE.md). Tras levantar PostgreSQL y aplicar las migraciones, `npm run seed:integration -- --date YYYY-MM-DD` elimina el 404 de `/v1/challenges/daily` en el entorno local sin publicar datos reales ni habilitarse en producción.
 
+La lista de migraciones incluye cambios estructurales y reparaciones sobre datos ya importados. Las reparaciones de identidad y media (`012`–`071`) presuponen que existen las entidades o activos descritos en su expediente; no forman por sí solas un bootstrap vacío y no deben ejecutarse sobre una base nueva antes de importar esos datos. La CI usa un subconjunto estructural explícito (`001`–`011`, `019`, `026`–`028`, `053`, `072`–`074`) para probar el contrato HTTP desde cero; una instalación de producción debe aplicar las reparaciones únicamente en el orden documentado sobre su base de datos respaldada.
+
 ## Requisitos
 
 - Node.js 20.9+

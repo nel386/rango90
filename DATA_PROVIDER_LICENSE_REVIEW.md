@@ -43,6 +43,15 @@ La documentación oficial de [licenciamiento de Wikidata](https://www.wikidata.o
 
 Wikidata queda aprobado aquí únicamente como candidato para identidad, nombres, fechas y relaciones de entidades. No se considera todavía fuente suficiente para ninguna de las siete clasificaciones: hay que demostrar, mediante una consulta reproducible y una auditoría de cobertura, 200 filas reales, una definición estadística homogénea y procedencia verificable para cada valor. Hasta entonces no se cambia ningún snapshot a `approved`.
 
+## Candidatos abiertos adicionales para títulos de clubes
+
+La revisión de fuentes abiertas identifica dos conjuntos útiles para investigar la categoría `national-league-club-titles`, pero ninguno se aprueba automáticamente ni cubre las cinco categorías de jugadores:
+
+- [OpenFootball/leagues](https://github.com/openfootball/leagues) declara que sus datos de ligas y copas nacionales e internacionales están dedicados al dominio público. Es un candidato para resultados y temporadas de competiciones, no una fuente de tarjetas, goles individuales o palmarés de jugadores.
+- [schochastics/football-data](https://github.com/schochastics/football-data) publica resultados de más de 200 ligas domésticas bajo la Open Data Commons Attribution License. Puede servir para derivar campeones por temporada, pero el propio proyecto advierte de errores en partidos antiguos y de identidades de clubes que se fusionan, dividen o desaparecen.
+
+Antes de usarlos en un snapshot publicable hay que conservar la licencia y versión exactas, reconstruir la clasificación de cada temporada, resolver cambios históricos de identidad, contrastar los campeones y documentar la atribución ODC cuando corresponda. Esta ruta puede ampliar el universo de títulos nacionales; no resuelve por sí misma las tarjetas amarillas/rojas ni los goles globales de carrera.
+
 ## Candidato adicional revisado — Football API / Roanuz
 
 El [texto oficial de términos de Football API](https://footballapi.com/legal/terms-of-use/) actualizado el 15 de mayo de 2026 indica que el uso comercial de los datos solo está permitido en la medida autorizada por el plan contratado o por un acuerdo separado. También permite mostrar datos dentro de la aplicación y conservar caché razonable, pero prohíbe redistribuir datos crudos o crear feeds/productos derivados competitivos sin un acuerdo escrito específico.

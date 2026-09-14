@@ -1,0 +1,49 @@
+{
+  "categorySlug": "afc-champions-league-club-titles",
+  "source": {
+    "key": "afc-champions-league-official-roll-of-honour",
+    "name": "AFC Champions League official roll of honour",
+    "sourceType": "official",
+    "baseUrl": "https://www.the-afc.com/en/club/afc_champions_league/news/afc_champions_league_the_drama_the_glory.html",
+    "sourceUrls": [
+      "https://www.the-afc.com/en/club/afc_champions_league/news/afc_champions_league_the_drama_the_glory.html",
+      "https://assets.the-afc.com/ACL_2022/Downloads/AFC-Champions-League%E2%84%A2-2022-Official-Media-Guide.pdf",
+      "https://www.the-afc.com/en/club/afc_champions_league/archive/2022.html",
+      "https://www.the-afc.com/en/club/afc_champions_league.html/news/year-in-review-afc-champions-league%E2%84%A2-202324",
+      "https://www.the-afc.com/en/club/afc_champions_league_elite.html/news/year-in-review-afc-champions-league-elite-202425%E2%84%A2",
+      "https://www.the-afc.com/en/club/afc_champions_league_elite.html/news/al-ahli-saudi-savour-glory-again"
+    ],
+    "rightsStatus": "review_required"
+  },
+  "dataVersion": "afc-champions-league-official-roll-of-honour-2026",
+  "coverageComplete": true,
+  "reviewed": false,
+  "notes": "Closed universe of editions actually played. The historical AFC roll of honour covers 1967–2014; the official AFC 2022 media guide covers 2015–2021; AFC archive and year-review pages cover 2022–2026. Former names are consolidated only where the official record identifies the same club (Taj/Esteghlal).",
+  "entries": [
+    { "entityId": "afc:champions-league:club:al-hilal", "entityType": "club", "name": "Al Hilal", "rawValue": 4, "evidence": { "sourceRank": 1, "editions": ["1991", "1999-2000", "2019", "2021"] } },
+    { "entityId": "afc:champions-league:club:pohang-steelers", "entityType": "club", "name": "Pohang Steelers", "rawValue": 3, "evidence": { "sourceRank": 2, "editions": ["1996-97", "1997-98", "2009"] } },
+    { "entityId": "afc:champions-league:club:urawa-red-diamonds", "entityType": "club", "name": "Urawa Red Diamonds", "rawValue": 3, "evidence": { "sourceRank": 3, "editions": ["2007", "2017", "2022"] } },
+    { "entityId": "afc:champions-league:club:al-ahli-saudi", "entityType": "club", "name": "Al Ahli Saudi", "rawValue": 2, "evidence": { "sourceRank": 4, "editions": ["2024-25", "2025-26"] } },
+    { "entityId": "afc:champions-league:club:al-ain", "entityType": "club", "name": "Al Ain", "rawValue": 2, "evidence": { "sourceRank": 5, "editions": ["2002-03", "2023-24"] } },
+    { "entityId": "afc:champions-league:club:al-ittihad", "entityType": "club", "name": "Al Ittihad", "rawValue": 2, "evidence": { "sourceRank": 6, "editions": ["2004", "2005"] } },
+    { "entityId": "afc:champions-league:club:al-sadd", "entityType": "club", "name": "Al Sadd", "rawValue": 2, "evidence": { "sourceRank": 7, "editions": ["1988-89", "2011"] } },
+    { "entityId": "afc:champions-league:club:esteghlal", "entityType": "club", "name": "Esteghlal (Taj)", "rawValue": 2, "evidence": { "sourceRank": 8, "editions": ["1970", "1990-91"] } },
+    { "entityId": "afc:champions-league:club:guangzhou-evergrande", "entityType": "club", "name": "Guangzhou Evergrande", "rawValue": 2, "evidence": { "sourceRank": 9, "editions": ["2013", "2015"] } },
+    { "entityId": "afc:champions-league:club:jeonbuk-hyundai-motors", "entityType": "club", "name": "Jeonbuk Hyundai Motors", "rawValue": 2, "evidence": { "sourceRank": 10, "editions": ["2006", "2016"] } },
+    { "entityId": "afc:champions-league:club:maccabi-tel-aviv", "entityType": "club", "name": "Maccabi Tel Aviv", "rawValue": 2, "evidence": { "sourceRank": 11, "editions": ["1968", "1971"] } },
+    { "entityId": "afc:champions-league:club:seongnam", "entityType": "club", "name": "Seongnam Ilhwa Chunma", "rawValue": 2, "evidence": { "sourceRank": 12, "editions": ["1995", "2010"] } },
+    { "entityId": "afc:champions-league:club:suwon-bluewings", "entityType": "club", "name": "Suwon Bluewings", "rawValue": 2, "evidence": { "sourceRank": 13, "editions": ["2000-01", "2001-02"] } },
+    { "entityId": "afc:champions-league:club:thai-farmers-bank", "entityType": "club", "name": "Thai Farmers Bank", "rawValue": 2, "evidence": { "sourceRank": 14, "editions": ["1993-94", "1994-95"] } },
+    { "entityId": "afc:champions-league:club:ulsan-hyundai", "entityType": "club", "name": "Ulsan Hyundai", "rawValue": 2, "evidence": { "sourceRank": 15, "editions": ["2012", "2020"] } },
+    { "entityId": "afc:champions-league:club:daewoo-royals", "entityType": "club", "name": "Daewoo Royals", "rawValue": 1, "evidence": { "sourceRank": 16, "editions": ["1985"] } },
+    { "entityId": "afc:champions-league:club:furukawa-electric", "entityType": "club", "name": "Furukawa Electric", "rawValue": 1, "evidence": { "sourceRank": 17, "editions": ["1986"] } },
+    { "entityId": "afc:champions-league:club:gamba-osaka", "entityType": "club", "name": "Gamba Osaka", "rawValue": 1, "evidence": { "sourceRank": 18, "editions": ["2008"] } },
+    { "entityId": "afc:champions-league:club:hapoel-tel-aviv", "entityType": "club", "name": "Hapoel Tel Aviv", "rawValue": 1, "evidence": { "sourceRank": 19, "editions": ["1967"] } },
+    { "entityId": "afc:champions-league:club:ju-bilo-iwata", "entityType": "club", "name": "Júbilo Iwata", "rawValue": 1, "evidence": { "sourceRank": 20, "editions": ["1998-99"] } },
+    { "entityId": "afc:champions-league:club:kashima-antlers", "entityType": "club", "name": "Kashima Antlers", "rawValue": 1, "evidence": { "sourceRank": 21, "editions": ["2018"] } },
+    { "entityId": "afc:champions-league:club:liaoning", "entityType": "club", "name": "Liaoning FC", "rawValue": 1, "evidence": { "sourceRank": 22, "editions": ["1989-90"] } },
+    { "entityId": "afc:champions-league:club:pas", "entityType": "club", "name": "Pas", "rawValue": 1, "evidence": { "sourceRank": 23, "editions": ["1992-93"] } },
+    { "entityId": "afc:champions-league:club:western-sydney-wanderers", "entityType": "club", "name": "Western Sydney Wanderers", "rawValue": 1, "evidence": { "sourceRank": 24, "editions": ["2014"] } },
+    { "entityId": "afc:champions-league:club:yomiuri", "entityType": "club", "name": "Yomiuri", "rawValue": 1, "evidence": { "sourceRank": 25, "editions": ["1987"] } }
+  ]
+}

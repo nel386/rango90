@@ -157,6 +157,7 @@
   "import:uefa-euro:global": "tsx src/cli.ts import-uefa-euro-global",
     "build:rankings:club-career-titles": "tsx src/cli.ts build-club-career-titles",
     "build:rankings:club-global-titles": "tsx src/cli.ts build-club-global-titles",
+    "build:rankings:national-league-club-titles": "tsx src/cli.ts build-national-league-club-titles",
     "build:rankings:player-career-titles": "tsx src/cli.ts build-player-career-titles",
     "build:rankings:goalkeeper-clean-sheets": "tsx src/cli.ts build-global-goalkeeper-clean-sheets",
     "build:rankings:goalkeeper-index": "tsx src/cli.ts build-goalkeeper-historical-index",

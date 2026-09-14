@@ -33,7 +33,7 @@ Para la matriz elegida, `player-career-goals` significa goles oficiales de carre
 ## Evidencia local actual
 
 - `sources` contiene 0 fuentes con `rights_status = approved`.
-- Las categorías y snapshots candidatos continúan en `draft`; además existe un snapshot provisional de `player-career-goals` (`rs_c2c4a7942b4f8d2bd156306c`) con `coverage_complete=false`, que no es publicable.
+- Las categorías y snapshots candidatos continúan en `draft`; además existen snapshots provisionales de `player-career-goals` (`rs_c2c4a7942b4f8d2bd156306c`, 200 filas, `coverage_complete=false`) y `national-league-club-titles` (`rs_5943de063ce56ca0b02a48ab`, 69 filas, `coverage_complete=false`), ninguno publicable.
 - Los activos de retratos y escudos no se consideran publicables solo por estar descargados o por tener un fallback visual.
 - El validador `validate:evidence:global-career-goals` informa que no hay fuente válida para publicar. El agregado provisional existente se mantiene explícitamente en `draft` y no cambia esa decisión.
 

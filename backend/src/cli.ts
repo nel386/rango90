@@ -2650,6 +2650,131 @@ try {
       }))
     });
     console.log(JSON.stringify({ source: 'rango90-club-title-facts', categorySlug, rankingId, entries: rows.rows.length, coverageComplete: false, note: 'Snapshot provisional: solo incluye palmarés de clubes importados y deduplicados.' }, null, 2));
+  } else if (command === 'build-national-league-club-titles') {
+    const categorySlug = 'national-league-club-titles';
+    const domesticCategorySlugs = [
+      'premier-league-club-titles',
+      'la-liga-club-titles',
+      'bundesliga-club-titles',
+      'serie-a-club-titles',
+      'ligue-1-club-titles',
+      'primeira-liga-club-titles'
+    ];
+    const rows = await pool.query<{
+      entity_id: string;
+      canonical_name: string;
+      titles: string;
+      source_snapshots: string[];
+      source_fact_ids: string[];
+      competitions: string[];
+    }>(
+      `WITH RECURSIVE identity_chain AS (
+         SELECT e.id AS source_entity_id, e.id AS canonical_entity_id,
+                ARRAY[e.id]::text[] AS path, 0 AS depth
+           FROM entities e
+          WHERE e.entity_type = 'club'
+         UNION ALL
+         SELECT chain.source_entity_id, link.canonical_entity_id,
+                chain.path || link.canonical_entity_id, chain.depth + 1
+           FROM identity_chain chain
+           JOIN entity_identity_links link ON link.source_entity_id = chain.canonical_entity_id
+          WHERE NOT link.canonical_entity_id = ANY(chain.path)
+            AND chain.depth < 10
+       ), resolved_identity AS (
+         SELECT DISTINCT ON (source_entity_id) source_entity_id, canonical_entity_id
+           FROM identity_chain
+          ORDER BY source_entity_id, depth DESC
+       ), playable_clubs AS (
+         SELECT DISTINCT COALESCE(resolved_identity.canonical_entity_id, e.id) AS entity_id
+           FROM entity_game_profiles profile
+           JOIN entities e ON e.id = profile.entity_id AND e.entity_type = 'club'
+           LEFT JOIN resolved_identity ON resolved_identity.source_entity_id = e.id
+          WHERE profile.playable_default = TRUE
+       ), domestic_facts AS (
+         SELECT f.id,
+                COALESCE(resolved_identity.canonical_entity_id, f.subject_entity_id) AS entity_id,
+                f.source_snapshot_id,
+                f.value->>'categorySlug' AS competition,
+                NULLIF((f.value->>'rawValue')::numeric, 0) AS raw_value,
+                ROW_NUMBER() OVER (
+                  PARTITION BY COALESCE(resolved_identity.canonical_entity_id, f.subject_entity_id), f.value->>'categorySlug'
+                  ORDER BY f.id DESC
+                ) AS freshness_rank
+           FROM fact_assertions f
+           JOIN entities subject ON subject.id = f.subject_entity_id AND subject.entity_type = 'club'
+           LEFT JOIN resolved_identity ON resolved_identity.source_entity_id = f.subject_entity_id
+          WHERE f.fact_type = 'ranking_value:titles'
+            AND f.review_status IN ('pending', 'approved')
+            AND f.value->>'categorySlug' = ANY($1::text[])
+            AND NULLIF((f.value->>'rawValue')::numeric, 0) IS NOT NULL
+            AND EXISTS (
+              SELECT 1
+                FROM ranking_snapshots source_ranking
+                JOIN category_definitions source_category ON source_category.id = source_ranking.category_id
+               WHERE source_category.slug = f.value->>'categorySlug'
+                 AND source_category.entity_type = 'club'
+                 AND source_ranking.metadata->>'sourceSnapshotId' = f.source_snapshot_id
+                 AND source_ranking.status <> 'superseded'
+                 AND source_ranking.coverage_complete = TRUE
+            )
+       ), totals AS (
+         SELECT fact.entity_id,
+                SUM(fact.raw_value)::text AS titles,
+                ARRAY_AGG(DISTINCT fact.source_snapshot_id ORDER BY fact.source_snapshot_id) AS source_snapshots,
+                ARRAY_AGG(DISTINCT fact.id ORDER BY fact.id) AS source_fact_ids,
+                ARRAY_AGG(DISTINCT fact.competition ORDER BY fact.competition) AS competitions
+           FROM domestic_facts fact
+           JOIN playable_clubs playable ON playable.entity_id = fact.entity_id
+          WHERE fact.freshness_rank = 1
+          GROUP BY fact.entity_id
+       )
+       SELECT totals.entity_id, entity.canonical_name, totals.titles,
+              totals.source_snapshots, totals.source_fact_ids, totals.competitions
+         FROM totals
+         JOIN entities entity ON entity.id = totals.entity_id AND entity.entity_type = 'club'
+        ORDER BY totals.titles::numeric DESC, entity.canonical_name, totals.entity_id`,
+      [domesticCategorySlugs]
+    );
+    if (rows.rows.length === 0) throw new Error('No hay clubes jugables con hechos de títulos nacionales importados');
+    const rankingId = await importRankingInput({
+      categorySlug,
+      source: {
+        key: 'rango90-domestic-league-club-titles-derived',
+        name: 'Agregado Rango90 de títulos de primera división doméstica',
+        sourceType: 'reference',
+        baseUrl: 'https://www.rango90.local/data/domestic-league-club-titles',
+        rightsStatus: 'review_required'
+      },
+      dataVersion: `rango90-national-league-club-titles-${new Date().toISOString().slice(0, 10)}`,
+      coverageComplete: false,
+      allowPartialDraft: true,
+      partialDraftReason: `El snapshot suma solo las seis ligas domésticas actualmente importadas (${domesticCategorySlugs.join(', ')}); contiene ${rows.rows.length} clubes y no afirma cobertura mundial de títulos nacionales ni derechos de redistribución.`,
+      reviewed: false,
+      entries: rows.rows.map((row, index) => ({
+        entityId: row.entity_id,
+        entityType: 'club' as const,
+        name: row.canonical_name,
+        rawValue: Number(row.titles),
+        evidence: {
+          sourceRank: index + 1,
+          sourceSnapshotIds: row.source_snapshots,
+          sourceFactIds: row.source_fact_ids,
+          domesticCompetitions: row.competitions,
+          definition: 'Suma provisional de títulos de primera división de las ligas domésticas importadas; se cuenta cada club y competición una vez y no se aplica padding.'
+        }
+      }))
+    });
+    console.log(JSON.stringify({
+      source: 'rango90-domestic-league-club-titles-derived',
+      categorySlug,
+      rankingId,
+      entries: rows.rows.length,
+      requiredOpenUniverseEntries: MAX_GAME_RANKING_ENTRIES,
+      coverageComplete: false,
+      published: false,
+      domesticCompetitions: domesticCategorySlugs,
+      note: 'Snapshot draft parcial; requiere ampliar a ligas nacionales mundiales, resolver identidades y obtener derechos abiertos o permiso escrito antes de publicar.'
+    }, null, 2));
   } else if (command === 'build-club-career-titles') {
     const categorySlug = 'club-career-titles';
     const rows = await pool.query<{

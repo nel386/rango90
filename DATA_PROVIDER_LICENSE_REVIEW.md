@@ -24,6 +24,14 @@ La existencia de una API, un plan gratuito o una respuesta con imágenes no demu
 - Los activos de retratos y escudos no se consideran publicables solo por estar descargados o por tener un fallback visual.
 - El validador `validate:evidence:global-career-goals` informa que no hay fuente válida y cierra el expediente sin importación insegura.
 
+## Candidato adicional revisado — Football API / Roanuz
+
+El [texto oficial de términos de Football API](https://footballapi.com/legal/terms-of-use/) actualizado el 15 de mayo de 2026 indica que el uso comercial de los datos solo está permitido en la medida autorizada por el plan contratado o por un acuerdo separado. También permite mostrar datos dentro de la aplicación y conservar caché razonable, pero prohíbe redistribuir datos crudos o crear feeds/productos derivados competitivos sin un acuerdo escrito específico.
+
+La [página oficial de precios](https://footballapi.com/pricing/) publica el plan Basic a **172 USD/mes** con facturación anual o **229 USD/mes** con facturación mensual. Esto excede ampliamente el presupuesto operativo aproximado de 30 €/mes y, por sí solo, no demuestra cobertura homogénea de los siete rankings históricos requeridos.
+
+Decisión: **no seleccionado**. Podría solicitarse una oferta empresarial únicamente si cambia el presupuesto; antes de importar o aprobar cualquier dato todavía habría que obtener confirmación escrita sobre el juego comercial, rankings derivados, snapshots inmutables, almacenamiento, Android, atribución y derechos de terceros.
+
 ## Criterio de desbloqueo
 
 Para cada una de las siete categorías debe incorporarse al expediente:

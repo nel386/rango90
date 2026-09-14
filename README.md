@@ -231,3 +231,11 @@ npm run build
 ```
 
 No se publicará una categoría si no tiene cobertura completa de su universo, conflictos resueltos y 200 entidades jugables reales en los rankings abiertos. En universos cerrados se exige el universo completo (por ejemplo, los campeones históricos de una competición), no un número artificial de 200. Los activos visuales publicados deben tener un expediente de derechos aprobado; cuando la imagen sea opcional, el frontend puede usar el fallback visual propio. Las filas históricas conservadas fuera del roster jugable no cuentan para este requisito.
+
+El guard de salida completo es de solo lectura y debe devolver `ready: true` antes de una publicación:
+
+```bash
+npm run verify:release-readiness
+```
+
+Comprueba conexión, fuentes aprobadas, snapshots publicados, una matriz diaria 7×7, contratos de sus categorías y los límites del catálogo. No crea fixtures ni cambia la base de datos.

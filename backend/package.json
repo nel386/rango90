@@ -178,6 +178,7 @@
     "media:requeue:api-football:playable": "tsx src/cli.ts requeue-playable-api-football-media",
     "audit:data-readiness": "tsx src/cli.ts audit-data-readiness",
     "verify:game-catalog": "tsx src/cli.ts verify-game-catalog",
+    "verify:release-readiness": "tsx src/tools/verify-release-readiness.ts",
     "cleanup:ranking-padding": "tsx src/cli.ts clean-ranking-padding",
     "validate:evidence:global-career-goals": "tsx src/tools/validate-global-career-goals-source-review.ts",
     "validate:production:champions-goals": "tsx src/tools/validate-champions-goals-production.ts",

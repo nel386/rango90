@@ -6,7 +6,7 @@ Las reglas del motor están documentadas en [GAME_ENGINE.md](GAME_ENGINE.md) y e
 
 La fixture publicada exclusivamente para integración está documentada en [INTEGRATION_FIXTURE.md](INTEGRATION_FIXTURE.md). Tras levantar PostgreSQL y aplicar las migraciones, `npm run seed:integration -- --date YYYY-MM-DD` elimina el 404 de `/v1/challenges/daily` en el entorno local sin publicar datos reales ni habilitarse en producción.
 
-La lista de migraciones incluye cambios estructurales y reparaciones sobre datos ya importados. Las reparaciones de identidad y media (`012`–`071`) presuponen que existen las entidades o activos descritos en su expediente; no forman por sí solas un bootstrap vacío y no deben ejecutarse sobre una base nueva antes de importar esos datos. La CI usa un subconjunto estructural explícito (`001`–`011`, `019`, `026`–`028`, `053`, `072`–`074`) para probar el contrato HTTP desde cero; una instalación de producción debe aplicar las reparaciones únicamente en el orden documentado sobre su base de datos respaldada.
+La lista de migraciones incluye cambios estructurales y reparaciones sobre datos ya importados. Las reparaciones de identidad y media (`012`–`071`) presuponen que existen las entidades o activos descritos en su expediente; no forman por sí solas un bootstrap vacío y no deben ejecutarse sobre una base nueva antes de importar esos datos. La CI usa un subconjunto estructural explícito (`001`–`011`, `019`, `026`–`028`, `053`, `072`–`075`) para probar el contrato HTTP desde cero; una instalación de producción debe aplicar las reparaciones únicamente en el orden documentado sobre su base de datos respaldada.
 
 ## Requisitos
 
@@ -95,6 +95,7 @@ psql "$DATABASE_URL" -f migrations/071_flatten_reviewed_zaniolo_identity_chain.s
 psql "$DATABASE_URL" -f migrations/072_freeze_published_ranking_snapshots.sql
 psql "$DATABASE_URL" -f migrations/073_allow_approved_categories_in_game_challenges.sql
 psql "$DATABASE_URL" -f migrations/074_validate_published_game_ranking_values.sql
+psql "$DATABASE_URL" -f migrations/075_source_rights_ledger.sql
 
 Para casos de homónimos de Wikidata, el enriquecedor admite un `--qid` explícito; valida que la etiqueta coincida y que la descripción sea futbolística antes de aplicar la fecha.
 npm run seed
@@ -186,7 +187,7 @@ npm run entity:consolidate:uefa-shared-clubs
 npm run entity:consolidate:rsssf
 npm run entity:consolidate:dfl-supercup
 npm run approve:category -- --slug premier-league-goals
-npm run review:source -- --key premier-league-official --status approved
+# La aprobación de una fuente requiere evidencia; ver el ejemplo de review:source más abajo.
 npm run approve:snapshot -- --snapshot rs_xxx
 npm run publish -- --snapshot rs_xxx
 npm run audit:data-readiness
@@ -369,7 +370,18 @@ Sin `--snapshot`, el comando busca clubes jugables sin escudo aprobado; con `--s
 
 Cuando se quiera descargar y dejar candidatos locales para revisión, se puede usar `media:stage:thesportsdb`. Los activos quedan siempre `pending` y `review_required`; TheSportsDB no es fuente de estadísticas y sus URLs disponibles no bastan por sí solas como licencia comercial. El adaptador no permite aprobar esos escudos automáticamente:
 
-La aprobación de un activo de TheSportsDB solo se habilita después de ejecutar `review-source --key thesportsdb-artwork --status approved`, una vez confirmada la licencia comercial aplicable a Rango 90. Con `review_required` o `unknown`, el backend rechaza la aprobación de forma intencionada.
+La aprobación de un activo de TheSportsDB solo se habilita después de registrar la licencia comercial aplicable a Rango 90. `review-source` ya no acepta un cambio de estado desnudo: para marcar una fuente como `approved` exige evidencia, revisor, alcance de uso y notas, y conserva la decisión en `source_rights_reviews`:
+
+```bash
+npm run review:source -- --key thesportsdb-artwork --status approved \
+  --rights-basis provider_license --commercial-use \
+  --reviewer legal-review-1 \
+  --rights-evidence-url https://example.com/rango90-licence \
+  --usage-scope web,pwa,android,cdn,local_storage \
+  --rights-notes "Contrato y alcance comercial revisados para datos/medios de Rango90."
+```
+
+Con `review_required` o `unknown`, el backend rechaza la aprobación de activos de forma intencionada. La migración `075_source_rights_ledger.sql` añade además un trigger de base de datos para impedir que una actualización SQL omita ese expediente.
 
 ```bash
 npm run media:stage:thesportsdb -- --limit 20 --delay-ms 2100

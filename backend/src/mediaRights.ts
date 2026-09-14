@@ -1,6 +1,45 @@
 export type RightsBasis = 'unknown' | 'public_domain' | 'open_license' | 'direct_license' | 'provider_license' | 'written_permission' | 'not_applicable';
 export type TrademarkStatus = 'not_applicable' | 'review_required' | 'cleared' | 'rejected';
 
+const sourceRightsBases: RightsBasis[] = [
+  'public_domain',
+  'open_license',
+  'direct_license',
+  'provider_license',
+  'written_permission'
+];
+
+export function assertSourceRightsApproval(input: {
+  rightsBasis: string | undefined;
+  commercialUse: boolean;
+  reviewer: string | undefined;
+  rightsEvidenceUrl: string | undefined;
+  usageScope: string | undefined;
+  rightsNotes: string | undefined;
+}): { rightsBasis: RightsBasis; rightsEvidenceUrl: string; usageScope: string[]; reviewer: string; rightsNotes: string } {
+  if (!input.rightsBasis || !sourceRightsBases.includes(input.rightsBasis as RightsBasis)) {
+    throw new Error('--rights-basis debe ser public_domain, open_license, direct_license, provider_license o written_permission');
+  }
+  if (!input.commercialUse) throw new Error('La aprobación de una fuente exige confirmar --commercial-use');
+  const reviewer = input.reviewer?.trim();
+  if (!reviewer) throw new Error('La aprobación de una fuente requiere --reviewer');
+  const rightsNotes = input.rightsNotes?.trim();
+  if (!rightsNotes) throw new Error('La aprobación de una fuente requiere --rights-notes con el alcance y las limitaciones revisadas');
+  const rightsEvidenceUrl = assertRightsEvidenceUrl(input.rightsEvidenceUrl);
+  const usageScope = parseUsageScope(input.usageScope);
+  const requiredScope = new Set(['web', 'pwa', 'android', 'local_storage']);
+  if ([...requiredScope].some((scope) => !usageScope.includes(scope))) {
+    throw new Error('--usage-scope de una fuente debe incluir web,pwa,android,local_storage');
+  }
+  return {
+    rightsBasis: input.rightsBasis as RightsBasis,
+    rightsEvidenceUrl,
+    usageScope,
+    reviewer,
+    rightsNotes
+  };
+}
+
 export function assertPublishableImageLicense(
   provider: string,
   licenseName: string | null | undefined,

@@ -18,6 +18,7 @@ const eligibleUserId = `it-eligible-${suffix}`;
 const cutoffUserId = `it-cutoff-${suffix}`;
 const validationChallengeId = `it-validation-${suffix}`;
 const missingRankingEntityId = `it-missing-ranking-entity-${suffix}`;
+const sourceRightsKey = `it-source-rights-${suffix}`;
 const thresholdSession249 = `it-session-249-${suffix}`;
 const thresholdSession250 = `it-session-250-${suffix}`;
 const authToken = `integration-auth-${suffix}-token`;
@@ -207,8 +208,30 @@ async function assertPublishedChallengeRejectsUnbackedEntity(): Promise<void> {
   }
 }
 
+async function assertSourceApprovalRequiresEvidence(): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(
+      `INSERT INTO sources (key, name, source_type, rights_status)
+       VALUES ($1, 'Integration source rights', 'manual', 'review_required')`,
+      [sourceRightsKey]
+    );
+    await assert.rejects(
+      async () => {
+        await client.query(`UPDATE sources SET rights_status = 'approved' WHERE key = $1`, [sourceRightsKey]);
+      },
+      /cannot be approved without commercial evidence and a registered review|no puede aprobarse sin evidencia comercial y revisión registrada/u
+    );
+  } finally {
+    await client.query('ROLLBACK').catch(() => undefined);
+    client.release();
+  }
+}
+
 async function run(): Promise<void> {
   await setup();
+  await assertSourceApprovalRequiresEvidence();
   await assertPublishedChallengeRejectsUnbackedEntity();
   let app: FastifyInstance | undefined;
   try {

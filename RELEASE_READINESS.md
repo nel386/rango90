@@ -6,7 +6,7 @@ Este documento es una lista de control, no una autorización de publicación. La
 
 | Requisito de salida | Evidencia autoritativa | Estado observado |
 | --- | --- | --- |
-| Dataset y licencias aprobados | `npm run verify:release-readiness`, `DATA_PROVIDER_LICENSE_REVIEW.md`, expedientes de `sources` y `source_snapshots` | **Bloqueado**: `approvedSources=0`; ninguna fuente está aprobada para redistribución comercial |
+| Dataset y licencias aprobados | `npm run verify:release-readiness`, `DATA_PROVIDER_LICENSE_REVIEW.md`, expedientes de `sources`, `source_snapshots` y `source_rights_reviews` | **Bloqueado**: `approvedSources=0`; ninguna fuente está aprobada para redistribución comercial |
 | Siete categorías homogéneas | `DATA_7X7_CANDIDATE.md`, contratos de categoría y snapshots | **Candidato únicamente**: hay siete snapshots draft de 200 entradas, pero seis tienen `coverage_complete=false`, y todos carecen de derechos aprobados |
 | Siete jugadores comunes | Selector `selectCommonDailyEntities()` y guard de publicación | **Implementado y verificable**: el selector exige presencia en los siete snapshots; el candidato actual tiene ocho jugadores comunes |
 | Identidades, empates, posiciones y evidencias | Validadores de ranking, manifests de identidad y revisión de producción UEFA | **Bloqueado**: `uefa-champions-league-goals` conserva 12 discrepancias frente al contraste oficial |

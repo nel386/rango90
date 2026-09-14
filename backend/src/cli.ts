@@ -65,7 +65,7 @@ import { cleanupApiFootballSeasonCache, fetchApiFootballLeagueCompleteSeason, fe
 import { fetchApiFootballPlayerTrophies, type ApiFootballTrophy } from './providers/apiFootballTrophiesClient.js';
 import { consolidateApiFootballIdentities, consolidateBdfutbolLaLigaIdentities, consolidateBdfutbolSharedPlayerIdentities, consolidateDfbBundesligaIdentities, consolidateDfbPokalIdentities, consolidateDflSupercupIdentities, consolidateFaCupIdentities, consolidateRsssfIdentities, consolidateSerieAClubTitlesIdentities, consolidateStatbunkerChampionsLeagueIdentities, consolidateStatbunkerClubWorldCupIdentities, consolidateStatbunkerConferenceIdentities, consolidateStatbunkerCopaAmericaIdentities, consolidateStatbunkerCopaLibertadoresIdentities, consolidateStatbunkerEuroIdentities, consolidateStatbunkerEuropaIdentities, consolidateStatbunkerNationsLeagueIdentities, consolidateStatbunkerWorldCupIdentities, consolidateSupercoppaItalianaIdentities, consolidateTransfermarktBundesligaAssistsIdentities, consolidateTransfermarktClubWorldCupIdentities, consolidateTransfermarktCopaAmericaIdentities, consolidateTransfermarktCopaLibertadoresIdentities, consolidateTransfermarktCopaSudamericanaIdentities, consolidateTransfermarktEuropeanCupChampionsLeagueIdentities, consolidateTransfermarktLaLigaAssistsIdentities, consolidateTransfermarktLigue1AssistsIdentities, consolidateTransfermarktNationsLeagueIdentities, consolidateTransfermarktPrimeiraLigaAssistsIdentities, consolidateTransfermarktSerieAAssistsIdentities, consolidateTransfermarktUefaEuropaLeagueIdentities, consolidateTransfermarktWorldCupIdentities, consolidateUefaChampionsLeagueIdentities, consolidateUefaClubIdentities, consolidateUefaConferenceLeagueIdentities, consolidateUefaEuroIdentities, consolidateUefaSharedClubIdentities, consolidateUefaSharedPlayerIdentities, consolidateWikipediaCopaDelReyIdentities, consolidateWikipediaCopaSudamericanaIdentities, consolidateWikipediaRecopaSudamericanaIdentities, consolidateWikipediaSerieAIdentities, repairIdentityLinks } from './identityConsolidation.js';
 import { findUniqueCanonicalEntity, moveEntityDataToCanonical, recordIdentityLink, resolveCanonicalEntityId } from './entityIdentity.js';
-import { assertPublishableImageLicense, assertRightsApproval } from './mediaRights.js';
+import { assertPublishableImageLicense, assertRightsApproval, assertSourceRightsApproval } from './mediaRights.js';
 import { MAX_GAME_RANKING_ENTRIES, runDataCatalogCleanup, verifyGameCatalogBoundary } from './catalogCleanup.js';
 import { calculateChallengeSha256 } from './game-contract.js';
 import { selectCommonDailyEntities } from './dailyChallengeSelection.js';
@@ -5166,12 +5166,55 @@ try {
     if (!key || !rightsStatus || !['unknown', 'review_required', 'approved', 'rejected'].includes(rightsStatus)) {
       throw new Error('Faltan --key o --status: unknown | review_required | approved | rejected');
     }
-    const result = await pool.query(
-      `UPDATE sources SET rights_status = $2 WHERE key = $1 RETURNING key`,
-      [key, rightsStatus]
-    );
-    if (!result.rows[0]) throw new Error(`Fuente inexistente: ${key}`);
-    console.log(`Estado de derechos actualizado: ${key} -> ${rightsStatus}`);
+    if (rightsStatus !== 'approved') {
+      const result = await pool.query(
+        `UPDATE sources SET rights_status = $2 WHERE key = $1 RETURNING key`,
+        [key, rightsStatus]
+      );
+      if (!result.rows[0]) throw new Error(`Fuente inexistente: ${key}`);
+      console.log(`Estado de derechos actualizado: ${key} -> ${rightsStatus}`);
+    } else {
+      const rightsReview = assertSourceRightsApproval({
+        rightsBasis: argument('rights-basis'),
+        commercialUse: args.includes('--commercial-use'),
+        reviewer: argument('reviewer'),
+        rightsEvidenceUrl: argument('rights-evidence-url'),
+        usageScope: argument('usage-scope'),
+        rightsNotes: argument('rights-notes')
+      });
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        const source = await client.query<{ key: string }>(
+          `SELECT key FROM sources WHERE key = $1 FOR UPDATE`,
+          [key]
+        );
+        if (!source.rows[0]) throw new Error(`Fuente inexistente: ${key}`);
+        const reviewId = `srr_${createHash('sha256').update(`${key}:${rightsReview.rightsEvidenceUrl}:${rightsReview.reviewer}:${Date.now()}`).digest('hex').slice(0, 24)}`;
+        await client.query(
+          `INSERT INTO source_rights_reviews
+             (id, source_key, decision, rights_basis, commercial_use, evidence_url, reviewer, usage_scope, notes)
+           VALUES ($1, $2, 'approved', $3, TRUE, $4, $5, $6::jsonb, $7)`,
+          [reviewId, key, rightsReview.rightsBasis, rightsReview.rightsEvidenceUrl, rightsReview.reviewer, JSON.stringify(rightsReview.usageScope), rightsReview.rightsNotes]
+        );
+        await client.query(
+          `UPDATE sources
+              SET rights_status = 'approved', rights_basis = $2,
+                  commercial_use = TRUE, rights_evidence_url = $3,
+                  rights_verified_at = NOW(), rights_verified_by = $4,
+                  rights_usage_scope = $5::jsonb, rights_notes = $6
+            WHERE key = $1`,
+          [key, rightsReview.rightsBasis, rightsReview.rightsEvidenceUrl, rightsReview.reviewer, JSON.stringify(rightsReview.usageScope), rightsReview.rightsNotes]
+        );
+        await client.query('COMMIT');
+        console.log(`Fuente aprobada con evidencia registrada: ${key}`);
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
+    }
   } else if (command === 'audit-media-rights') {
     const result = await pool.query<{
       asset_kind: 'portrait' | 'badge';

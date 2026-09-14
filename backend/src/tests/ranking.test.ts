@@ -32,7 +32,7 @@ import { parseLaLigaClubTitles } from '../providers/laLigaTitlesClient.js';
 import { parseCoppaItaliaClubTitles } from '../providers/coppaItaliaTitlesClient.js';
 import { copaAmericaTitleRows } from '../providers/copaAmericaTitlesClient.js';
 import { aliasesForTheSportsDbPortrait, selectExactTheSportsDbTeam } from '../providers/theSportsDbClient.js';
-import { assertRightsApproval } from '../mediaRights.js';
+import { assertRightsApproval, assertSourceRightsApproval } from '../mediaRights.js';
 
 const ranking = buildRanking([
   { entityId: 'a', rawValue: 20 },
@@ -378,6 +378,27 @@ assert.equal(new Set(iffhsGoalkeepers.entries.map((row) => row.externalId)).size
 
 const rightsEvidence = 'https://example.test/licence';
 const rightsScope = 'web,pwa,android,cdn,local_storage';
+assert.deepEqual(assertSourceRightsApproval({
+  rightsBasis: 'direct_license', commercialUse: true, reviewer: 'legal-review-1',
+  rightsEvidenceUrl: rightsEvidence, usageScope: 'web,pwa,android,cdn,local_storage',
+  rightsNotes: 'Contrato comercial: juego web/PWA/Android, almacenamiento de snapshots y límites de uso revisados.'
+}), {
+  rightsBasis: 'direct_license',
+  rightsEvidenceUrl: rightsEvidence,
+  usageScope: ['web', 'pwa', 'android', 'cdn', 'local_storage'],
+  reviewer: 'legal-review-1',
+  rightsNotes: 'Contrato comercial: juego web/PWA/Android, almacenamiento de snapshots y límites de uso revisados.'
+});
+assert.throws(() => assertSourceRightsApproval({
+  rightsBasis: 'provider_license', commercialUse: true, reviewer: 'legal-review-1',
+  rightsEvidenceUrl: rightsEvidence, usageScope: 'web,pwa,cdn',
+  rightsNotes: 'Falta confirmar Android y almacenamiento.'
+}));
+assert.throws(() => assertSourceRightsApproval({
+  rightsBasis: 'direct_license', commercialUse: true, reviewer: undefined,
+  rightsEvidenceUrl: rightsEvidence, usageScope: 'web,pwa,android,local_storage',
+  rightsNotes: 'Contrato revisado.'
+}));
 assert.deepEqual(assertRightsApproval({
   assetKind: 'portrait', entityType: 'player', provider: 'wikimedia-commons',
   licenseName: 'CC BY 4.0', licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',

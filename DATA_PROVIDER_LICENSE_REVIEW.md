@@ -37,6 +37,12 @@ Para la matriz elegida, `player-career-goals` significa goles oficiales de carre
 - Los activos de retratos y escudos no se consideran publicables solo por estar descargados o por tener un fallback visual.
 - El validador `validate:evidence:global-career-goals` informa que no hay fuente válida para publicar. El agregado provisional existente se mantiene explícitamente en `draft` y no cambia esa decisión.
 
+## Candidato abierto sin licencia de proveedor — Wikidata
+
+La documentación oficial de [licenciamiento de Wikidata](https://www.wikidata.org/wiki/Wikidata:Licensing) establece que los datos estructurados de los espacios principales se ofrecen bajo CC0. Su [guía oficial de reutilización](https://www.wikidata.org/wiki/Wikidata:Reuse) confirma que pueden reutilizarse sin obligación de atribución. Esto encaja con la decisión de no contratar una licencia de proveedor.
+
+Wikidata queda aprobado aquí únicamente como candidato para identidad, nombres, fechas y relaciones de entidades. No se considera todavía fuente suficiente para ninguna de las siete clasificaciones: hay que demostrar, mediante una consulta reproducible y una auditoría de cobertura, 200 filas reales, una definición estadística homogénea y procedencia verificable para cada valor. Hasta entonces no se cambia ningún snapshot a `approved`.
+
 ## Candidato adicional revisado — Football API / Roanuz
 
 El [texto oficial de términos de Football API](https://footballapi.com/legal/terms-of-use/) actualizado el 15 de mayo de 2026 indica que el uso comercial de los datos solo está permitido en la medida autorizada por el plan contratado o por un acuerdo separado. También permite mostrar datos dentro de la aplicación y conservar caché razonable, pero prohíbe redistribuir datos crudos o crear feeds/productos derivados competitivos sin un acuerdo escrito específico.

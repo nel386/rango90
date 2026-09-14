@@ -15,6 +15,8 @@ Se levantó el backend compilado (`npm start`) contra la instancia PostgreSQL lo
 
 También pasaron las regresiones automatizadas del frontend y backend, incluyendo lint, typecheck, builds estáticos, pruebas de contratos, rate limit y compilación de APK debug.
 
+La prueba `npm run test:integration` también pasó y limpió su fixture sintético: verificó sesión, inicio de partida, cálculo de resultado, idempotencia, conflicto de resultados, intento de manipulación, expiración, leaderboard, duelos y replay.
+
 ## Límites de esta evidencia
 
 - No existe todavía un reto o snapshot publicado contra el que probar el flujo completo de partida.

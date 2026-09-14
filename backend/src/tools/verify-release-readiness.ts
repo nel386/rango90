@@ -109,17 +109,26 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
       coverage_complete: boolean;
       unresolved_conflicts: number;
       eligible_count: number;
+      ranking_entry_count: number;
       source_rights_status: string;
     }>(
       `SELECT c.slug, c.status AS category_status, rs.status AS snapshot_status,
               rs.coverage_complete, rs.unresolved_conflicts, rs.eligible_count,
+              COUNT(DISTINCT COALESCE(identity_link.canonical_entity_id, re.entity_id))
+                FILTER (WHERE re.rank <= 200)::int AS ranking_entry_count,
               COALESCE(s.rights_status, 'unknown') AS source_rights_status
          FROM game_challenge_categories gcc
          JOIN category_definitions c ON c.id = gcc.category_id
          JOIN ranking_snapshots rs ON rs.id = gcc.ranking_snapshot_id
+         LEFT JOIN ranking_entries re ON re.snapshot_id = rs.id
+         LEFT JOIN entity_identity_links identity_link
+           ON identity_link.source_entity_id = re.entity_id
          LEFT JOIN source_snapshots ss ON ss.id = rs.metadata->>'sourceSnapshotId'
          LEFT JOIN sources s ON s.key = ss.source_key
         WHERE gcc.game_challenge_id = $1
+        GROUP BY c.slug, c.status, rs.status, rs.coverage_complete,
+                 rs.unresolved_conflicts, rs.eligible_count, s.rights_status,
+                 gcc.category_ordinal
         ORDER BY gcc.category_ordinal`,
       [daily.id]
     )
@@ -131,6 +140,7 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
     || !category.coverage_complete
     || category.unresolved_conflicts > 0
     || category.eligible_count < 200
+    || category.ranking_entry_count < 200
     || category.source_rights_status !== 'approved'
   );
   const boundary = await verifyGameCatalogBoundary();
@@ -155,7 +165,7 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
     dailyCategoryContracts: check(
       Boolean(daily && dailyCategories.rows.length === 7 && categoryFailures.length === 0),
       { categoryCount: dailyCategories.rows.length, failures: categoryFailures.map((category) => category.slug) },
-      'Las categorías del reto tienen snapshot publicado, cobertura completa, conflictos resueltos, 200 entradas y derechos aprobados'
+      'Las categorías del reto tienen snapshot publicado, cobertura completa, conflictos resueltos, 200 entradas reales y derechos aprobados'
     ),
     catalogBoundary: check(
       boundaryFailures.length === 0,

@@ -22,7 +22,7 @@ La auditoría `npm run audit:7x7` valida ahora exclusivamente las siete categor�
 | `national-league-club-titles` | `rs_5943de063ce56ca0b02a48ab` | draft | 69 | 69 | 69 | universo abierto incompleto |
 | `european-cup-champions-league-club-titles` | `rs_a5608e2d2d543e7e8a25e045` | draft | 24 | 24 | 24 | ninguno estadístico; faltan derechos/publicación |
 
-Resultado verificado el 14 de septiembre de 2026 tras aplicar la migración `078_admit_selected_historical_daily_matrix_players.sql`: `ready=false`, sin combinación común válida de cinco jugadores y dos equipos para esta matriz. Los números de esta tabla son una fotografía de la auditoría; deben regenerarse tras cada nueva carga o consolidación.
+Resultado verificado el 14 de septiembre de 2026 tras aplicar la migración `078_admit_selected_historical_daily_matrix_players.sql`: `ready=false`, sin combinación común válida de cinco jugadores y dos equipos para esta matriz. Después se ejecutaron las consolidaciones locales de identidades: API-Football enlazó 7 jugadores; quedaron 3 conflictos de ranking conservados sin enlace automático por posible duplicación o ambigüedad. Las consolidaciones DFB y BDFutbol no añadieron enlaces. Los números de esta tabla son una fotografía de la auditoría; deben regenerarse tras cada nueva carga o consolidación.
 
 Como evidencia auxiliar, `enrich:wikidata:birth-dates --category world-cup-goals --limit 70 --apply` registró el snapshot `src_2f76a3d3829f0f05b4d422e9`: 34 fechas exactas aplicadas, 28 coincidencias no únicas y 8 errores. Wikidata se usa aquí solo para enriquecer identidad/fecha; no aporta los goles ni aprueba la fuente estadística.
 

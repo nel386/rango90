@@ -16,6 +16,8 @@ const entityB = `it-entity-b-${suffix}`;
 const userId = `it-user-${suffix}`;
 const eligibleUserId = `it-eligible-${suffix}`;
 const cutoffUserId = `it-cutoff-${suffix}`;
+const validationChallengeId = `it-validation-${suffix}`;
+const missingRankingEntityId = `it-missing-ranking-entity-${suffix}`;
 const thresholdSession249 = `it-session-249-${suffix}`;
 const thresholdSession250 = `it-session-250-${suffix}`;
 const authToken = `integration-auth-${suffix}-token`;
@@ -87,7 +89,7 @@ async function setup(): Promise<void> {
     );
     await client.query(
       `INSERT INTO game_challenge_answers (game_challenge_id, decision_ordinal, category_id, score_value)
-       VALUES ($1, 0, $2, 1), ($1, 0, $3, 20), ($1, 1, $2, 10), ($1, 1, $3, 2)`,
+       VALUES ($1, 0, $2, 1), ($1, 0, $3, 1), ($1, 1, $2, 2), ($1, 1, $3, 2)`,
       [challengeId, categoryA, categoryB]
     );
     const challengeSha256 = calculateChallengeSha256({
@@ -108,8 +110,8 @@ async function setup(): Promise<void> {
       ],
       answers: [
         { decisionOrdinal: 0, categoryId: categoryA, scoreValue: 1 },
-        { decisionOrdinal: 0, categoryId: categoryB, scoreValue: 20 },
-        { decisionOrdinal: 1, categoryId: categoryA, scoreValue: 10 },
+        { decisionOrdinal: 0, categoryId: categoryB, scoreValue: 1 },
+        { decisionOrdinal: 1, categoryId: categoryA, scoreValue: 2 },
         { decisionOrdinal: 1, categoryId: categoryB, scoreValue: 2 }
       ]
     });
@@ -159,8 +161,55 @@ async function cleanup(): Promise<void> {
   await query('DELETE FROM entities WHERE id IN ($1, $2)', [entityA, entityB]);
 }
 
+async function assertPublishedChallengeRejectsUnbackedEntity(): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(
+      `INSERT INTO entities (id, entity_type, canonical_name, short_name)
+       VALUES ($1, 'player', 'Unbacked Integration Player', 'UIP')`,
+      [missingRankingEntityId]
+    );
+    await client.query(
+      `INSERT INTO game_challenges
+         (id, challenge_kind, challenge_date, status, source_version, engine_version, time_limit_seconds, score_cap, challenge_sha256)
+       VALUES ($1, 'daily', '2026-09-10', 'draft', 'it-v1', 'game-engine-v1', 10, 100, $2)`,
+      [validationChallengeId, 'e'.repeat(64)]
+    );
+    await client.query(
+      `INSERT INTO game_challenge_categories (game_challenge_id, category_id, category_ordinal, ranking_snapshot_id)
+       VALUES ($1, $2, 0, $4), ($1, $3, 1, $5)`,
+      [validationChallengeId, categoryA, categoryB, snapshotA, snapshotB]
+    );
+    await client.query(
+      `INSERT INTO game_challenge_decisions (game_challenge_id, decision_ordinal, entity_id)
+       VALUES ($1, 0, $2), ($1, 1, $3)`,
+      [validationChallengeId, entityA, missingRankingEntityId]
+    );
+    await client.query(
+      `INSERT INTO game_challenge_answers (game_challenge_id, decision_ordinal, category_id, score_value)
+       VALUES ($1, 0, $2, 1), ($1, 0, $3, 1), ($1, 1, $2, 1), ($1, 1, $3, 1)`,
+      [validationChallengeId, categoryA, categoryB]
+    );
+    await assert.rejects(
+      async () => {
+        await client.query(
+          `UPDATE game_challenges SET status = 'published', published_at = $2 WHERE id = $1`,
+          [validationChallengeId, startedAt]
+        );
+        await client.query('COMMIT');
+      },
+      /published game challenge requires every decision entity in every ranking snapshot/u
+    );
+  } finally {
+    await client.query('ROLLBACK').catch(() => undefined);
+    client.release();
+  }
+}
+
 async function run(): Promise<void> {
   await setup();
+  await assertPublishedChallengeRejectsUnbackedEntity();
   let app: FastifyInstance | undefined;
   try {
     app = buildApp({ gameDb: pool, clock: () => clockTime });

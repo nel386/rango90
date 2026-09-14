@@ -25,39 +25,80 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
     decision_count: number;
     decision_entity_count: number;
     answer_count: number;
-    non_common_decisions: number;
+    missing_ranking_entries: number;
+    score_mismatches: number;
+    entity_type_count: number;
   }>(
-    `WITH decision_category_counts AS (
-       SELECT gcd.game_challenge_id, gcd.decision_ordinal,
-              COUNT(DISTINCT gca.category_id)::int AS category_count
+    `WITH published_daily AS (
+       SELECT id
+         FROM game_challenges
+        WHERE status = 'published' AND challenge_kind = 'daily'
+        ORDER BY challenge_date DESC NULLS LAST, published_at DESC NULLS LAST, id DESC
+        LIMIT 1
+     ),
+     decision_category_matrix AS (
+       SELECT gcd.game_challenge_id, gcd.decision_ordinal, gcd.entity_id,
+              gcc.category_id, gcc.ranking_snapshot_id,
+              gca.score_value AS answer_score,
+              re.score_value AS ranking_score
          FROM game_challenge_decisions gcd
+         JOIN published_daily pd ON pd.id = gcd.game_challenge_id
+         CROSS JOIN game_challenge_categories gcc
          LEFT JOIN game_challenge_answers gca
            ON gca.game_challenge_id = gcd.game_challenge_id
           AND gca.decision_ordinal = gcd.decision_ordinal
-        GROUP BY gcd.game_challenge_id, gcd.decision_ordinal
+          AND gca.category_id = gcc.category_id
+         LEFT JOIN LATERAL (
+           SELECT ranking_entry.score_value
+             FROM ranking_entries ranking_entry
+             LEFT JOIN entity_identity_links ranking_identity
+               ON ranking_identity.source_entity_id = ranking_entry.entity_id
+            WHERE ranking_entry.snapshot_id = gcc.ranking_snapshot_id
+              AND COALESCE(ranking_identity.canonical_entity_id, ranking_entry.entity_id) = gcd.entity_id
+            ORDER BY ranking_entry.rank, ranking_entry.entity_id
+            LIMIT 1
+         ) re ON TRUE
+        WHERE gcc.game_challenge_id = gcd.game_challenge_id
+     ),
+     matrix_summary AS (
+       SELECT game_challenge_id,
+              COUNT(*) FILTER (WHERE ranking_score IS NULL)::int AS missing_ranking_entries,
+              COUNT(*) FILTER (WHERE ranking_score IS NOT NULL AND answer_score IS DISTINCT FROM ranking_score)::int AS score_mismatches
+         FROM decision_category_matrix
+        GROUP BY game_challenge_id
      )
      SELECT gc.id,
             COUNT(DISTINCT gcc.category_id)::int AS category_count,
             COUNT(DISTINCT gcd.decision_ordinal)::int AS decision_count,
             COUNT(DISTINCT gcd.entity_id)::int AS decision_entity_count,
             COUNT(DISTINCT (gca.decision_ordinal, gca.category_id))::int AS answer_count,
-            COUNT(*) FILTER (WHERE dcc.category_count <> 7)::int AS non_common_decisions
+            COALESCE(MAX(ms.missing_ranking_entries), 0)::int AS missing_ranking_entries,
+            COALESCE(MAX(ms.score_mismatches), 0)::int AS score_mismatches,
+            COUNT(DISTINCT c.entity_type)::int AS entity_type_count
        FROM game_challenges gc
        LEFT JOIN game_challenge_categories gcc ON gcc.game_challenge_id = gc.id
+       LEFT JOIN category_definitions c ON c.id = gcc.category_id
        LEFT JOIN game_challenge_decisions gcd ON gcd.game_challenge_id = gc.id
        LEFT JOIN game_challenge_answers gca ON gca.game_challenge_id = gc.id
-       LEFT JOIN decision_category_counts dcc
-         ON dcc.game_challenge_id = gcd.game_challenge_id
-        AND dcc.decision_ordinal = gcd.decision_ordinal
+       LEFT JOIN matrix_summary ms ON ms.game_challenge_id = gc.id
       WHERE gc.status = 'published' AND gc.challenge_kind = 'daily'
-      GROUP BY gc.id
+       GROUP BY gc.id
       ORDER BY gc.challenge_date DESC NULLS LAST, gc.published_at DESC NULLS LAST, gc.id DESC
       LIMIT 1`
   );
 
   const daily = latestDaily.rows[0] ?? null;
   const dailyShape = daily
-    ? { id: daily.id, categories: daily.category_count, decisions: daily.decision_count, distinctEntities: daily.decision_entity_count, answers: daily.answer_count, nonCommonDecisions: daily.non_common_decisions }
+    ? {
+      id: daily.id,
+      categories: daily.category_count,
+      decisions: daily.decision_count,
+      distinctEntities: daily.decision_entity_count,
+      answers: daily.answer_count,
+      missingRankingEntries: daily.missing_ranking_entries,
+      scoreMismatches: daily.score_mismatches,
+      entityTypeCount: daily.entity_type_count
+    }
     : null;
 
   const dailyCategories = daily
@@ -100,9 +141,16 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
     approvedSources: check((approvedSources.rows[0]?.count ?? 0) > 0, approvedSources.rows[0]?.count ?? 0, 'Existe al menos una fuente con derechos aprobados'),
     publishedSnapshots: check((publishedSnapshots.rows[0]?.count ?? 0) > 0, publishedSnapshots.rows[0]?.count ?? 0, 'Existe al menos un snapshot publicado'),
     publishedDaily7x7: check(
-      Boolean(daily && daily.category_count === 7 && daily.decision_count === 7 && daily.decision_entity_count === 7 && daily.answer_count === 49 && daily.non_common_decisions === 0),
+      Boolean(daily
+        && daily.category_count === 7
+        && daily.decision_count === 7
+        && daily.decision_entity_count === 7
+        && daily.answer_count === 49
+        && daily.missing_ranking_entries === 0
+        && daily.score_mismatches === 0
+        && daily.entity_type_count === 1),
       dailyShape,
-      'Existe un reto diario publicado con matriz 7 categorías × 7 decisiones'
+      'Existe un reto diario publicado con matriz 7×7, entidades comunes y valores derivados de sus snapshots'
     ),
     dailyCategoryContracts: check(
       Boolean(daily && dailyCategories.rows.length === 7 && categoryFailures.length === 0),

@@ -92,6 +92,7 @@ psql "$DATABASE_URL" -f migrations/070_remove_pre1930_game_exceptions.sql
 psql "$DATABASE_URL" -f migrations/071_flatten_reviewed_zaniolo_identity_chain.sql
 psql "$DATABASE_URL" -f migrations/072_freeze_published_ranking_snapshots.sql
 psql "$DATABASE_URL" -f migrations/073_allow_approved_categories_in_game_challenges.sql
+psql "$DATABASE_URL" -f migrations/074_validate_published_game_ranking_values.sql
 
 Para casos de homónimos de Wikidata, el enriquecedor admite un `--qid` explícito; valida que la etiqueta coincida y que la descripción sea futbolística antes de aplicar la fecha.
 npm run seed

@@ -220,6 +220,7 @@ psql "$DATABASE_URL" -f migrations/055_link_exact_approved_portrait_duplicates.s
 psql "$DATABASE_URL" -f migrations/058_add_club_career_titles_category.sql
 psql "$DATABASE_URL" -f migrations/072_freeze_published_ranking_snapshots.sql
 psql "$DATABASE_URL" -f migrations/073_allow_approved_categories_in_game_challenges.sql
+psql "$DATABASE_URL" -f migrations/074_validate_published_game_ranking_values.sql
 npm run seed
 npm run seed:game-audience
 npm run entity:consolidate:uefa-shared-clubs

@@ -158,6 +158,8 @@ Capacitor está preparado con `webDir: out`, `com.rango90.app` y pantalla de arr
 
 La primera APK debug se generó y verificó localmente; el detalle reproducible está en [`ANDROID_BUILD_VERIFICATION.md`](./ANDROID_BUILD_VERIFICATION.md). Este artefacto no equivale todavía a una release firmada para distribución pública.
 
+El QA de runtime local está registrado en [`LOCAL_RUNTIME_QA.md`](./LOCAL_RUNTIME_QA.md); confirma los guards de servicio, pero no sustituye la prueba de un reto publicado ni el QA visual externo.
+
 ## Backend de datos
 
 La base inicial del backend está en [`backend/`](./backend/). Usa Node.js/TypeScript, PostgreSQL y snapshots inmutables de rankings. El catálogo genera las competiciones y categorías iniciales; los datos reales se incorporarán mediante archivos revisables o un adaptador de fuente autorizado.

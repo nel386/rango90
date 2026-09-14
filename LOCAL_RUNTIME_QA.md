@@ -27,11 +27,21 @@ Se sirvió el build estático Android en `127.0.0.1:4174` y se abrió con Chromi
 | `/en/` | `lang=en`, título en inglés, encabezado `The table did not load.`, estado `role=alert`, navegación etiquetada y enlace `/es/` | Correcto para estado sin backend/reto publicado |
 | `/es/` y `/en/` a `390x844` | Misma estructura accesible; no hubo error de renderizado ni HTML de fallback 404 | Smoke móvil correcto |
 
-El flujo interactivo de partida, ranking, duelos y resultado no puede probarse desde este entorno porque no hay un reto diario publicado ni una API de producción configurada. Esta prueba tampoco sustituye la comprobación en un dispositivo Android físico.
+## QA funcional con fixture aislada
+
+Para cubrir el recorrido interactivo sin publicar datos no autorizados, se levantó una fixture sintética local y se accedió al build mediante un proxy HTTPS local. La fixture se eliminó al terminar y no representa datos de producción.
+
+| Caso | Resultado observado | Evaluación |
+| --- | --- | --- |
+| Español, escritorio `1280x900` | Inicio → `Jugar reto` → dos decisiones (`Goles integración` y `Asistencias integración`) → resultado; puntuación total `3`; filas oficiales visibles y guardado como invitado | Flujo funcional correcto con fixture |
+| Inglés, móvil emulado `390x844` | Inicio → `Play challenge` → dos decisiones → `See result`/resultado; puntuación total `3`; guardado como invitado; `lang=en` conservado | Flujo funcional responsive correcto con fixture |
+| API del reto diario | Respuesta `200` a través del proxy HTTPS después de corregir el hash de la fixture; el guard también devolvió `503 challenge_hash_mismatch` ante un hash inconsistente | Integridad y guard de publicación correctos |
+
+Esta evidencia cubre el flujo de aplicación con datos sintéticos, pero no sustituye la comprobación contra un reto diario real, la QA visual exhaustiva, la prueba en un dispositivo Android físico ni una revisión externa.
 
 ## Límites de esta evidencia
 
-- No existe todavía un reto o snapshot publicado contra el que probar el flujo completo de partida.
+- No existe todavía un reto o snapshot publicado real contra el que probar el flujo completo; la prueba funcional anterior usa únicamente una fixture sintética aislada.
 - No hay dispositivo ni emulador conectado para una prueba de instalación e interacción Android.
 - No sustituye QA visual exhaustivo ni una prueba en un dispositivo Android físico; el smoke de navegador anterior cubre arranque, estados de error, idiomas, estructura accesible y viewport móvil emulado.
 - La base local contiene datos draft y fuentes sin derechos aprobados; no se alteró ese estado para forzar un resultado positivo.

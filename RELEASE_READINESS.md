@@ -12,7 +12,7 @@ Este documento es una lista de control, no una autorización de publicación. La
 | Identidades, empates, posiciones y evidencias | Validadores de ranking, manifests de identidad y revisión de producción UEFA | **Bloqueado**: `uefa-champions-league-goals` conserva 12 discrepancias frente al contraste oficial |
 | Snapshots y reto diario reales publicados | `npm run verify:release-readiness` | **Bloqueado**: `publishedSnapshots=0`, `publishedDaily7x7=null` |
 | Integridad del reto publicado | Migración `074_validate_published_game_ranking_values.sql` y prueba de integración | **Implementado**: la base rechaza entidades no presentes en todos los snapshots y respuestas con valores divergentes |
-| QA web, móvil, idiomas y accesibilidad | `LOCAL_RUNTIME_QA.md` | **Parcial**: smoke de navegador en español/inglés y viewport móvil emulado; falta flujo funcional con reto real y QA externo |
+| QA web, móvil, idiomas y accesibilidad | `LOCAL_RUNTIME_QA.md` | **Parcial**: flujo funcional con fixture sintética en español/escritorio e inglés/móvil emulado; falta validación con reto real, QA visual exhaustiva y QA externo |
 | APK Android | `ANDROID_BUILD_VERIFICATION.md` y artefactos debug/release | **Parcial**: variante release firmada y verificada con keystore temporal de QA; falta clave oficial protegida, instalación y prueba en dispositivo/emulador |
 | Código y archivos versionados | `git status`, historial Git y `.github/workflows/ci.yml` | **Localmente correcto**: repositorio limpio; falta ejecutar CI remota porque no hay remoto Git configurado |
 

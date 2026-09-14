@@ -68,7 +68,7 @@ import { findUniqueCanonicalEntity, moveEntityDataToCanonical, recordIdentityLin
 import { assertPublishableImageLicense, assertRightsApproval, assertSourceRightsApproval } from './mediaRights.js';
 import { MAX_GAME_RANKING_ENTRIES, runDataCatalogCleanup, verifyGameCatalogBoundary } from './catalogCleanup.js';
 import { calculateChallengeSha256 } from './game-contract.js';
-import { selectCommonDailyEntities } from './dailyChallengeSelection.js';
+import { selectCommonDailyEntities, type DailyChallengeCandidate } from './dailyChallengeSelection.js';
 
 const [command, ...args] = process.argv.slice(2);
 const argument = (name: string): string | undefined => {
@@ -77,10 +77,10 @@ const argument = (name: string): string | undefined => {
 };
 
 /**
- * The catalogue remains a 200-entry ranking, and daily decisions are drawn
- * only from entities common to all seven selected categories. The stronger
- * top-90 band of at least one category keeps the daily draw varied while the
- * common-entity rule guarantees a true 7×7 matrix.
+ * The catalogue remains a 200-entry ranking for open universes, and daily
+ * decisions are drawn only from entities common to the selected categories
+ * of the same type. The stronger top-90 band keeps the daily draw varied
+ * while the typed common-entity rule guarantees a true 7×7 matrix.
  */
 export const DAILY_CHALLENGE_CANDIDATE_RANK = 90;
 
@@ -97,6 +97,7 @@ type DailyChallengeCategorySelection = {
   eligible_count: number;
   score_cap: number;
   source_rights_status: string | null;
+  scope: { closedUniverse?: boolean };
 };
 
 type DailyChallengeRankingEntry = {
@@ -177,7 +178,7 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
   try {
     await client.query('BEGIN');
     const categoryResult = await client.query<DailyChallengeCategorySelection>(
-      `SELECT c.id AS category_id, c.slug, c.status AS category_status, c.entity_type,
+      `SELECT c.id AS category_id, c.slug, c.status AS category_status, c.entity_type, c.scope,
               rs.id AS snapshot_id, rs.data_version, rs.status AS snapshot_status,
               rs.coverage_complete, rs.unresolved_conflicts, rs.eligible_count, c.score_cap,
               s.rights_status AS source_rights_status
@@ -201,57 +202,74 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
     const missing = categorySlugs.filter((slug) => !bySlug.has(slug));
     if (missing.length > 0) throw new Error(`No existen las categorías solicitadas: ${missing.join(', ')}`);
     const categories = categorySlugs.map((slug) => bySlug.get(slug) as DailyChallengeCategorySelection);
-    const entityType = categories[0]?.entity_type;
-    if (!entityType || categories.some((category) => category.entity_type !== entityType)) {
-      throw new Error('Las siete categorías deben usar el mismo tipo de entidad');
+    const categoryTypeCounts = categories.reduce<Record<string, number>>((counts, category) => ({
+      ...counts,
+      [category.entity_type]: (counts[category.entity_type] ?? 0) + 1
+    }), {});
+    if (categoryTypeCounts.player !== 5 || categoryTypeCounts.club !== 2 || (categoryTypeCounts.national_team ?? 0) !== 0) {
+      throw new Error(`La matriz diaria elegida requiere exactamente cinco categorías de jugadores y dos de equipos; recibido: ${JSON.stringify(categoryTypeCounts)}`);
     }
-    const incomplete = categories.filter((category) => !category.coverage_complete || category.unresolved_conflicts > 0 || category.eligible_count < MAX_GAME_RANKING_ENTRIES || category.score_cap !== 100);
+    const incomplete = categories.filter((category) => {
+      const minimumEntries = category.entity_type === 'player' || category.scope?.closedUniverse !== true
+        ? MAX_GAME_RANKING_ENTRIES
+        : 1;
+      return !category.coverage_complete || category.unresolved_conflicts > 0 || category.eligible_count < minimumEntries || category.score_cap !== 100;
+    });
     if (incomplete.length > 0) {
-      throw new Error(`Las categorías no cumplen cobertura real de ${MAX_GAME_RANKING_ENTRIES} entidades, conflictos resueltos y scoreCap=100: ${incomplete.map((category) => category.slug).join(', ')}`);
+      throw new Error(`Las categorías no cumplen su tamaño mínimo de universo, cobertura completa, conflictos resueltos y scoreCap=100: ${incomplete.map((category) => category.slug).join(', ')}`);
     }
     if (publish && categories.some((category) => !['approved', 'published'].includes(category.category_status) || category.snapshot_status !== 'published' || category.source_rights_status !== 'approved')) {
       throw new Error('La publicación requiere categorías aprobadas, snapshots publicados y fuentes con derechos approved');
     }
 
     const snapshotIds = categories.map((category) => category.snapshot_id);
-    const entriesResult = await client.query<DailyChallengeRankingEntry>(
-      `SELECT DISTINCT ON (re.snapshot_id, canonical_entity.id)
-              re.snapshot_id, canonical_entity.id AS entity_id, re.rank, re.score_value
-         FROM ranking_entries re
-         JOIN entities source_entity ON source_entity.id = re.entity_id
-         LEFT JOIN entity_identity_links identity_link
-           ON identity_link.source_entity_id = re.entity_id
-         JOIN entities canonical_entity
-           ON canonical_entity.id = COALESCE(identity_link.canonical_entity_id, re.entity_id)
-        WHERE re.snapshot_id = ANY($1::text[])
-          AND re.rank <= ${MAX_GAME_RANKING_ENTRIES}
-          AND canonical_entity.entity_type = $2
-          AND canonical_entity.catalog_status = 'active'
-          AND (canonical_entity.entity_type <> 'player' OR EXISTS (
-            SELECT 1 FROM entity_game_profiles playable_profile
-             WHERE playable_profile.entity_id = canonical_entity.id
-               AND playable_profile.playable_default = TRUE
-          ))
-        ORDER BY re.snapshot_id, canonical_entity.id, re.rank, re.entity_id`,
-      [snapshotIds, entityType]
-    );
-    const challengeSeed = `${date}|${snapshotIds.join('|')}`;
-    const candidateEntities = selectCommonDailyEntities(
-      entriesResult.rows.map((entry) => ({
-        snapshotId: entry.snapshot_id,
-        entityId: entry.entity_id,
-        rank: entry.rank,
-        scoreValue: entry.score_value
-      })),
-      snapshotIds,
-      challengeSeed,
-      DAILY_CHALLENGE_CANDIDATE_RANK,
-      7
-    );
-    if (candidateEntities.length < 7) {
-      throw new Error(`No hay siete entidades jugables comunes a las siete categorías (con al menos una posición dentro del top ${DAILY_CHALLENGE_CANDIDATE_RANK}); solo hay ${candidateEntities.length}`);
+    const categoriesByEntityType = new Map<string, DailyChallengeCategorySelection[]>();
+    for (const category of categories) {
+      const group = categoriesByEntityType.get(category.entity_type) ?? [];
+      group.push(category);
+      categoriesByEntityType.set(category.entity_type, group);
     }
-    const decisions = candidateEntities.slice(0, 7);
+    const challengeSeed = `${date}|${snapshotIds.join('|')}`;
+    const decisions: Array<DailyChallengeCandidate & { entityType: DailyChallengeCategorySelection['entity_type'] }> = [];
+    for (const [entityType, group] of categoriesByEntityType) {
+      const groupSnapshotIds = group.map((category) => category.snapshot_id);
+      const entriesResult = await client.query<DailyChallengeRankingEntry>(
+        `SELECT DISTINCT ON (re.snapshot_id, canonical_entity.id)
+                re.snapshot_id, canonical_entity.id AS entity_id, re.rank, re.score_value
+           FROM ranking_entries re
+           LEFT JOIN entity_identity_links identity_link
+             ON identity_link.source_entity_id = re.entity_id
+           JOIN entities canonical_entity
+             ON canonical_entity.id = COALESCE(identity_link.canonical_entity_id, re.entity_id)
+          WHERE re.snapshot_id = ANY($1::text[])
+            AND re.rank <= ${MAX_GAME_RANKING_ENTRIES}
+            AND canonical_entity.entity_type = $2
+            AND canonical_entity.catalog_status = 'active'
+            AND (canonical_entity.entity_type <> 'player' OR EXISTS (
+              SELECT 1 FROM entity_game_profiles playable_profile
+               WHERE playable_profile.entity_id = canonical_entity.id
+                 AND playable_profile.playable_default = TRUE
+            ))
+          ORDER BY re.snapshot_id, canonical_entity.id, re.rank, re.entity_id`,
+        [groupSnapshotIds, entityType]
+      );
+      const groupCandidates = selectCommonDailyEntities(
+        entriesResult.rows.map((entry) => ({
+          snapshotId: entry.snapshot_id,
+          entityId: entry.entity_id,
+          rank: entry.rank,
+          scoreValue: entry.score_value
+        })),
+        groupSnapshotIds,
+        `${challengeSeed}|${entityType}`,
+        DAILY_CHALLENGE_CANDIDATE_RANK,
+        group.length
+      );
+      if (groupCandidates.length < group.length) {
+        throw new Error(`No hay ${group.length} entidades ${entityType} comunes a sus categorías (con al menos una posición dentro del top ${DAILY_CHALLENGE_CANDIDATE_RANK}); solo hay ${groupCandidates.length}`);
+      }
+      decisions.push(...groupCandidates.map((candidate) => ({ ...candidate, entityType: entityType as DailyChallengeCategorySelection['entity_type'] })));
+    }
     const challengeKey = `${date}|${categories.map((category) => `${category.slug}:${category.snapshot_id}`).join('|')}`;
     const challengeId = `daily_${date}_${createHash('sha256').update(challengeKey).digest('hex').slice(0, 16)}`;
     const sourceVersion = categories.map((category) => `${category.slug}@${category.data_version}`).join('|');
@@ -260,30 +278,32 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
       kind: 'daily',
       challengeDate: date,
       sourceVersion,
-      engineVersion: 'game-engine-v1',
+      engineVersion: 'game-engine-v2',
       timeLimitSeconds: 90,
       scoreCap: 100,
-      categories: categories.map((category, ordinal) => ({ ordinal, categoryId: category.category_id, rankingSnapshotId: category.snapshot_id, slug: category.slug })),
-      decisions: decisions.map((decision, ordinal) => ({ ordinal, entityId: decision.entityId })),
-      answers: decisions.flatMap((decision, decisionOrdinal) => categories.map((category) => ({
-        decisionOrdinal,
-        categoryId: category.category_id,
-        scoreValue: decision.bySnapshot.get(category.snapshot_id)?.scoreValue ?? 100
-      })))
+      categories: categories.map((category, ordinal) => ({ ordinal, categoryId: category.category_id, rankingSnapshotId: category.snapshot_id, slug: category.slug, entityType: category.entity_type })),
+      decisions: decisions.map((decision, ordinal) => ({ ordinal, entityId: decision.entityId, entityType: decision.entityType })),
+      answers: decisions.flatMap((decision, decisionOrdinal) => categories
+        .filter((category) => category.entity_type === decision.entityType)
+        .map((category) => ({
+          decisionOrdinal,
+          categoryId: category.category_id,
+          scoreValue: decision.bySnapshot.get(category.snapshot_id)?.scoreValue ?? 100
+        })))
     });
     const existing = await client.query<{ status: string }>('SELECT status FROM game_challenges WHERE id = $1 FOR UPDATE', [challengeId]);
     if (existing.rows[0]?.status === 'published') throw new Error(`El reto ${challengeId} ya está publicado y es inmutable`);
     await client.query(
       `INSERT INTO game_challenges
          (id, challenge_kind, challenge_date, status, source_version, engine_version, time_limit_seconds, score_cap, challenge_sha256, published_at, retired_at, metadata)
-       VALUES ($1, 'daily', $2, 'draft', $3, 'game-engine-v1', 90, 100, $4, NULL, NULL, $5::jsonb)
+       VALUES ($1, 'daily', $2, 'draft', $3, 'game-engine-v2', 90, 100, $4, NULL, NULL, $5::jsonb)
        ON CONFLICT (id) DO UPDATE SET
          challenge_date = EXCLUDED.challenge_date,
          status = 'draft', source_version = EXCLUDED.source_version,
          engine_version = EXCLUDED.engine_version, time_limit_seconds = EXCLUDED.time_limit_seconds,
          score_cap = EXCLUDED.score_cap, challenge_sha256 = EXCLUDED.challenge_sha256,
          published_at = NULL, retired_at = NULL, metadata = EXCLUDED.metadata, updated_at = NOW()`,
-      [challengeId, date, sourceVersion, challengeSha256, JSON.stringify({ materialization: 'daily-multicategory-v3-common-entities', categories: categorySlugs, snapshotIds, decisionCount: decisions.length, entityType, candidateRankLimit: DAILY_CHALLENGE_CANDIDATE_RANK, selection: 'deterministic-shuffle-v2', selectionSeed: challengeSeed, commonAcrossAllCategories: true })]
+      [challengeId, date, sourceVersion, challengeSha256, JSON.stringify({ materialization: 'daily-multicategory-v4-typed-entities', categories: categorySlugs, snapshotIds, decisionCount: decisions.length, entityTypes: [...categoriesByEntityType.keys()], candidateRankLimit: DAILY_CHALLENGE_CANDIDATE_RANK, selection: 'deterministic-shuffle-v2', selectionSeed: challengeSeed, commonWithinEntityType: true })]
     );
     await client.query('DELETE FROM game_challenge_answers WHERE game_challenge_id = $1', [challengeId]);
     await client.query('DELETE FROM game_challenge_decisions WHERE game_challenge_id = $1', [challengeId]);
@@ -300,10 +320,12 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
         [challengeId, ordinal, decision.entityId]
       );
       for (const category of categories) {
-        await client.query(
-          `INSERT INTO game_challenge_answers (game_challenge_id, decision_ordinal, category_id, score_value) VALUES ($1, $2, $3, $4)`,
-          [challengeId, ordinal, category.category_id, decision.bySnapshot.get(category.snapshot_id)?.scoreValue]
-        );
+        if (category.entity_type === decision.entityType) {
+          await client.query(
+            `INSERT INTO game_challenge_answers (game_challenge_id, decision_ordinal, category_id, score_value) VALUES ($1, $2, $3, $4)`,
+            [challengeId, ordinal, category.category_id, decision.bySnapshot.get(category.snapshot_id)?.scoreValue]
+          );
+        }
       }
     }
     if (publish) await client.query(`UPDATE game_challenges SET status = 'published', published_at = NOW(), updated_at = NOW() WHERE id = $1`, [challengeId]);

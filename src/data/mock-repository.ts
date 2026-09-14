@@ -41,7 +41,8 @@ export const mockGameRepository: GameRepository = {
     const remainingCategories = session.challenge.categories.filter((category) => !used.has(category.slug));
     const claims = [...knownAssignments];
     session.challenge.entities.slice(knownAssignments.length).forEach((entity, index) => {
-      const category = remainingCategories[index];
+      const categoryIndex = remainingCategories.findIndex((category) => !category.entityType || category.entityType === entity.entityType);
+      const category = categoryIndex >= 0 ? remainingCategories.splice(categoryIndex, 1)[0] : undefined;
       if (category) claims.push({ ordinal: entity.ordinal ?? knownAssignments.length + index, entityId: entity.id, categorySlug: category.slug, timedOut: true });
     });
     return mockResult(session, claims, true);

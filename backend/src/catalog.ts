@@ -122,6 +122,24 @@ export const categories: CategorySeed[] = [
     definition: 'Todos los goles oficiales de primer equipo en competiciones de clubes registradas, agregados en una única categoría global; se excluyen amistosos, juveniles, reservas y testimoniales.'
   },
   {
+    id: 'category-player-career-goals',
+    slug: 'player-career-goals',
+    labelEs: 'Goles globales en la carrera',
+    labelEn: 'Global career goals',
+    entityType: 'player',
+    metricKey: 'goals',
+    scopeKind: 'career_global',
+    scope: {
+      officialOnly: true,
+      seniorClubCompetitions: true,
+      seniorNationalTeamCompetitions: true,
+      firstTeamOnly: true,
+      seniorAOnly: true,
+      excluded: ['friendlies', 'youth', 'reserve', 'testimonial', 'unofficial']
+    },
+    definition: 'Total de goles oficiales de primer equipo anotados por cada jugador en clubes y con la selección absoluta, sumados en una única categoría global. No es solo una clasificación de goles en clubes; las definiciones de partido oficial y los casos históricos excepcionales deben quedar documentados por la fuente abierta utilizada.'
+  },
+  {
     id: 'category-club-career-assists',
     slug: 'club-career-assists',
     labelEs: 'Asistencias globales en clubes (carrera)',
@@ -147,6 +165,24 @@ export const categories: CategorySeed[] = [
       excluded: ['friendlies', 'youth', 'reserve', 'testimonial']
     },
     definition: 'Número de títulos oficiales de primer equipo ganados por cada club, agregado entre las competiciones de clubes importadas. Se deduplican snapshots repetidos y se conserva la evidencia de cada competición; el corte actual es provisional hasta completar todas las competiciones y épocas.'
+  },
+  {
+    id: 'category-national-league-club-titles',
+    slug: 'national-league-club-titles',
+    labelEs: 'Títulos nacionales de liga (clubes)',
+    labelEn: 'Domestic league titles (clubs)',
+    entityType: 'club',
+    metricKey: 'titles',
+    scopeKind: 'domestic_league_all_time',
+    scope: {
+      officialOnly: true,
+      domesticFirstDivisionOnly: true,
+      historicalFormatsIncluded: true,
+      oneTitleCountPerCompetitionAndEdition: true,
+      openUniverse: true,
+      sourceRowCutoff: 200
+    },
+    definition: 'Número de títulos de primera división nacional conseguidos por cada club en su historia, agregando las ligas domésticas cuya fuente abierta y alcance histórico estén documentados. No incluye copas nacionales, supercopas, competiciones continentales ni amistosos.'
   },
   {
     id: 'category-concacaf-champions-cup-club-titles',

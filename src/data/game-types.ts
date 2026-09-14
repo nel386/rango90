@@ -8,6 +8,7 @@ export type MockCategory = {
   ordinal?: number;
   label: Record<Locale, string>;
   definition: Record<Locale, string>;
+  entityType?: EntityType;
 };
 
 export type MockEntity = {

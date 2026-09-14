@@ -1,6 +1,7 @@
 import { pool, closeDb } from './db.js';
 import { config } from './config.js';
 import { calculateChallengeSha256 } from './game-contract.js';
+import { GAME_ENGINE_VERSION } from './game-engine.js';
 
 const challengeId = 'integration-daily-v1';
 const categoryA = { id: 'integration-category-goals', slug: 'integration-test-goals', snapshotId: 'integration-snapshot-goals' };
@@ -83,11 +84,11 @@ async function seed(): Promise<void> {
       `INSERT INTO game_challenges
          (id, challenge_kind, challenge_date, status, source_version, engine_version,
           time_limit_seconds, score_cap, challenge_sha256, published_at, metadata)
-       VALUES ($1, 'daily', $2, 'draft', 'integration-v1', 'game-engine-v1', 120, 100, $3, NULL, '{"fixture":true,"integrationOnly":true}'::jsonb)
+         VALUES ($1, 'daily', $2, 'draft', 'integration-v1', $4, 120, 100, $3, NULL, '{"fixture":true,"integrationOnly":true}'::jsonb)
        ON CONFLICT (id) DO UPDATE SET challenge_date = EXCLUDED.challenge_date, status = 'draft', published_at = NULL,
          source_version = EXCLUDED.source_version, engine_version = EXCLUDED.engine_version,
          challenge_sha256 = EXCLUDED.challenge_sha256, metadata = EXCLUDED.metadata`,
-      [challengeId, date, '3'.repeat(64)]
+      [challengeId, date, '3'.repeat(64), GAME_ENGINE_VERSION]
     );
     await client.query('DELETE FROM game_challenge_answers WHERE game_challenge_id = $1', [challengeId]);
     await client.query('DELETE FROM game_challenge_decisions WHERE game_challenge_id = $1', [challengeId]);
@@ -112,16 +113,16 @@ async function seed(): Promise<void> {
       kind: 'daily',
       challengeDate: date,
       sourceVersion: 'integration-v1',
-      engineVersion: 'game-engine-v1',
+      engineVersion: GAME_ENGINE_VERSION,
       timeLimitSeconds: 120,
       scoreCap: 100,
       categories: [
-        { ordinal: 0, categoryId: categoryA.id, rankingSnapshotId: categoryA.snapshotId, slug: categoryA.slug },
-        { ordinal: 1, categoryId: categoryB.id, rankingSnapshotId: categoryB.snapshotId, slug: categoryB.slug }
+        { ordinal: 0, categoryId: categoryA.id, rankingSnapshotId: categoryA.snapshotId, slug: categoryA.slug, entityType: 'player' },
+        { ordinal: 1, categoryId: categoryB.id, rankingSnapshotId: categoryB.snapshotId, slug: categoryB.slug, entityType: 'player' }
       ],
       decisions: [
-        { ordinal: 0, entityId: entityA },
-        { ordinal: 1, entityId: entityB }
+        { ordinal: 0, entityId: entityA, entityType: 'player' },
+        { ordinal: 1, entityId: entityB, entityType: 'player' }
       ],
       answers: [
         { decisionOrdinal: 0, categoryId: categoryA.id, scoreValue: 1 },

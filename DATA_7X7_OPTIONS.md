@@ -2,7 +2,7 @@
 
 Fecha: 14 de septiembre de 2026 (UTC)
 
-La elección de una opción fija el alcance del reto. No aprueba por sí sola las fuentes ni convierte datos parciales en publicables. En todos los casos se mantienen estas reglas técnicas: siete categorías de jugadores, 200 entradas reales por categoría, siete jugadores comunes jugables, selección diaria dentro del top 90, identidades canónicas, empates reproducibles y cero conflictos.
+La elección de una opción fija el alcance del reto. No aprueba por sí sola las fuentes ni convierte datos parciales en publicables. En todos los casos se mantienen estas reglas técnicas: siete categorías y siete decisiones, 200 entradas reales por categoría abierta (o universo cerrado completo), entidades comunes dentro de cada tipo, selección diaria dentro del top 90, identidades canónicas, empates reproducibles y cero conflictos.
 
 ## A — Mantener el candidato actual
 
@@ -50,10 +50,10 @@ La selección recibida queda fijada así:
 
 1. `club-career-yellow-cards` — jugadores con más tarjetas amarillas.
 2. `club-career-red-cards` — jugadores con más tarjetas rojas.
-3. `club-career-titles` — jugadores con más títulos de club.
+3. `club-career-titles` — jugadores con más títulos a nivel de club.
 4. `world-cup-goals` — jugadores con más goles en Mundiales.
 5. `player-career-goals` — jugadores con más goles oficiales en carrera global (clubes + selección absoluta).
-6. `uefa-champions-league-assists` — jugadores con más asistencias en Champions League.
-7. `uefa-champions-league-goals` — categoría añadida para completar la matriz y mantener el bloque de Champions coherente.
+6. `national-league-club-titles` — equipo con más títulos nacionales de primera división.
+7. `european-cup-champions-league-club-titles` — equipo con más Copas de Europa / Champions League.
 
-Las dos menciones a “goles en carrera” se han contado como una sola categoría. El total global incluye los goles oficiales de clubes y de selección absoluta; `world-cup-goals` mantiene el subconjunto específico de Mundiales. `player-career-goals` es una categoría nueva respecto al catálogo actual y necesitará una fuente homogénea, una definición única y un snapshot propio. Esta matriz sustituye como objetivo de producto al candidato anterior; todavía hay que generar/validar sus snapshots, resolver identidades y derechos, y pasar el guard antes de publicarla.
+Las dos menciones a “goles en carrera” se han contado como una sola categoría. El total global incluye los goles oficiales de clubes y de selección absoluta; `world-cup-goals` mantiene el subconjunto específico de Mundiales. Las cinco primeras categorías son de jugadores y las dos últimas de equipos: no se cruzan respuestas entre tipos. `player-career-goals` y `national-league-club-titles` son categorías nuevas respecto al catálogo anterior y necesitarán una fuente homogénea, una definición única y snapshots propios. Esta matriz sustituye como objetivo de producto al candidato anterior; todavía hay que generar/validar sus snapshots, resolver identidades y derechos, y pasar el guard antes de publicarla.

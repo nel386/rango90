@@ -1,9 +1,12 @@
 import { createHash } from 'node:crypto';
 
-export const GAME_ENGINE_VERSION = 'game-engine-v1';
+export const GAME_ENGINE_VERSION = 'game-engine-v2';
+
+export type GameEntityType = 'player' | 'club' | 'national_team';
 
 export type GameCategory = {
   slug: string;
+  entityType?: GameEntityType;
 };
 
 /**
@@ -13,6 +16,7 @@ export type GameCategory = {
 export type GameDecision = {
   ordinal: number;
   entityId: string;
+  entityType?: GameEntityType;
   scoreByCategory: Readonly<Record<string, number>>;
 };
 
@@ -73,6 +77,7 @@ export type GameResult = {
 export type PresentedDecision = {
   ordinal: number;
   entityId: string;
+  entityType?: GameEntityType;
   availableCategorySlugs: readonly string[];
 };
 
@@ -107,6 +112,22 @@ function isPositiveSafeInteger(value: number): boolean {
   return Number.isSafeInteger(value) && value > 0;
 }
 
+function categorySupportsDecision(category: GameCategory, decision: GameDecision): boolean {
+  return !category.entityType || !decision.entityType || category.entityType === decision.entityType;
+}
+
+function expectedCategorySlugs(challenge: PublishedGameChallenge, decision: GameDecision): string[] {
+  return challenge.categories.filter((category) => categorySupportsDecision(category, decision)).map((category) => category.slug);
+}
+
+function firstCompatibleRemainingCategory(
+  challenge: PublishedGameChallenge,
+  decision: GameDecision,
+  usedCategoriesSet: ReadonlySet<string>
+): GameCategory | undefined {
+  return challenge.categories.find((category) => !usedCategoriesSet.has(category.slug) && categorySupportsDecision(category, decision));
+}
+
 function assertChallenge(challenge: PublishedGameChallenge): void {
   if (!challenge.id || !challenge.sourceVersion || !/^[0-9a-f]{64}$/.test(challenge.challengeSha256) || !isPositiveSafeInteger(challenge.timeLimitSeconds) || !isPositiveSafeInteger(challenge.scoreCap) || !Number.isSafeInteger(challenge.timeLimitSeconds * 1000)) {
     throw new GameRuleError('challenge_invalid', 'El reto publicado tiene metadatos inválidos');
@@ -123,6 +144,12 @@ function assertChallenge(challenge: PublishedGameChallenge): void {
     categorySlugs.add(category.slug);
   }
 
+  for (const category of challenge.categories) {
+    if (!challenge.decisions.some((decision) => categorySupportsDecision(category, decision))) {
+      throw new GameRuleError('challenge_invalid', `La categoría ${category.slug} no tiene ninguna entidad compatible`);
+    }
+  }
+
   const entityIds = new Set<string>();
   for (const [index, decision] of challenge.decisions.entries()) {
     if (decision.ordinal !== index || !decision.entityId || entityIds.has(decision.entityId)) {
@@ -130,10 +157,11 @@ function assertChallenge(challenge: PublishedGameChallenge): void {
     }
     entityIds.add(decision.entityId);
     const answerSlugs = Object.keys(decision.scoreByCategory);
-    if (answerSlugs.length !== categorySlugs.size || answerSlugs.some((slug) => !categorySlugs.has(slug))) {
+    const expectedSlugs = expectedCategorySlugs(challenge, decision);
+    if (answerSlugs.length !== expectedSlugs.length || answerSlugs.some((slug) => !expectedSlugs.includes(slug))) {
       throw new GameRuleError('challenge_invalid', `Matriz de respuestas incompleta en la decisión ${index}`);
     }
-    for (const slug of categorySlugs) {
+    for (const slug of expectedSlugs) {
       const score = decision.scoreByCategory[slug];
       if (score === undefined || !Number.isSafeInteger(score) || score < 1 || score > challenge.scoreCap) {
         throw new GameRuleError('challenge_invalid', `Puntuación inválida para ${decision.entityId}/${slug}`);
@@ -191,7 +219,8 @@ export function getCurrentDecision(challenge: PublishedGameChallenge, state: Gam
   return {
     ordinal: decision.ordinal,
     entityId: decision.entityId,
-    availableCategorySlugs: challenge.categories.filter((category) => !used.has(category.slug)).map((category) => category.slug)
+    ...(decision.entityType ? { entityType: decision.entityType } : {}),
+    availableCategorySlugs: challenge.categories.filter((category) => !used.has(category.slug) && categorySupportsDecision(category, decision)).map((category) => category.slug)
   };
 }
 
@@ -220,14 +249,19 @@ export function expireGame(challenge: PublishedGameChallenge, state: GameState, 
   }
 
   const used = usedCategories(state);
-  const remainingCategories = challenge.categories.filter((category) => !used.has(category.slug));
-  const timeoutAssignments = challenge.decisions.slice(state.currentOrdinal).map((decision, index) => ({
-    ordinal: decision.ordinal,
-    entityId: decision.entityId,
-    categorySlug: remainingCategories[index]?.slug ?? '',
-    scoreValue: challenge.scoreCap,
-    timedOut: true
-  }));
+  const timeoutAssignments: GameAssignment[] = [];
+  const timeoutUsed = new Set(used);
+  for (const decision of challenge.decisions.slice(state.currentOrdinal)) {
+    const category = firstCompatibleRemainingCategory(challenge, decision, timeoutUsed);
+    timeoutAssignments.push({
+      ordinal: decision.ordinal,
+      entityId: decision.entityId,
+      categorySlug: category?.slug ?? '',
+      scoreValue: challenge.scoreCap,
+      timedOut: true
+    });
+    if (category) timeoutUsed.add(category.slug);
+  }
   if (timeoutAssignments.some((assignment) => !assignment.categorySlug)) {
     throw new GameRuleError('challenge_invalid', 'No hay categorías suficientes para completar el timeout');
   }
@@ -393,15 +427,16 @@ export function validateGameResult(challenge: PublishedGameChallenge, result: Ga
       if (used.has(assignment.categorySlug)) {
         return { valid: false, code: 'result_invalid', message: 'El resultado contiene categorías duplicadas' };
       }
-      used.add(assignment.categorySlug);
+      const expectedTimeoutCategory = assignment.timedOut
+        ? firstCompatibleRemainingCategory(challenge, decision, used)
+        : undefined;
       const expectedScore = decision.scoreByCategory[assignment.categorySlug];
       if (expectedScore === undefined && !assignment.timedOut) {
         return { valid: false, code: 'result_invalid', message: 'Respuesta inválida en el resultado' };
       }
       if (assignment.timedOut) {
         timedOutStarted = true;
-        const remaining = challenge.categories.filter((category) => !result.assignments.slice(0, index).some((item) => item.categorySlug === category.slug));
-        if (assignment.categorySlug !== remaining[0]?.slug || assignment.scoreValue !== challenge.scoreCap) {
+        if (assignment.categorySlug !== expectedTimeoutCategory?.slug || assignment.scoreValue !== challenge.scoreCap) {
           return { valid: false, code: 'result_invalid', message: 'Asignación de timeout no reproducible' };
         }
       } else {
@@ -409,6 +444,7 @@ export function validateGameResult(challenge: PublishedGameChallenge, result: Ga
           return { valid: false, code: 'result_invalid', message: 'Puntuación o secuencia de timeout inválida' };
         }
       }
+      used.add(assignment.categorySlug);
       totalScore += assignment.scoreValue;
     }
 

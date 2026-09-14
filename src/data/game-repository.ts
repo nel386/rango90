@@ -45,7 +45,7 @@ export interface GameRepository {
 
 type ApiChallenge = {
   id: string; kind: "daily" | "weekly" | "duel"; challengeDate: string | null; sourceVersion: string; challengeSha256: string; engineVersion: string; timeLimitSeconds: number; scoreCap: number;
-  categories: Array<{ ordinal: number; id: string; rankingSnapshotId: string; slug: string; labelEs: string; labelEn: string }>;
+  categories: Array<{ ordinal: number; id: string; rankingSnapshotId: string; slug: string; entityType?: string; labelEs: string; labelEn: string }>;
   decisions: Array<{ ordinal: number; entityId: string; name: string; shortName: string | null; entityType: string; imageUrl?: string; imageStatus?: "licensed" | "fallback" }>;
 };
 
@@ -65,7 +65,7 @@ function normalizeChallenge(raw: ApiChallenge, baseUrl = ""): MockChallenge {
     subtitle: { es: "Una combinación publicada y auditada.", en: "A published and audited combination." },
     entityType: raw.decisions[0]?.entityType === "club" || raw.decisions[0]?.entityType === "national_team" ? raw.decisions[0].entityType : "player",
     timeLimitSeconds: raw.timeLimitSeconds, qualificationScore: 250, scoreCap: raw.scoreCap, sourceVersion: raw.sourceVersion, challengeSha256: raw.challengeSha256, engineVersion: raw.engineVersion, difficulty: "balanced",
-    categories: raw.categories.map((category) => ({ slug: category.slug, code: category.slug.slice(0, 2).toUpperCase(), id: category.id, ordinal: category.ordinal, label: { es: category.labelEs, en: category.labelEn }, definition: { es: "Ranking publicado para este reto.", en: "Published ranking for this challenge." } })),
+    categories: raw.categories.map((category) => ({ slug: category.slug, code: category.slug.slice(0, 2).toUpperCase(), id: category.id, ordinal: category.ordinal, entityType: category.entityType === "club" || category.entityType === "national_team" ? category.entityType : "player", label: { es: category.labelEs, en: category.labelEn }, definition: { es: "Ranking publicado para este reto.", en: "Published ranking for this challenge." } })),
     entities: raw.decisions.map((decision) => ({ id: decision.entityId, name: decision.name, shortName: decision.shortName ?? decision.name.slice(0, 2).toUpperCase(), entityType: decision.entityType === "club" || decision.entityType === "national_team" ? decision.entityType : "player", position: "", imageUrl: resolveApiAssetUrl(baseUrl, decision.imageUrl), imageFallbackUrl: resolveApiAssetUrl(baseUrl, `/v1/media/${encodeURIComponent(decision.entityId)}/fallback`), imageStatus: decision.imageStatus, ordinal: decision.ordinal, scores: {} })),
   };
 }

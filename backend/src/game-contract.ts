@@ -13,6 +13,7 @@ import {
   GAME_ENGINE_VERSION,
   startGame,
   submitDecision,
+  type GameEntityType,
   type GameResult,
   type PublishedGameChallenge,
   type SubmittedAssignment
@@ -40,6 +41,7 @@ type ChallengeCategoryRow = {
   slug: string;
   label_es: string;
   label_en: string;
+  entity_type: GameEntityType;
 };
 
 type ChallengeDecisionRow = {
@@ -47,7 +49,7 @@ type ChallengeDecisionRow = {
   entity_id: string;
   canonical_name: string;
   short_name: string | null;
-  entity_type: string;
+  entity_type: GameEntityType;
   image_url: string;
   image_status: 'licensed' | 'fallback';
 };
@@ -94,8 +96,8 @@ export type ChallengeHashInput = {
   engineVersion: string;
   timeLimitSeconds: number;
   scoreCap: number;
-  categories: Array<{ ordinal: number; categoryId: string; rankingSnapshotId: string; slug: string }>;
-  decisions: Array<{ ordinal: number; entityId: string }>;
+  categories: Array<{ ordinal: number; categoryId: string; rankingSnapshotId: string; slug: string; entityType?: GameEntityType }>;
+  decisions: Array<{ ordinal: number; entityId: string; entityType?: GameEntityType }>;
   answers: Array<{ decisionOrdinal: number; categoryId: string; scoreValue: number }>;
 };
 
@@ -188,7 +190,7 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
                      WHERE playable_profile.entity_id = decision_entity.id
                        AND playable_profile.playable_default = TRUE
                   ))
-                  OR (decision_entity.entity_type = 'player' AND NOT EXISTS (
+                  OR NOT EXISTS (
                     SELECT 1
                     FROM ranking_entries ranked_entry
                     JOIN ranking_snapshots ranked_snapshot
@@ -201,7 +203,7 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
                       ON ranked_identity.source_entity_id = ranked_entry.entity_id
                     WHERE ranked_entry.rank <= ${MAX_GAME_RANKING_ENTRIES}
                       AND COALESCE(ranked_identity.canonical_entity_id, ranked_entry.entity_id) = decision_entity.id
-                  )))
+                  ))
         )
       ORDER BY challenge_date DESC NULLS LAST, published_at DESC NULLS LAST, id
       LIMIT 1`,
@@ -213,7 +215,7 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
 
   const categoriesResult = await db.query<ChallengeCategoryRow>(
     `SELECT gcc.category_ordinal, gcc.category_id, gcc.ranking_snapshot_id,
-            cd.slug, cd.label_es, cd.label_en
+            cd.slug, cd.label_es, cd.label_en, cd.entity_type
        FROM game_challenge_categories gcc
        JOIN category_definitions cd ON cd.id = gcc.category_id
       WHERE gcc.game_challenge_id = $1
@@ -272,8 +274,8 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
     engineVersion: row.engine_version,
     timeLimitSeconds: toNumber(row.time_limit_seconds),
     scoreCap: toNumber(row.score_cap),
-    categories: categories.map((category) => ({ ordinal: category.category_ordinal, categoryId: category.category_id, rankingSnapshotId: category.ranking_snapshot_id, slug: category.slug })),
-    decisions: decisionsResult.rows.map((decision) => ({ ordinal: decision.decision_ordinal, entityId: decision.entity_id })),
+    categories: categories.map((category) => ({ ordinal: category.category_ordinal, categoryId: category.category_id, rankingSnapshotId: category.ranking_snapshot_id, slug: category.slug, entityType: category.entity_type })),
+    decisions: decisionsResult.rows.map((decision) => ({ ordinal: decision.decision_ordinal, entityId: decision.entity_id, entityType: decision.entity_type })),
     answers: answersResult.rows.map((answer) => ({ decisionOrdinal: answer.decision_ordinal, categoryId: answer.category_id, scoreValue: toNumber(answer.score_value) }))
   });
   if (row.challenge_sha256 !== expectedChallengeSha256) {
@@ -291,10 +293,11 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
     challengeSha256: row.challenge_sha256,
     timeLimitSeconds: toNumber(row.time_limit_seconds),
     scoreCap: toNumber(row.score_cap),
-    categories: categories.map((category) => ({ slug: category.slug })),
+    categories: categories.map((category) => ({ slug: category.slug, entityType: category.entity_type })),
     decisions: decisionsResult.rows.map((decision) => ({
       ordinal: decision.decision_ordinal,
       entityId: decision.entity_id,
+      entityType: decision.entity_type,
       scoreByCategory: answersByDecision.get(decision.decision_ordinal) ?? {}
     }))
   };
@@ -338,6 +341,7 @@ function publicChallenge(challenge: LoadedChallenge) {
       id: category.category_id,
       rankingSnapshotId: category.ranking_snapshot_id,
       slug: category.slug,
+      entityType: category.entity_type,
       labelEs: category.label_es,
       labelEn: category.label_en
     })),

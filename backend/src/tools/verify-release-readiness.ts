@@ -51,6 +51,7 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
     decision_count: number;
     decision_entity_count: number;
     answer_count: number;
+    expected_answer_count: number;
     missing_ranking_entries: number;
     score_mismatches: number;
     entity_type_count: number;
@@ -69,7 +70,9 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
               re.score_value AS ranking_score
          FROM game_challenge_decisions gcd
          JOIN published_daily pd ON pd.id = gcd.game_challenge_id
+         JOIN entities decision_entity ON decision_entity.id = gcd.entity_id
          CROSS JOIN game_challenge_categories gcc
+         JOIN category_definitions category_definition ON category_definition.id = gcc.category_id
          LEFT JOIN game_challenge_answers gca
            ON gca.game_challenge_id = gcd.game_challenge_id
           AND gca.decision_ordinal = gcd.decision_ordinal
@@ -85,9 +88,11 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
             LIMIT 1
          ) re ON TRUE
         WHERE gcc.game_challenge_id = gcd.game_challenge_id
+          AND decision_entity.entity_type = category_definition.entity_type
      ),
      matrix_summary AS (
        SELECT game_challenge_id,
+              COUNT(*)::int AS expected_answer_count,
               COUNT(*) FILTER (WHERE ranking_score IS NULL)::int AS missing_ranking_entries,
               COUNT(*) FILTER (WHERE ranking_score IS NOT NULL AND answer_score IS DISTINCT FROM ranking_score)::int AS score_mismatches
          FROM decision_category_matrix
@@ -98,6 +103,7 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
             COUNT(DISTINCT gcd.decision_ordinal)::int AS decision_count,
             COUNT(DISTINCT gcd.entity_id)::int AS decision_entity_count,
             COUNT(DISTINCT (gca.decision_ordinal, gca.category_id))::int AS answer_count,
+            COALESCE(MAX(ms.expected_answer_count), 0)::int AS expected_answer_count,
             COALESCE(MAX(ms.missing_ranking_entries), 0)::int AS missing_ranking_entries,
             COALESCE(MAX(ms.score_mismatches), 0)::int AS score_mismatches,
             COUNT(DISTINCT c.entity_type)::int AS entity_type_count
@@ -121,6 +127,7 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
       decisions: daily.decision_count,
       distinctEntities: daily.decision_entity_count,
       answers: daily.answer_count,
+      expectedAnswers: daily.expected_answer_count,
       missingRankingEntries: daily.missing_ranking_entries,
       scoreMismatches: daily.score_mismatches,
       entityTypeCount: daily.entity_type_count
@@ -136,10 +143,14 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
       unresolved_conflicts: number;
       eligible_count: number;
       ranking_entry_count: number;
+      entity_type: 'player' | 'club' | 'national_team';
+      closed_universe: boolean;
       source_rights_status: string;
     }>(
       `SELECT c.slug, c.status AS category_status, rs.status AS snapshot_status,
               rs.coverage_complete, rs.unresolved_conflicts, rs.eligible_count,
+              c.entity_type,
+              COALESCE((c.scope->>'closedUniverse')::boolean, FALSE) AS closed_universe,
               COUNT(DISTINCT COALESCE(identity_link.canonical_entity_id, re.entity_id))
                 FILTER (
                   WHERE re.rank <= 200
@@ -166,7 +177,7 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
         WHERE gcc.game_challenge_id = $1
         GROUP BY c.slug, c.status, rs.status, rs.coverage_complete,
                  rs.unresolved_conflicts, rs.eligible_count, s.rights_status,
-                 gcc.category_ordinal
+                 c.entity_type, c.scope, gcc.category_ordinal
         ORDER BY gcc.category_ordinal`,
       [daily.id]
     )
@@ -177,8 +188,8 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
     || category.snapshot_status !== 'published'
     || !category.coverage_complete
     || category.unresolved_conflicts > 0
-    || category.eligible_count < 200
-    || category.ranking_entry_count < 200
+    || category.eligible_count < (category.closed_universe ? 1 : 200)
+    || category.ranking_entry_count < (category.closed_universe ? 1 : 200)
     || category.source_rights_status !== 'approved'
   );
   const boundary = await verifyGameCatalogBoundary();
@@ -198,17 +209,18 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
         && daily.category_count === 7
         && daily.decision_count === 7
         && daily.decision_entity_count === 7
-        && daily.answer_count === 49
+        && daily.answer_count === daily.expected_answer_count
+        && daily.expected_answer_count > 0
         && daily.missing_ranking_entries === 0
         && daily.score_mismatches === 0
-        && daily.entity_type_count === 1),
+        && daily.entity_type_count >= 1),
       dailyShape,
       'Existe un reto diario publicado con matriz 7×7, entidades comunes y valores derivados de sus snapshots'
     ),
     dailyCategoryContracts: check(
       Boolean(daily && dailyCategories.rows.length === 7 && categoryFailures.length === 0),
       { categoryCount: dailyCategories.rows.length, failures: categoryFailures.map((category) => category.slug) },
-      'Las categorías del reto tienen snapshot publicado, cobertura completa, conflictos resueltos, 200 entradas reales y derechos aprobados'
+      'Las categorías del reto tienen snapshot publicado, cobertura completa, conflictos resueltos, tamaño mínimo por universo y derechos aprobados'
     ),
     catalogBoundary: check(
       boundaryFailures.length === 0,

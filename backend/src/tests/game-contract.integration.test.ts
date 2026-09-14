@@ -3,6 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import type { FastifyInstance } from 'fastify';
 import { buildApp } from '../app.js';
 import { calculateChallengeSha256 } from '../game-contract.js';
+import { GAME_ENGINE_VERSION } from '../game-engine.js';
 import { closeDb, pool } from '../db.js';
 
 const suffix = randomUUID().slice(0, 8);
@@ -75,8 +76,8 @@ async function setup(): Promise<void> {
     );
     await client.query(
       `INSERT INTO game_challenges (id, challenge_kind, challenge_date, status, source_version, engine_version, time_limit_seconds, score_cap, challenge_sha256)
-       VALUES ($1, 'daily', '2026-09-09', 'draft', 'it-v1', 'game-engine-v1', 10, 100, $2)`,
-      [challengeId, 'c'.repeat(64)]
+       VALUES ($1, 'daily', '2026-09-09', 'draft', 'it-v1', $3, 10, 100, $2)`,
+      [challengeId, 'c'.repeat(64), GAME_ENGINE_VERSION]
     );
     await client.query(
       `INSERT INTO game_challenge_categories (game_challenge_id, category_id, category_ordinal, ranking_snapshot_id)
@@ -98,16 +99,16 @@ async function setup(): Promise<void> {
       kind: 'daily',
       challengeDate: '2026-09-09',
       sourceVersion: 'it-v1',
-      engineVersion: 'game-engine-v1',
+      engineVersion: GAME_ENGINE_VERSION,
       timeLimitSeconds: 10,
       scoreCap: 100,
       categories: [
-        { ordinal: 0, categoryId: categoryA, rankingSnapshotId: snapshotA, slug: 'it-goals' },
-        { ordinal: 1, categoryId: categoryB, rankingSnapshotId: snapshotB, slug: 'it-assists' }
+        { ordinal: 0, categoryId: categoryA, rankingSnapshotId: snapshotA, slug: 'it-goals', entityType: 'player' },
+        { ordinal: 1, categoryId: categoryB, rankingSnapshotId: snapshotB, slug: 'it-assists', entityType: 'player' }
       ],
       decisions: [
-        { ordinal: 0, entityId: entityA },
-        { ordinal: 1, entityId: entityB }
+        { ordinal: 0, entityId: entityA, entityType: 'player' },
+        { ordinal: 1, entityId: entityB, entityType: 'player' }
       ],
       answers: [
         { decisionOrdinal: 0, categoryId: categoryA, scoreValue: 1 },
@@ -200,7 +201,7 @@ async function assertPublishedChallengeRejectsUnbackedEntity(): Promise<void> {
         );
         await client.query('COMMIT');
       },
-      /published game challenge requires every decision entity in every ranking snapshot/u
+    /published game challenge requires every compatible decision entity in its ranking snapshot/u
     );
   } finally {
     await client.query('ROLLBACK').catch(() => undefined);

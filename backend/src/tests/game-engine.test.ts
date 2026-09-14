@@ -9,7 +9,8 @@ import {
   getCurrentDecision,
   startGame,
   submitDecision,
-  validateGameResult
+  validateGameResult,
+  type PublishedGameChallenge
 } from '../game-engine.js';
 import { gameChallengeFixture } from './fixtures/gameChallenge.js';
 
@@ -102,5 +103,35 @@ assert.equal(ledger.submit(gameChallengeFixture, { playerId: 'player-2', idempot
 // Invalid published challenges are rejected before a game can start.
 assert.throws(() => startGame({ ...gameChallengeFixture, categories: [...gameChallengeFixture.categories, { slug: 'extra' }] }, start), (error: unknown) => error instanceof GameRuleError && error.code === 'challenge_invalid');
 assert.throws(() => startGame({ ...gameChallengeFixture, decisions: [{ ...gameChallengeFixture.decisions[0]!, entityId: 'player-b' }, ...gameChallengeFixture.decisions.slice(1)] }, start), (error: unknown) => error instanceof GameRuleError && error.code === 'challenge_invalid');
+
+// Typed daily matrix: player decisions only see player categories and the club
+// decision only sees club categories; the timeout keeps the same compatibility.
+const typedChallenge: PublishedGameChallenge = {
+  id: 'typed-challenge',
+  sourceVersion: 'typed-fixture-v1',
+  challengeSha256: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  timeLimitSeconds: 10,
+  scoreCap: 100,
+  categories: [
+    { slug: 'player-goals', entityType: 'player' as const },
+    { slug: 'player-cards', entityType: 'player' as const },
+    { slug: 'club-champions', entityType: 'club' as const }
+  ],
+  decisions: [
+    { ordinal: 0, entityId: 'player-typed-a', entityType: 'player' as const, scoreByCategory: { 'player-goals': 1, 'player-cards': 2 } },
+    { ordinal: 1, entityId: 'player-typed-b', entityType: 'player' as const, scoreByCategory: { 'player-goals': 3, 'player-cards': 4 } },
+    { ordinal: 2, entityId: 'club-typed-a', entityType: 'club' as const, scoreByCategory: { 'club-champions': 5 } }
+  ]
+};
+let typedState = startGame(typedChallenge, start);
+assert.deepEqual(getCurrentDecision(typedChallenge, typedState)?.availableCategorySlugs, ['player-goals', 'player-cards']);
+typedState = submitDecision(typedChallenge, typedState, { ordinal: 0, entityId: 'player-typed-a', categorySlug: 'player-goals' }, start + 1);
+assert.deepEqual(getCurrentDecision(typedChallenge, typedState)?.availableCategorySlugs, ['player-cards']);
+typedState = expireGame(typedChallenge, typedState, start + 10_000);
+assert.deepEqual(typedState.assignments.slice(1), [
+  { ordinal: 1, entityId: 'player-typed-b', categorySlug: 'player-cards', scoreValue: 100, timedOut: true },
+  { ordinal: 2, entityId: 'club-typed-a', categorySlug: 'club-champions', scoreValue: 100, timedOut: true }
+]);
+assert.equal(validateGameResult(typedChallenge, calculateGameResult(typedChallenge, typedState)).valid, true);
 
 console.log('game engine tests passed');

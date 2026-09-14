@@ -142,6 +142,11 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      # next build uses the root tsconfig, which includes backend/**/*.ts.
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
       - name: Build and sync Capacitor assets
         env:
           NEXT_PUBLIC_API_BASE_URL: https://api.example.com

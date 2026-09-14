@@ -20,6 +20,18 @@ type RankingEntryRow = {
   rank: number;
 };
 
+type CategoryDiagnostic = {
+  slug: string;
+  snapshotId: string;
+  playableTop200: number;
+  playableTop90: number;
+  coverageComplete: boolean;
+  unresolvedConflicts: number;
+  eligibleCount: number;
+  scoreCap: number;
+  blockingReasons: string[];
+};
+
 try {
   const snapshotRows = await pool.query<SnapshotRow>(
     `SELECT DISTINCT ON (c.id)
@@ -69,15 +81,31 @@ try {
     bySnapshot.set(entry.snapshot_id, snapshotEntries);
   }
 
+  const diagnostics: CategoryDiagnostic[] = snapshotRows.rows.map((row) => {
+    const snapshotEntries = bySnapshot.get(row.snapshot_id) ?? new Map<string, number>();
+    const playableTop90 = [...snapshotEntries.values()].filter((rank) => rank <= DAILY_CHALLENGE_CANDIDATE_RANK).length;
+    const blockingReasons: string[] = [];
+    if (!row.coverage_complete) blockingReasons.push('coverage_incomplete');
+    if (row.unresolved_conflicts !== 0) blockingReasons.push('unresolved_conflicts');
+    if (row.eligible_count < MAX_GAME_RANKING_ENTRIES) blockingReasons.push('source_entry_count_below_200');
+    if (row.score_cap !== 100) blockingReasons.push('score_cap_not_100');
+    if (snapshotEntries.size < MAX_GAME_RANKING_ENTRIES) blockingReasons.push('playable_canonical_players_below_200');
+    if (playableTop90 < 7) blockingReasons.push('fewer_than_7_playable_players_in_top_90');
+    return {
+      slug: row.slug,
+      snapshotId: row.snapshot_id,
+      playableTop200: snapshotEntries.size,
+      playableTop90,
+      coverageComplete: row.coverage_complete,
+      unresolvedConflicts: row.unresolved_conflicts,
+      eligibleCount: row.eligible_count,
+      scoreCap: row.score_cap,
+      blockingReasons
+    };
+  });
+
   const candidates: SevenBySevenCategory[] = snapshotRows.rows
-    .filter((row) => {
-      const snapshotEntries = bySnapshot.get(row.snapshot_id) ?? new Map<string, number>();
-      return row.coverage_complete
-        && row.unresolved_conflicts === 0
-        && row.eligible_count >= MAX_GAME_RANKING_ENTRIES
-        && row.score_cap === 100
-        && snapshotEntries.size >= MAX_GAME_RANKING_ENTRIES;
-    })
+    .filter((row) => diagnostics.find((diagnostic) => diagnostic.snapshotId === row.snapshot_id)?.blockingReasons.length === 0)
     .map((row) => {
       const snapshotEntries = bySnapshot.get(row.snapshot_id) ?? new Map<string, number>();
       return {
@@ -104,6 +132,9 @@ try {
     },
     activePlayerCategories: snapshotRows.rows.length,
     individuallyEligibleCategories: candidates.map((category) => ({ slug: category.slug, snapshotId: category.snapshotId })),
+    closestCategoryDiagnostics: diagnostics
+      .sort((left, right) => right.playableTop200 - left.playableTop200 || right.playableTop90 - left.playableTop90 || left.slug.localeCompare(right.slug))
+      .slice(0, 20),
     ...audit,
     note: 'Esta auditoría valida datos locales y no aprueba derechos de redistribución ni activos visuales.'
   }, null, 2));

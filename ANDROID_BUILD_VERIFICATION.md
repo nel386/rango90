@@ -70,6 +70,8 @@ Verified using v2 scheme (APK Signature Scheme v2): true
 
 El keystore temporal no es una clave de distribución y no debe instalarse ni publicarse como release oficial. La firma oficial queda pendiente de la clave protegida del proyecto.
 
+Como regresión del fallback, se repitió `assembleRelease` sin las cuatro variables: Gradle registró `no signing credentials configured; building unsigned artifact`, terminó con `BUILD SUCCESSFUL` y produjo únicamente `app-release-unsigned.apk`.
+
 ## Alcance pendiente
 
 Esta evidencia demuestra que el proyecto puede producir una APK debug válida y compilar la variante release. No se ha instalado en un dispositivo o emulador. Antes de una distribución pública todavía se necesita firmar la variante `release` con una clave protegida, verificar la firma resultante y ejecutar QA funcional de la aplicación contra un backend real autorizado.

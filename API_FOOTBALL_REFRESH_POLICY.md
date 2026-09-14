@@ -33,6 +33,8 @@ npm run refresh:api-football:scheduled -- weekly --dry-run
 
 El año diario es el año UTC actual; el semanal es el último año cerrado. Se puede fijar explícitamente con `--season YYYY`. La clave se configura únicamente como secreto de entorno `API_FOOTBALL_KEY`; nunca se guarda en el repositorio.
 
+En la comprobación operativa del 14/09/2026, la clave presente en `backend/.env` fue rechazada por el proveedor con HTTP 403 (`Invalid API key`). Por tanto, la planificación y el modo `--dry-run` están verificados, pero no se debe considerar completada una sincronización real hasta sustituir o rotar esa credencial y repetir `npm run audit:api-football -- --season YYYY`.
+
 Ejemplo de `cron` en UTC, desde el directorio `backend`:
 
 ```cron

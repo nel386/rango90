@@ -1,7 +1,7 @@
 # Ruta de producción para escudos oficiales — Rango 90
 
-**Fecha de comprobación:** 12 de septiembre de 2026  
-**Estado:** ruta identificada, pendiente de oferta y acuerdo escrito  
+**Fecha de comprobación:** 12 de septiembre de 2026
+**Estado:** ruta identificada, pendiente de oferta y acuerdo escrito
 **API-Football:** no consultada durante esta investigación
 
 ## Conclusión ejecutiva

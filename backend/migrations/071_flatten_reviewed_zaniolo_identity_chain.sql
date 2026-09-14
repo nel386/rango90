@@ -12,4 +12,3 @@ WHERE source_entity_id = 'uefa:player:73e7744cbe1849644fa242a1'
   AND canonical_entity_id = 'uefa:player:abbb901952dc98cc287ca7c9';
 
 COMMIT;
-

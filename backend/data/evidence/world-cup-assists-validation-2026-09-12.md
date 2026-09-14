@@ -1,6 +1,6 @@
 # Validación de `world-cup-assists`
 
-Fecha de comprobación: 2026-09-12  
+Fecha de comprobación: 2026-09-12
 Alcance: Copa Mundial de la FIFA masculina, fases finales, asistencias acumuladas por jugador.
 
 ## Estado reproducible de Rango90
@@ -47,4 +47,3 @@ No existe evidencia suficiente para afirmar que el conjunto actual sea un top 20
 4. No se modifica el cliente ni se promueve el snapshot a publicado.
 
 El bloqueo queda abierto hasta disponer de una tabla completa de 200 o de datos partido a partido desde 1966, con definición de asistencia y metodología constante, procedentes de una fuente oficial o de un proveedor cuya licencia y cobertura histórica puedan demostrarse.
-

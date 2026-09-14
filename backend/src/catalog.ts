@@ -252,7 +252,7 @@ export const categories: CategorySeed[] = [
     scopeKind: 'club_career_global',
     scope: { officialOnly: true, firstTeamOnly: true, goalkeeperOnly: true, excluded: ['friendlies', 'youth', 'reserve', 'testimonial'] },
     definition: 'Porterías a cero registradas por porteros en partidos oficiales de primer equipo de clubes, agregadas globalmente y sin inferirlas cuando la fuente no las ofrece.'
-  }, 
+  },
   {
     id: 'category-national-team-official-goals',
     slug: 'national-team-official-goals',

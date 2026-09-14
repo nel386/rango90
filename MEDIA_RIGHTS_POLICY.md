@@ -75,7 +75,7 @@ La verificación de TheSportsDB del 12 de septiembre de 2026 confirmó que 223/2
 5. Aprobarlo solo después de la revisión.
 6. Publicar un ranking solo cuando sus 200 primeras entradas tengan cobertura de datos validada y cualquier activo visual publicado tenga expediente aprobado. Las imágenes opcionales pueden usar el fallback propio.
 
-Esta política no sustituye asesoramiento jurídico. Si se quiere una cobertura completa de escudos comerciales, la decisión presupuestaria correcta es negociar una licencia de marca/activos con los titulares o contratar un proveedor que la incluya por escrito. 
+Esta política no sustituye asesoramiento jurídico. Si se quiere una cobertura completa de escudos comerciales, la decisión presupuestaria correcta es negociar una licencia de marca/activos con los titulares o contratar un proveedor que la incluya por escrito.
 
 ## Comprobación de proveedores de API (11 de septiembre de 2026)
 

@@ -12,4 +12,3 @@ assert.notDeepEqual(first, other);
 assert.ok(first.length > 100);
 
 console.log('media fallback tests passed');
-

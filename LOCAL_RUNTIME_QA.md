@@ -41,6 +41,10 @@ Esta evidencia cubre el flujo de aplicación con datos sintéticos, pero no sust
 
 ## Límites de esta evidencia
 
+## Revalidación local — 14/09/2026 12:12 UTC
+
+Se reconstruyeron los artefactos estáticos con `NEXT_PUBLIC_API_BASE_URL` apuntando a un origen HTTPS de QA y pasaron `build:pages`, `verify:pages`, `build:android` y `verify:android`. Chromium 152 headless sirvió `out/` en `127.0.0.1:4174` y comprobó `/es/` y `/en/`: ambas rutas terminaron con estado 0, `lang` correcto, título localizado, `role="alert"` y enlace al idioma contrario. Esta ejecución confirma nuevamente el smoke de arranque y accesibilidad del estado sin backend publicado.
+
 - No existe todavía un reto o snapshot publicado real contra el que probar el flujo completo; la prueba funcional anterior usa únicamente una fixture sintética aislada.
 - No hay dispositivo ni emulador conectado para una prueba de instalación e interacción Android.
 - No sustituye QA visual exhaustivo ni una prueba en un dispositivo Android físico; el smoke de navegador anterior cubre arranque, estados de error, idiomas, estructura accesible y viewport móvil emulado.

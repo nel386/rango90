@@ -87,8 +87,8 @@ async function copyText(text: string) {
 
 export function Rango90App({ locale }: { locale: Locale }) {
   const t = useTranslations("Game");
-  const initialDuelCode = typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("duel")?.toUpperCase() ?? "";
-  const [view, setView] = useState<View>(initialDuelCode ? "duels" : "home");
+  const [initialDuelCode, setInitialDuelCode] = useState("");
+  const [view, setView] = useState<View>("home");
   const [phase, setPhase] = useState<GamePhase>("playing");
   const [gameMode, setGameMode] = useState<GameMode>("daily");
   const [challenge, setChallenge] = useState(fallbackChallenge);
@@ -116,7 +116,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
   const [submissionState, setSubmissionState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [leaderboardEligible, setLeaderboardEligible] = useState<boolean | null>(null);
   const [duel, setDuel] = useState<DuelState | null>(null);
-  const [duelCodeInput, setDuelCodeInput] = useState(initialDuelCode);
+  const [duelCodeInput, setDuelCodeInput] = useState("");
   const [duelState, setDuelState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [duelMessage, setDuelMessage] = useState("");
   const [duelToken, setDuelToken] = useState<DuelToken | null>(null);
@@ -572,10 +572,16 @@ export function Rango90App({ locale }: { locale: Locale }) {
   }
 
   useEffect(() => {
-    if (!initialDuelCode) return;
-    const timer = window.setTimeout(() => void openDuel(initialDuelCode), 0);
+    const code = new URLSearchParams(window.location.search).get("duel")?.toUpperCase() ?? "";
+    if (!code) return;
+    const timer = window.setTimeout(() => {
+      setInitialDuelCode(code);
+      setDuelCodeInput(code);
+      setView("duels");
+      void openDuel(code);
+    }, 0);
     return () => window.clearTimeout(timer);
-    // The URL is read once on mount; the async handler owns its state updates.
+    // The URL is read once after hydration; the async handler owns its state updates.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

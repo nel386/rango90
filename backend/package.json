@@ -104,6 +104,7 @@
     "entity:link": "tsx src/cli.ts link-entity",
     "entity:repair-links": "tsx src/cli.ts repair-identity-links",
     "entity:consolidate:api-football": "tsx src/cli.ts consolidate-api-football-identities",
+    "entity:consolidate:football-data": "tsx src/cli.ts consolidate-football-data-club-identities",
     "entity:consolidate:uefa": "tsx src/cli.ts consolidate-uefa-identities",
     "entity:consolidate:uefa-shared-players": "tsx src/cli.ts consolidate-uefa-shared-player-identities",
     "entity:consolidate:uefa-clubs": "tsx src/cli.ts consolidate-uefa-club-identities",

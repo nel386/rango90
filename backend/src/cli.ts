@@ -63,7 +63,7 @@ import { downloadOpenverseImage, searchOpenversePlayerCandidates, type Openverse
 import { seedGameAudienceProfiles } from './gameAudience.js';
 import { cleanupApiFootballSeasonCache, fetchApiFootballLeagueCompleteSeason, fetchApiFootballPremierLeagueCompleteSeason, fetchApiFootballPremierLeagueSeason } from './providers/apiFootballSeasonClient.js';
 import { fetchApiFootballPlayerTrophies, type ApiFootballTrophy } from './providers/apiFootballTrophiesClient.js';
-import { consolidateApiFootballIdentities, consolidateBdfutbolLaLigaIdentities, consolidateBdfutbolSharedPlayerIdentities, consolidateDfbBundesligaIdentities, consolidateDfbPokalIdentities, consolidateDflSupercupIdentities, consolidateFaCupIdentities, consolidateRsssfIdentities, consolidateSerieAClubTitlesIdentities, consolidateStatbunkerChampionsLeagueIdentities, consolidateStatbunkerClubWorldCupIdentities, consolidateStatbunkerConferenceIdentities, consolidateStatbunkerCopaAmericaIdentities, consolidateStatbunkerCopaLibertadoresIdentities, consolidateStatbunkerEuroIdentities, consolidateStatbunkerEuropaIdentities, consolidateStatbunkerNationsLeagueIdentities, consolidateStatbunkerWorldCupIdentities, consolidateSupercoppaItalianaIdentities, consolidateTransfermarktBundesligaAssistsIdentities, consolidateTransfermarktClubWorldCupIdentities, consolidateTransfermarktCopaAmericaIdentities, consolidateTransfermarktCopaLibertadoresIdentities, consolidateTransfermarktCopaSudamericanaIdentities, consolidateTransfermarktEuropeanCupChampionsLeagueIdentities, consolidateTransfermarktLaLigaAssistsIdentities, consolidateTransfermarktLigue1AssistsIdentities, consolidateTransfermarktNationsLeagueIdentities, consolidateTransfermarktPrimeiraLigaAssistsIdentities, consolidateTransfermarktSerieAAssistsIdentities, consolidateTransfermarktUefaEuropaLeagueIdentities, consolidateTransfermarktWorldCupIdentities, consolidateUefaChampionsLeagueIdentities, consolidateUefaClubIdentities, consolidateUefaConferenceLeagueIdentities, consolidateUefaEuroIdentities, consolidateUefaSharedClubIdentities, consolidateUefaSharedPlayerIdentities, consolidateWikipediaCopaDelReyIdentities, consolidateWikipediaCopaSudamericanaIdentities, consolidateWikipediaRecopaSudamericanaIdentities, consolidateWikipediaSerieAIdentities, repairIdentityLinks } from './identityConsolidation.js';
+import { consolidateApiFootballIdentities, consolidateBdfutbolLaLigaIdentities, consolidateBdfutbolSharedPlayerIdentities, consolidateDfbBundesligaIdentities, consolidateDfbPokalIdentities, consolidateDflSupercupIdentities, consolidateFaCupIdentities, consolidateFootballDataClubIdentities, consolidateRsssfIdentities, consolidateSerieAClubTitlesIdentities, consolidateStatbunkerChampionsLeagueIdentities, consolidateStatbunkerClubWorldCupIdentities, consolidateStatbunkerConferenceIdentities, consolidateStatbunkerCopaAmericaIdentities, consolidateStatbunkerCopaLibertadoresIdentities, consolidateStatbunkerEuroIdentities, consolidateStatbunkerEuropaIdentities, consolidateStatbunkerNationsLeagueIdentities, consolidateStatbunkerWorldCupIdentities, consolidateSupercoppaItalianaIdentities, consolidateTransfermarktBundesligaAssistsIdentities, consolidateTransfermarktClubWorldCupIdentities, consolidateTransfermarktCopaAmericaIdentities, consolidateTransfermarktCopaLibertadoresIdentities, consolidateTransfermarktCopaSudamericanaIdentities, consolidateTransfermarktEuropeanCupChampionsLeagueIdentities, consolidateTransfermarktLaLigaAssistsIdentities, consolidateTransfermarktLigue1AssistsIdentities, consolidateTransfermarktNationsLeagueIdentities, consolidateTransfermarktPrimeiraLigaAssistsIdentities, consolidateTransfermarktSerieAAssistsIdentities, consolidateTransfermarktUefaEuropaLeagueIdentities, consolidateTransfermarktWorldCupIdentities, consolidateUefaChampionsLeagueIdentities, consolidateUefaClubIdentities, consolidateUefaConferenceLeagueIdentities, consolidateUefaEuroIdentities, consolidateUefaSharedClubIdentities, consolidateUefaSharedPlayerIdentities, consolidateWikipediaCopaDelReyIdentities, consolidateWikipediaCopaSudamericanaIdentities, consolidateWikipediaRecopaSudamericanaIdentities, consolidateWikipediaSerieAIdentities, repairIdentityLinks } from './identityConsolidation.js';
 import { findUniqueCanonicalEntity, moveEntityDataToCanonical, recordIdentityLink, resolveCanonicalEntityId } from './entityIdentity.js';
 import { assertPublishableImageLicense, assertRightsApproval, assertSourceRightsApproval } from './mediaRights.js';
 import { MAX_GAME_RANKING_ENTRIES, runDataCatalogCleanup, verifyGameCatalogBoundary } from './catalogCleanup.js';
@@ -7670,6 +7670,19 @@ try {
       const result = await consolidateApiFootballIdentities(client);
       await client.query('COMMIT');
       console.log(JSON.stringify({ source: 'api-football', ...result }, null, 2));
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  } else if (command === 'consolidate-football-data-club-identities') {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await consolidateFootballDataClubIdentities(client);
+      await client.query('COMMIT');
+      console.log(JSON.stringify({ source: 'schochastics-football-data', ...result }, null, 2));
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;

@@ -61,11 +61,12 @@ function parseSeasonStartYear(seasonLabel: string): number {
 
 function parseDateLine(line: string, seasonStartYear: number): { month: number; day: number; year?: number } | null {
   const match = line.trim().match(/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Z][a-z]{2})\s+(\d{1,2})(?:\s+(\d{4}))?$/);
-  if (!match) return null;
-  const month = monthByName[match[1]!];
-  const day = Number(match[2]);
+  const numericMatch = line.trim().match(/^(\d{1,2})\.(\d{1,2})\.?$/);
+  if (!match && !numericMatch) return null;
+  const month = match ? monthByName[match[1]!] : Number(numericMatch![2]);
+  const day = Number(match ? match[2] : numericMatch![1]);
   if (!month || !Number.isInteger(day) || day < 1 || day > 31) return null;
-  const explicitYear = match[3] ? Number(match[3]) : undefined;
+  const explicitYear = match?.[3] ? Number(match[3]) : undefined;
   if (explicitYear !== undefined && (!Number.isInteger(explicitYear) || explicitYear < 1800 || explicitYear > 2200)) return null;
   return { month, day, ...(explicitYear === undefined ? {} : { year: explicitYear }) };
 }

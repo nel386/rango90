@@ -1,0 +1,2078 @@
+{
+  "sourceVersion": "england@ec25b557eeb0f5cefd233fbeeb43d340ce05142e,deutschland@b3039e75a649a251d75f190eb71a96c5d00576ba,espana@35aa00a19cafa72953cc92ccee060352c9ae6e39,italy@8ba9b3c44145de7a174b0c98bdaf5808798e14ad,france@a475af95da7a3b0b811148d9479efc15f4a8fd65,europe@a475af95da7a3b0b811148d9479efc15f4a8fd65,south-america@4371c453d0cb8882b85bbc665ab336561e60e125,world@4eff3ecf17a23404f492095aaf28fbf45d66861b",
+  "generatedAt": "2026-09-14T15:11:46.650Z",
+  "seasons": [
+    {
+      "competition": "albania",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/albania/2023-24_al1.txt",
+      "sourcePath": "albania/2023-24_al1.txt",
+      "sourceSha": "50aa896a32f40a87ca7bacb8e4eb3d1f7f72a7bf"
+    },
+    {
+      "competition": "albania",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/albania/2024-25_al1.txt",
+      "sourcePath": "albania/2024-25_al1.txt",
+      "sourceSha": "b2ec12139034050d185a4a0d87b81fa3448348ab"
+    },
+    {
+      "competition": "algeria",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/algeria/2023-24_dz1.txt",
+      "sourcePath": "africa/algeria/2023-24_dz1.txt",
+      "sourceSha": "118c48f68831a064392f45fe121b25a716ef9008"
+    },
+    {
+      "competition": "algeria",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/algeria/2024-25_dz1.txt",
+      "sourcePath": "africa/algeria/2024-25_dz1.txt",
+      "sourceSha": "fdd16be2ac6c4017225d496b41eba57f61060544"
+    },
+    {
+      "competition": "andorra",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/andorra/2023-24_ad1.txt",
+      "sourcePath": "andorra/2023-24_ad1.txt",
+      "sourceSha": "c0a83a5beaee8babb42750b992cc531a3fd5ad6c"
+    },
+    {
+      "competition": "andorra",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/andorra/2024-25_ad1.txt",
+      "sourcePath": "andorra/2024-25_ad1.txt",
+      "sourceSha": "32a2c441498c78f3620a618ab067393500b84fa5"
+    },
+    {
+      "competition": "argentina",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/argentina/2018-19_ar1.txt",
+      "sourcePath": "argentina/2018-19_ar1.txt",
+      "sourceSha": "bbba027dd08214d81fc71e5c23d1e8a141875f8e"
+    },
+    {
+      "competition": "argentina",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/argentina/2019-20_ar1.txt",
+      "sourcePath": "argentina/2019-20_ar1.txt",
+      "sourceSha": "617360c10e1c74bc10dbca568c4aaa9295946d8e"
+    },
+    {
+      "competition": "argentina",
+      "season": "2020",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/argentina/2020_ar1.txt",
+      "sourcePath": "argentina/2020_ar1.txt",
+      "sourceSha": "3e85db9884c087d0382fe5adf508e5df00bbe53a"
+    },
+    {
+      "competition": "argentina",
+      "season": "2021",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/argentina/2021_ar1.txt",
+      "sourcePath": "argentina/2021_ar1.txt",
+      "sourceSha": "e733914871bc83d0a5eac06b263198cc504049bc"
+    },
+    {
+      "competition": "argentina",
+      "season": "2022",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/argentina/2022_ar1.txt",
+      "sourcePath": "argentina/2022_ar1.txt",
+      "sourceSha": "005304a5bb952185ca6bfaa1e1f3060efd96448c"
+    },
+    {
+      "competition": "argentina",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/argentina/2023_ar1.txt",
+      "sourcePath": "argentina/2023_ar1.txt",
+      "sourceSha": "bc90b3bc96f7d53e7b4218c8b28663be0b0c057f"
+    },
+    {
+      "competition": "argentina",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/argentina/2024_ar1.txt",
+      "sourcePath": "argentina/2024_ar1.txt",
+      "sourceSha": "ecd3db39eb871b30ae54ad4c32ea5b4554cd8539"
+    },
+    {
+      "competition": "argentina",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/argentina/2025_ar1.txt",
+      "sourcePath": "argentina/2025_ar1.txt",
+      "sourceSha": "8767404c5dfa2014e5f6c0e8d62ec60fabf004f5"
+    },
+    {
+      "competition": "armenia",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/armenia/2023-24_am1.txt",
+      "sourcePath": "armenia/2023-24_am1.txt",
+      "sourceSha": "24d55b2a6eb1cd9f69b1a52c77c1aaa222933062"
+    },
+    {
+      "competition": "armenia",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/armenia/2024-25_am1.txt",
+      "sourcePath": "armenia/2024-25_am1.txt",
+      "sourceSha": "43297a6b01554df732045d4fc8c61bb174a69de7"
+    },
+    {
+      "competition": "australia",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/pacific/australia/2018-19_au1.txt",
+      "sourcePath": "pacific/australia/2018-19_au1.txt",
+      "sourceSha": "2a4c20f8d9c42ad19d70d33ecfecfb5e7ffd538b"
+    },
+    {
+      "competition": "australia",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/pacific/australia/2019-20_au1.txt",
+      "sourcePath": "pacific/australia/2019-20_au1.txt",
+      "sourceSha": "fbc58e8fcf580c36d5db6b87b40b2927317e20a8"
+    },
+    {
+      "competition": "australia",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/pacific/australia/2020-21_au1.txt",
+      "sourcePath": "pacific/australia/2020-21_au1.txt",
+      "sourceSha": "669896eba46433c8b2edcf944936a8e393ef6d3d"
+    },
+    {
+      "competition": "australia",
+      "season": "2021-22",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/pacific/australia/2021-22_au1.txt",
+      "sourcePath": "pacific/australia/2021-22_au1.txt",
+      "sourceSha": "b8e06eda1702421107bc374b5d9566291ee239b9"
+    },
+    {
+      "competition": "australia",
+      "season": "2022-23",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/pacific/australia/2022-23_au1.txt",
+      "sourcePath": "pacific/australia/2022-23_au1.txt",
+      "sourceSha": "d52bcabeff82ee196e8079469326fc1c93ac7513"
+    },
+    {
+      "competition": "australia",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/pacific/australia/2023-24_au1.txt",
+      "sourcePath": "pacific/australia/2023-24_au1.txt",
+      "sourceSha": "79fac8d90689a38a7730031f4ecc7d7ef6bb4fb4"
+    },
+    {
+      "competition": "australia",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/pacific/australia/2024-25_au1.txt",
+      "sourcePath": "pacific/australia/2024-25_au1.txt",
+      "sourceSha": "7cae9308013f30de900ed603dec41826bc5424f4"
+    },
+    {
+      "competition": "azerbaijan",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/azerbaijan/2023-24_az1.txt",
+      "sourcePath": "azerbaijan/2023-24_az1.txt",
+      "sourceSha": "a3696a69b8f91ea4181d27e20deb88d5b66b97ff"
+    },
+    {
+      "competition": "azerbaijan",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/azerbaijan/2024-25_az1.txt",
+      "sourcePath": "azerbaijan/2024-25_az1.txt",
+      "sourceSha": "6daaf429db84eb92fa32c58c46753bbe2ce12dc2"
+    },
+    {
+      "competition": "belarus",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/belarus/2023_by1.txt",
+      "sourcePath": "belarus/2023_by1.txt",
+      "sourceSha": "4c2870ad238719e3d7378b041bd0e23e1120494e"
+    },
+    {
+      "competition": "belarus",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/belarus/2024_by1.txt",
+      "sourcePath": "belarus/2024_by1.txt",
+      "sourceSha": "8a6bcecd78e7525f605224a10071ed3851f7f960"
+    },
+    {
+      "competition": "belarus",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/belarus/2025_by1.txt",
+      "sourcePath": "belarus/2025_by1.txt",
+      "sourceSha": "cfde6ced3be6c6ea5c1aabc858bf554bad96955c"
+    },
+    {
+      "competition": "bosnia-herzegovina",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/bosnia-herzegovina/2023-24_ba1.txt",
+      "sourcePath": "bosnia-herzegovina/2023-24_ba1.txt",
+      "sourceSha": "943872cc0260c0b8c931a04601b934d599437425"
+    },
+    {
+      "competition": "bosnia-herzegovina",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/bosnia-herzegovina/2024-25_ba1.txt",
+      "sourcePath": "bosnia-herzegovina/2024-25_ba1.txt",
+      "sourceSha": "a585ee1de4c171abe7039db9c3ea0a487a5f18ce"
+    },
+    {
+      "competition": "brazil",
+      "season": "2018",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/brazil/2018_br1.txt",
+      "sourcePath": "brazil/2018_br1.txt",
+      "sourceSha": "08c74ad419b1a164f997f438c67d6a4c9230e9e9"
+    },
+    {
+      "competition": "brazil",
+      "season": "2019",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/brazil/2019_br1.txt",
+      "sourcePath": "brazil/2019_br1.txt",
+      "sourceSha": "c50bee602b0a7d95590d915ddaaf14a544333c7d"
+    },
+    {
+      "competition": "brazil",
+      "season": "2020",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/brazil/2020_br1.txt",
+      "sourcePath": "brazil/2020_br1.txt",
+      "sourceSha": "e74b8f36697dce7badda2fc29acc710da01487f6"
+    },
+    {
+      "competition": "brazil",
+      "season": "2021",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/brazil/2021_br1.txt",
+      "sourcePath": "brazil/2021_br1.txt",
+      "sourceSha": "0480deda0657e0d3240575ce2b93f821ebee9c64"
+    },
+    {
+      "competition": "brazil",
+      "season": "2022",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/brazil/2022_br1.txt",
+      "sourcePath": "brazil/2022_br1.txt",
+      "sourceSha": "6538cb110a839057225e375a9cba07cf17a0e52e"
+    },
+    {
+      "competition": "brazil",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/brazil/2023_br1.txt",
+      "sourcePath": "brazil/2023_br1.txt",
+      "sourceSha": "431ebd01b75e2f95f36636b83d0e9cfa10ad1fa7"
+    },
+    {
+      "competition": "brazil",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/brazil/2024_br1.txt",
+      "sourcePath": "brazil/2024_br1.txt",
+      "sourceSha": "169baa9fdcccb933d95d3ed204bde28736fd7b1d"
+    },
+    {
+      "competition": "brazil",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/brazil/2025_br1.txt",
+      "sourcePath": "brazil/2025_br1.txt",
+      "sourceSha": "4dcb1a52faaec9dabb08079ea608180430515c01"
+    },
+    {
+      "competition": "bulgaria",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/bulgaria/2023-24_bg1.txt",
+      "sourcePath": "bulgaria/2023-24_bg1.txt",
+      "sourceSha": "a432730af835b2ca677349d0af6126feae7ce7ff"
+    },
+    {
+      "competition": "bulgaria",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/bulgaria/2024-25_bg1.txt",
+      "sourcePath": "bulgaria/2024-25_bg1.txt",
+      "sourceSha": "dac2dbb63b1743cd9db8529a7d6b20253754490a"
+    },
+    {
+      "competition": "china",
+      "season": "2018",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/china/2018_cn1.txt",
+      "sourcePath": "asia/china/2018_cn1.txt",
+      "sourceSha": "bb71a29b9581945f0d874812fe64709ab737463f"
+    },
+    {
+      "competition": "china",
+      "season": "2019",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/china/2019_cn1.txt",
+      "sourcePath": "asia/china/2019_cn1.txt",
+      "sourceSha": "d7f7a2fae529bfb707370501a66be335a4775832"
+    },
+    {
+      "competition": "china",
+      "season": "2020",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/china/2020_cn1.txt",
+      "sourcePath": "asia/china/2020_cn1.txt",
+      "sourceSha": "9a03e7792f7ce35ff7e4654fa2310661279cd074"
+    },
+    {
+      "competition": "china",
+      "season": "2021",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/china/2021_cn1.txt",
+      "sourcePath": "asia/china/2021_cn1.txt",
+      "sourceSha": "9b07ba73bd656a0a2bbf838b391ab3d436c22590"
+    },
+    {
+      "competition": "china",
+      "season": "2022",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/china/2022_cn1.txt",
+      "sourcePath": "asia/china/2022_cn1.txt",
+      "sourceSha": "82a5f157002d39cdabf35c55b39b7a3a4761f266"
+    },
+    {
+      "competition": "china",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/china/2023_cn1.txt",
+      "sourcePath": "asia/china/2023_cn1.txt",
+      "sourceSha": "bb649540d8b5ca7c8ea5a3f8289aba205bb2f1da"
+    },
+    {
+      "competition": "china",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/china/2024_cn1.txt",
+      "sourcePath": "asia/china/2024_cn1.txt",
+      "sourceSha": "223283439ea59a8f46e8358b9d7bf40e8e5c7e26"
+    },
+    {
+      "competition": "china",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/china/2025_cn1.txt",
+      "sourcePath": "asia/china/2025_cn1.txt",
+      "sourceSha": "915da6207188bcf1f317adbc0ecc8a7667e92404"
+    },
+    {
+      "competition": "colombia",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/colombia/2023_co1.txt",
+      "sourcePath": "colombia/2023_co1.txt",
+      "sourceSha": "d1fb5d0e4ad46e6f6bd2d15f70434296633311e2"
+    },
+    {
+      "competition": "colombia",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/colombia/2024_co1.txt",
+      "sourcePath": "colombia/2024_co1.txt",
+      "sourceSha": "e15908838c89f55175c0a9350adfab95a47e6a0f"
+    },
+    {
+      "competition": "colombia",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/colombia/2025_co1.txt",
+      "sourcePath": "colombia/2025_co1.txt",
+      "sourceSha": "a519be12da44d6d0c83264bacc704df8e51e0558"
+    },
+    {
+      "competition": "costa-rica",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/central-america/costa-rica/2024-25_cr1.txt",
+      "sourcePath": "central-america/costa-rica/2024-25_cr1.txt",
+      "sourceSha": "035b2cb8530e3775b901c2f2166a314628c5d978"
+    },
+    {
+      "competition": "croatia",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/croatia/2023-24_hr1.txt",
+      "sourcePath": "croatia/2023-24_hr1.txt",
+      "sourceSha": "8c092aed036df9532f4b8a00bd1f2fffe4714e23"
+    },
+    {
+      "competition": "croatia",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/croatia/2024-25_hr1.txt",
+      "sourcePath": "croatia/2024-25_hr1.txt",
+      "sourceSha": "b49007fd66edc5cf5c120cfb20f9471f96d5f510"
+    },
+    {
+      "competition": "cyprus",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/cyprus/2023-24_cy1.txt",
+      "sourcePath": "cyprus/2023-24_cy1.txt",
+      "sourceSha": "e9e96e64af51d4ca03a6bccf5e9b848409962033"
+    },
+    {
+      "competition": "cyprus",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/cyprus/2024-25_cy1.txt",
+      "sourcePath": "cyprus/2024-25_cy1.txt",
+      "sourceSha": "e4b3be9a026602ece3278c001f89f20f6ada78dd"
+    },
+    {
+      "competition": "czech-republic",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/czech-republic/2018-19_cz1.txt",
+      "sourcePath": "czech-republic/2018-19_cz1.txt",
+      "sourceSha": "736826e3e3b7327bb0c94cfdae98555ce2c5b83b"
+    },
+    {
+      "competition": "czech-republic",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/czech-republic/2020-21_cz1.txt",
+      "sourcePath": "czech-republic/2020-21_cz1.txt",
+      "sourceSha": "2173db438b3476b9dd57bb07204e78f341f08274"
+    },
+    {
+      "competition": "czech-republic",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/czech-republic/2023-24_cz1.txt",
+      "sourcePath": "czech-republic/2023-24_cz1.txt",
+      "sourceSha": "590ecb08c98a66b1e307d0c18fefd797aa2c543e"
+    },
+    {
+      "competition": "czech-republic",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/czech-republic/2024-25_cz1.txt",
+      "sourcePath": "czech-republic/2024-25_cz1.txt",
+      "sourceSha": "199262d1b944cc7b99aac6c18ccbaa8e764d6ec1"
+    },
+    {
+      "competition": "denmark",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/denmark/2023-24_dk1.txt",
+      "sourcePath": "denmark/2023-24_dk1.txt",
+      "sourceSha": "70bb4c62ff52f82157a4af5513021e32d3c0701d"
+    },
+    {
+      "competition": "denmark",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/denmark/2024-25_dk1.txt",
+      "sourcePath": "denmark/2024-25_dk1.txt",
+      "sourceSha": "f51861cec6eab823d0de41f09a1d543a1cb0cbdc"
+    },
+    {
+      "competition": "ecuador",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/ecuador/2025_ec1.txt",
+      "sourcePath": "ecuador/2025_ec1.txt",
+      "sourceSha": "7fcb1068cba5c068e5b16425125c9269f33e5d7c"
+    },
+    {
+      "competition": "egypt",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/egypt/2023-24_eg1.txt",
+      "sourcePath": "africa/egypt/2023-24_eg1.txt",
+      "sourceSha": "9c41f03b72bd7c615b7f0bd8a6c1c3d4a433f617"
+    },
+    {
+      "competition": "egypt",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/egypt/2024-25_eg1.txt",
+      "sourcePath": "africa/egypt/2024-25_eg1.txt",
+      "sourceSha": "8f8374f1fa97c5821d89ac5819fb79e0d773e348"
+    },
+    {
+      "competition": "england",
+      "season": "2000-01",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2000-01/1-premierleague.txt",
+      "sourcePath": "2000-01/1-premierleague.txt",
+      "sourceSha": "7c86400402b30aca32235b506e86112bc6fd8e0e"
+    },
+    {
+      "competition": "england",
+      "season": "2001-02",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2001-02/1-premierleague.txt",
+      "sourcePath": "2001-02/1-premierleague.txt",
+      "sourceSha": "fa5ddd286d91d6485e1f7189b1d85383496a8dcb"
+    },
+    {
+      "competition": "england",
+      "season": "2002-03",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2002-03/1-premierleague.txt",
+      "sourcePath": "2002-03/1-premierleague.txt",
+      "sourceSha": "9247fdb533cc535f721267f869eaaca54ab97103"
+    },
+    {
+      "competition": "england",
+      "season": "2003-04",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2003-04/1-premierleague.txt",
+      "sourcePath": "2003-04/1-premierleague.txt",
+      "sourceSha": "9e0fe7cc14dd65728b4e8631c4c7b340a5a9cc2f"
+    },
+    {
+      "competition": "england",
+      "season": "2004-05",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2004-05/1-premierleague.txt",
+      "sourcePath": "2004-05/1-premierleague.txt",
+      "sourceSha": "4e8376eecbc0a6eaafd279c3143cdb33734eb311"
+    },
+    {
+      "competition": "england",
+      "season": "2005-06",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2005-06/1-premierleague.txt",
+      "sourcePath": "2005-06/1-premierleague.txt",
+      "sourceSha": "82e6171a5213f2e9c96641ba51a6fb3537040215"
+    },
+    {
+      "competition": "england",
+      "season": "2006-07",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2006-07/1-premierleague.txt",
+      "sourcePath": "2006-07/1-premierleague.txt",
+      "sourceSha": "4173f58318121b1870e90bd1ffbd1407e78aa520"
+    },
+    {
+      "competition": "england",
+      "season": "2007-08",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2007-08/1-premierleague.txt",
+      "sourcePath": "2007-08/1-premierleague.txt",
+      "sourceSha": "0f561e3a675f01226260417de1d2a210b227e6e1"
+    },
+    {
+      "competition": "england",
+      "season": "2008-09",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2008-09/1-premierleague.txt",
+      "sourcePath": "2008-09/1-premierleague.txt",
+      "sourceSha": "b236c7cd41b45cca707b59bd7c9c99dbb303986b"
+    },
+    {
+      "competition": "england",
+      "season": "2009-10",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2009-10/1-premierleague.txt",
+      "sourcePath": "2009-10/1-premierleague.txt",
+      "sourceSha": "78ba66cd59dcbd879efdfda75713bb173e842ccc"
+    },
+    {
+      "competition": "england",
+      "season": "2010-11",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2010-11/1-premierleague.txt",
+      "sourcePath": "2010-11/1-premierleague.txt",
+      "sourceSha": "66e71ad9a1cbd73ae44b59012149f963bcb8aa25"
+    },
+    {
+      "competition": "england",
+      "season": "2011-12",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2011-12/1-premierleague.txt",
+      "sourcePath": "2011-12/1-premierleague.txt",
+      "sourceSha": "c012fca8562648cb139cfde5846d1499cac5d16b"
+    },
+    {
+      "competition": "england",
+      "season": "2012-13",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2012-13/1-premierleague.txt",
+      "sourcePath": "2012-13/1-premierleague.txt",
+      "sourceSha": "37421a31e8249bebb67c0a3488c398f76793efe8"
+    },
+    {
+      "competition": "england",
+      "season": "2013-14",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2013-14/1-premierleague.txt",
+      "sourcePath": "2013-14/1-premierleague.txt",
+      "sourceSha": "467de287fd2bcf305a0159e6791856377640b6a0"
+    },
+    {
+      "competition": "england",
+      "season": "2014-15",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2014-15/1-premierleague.txt",
+      "sourcePath": "2014-15/1-premierleague.txt",
+      "sourceSha": "2279c41b3f10669c454b2b8f2408bd745ac52e88"
+    },
+    {
+      "competition": "england",
+      "season": "2015-16",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2015-16/1-premierleague.txt",
+      "sourcePath": "2015-16/1-premierleague.txt",
+      "sourceSha": "e08302680948f511c85c347dcc6d3900a15c7b53"
+    },
+    {
+      "competition": "england",
+      "season": "2016-17",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2016-17/1-premierleague.txt",
+      "sourcePath": "2016-17/1-premierleague.txt",
+      "sourceSha": "feb36a2417f9c8168b1f0f45a24436c6e426bdd6"
+    },
+    {
+      "competition": "england",
+      "season": "2017-18",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2017-18/1-premierleague.txt",
+      "sourcePath": "2017-18/1-premierleague.txt",
+      "sourceSha": "c69c9fbf93520900fdbe44fd333d4a33121cefa3"
+    },
+    {
+      "competition": "england",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2018-19/1-premierleague.txt",
+      "sourcePath": "2018-19/1-premierleague.txt",
+      "sourceSha": "1f36615f21448b5ca7bc1c4a32b9bb9ba4b3ca41"
+    },
+    {
+      "competition": "england",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2019-20/1-premierleague.txt",
+      "sourcePath": "2019-20/1-premierleague.txt",
+      "sourceSha": "e567ddbea2eb6b75e7cb402d7a058f08a51dfb91"
+    },
+    {
+      "competition": "england",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2020-21/1-premierleague.txt",
+      "sourcePath": "2020-21/1-premierleague.txt",
+      "sourceSha": "80232f0a9f5122b288d69cdd20717f9d4542d0c4"
+    },
+    {
+      "competition": "england",
+      "season": "2021-22",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2021-22/1-premierleague.txt",
+      "sourcePath": "2021-22/1-premierleague.txt",
+      "sourceSha": "d7e11e9134bfd03a7e847848f50029473bf9af9a"
+    },
+    {
+      "competition": "england",
+      "season": "2022-23",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2022-23/1-premierleague.txt",
+      "sourcePath": "2022-23/1-premierleague.txt",
+      "sourceSha": "3ef9d512d2150732c18ff6e39c9d7b20f446a050"
+    },
+    {
+      "competition": "england",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2023-24/1-premierleague.txt",
+      "sourcePath": "2023-24/1-premierleague.txt",
+      "sourceSha": "23cdd8a340b72f6f30c514fbf609d5cf252723aa"
+    },
+    {
+      "competition": "england",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/england/ec25b557eeb0f5cefd233fbeeb43d340ce05142e/2024-25/1-premierleague.txt",
+      "sourcePath": "2024-25/1-premierleague.txt",
+      "sourceSha": "ca0fe4923f0164d0f879f796ab0759253e13bc06"
+    },
+    {
+      "competition": "estonia",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/estonia/2023_ee1.txt",
+      "sourcePath": "estonia/2023_ee1.txt",
+      "sourceSha": "a1d91d18da7c58ceddb8d97a61ab0abd26e5a5d0"
+    },
+    {
+      "competition": "estonia",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/estonia/2024_ee1.txt",
+      "sourcePath": "estonia/2024_ee1.txt",
+      "sourceSha": "f78421915488e09661f71839c8e6303297784209"
+    },
+    {
+      "competition": "estonia",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/estonia/2025_ee1.txt",
+      "sourcePath": "estonia/2025_ee1.txt",
+      "sourceSha": "1dc9de27e2460ca3fb4b7b6012b146a18fe5a00f"
+    },
+    {
+      "competition": "faroe-islands",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/faroe-islands/2023_fo1.txt",
+      "sourcePath": "faroe-islands/2023_fo1.txt",
+      "sourceSha": "85df1b5ece8f726be3c7e3c7fe187575c14858d7"
+    },
+    {
+      "competition": "faroe-islands",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/faroe-islands/2024_fo1.txt",
+      "sourcePath": "faroe-islands/2024_fo1.txt",
+      "sourceSha": "94d26acf12612005c7f8890b13ad4d519e3b0fa1"
+    },
+    {
+      "competition": "faroe-islands",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/faroe-islands/2025_fo1.txt",
+      "sourcePath": "faroe-islands/2025_fo1.txt",
+      "sourceSha": "9d9d300574e8c94bcc989f9ea95bce7f7c853bf3"
+    },
+    {
+      "competition": "finland",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/finland/2023_fi1.txt",
+      "sourcePath": "finland/2023_fi1.txt",
+      "sourceSha": "38685b8dbf2ef118edeab4349d1d8394e510be62"
+    },
+    {
+      "competition": "finland",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/finland/2024_fi1.txt",
+      "sourcePath": "finland/2024_fi1.txt",
+      "sourceSha": "a5303f94a2a41c220bc88a9e1a0bac0e0539c7b9"
+    },
+    {
+      "competition": "finland",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/finland/2025_fi1.txt",
+      "sourcePath": "finland/2025_fi1.txt",
+      "sourceSha": "b07405f464f159b20f785190862f6fb70fcee506"
+    },
+    {
+      "competition": "georgia",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/georgia/2023_ge1.txt",
+      "sourcePath": "georgia/2023_ge1.txt",
+      "sourceSha": "52518e07c1f2f6ce144ec1c646290949b5bc6e6e"
+    },
+    {
+      "competition": "georgia",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/georgia/2024_ge1.txt",
+      "sourcePath": "georgia/2024_ge1.txt",
+      "sourceSha": "d7dfc9d6dad199f4c96796c7c161a9ab88217723"
+    },
+    {
+      "competition": "georgia",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/georgia/2025_ge1.txt",
+      "sourcePath": "georgia/2025_ge1.txt",
+      "sourceSha": "59299a92c65e1f62b495ac4185ec68d1d41ebc85"
+    },
+    {
+      "competition": "germany",
+      "season": "2010-11",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2010-11/1-bundesliga.txt",
+      "sourcePath": "2010-11/1-bundesliga.txt",
+      "sourceSha": "b12db90c81a63321f58b8add0ea5c5b0f693fb04"
+    },
+    {
+      "competition": "germany",
+      "season": "2011-12",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2011-12/1-bundesliga.txt",
+      "sourcePath": "2011-12/1-bundesliga.txt",
+      "sourceSha": "b3b07337c661fb834f006901113e6b5764af6f9b"
+    },
+    {
+      "competition": "germany",
+      "season": "2012-13",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2012-13/1-bundesliga.txt",
+      "sourcePath": "2012-13/1-bundesliga.txt",
+      "sourceSha": "f27d22a88cf790bf0011a5bdb53cb1a91ee6e049"
+    },
+    {
+      "competition": "germany",
+      "season": "2013-14",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2013-14/1-bundesliga.txt",
+      "sourcePath": "2013-14/1-bundesliga.txt",
+      "sourceSha": "53969175f29186c0f75c4f5d630666195d78ea61"
+    },
+    {
+      "competition": "germany",
+      "season": "2014-15",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2014-15/1-bundesliga.txt",
+      "sourcePath": "2014-15/1-bundesliga.txt",
+      "sourceSha": "65c3e10cc2a74fce30179e81c74ccf566846a650"
+    },
+    {
+      "competition": "germany",
+      "season": "2015-16",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2015-16/1-bundesliga.txt",
+      "sourcePath": "2015-16/1-bundesliga.txt",
+      "sourceSha": "e1f1d0db033f1b8a66264f9fae07c7f396e54b9d"
+    },
+    {
+      "competition": "germany",
+      "season": "2016-17",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2016-17/1-bundesliga.txt",
+      "sourcePath": "2016-17/1-bundesliga.txt",
+      "sourceSha": "21a87392511b0c361860f01232c13c196de0e2e8"
+    },
+    {
+      "competition": "germany",
+      "season": "2017-18",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2017-18/1-bundesliga.txt",
+      "sourcePath": "2017-18/1-bundesliga.txt",
+      "sourceSha": "22429b59e9123756364d12c4174d20c646eb514f"
+    },
+    {
+      "competition": "germany",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2018-19/1-bundesliga.txt",
+      "sourcePath": "2018-19/1-bundesliga.txt",
+      "sourceSha": "58feb569edccfbc0c994afe184f584d35ff16ee3"
+    },
+    {
+      "competition": "germany",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2019-20/1-bundesliga.txt",
+      "sourcePath": "2019-20/1-bundesliga.txt",
+      "sourceSha": "f20d263cb025ee517e224c074dd061f5fe5c963d"
+    },
+    {
+      "competition": "germany",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2020-21/1-bundesliga.txt",
+      "sourcePath": "2020-21/1-bundesliga.txt",
+      "sourceSha": "288231a8a833693e04841bd8e81bab74aa8ef66a"
+    },
+    {
+      "competition": "germany",
+      "season": "2021-22",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2021-22/1-bundesliga.txt",
+      "sourcePath": "2021-22/1-bundesliga.txt",
+      "sourceSha": "2d947fda8b18472ad518468c2842d5c6eea1d015"
+    },
+    {
+      "competition": "germany",
+      "season": "2022-23",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2022-23/1-bundesliga.txt",
+      "sourcePath": "2022-23/1-bundesliga.txt",
+      "sourceSha": "c564b378eb7eea5650a4f9446f860fa24209b2fe"
+    },
+    {
+      "competition": "germany",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2023-24/1-bundesliga.txt",
+      "sourcePath": "2023-24/1-bundesliga.txt",
+      "sourceSha": "dcbd22d15b3964955092ab182c611184c565c199"
+    },
+    {
+      "competition": "germany",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/deutschland/b3039e75a649a251d75f190eb71a96c5d00576ba/2024-25/1-bundesliga.txt",
+      "sourcePath": "2024-25/1-bundesliga.txt",
+      "sourceSha": "1cfad25a7820e3aa4d0a8ee9aac2c75ef61c0ae8"
+    },
+    {
+      "competition": "ghana",
+      "season": "2016-17",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/ghana/2016-17_gh1.txt",
+      "sourcePath": "africa/ghana/2016-17_gh1.txt",
+      "sourceSha": "77d6984122cba409bf3378e14eed6c38ddc24a86"
+    },
+    {
+      "competition": "ghana",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/ghana/2023-24_gh1.txt",
+      "sourcePath": "africa/ghana/2023-24_gh1.txt",
+      "sourceSha": "3871ca39efcc13f37f29c07b742420a928c87148"
+    },
+    {
+      "competition": "ghana",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/ghana/2024-25_gh1.txt",
+      "sourcePath": "africa/ghana/2024-25_gh1.txt",
+      "sourceSha": "dbdc7080f31102a16bb171b6c91f0e0a6e52ef85"
+    },
+    {
+      "competition": "gibraltar",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/gibraltar/2023-24_gi1.txt",
+      "sourcePath": "gibraltar/2023-24_gi1.txt",
+      "sourceSha": "fd665424e7a2c286d07d27032470330fff314660"
+    },
+    {
+      "competition": "gibraltar",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/gibraltar/2024-25_gi1.txt",
+      "sourcePath": "gibraltar/2024-25_gi1.txt",
+      "sourceSha": "3bc44dd2c4cfd3349efbc88d8dd769f785d02ff9"
+    },
+    {
+      "competition": "greece",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/greece/2018-19_gr1.txt",
+      "sourcePath": "greece/2018-19_gr1.txt",
+      "sourceSha": "58ff2b6d01f94023f75f5b5b359a4fa6ec72850f"
+    },
+    {
+      "competition": "greece",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/greece/2019-20_gr1.txt",
+      "sourcePath": "greece/2019-20_gr1.txt",
+      "sourceSha": "00fa005fb0df9e1f145ed210c2600c9df89de41a"
+    },
+    {
+      "competition": "greece",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/greece/2020-21_gr1.txt",
+      "sourcePath": "greece/2020-21_gr1.txt",
+      "sourceSha": "7b632889001e2254a00eb30a11ed814656732a9f"
+    },
+    {
+      "competition": "greece",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/greece/2023-24_gr1.txt",
+      "sourcePath": "greece/2023-24_gr1.txt",
+      "sourceSha": "830e36673e223ecaa8540bac2461c2b09dc927c5"
+    },
+    {
+      "competition": "greece",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/greece/2024-25_gr1.txt",
+      "sourcePath": "greece/2024-25_gr1.txt",
+      "sourceSha": "eb8f068495204adc96d650f90822c1ac5643c42f"
+    },
+    {
+      "competition": "hungary",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/hungary/2018-19_hu1.txt",
+      "sourcePath": "hungary/2018-19_hu1.txt",
+      "sourceSha": "e9dc8455e35e8564666798ba1887454a2ce4e38f"
+    },
+    {
+      "competition": "hungary",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/hungary/2020-21_hu1.txt",
+      "sourcePath": "hungary/2020-21_hu1.txt",
+      "sourceSha": "7fdd05a7ee8ce278613f893dfcf63537b1b124fb"
+    },
+    {
+      "competition": "hungary",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/hungary/2023-24_hu1.txt",
+      "sourcePath": "hungary/2023-24_hu1.txt",
+      "sourceSha": "96773d302773062d5411d185c228cc9f6eac10a0"
+    },
+    {
+      "competition": "hungary",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/hungary/2024-25_hu1.txt",
+      "sourcePath": "hungary/2024-25_hu1.txt",
+      "sourceSha": "ca8b6006106daa22dc73714964a1dcffbdb730c6"
+    },
+    {
+      "competition": "iceland",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/iceland/2023_is1.txt",
+      "sourcePath": "iceland/2023_is1.txt",
+      "sourceSha": "e01a130815b6230f1347f76985b192e35981b588"
+    },
+    {
+      "competition": "iceland",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/iceland/2024_is1.txt",
+      "sourcePath": "iceland/2024_is1.txt",
+      "sourceSha": "33b7e1e3645d9879be7528d1547300f9c848c738"
+    },
+    {
+      "competition": "iceland",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/iceland/2025_is1.txt",
+      "sourcePath": "iceland/2025_is1.txt",
+      "sourceSha": "0ee7ef4a9af21a74c9bcb9c9254fde3ceecb66ca"
+    },
+    {
+      "competition": "ireland",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/ireland/2023_ie1.txt",
+      "sourcePath": "ireland/2023_ie1.txt",
+      "sourceSha": "6f2649f2d8472f5afc7c800a48b62ee63debe639"
+    },
+    {
+      "competition": "ireland",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/ireland/2024_ie1.txt",
+      "sourcePath": "ireland/2024_ie1.txt",
+      "sourceSha": "77151440231dda3e87eccdff8801206b891bc71e"
+    },
+    {
+      "competition": "ireland",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/ireland/2025_ie1.txt",
+      "sourcePath": "ireland/2025_ie1.txt",
+      "sourceSha": "927a52212497fa49159a8a54450cbbfa1e72e856"
+    },
+    {
+      "competition": "israel",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/middle-east/israel/2023-24_il1.txt",
+      "sourcePath": "middle-east/israel/2023-24_il1.txt",
+      "sourceSha": "db150fbce830089defc998074ca02ca3c0e36293"
+    },
+    {
+      "competition": "israel",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/middle-east/israel/2024-25_il1.txt",
+      "sourcePath": "middle-east/israel/2024-25_il1.txt",
+      "sourceSha": "084203e5e3d8c8817e9b651f5288c90dccbdda7f"
+    },
+    {
+      "competition": "italy",
+      "season": "2013-14",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2013-14/1-seriea.txt",
+      "sourcePath": "2013-14/1-seriea.txt",
+      "sourceSha": "68edbf9fc36158bf84e8b3654f095694f4f64ce9"
+    },
+    {
+      "competition": "italy",
+      "season": "2014-15",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2014-15/1-seriea.txt",
+      "sourcePath": "2014-15/1-seriea.txt",
+      "sourceSha": "d606e78274912be719b65985dc9e871d4d6179aa"
+    },
+    {
+      "competition": "italy",
+      "season": "2015-16",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2015-16/1-seriea.txt",
+      "sourcePath": "2015-16/1-seriea.txt",
+      "sourceSha": "d4a554417f34415f4d167f34b72d486b1c4bcf7b"
+    },
+    {
+      "competition": "italy",
+      "season": "2016-17",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2016-17/1-seriea.txt",
+      "sourcePath": "2016-17/1-seriea.txt",
+      "sourceSha": "73ca913b158ad8a5dd53f6d8f36fdf8734dac348"
+    },
+    {
+      "competition": "italy",
+      "season": "2017-18",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2017-18/1-seriea.txt",
+      "sourcePath": "2017-18/1-seriea.txt",
+      "sourceSha": "6e4d903daee7ea71ac734cbf1b7871156c22f298"
+    },
+    {
+      "competition": "italy",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2018-19/1-seriea.txt",
+      "sourcePath": "2018-19/1-seriea.txt",
+      "sourceSha": "660a14a73e10cacc1360c0c9d0df6f5ff1ad4c2e"
+    },
+    {
+      "competition": "italy",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2019-20/1-seriea.txt",
+      "sourcePath": "2019-20/1-seriea.txt",
+      "sourceSha": "b487278cdff7fa7283a42341e6fedbbe5456255e"
+    },
+    {
+      "competition": "italy",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2020-21/1-seriea.txt",
+      "sourcePath": "2020-21/1-seriea.txt",
+      "sourceSha": "b0f114c92bda1ab032ca1e6512c1b18e3c5c942f"
+    },
+    {
+      "competition": "italy",
+      "season": "2021-22",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2021-22/1-seriea.txt",
+      "sourcePath": "2021-22/1-seriea.txt",
+      "sourceSha": "158d9b476b12317947ef5506a8df52f6f1c08721"
+    },
+    {
+      "competition": "italy",
+      "season": "2022-23",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2022-23/1-seriea.txt",
+      "sourcePath": "2022-23/1-seriea.txt",
+      "sourceSha": "c313aded344647bd937a0b1757c12a4ef47ad2a5"
+    },
+    {
+      "competition": "italy",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2023-24/1-seriea.txt",
+      "sourcePath": "2023-24/1-seriea.txt",
+      "sourceSha": "eaefd06daf945d3b8a58c87e90e9fb5794a118d6"
+    },
+    {
+      "competition": "italy",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/italy/8ba9b3c44145de7a174b0c98bdaf5808798e14ad/2024-25/1-seriea.txt",
+      "sourcePath": "2024-25/1-seriea.txt",
+      "sourceSha": "18945c20673ca42b2d985251c2d353744c3104d7"
+    },
+    {
+      "competition": "japan",
+      "season": "2019",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/japan/2019_jp1.txt",
+      "sourcePath": "asia/japan/2019_jp1.txt",
+      "sourceSha": "968be548699835fd03f235fbc1890ccb08f81f08"
+    },
+    {
+      "competition": "japan",
+      "season": "2020",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/japan/2020_jp1.txt",
+      "sourcePath": "asia/japan/2020_jp1.txt",
+      "sourceSha": "6e80c0ddbc50eeef2e2bea9c98e329ce3227fba2"
+    },
+    {
+      "competition": "japan",
+      "season": "2021",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/japan/2021_jp1.txt",
+      "sourcePath": "asia/japan/2021_jp1.txt",
+      "sourceSha": "6216ee0e2c1e5474c23015ef2e8d03fbf52af622"
+    },
+    {
+      "competition": "japan",
+      "season": "2022",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/japan/2022_jp1.txt",
+      "sourcePath": "asia/japan/2022_jp1.txt",
+      "sourceSha": "4b5ab2001d2c77fdc4fb79127d9286eeec6536e2"
+    },
+    {
+      "competition": "japan",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/japan/2023_jp1.txt",
+      "sourcePath": "asia/japan/2023_jp1.txt",
+      "sourceSha": "147cd40488649d9a6c772baa6c9508c6bbf4e70c"
+    },
+    {
+      "competition": "japan",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/japan/2024_jp1.txt",
+      "sourcePath": "asia/japan/2024_jp1.txt",
+      "sourceSha": "b8755d42533abc1c1e6d3929ff312f24a06d89dd"
+    },
+    {
+      "competition": "japan",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/japan/2025_jp1.txt",
+      "sourcePath": "asia/japan/2025_jp1.txt",
+      "sourceSha": "46a872987bddda98cd3156803a28eb922e65e3c5"
+    },
+    {
+      "competition": "kazakhstan",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/kazakhstan/2023_kz1.txt",
+      "sourcePath": "asia/kazakhstan/2023_kz1.txt",
+      "sourceSha": "639431f94def4de553ec0ddd17e4e4d65961fc0e"
+    },
+    {
+      "competition": "kazakhstan",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/kazakhstan/2024_kz1.txt",
+      "sourcePath": "asia/kazakhstan/2024_kz1.txt",
+      "sourceSha": "252d60abc103760401f1bad939cf95c89642b23a"
+    },
+    {
+      "competition": "kazakhstan",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/asia/kazakhstan/2025_kz1.txt",
+      "sourcePath": "asia/kazakhstan/2025_kz1.txt",
+      "sourceSha": "c3b235c7786c931a72e21d92ecfa9a998ed6c295"
+    },
+    {
+      "competition": "kenya",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/kenya/2023-24_ke1.txt",
+      "sourcePath": "africa/kenya/2023-24_ke1.txt",
+      "sourceSha": "04e10639523f4d9fa30999b4736fb490dfcda313"
+    },
+    {
+      "competition": "kenya",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/kenya/2024-25_ke1.txt",
+      "sourcePath": "africa/kenya/2024-25_ke1.txt",
+      "sourceSha": "8ba7fed921106813333c74d52a708ba2b183c865"
+    },
+    {
+      "competition": "kosovo",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/kosovo/2023-24_kos1.txt",
+      "sourcePath": "kosovo/2023-24_kos1.txt",
+      "sourceSha": "e87569a225d0bae758baecf5e2e7f792854906af"
+    },
+    {
+      "competition": "kosovo",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/kosovo/2024-25_kos1.txt",
+      "sourcePath": "kosovo/2024-25_kos1.txt",
+      "sourceSha": "465304b888f5206f583be6e3eaa34eb0f214b06d"
+    },
+    {
+      "competition": "latvia",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/latvia/2023_lv1.txt",
+      "sourcePath": "latvia/2023_lv1.txt",
+      "sourceSha": "2dbf9e301e5607bdf8cd22a4d9da91615cdd04d2"
+    },
+    {
+      "competition": "latvia",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/latvia/2024_lv1.txt",
+      "sourcePath": "latvia/2024_lv1.txt",
+      "sourceSha": "6b041b9b357eb84ceadbe12cbcde9590acb8562e"
+    },
+    {
+      "competition": "latvia",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/latvia/2025_lv1.txt",
+      "sourcePath": "latvia/2025_lv1.txt",
+      "sourceSha": "01fef857244d42664086aa11243856c9face50ef"
+    },
+    {
+      "competition": "lithuania",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/lithuania/2023_lt1.txt",
+      "sourcePath": "lithuania/2023_lt1.txt",
+      "sourceSha": "cb386a3b5bd92d04d07f653e2ac8a04bec16a119"
+    },
+    {
+      "competition": "lithuania",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/lithuania/2024_lt1.txt",
+      "sourcePath": "lithuania/2024_lt1.txt",
+      "sourceSha": "0c5857baea7d8fa8375270869cd98e317cd68071"
+    },
+    {
+      "competition": "lithuania",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/lithuania/2025_lt1.txt",
+      "sourcePath": "lithuania/2025_lt1.txt",
+      "sourceSha": "aa192ee605c193f0282c9697ac177de91f322a28"
+    },
+    {
+      "competition": "luxembourg",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/luxembourg/2023-24_lu1.txt",
+      "sourcePath": "luxembourg/2023-24_lu1.txt",
+      "sourceSha": "b55d0a16f072ac502037dfcfda866b41f730e2c0"
+    },
+    {
+      "competition": "luxembourg",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/luxembourg/2024-25_lu1.txt",
+      "sourcePath": "luxembourg/2024-25_lu1.txt",
+      "sourceSha": "9c0eddb047ef56b85181badcc5a0916d0b9d0250"
+    },
+    {
+      "competition": "malta",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/malta/2023-24_mt1.txt",
+      "sourcePath": "malta/2023-24_mt1.txt",
+      "sourceSha": "f79654531add4b6d960426445d1f89e6a3a3e002"
+    },
+    {
+      "competition": "malta",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/malta/2024-25_mt1.txt",
+      "sourcePath": "malta/2024-25_mt1.txt",
+      "sourceSha": "6a9bd13bf64fff7c0523df38a188606e5bf69af3"
+    },
+    {
+      "competition": "mexico",
+      "season": "2010-11",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2010-11_mx1.txt",
+      "sourcePath": "north-america/mexico/2010-11_mx1.txt",
+      "sourceSha": "acdf75d3d7b82f985deb5ca2696d1f1990957c9c"
+    },
+    {
+      "competition": "mexico",
+      "season": "2011-12",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2011-12_mx1.txt",
+      "sourcePath": "north-america/mexico/2011-12_mx1.txt",
+      "sourceSha": "85bcb25e0dddabcd15ce55528ae0e61cd8019c83"
+    },
+    {
+      "competition": "mexico",
+      "season": "2012-13",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2012-13_mx1.txt",
+      "sourcePath": "north-america/mexico/2012-13_mx1.txt",
+      "sourceSha": "81b5cd5ccfa81b6e9e20d7d7305b2b1cbd28d276"
+    },
+    {
+      "competition": "mexico",
+      "season": "2013-14",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2013-14_mx1.txt",
+      "sourcePath": "north-america/mexico/2013-14_mx1.txt",
+      "sourceSha": "0009ae8bf69e76b7aeb2b665745d7e41918733d3"
+    },
+    {
+      "competition": "mexico",
+      "season": "2014-15",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2014-15_mx1.txt",
+      "sourcePath": "north-america/mexico/2014-15_mx1.txt",
+      "sourceSha": "692bc27877432d403a80770849e611506a16b374"
+    },
+    {
+      "competition": "mexico",
+      "season": "2015-16",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2015-16_mx1.txt",
+      "sourcePath": "north-america/mexico/2015-16_mx1.txt",
+      "sourceSha": "3a9f25314dd7f07b3bdee3aaa8dd44885e8b4fae"
+    },
+    {
+      "competition": "mexico",
+      "season": "2016-17",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2016-17_mx1.txt",
+      "sourcePath": "north-america/mexico/2016-17_mx1.txt",
+      "sourceSha": "32c61442ef434ae13e302281f80677e8de4c77db"
+    },
+    {
+      "competition": "mexico",
+      "season": "2017-18",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2017-18_mx1.txt",
+      "sourcePath": "north-america/mexico/2017-18_mx1.txt",
+      "sourceSha": "6c05f0873ab1c03729cadc35baa6f975c6dc3f3c"
+    },
+    {
+      "competition": "mexico",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2018-19_mx1.txt",
+      "sourcePath": "north-america/mexico/2018-19_mx1.txt",
+      "sourceSha": "2d639b6fda238a1f381863fad47c6dfcd331c10b"
+    },
+    {
+      "competition": "mexico",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2019-20_mx1.txt",
+      "sourcePath": "north-america/mexico/2019-20_mx1.txt",
+      "sourceSha": "e728bccf3608d6c45347f4f1ddbd47ccee6e0d41"
+    },
+    {
+      "competition": "mexico",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2020-21_mx1.txt",
+      "sourcePath": "north-america/mexico/2020-21_mx1.txt",
+      "sourceSha": "085819d831a44ab1f02ba0034a9a48d8293b042a"
+    },
+    {
+      "competition": "mexico",
+      "season": "2021-22",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2021-22_mx1.txt",
+      "sourcePath": "north-america/mexico/2021-22_mx1.txt",
+      "sourceSha": "acb5d2263128f3612fe5b99689ccae974c6db4a2"
+    },
+    {
+      "competition": "mexico",
+      "season": "2022-23",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2022-23_mx1.txt",
+      "sourcePath": "north-america/mexico/2022-23_mx1.txt",
+      "sourceSha": "62b5f72c92a9e0523b1d6b819149c391acec0c0c"
+    },
+    {
+      "competition": "mexico",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2023-24_mx1.txt",
+      "sourcePath": "north-america/mexico/2023-24_mx1.txt",
+      "sourceSha": "4dfb1d20e698d7146aa8cf130e97c0face1ceb2a"
+    },
+    {
+      "competition": "mexico",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/north-america/mexico/2024-25_mx1.txt",
+      "sourcePath": "north-america/mexico/2024-25_mx1.txt",
+      "sourceSha": "c7d3b257765decb4fdbb710f99013278c744eed3"
+    },
+    {
+      "competition": "moldova",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/moldova/2023-24_md1.txt",
+      "sourcePath": "moldova/2023-24_md1.txt",
+      "sourceSha": "86b1eb6fe082b1aa044b40b9c52c8b58d34c0fa0"
+    },
+    {
+      "competition": "moldova",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/moldova/2024-25_md1.txt",
+      "sourcePath": "moldova/2024-25_md1.txt",
+      "sourceSha": "995cc98b9bc538e3c399574fd473005f6d90eb79"
+    },
+    {
+      "competition": "montenegro",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/montenegro/2023-24_me1.txt",
+      "sourcePath": "montenegro/2023-24_me1.txt",
+      "sourceSha": "143cc4aab5cd07656c5593358e5cb62672083865"
+    },
+    {
+      "competition": "montenegro",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/montenegro/2024-25_me1.txt",
+      "sourcePath": "montenegro/2024-25_me1.txt",
+      "sourceSha": "85232d692ddfccd3f074db49f4c986046c41e861"
+    },
+    {
+      "competition": "morocco",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/morocco/2023-24_ma1.txt",
+      "sourcePath": "africa/morocco/2023-24_ma1.txt",
+      "sourceSha": "34d66097da31c9c78cc091518ac3096020bd6bd3"
+    },
+    {
+      "competition": "morocco",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/morocco/2024-25_ma1.txt",
+      "sourcePath": "africa/morocco/2024-25_ma1.txt",
+      "sourceSha": "f3dc3f97c00706e5b3b6ba72763d39781c713cfa"
+    },
+    {
+      "competition": "netherlands",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/netherlands/2018-19_nl1.txt",
+      "sourcePath": "netherlands/2018-19_nl1.txt",
+      "sourceSha": "5421e6ac82acb4616dec45c11b85325545f39e70"
+    },
+    {
+      "competition": "netherlands",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/netherlands/2019-20_nl1.txt",
+      "sourcePath": "netherlands/2019-20_nl1.txt",
+      "sourceSha": "c4541c1a242f6de7dc1268b610e4f6c7fe099043"
+    },
+    {
+      "competition": "netherlands",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/netherlands/2020-21_nl1.txt",
+      "sourcePath": "netherlands/2020-21_nl1.txt",
+      "sourceSha": "60762d0a8bbc3b62ea1199706caea7f929ec0a43"
+    },
+    {
+      "competition": "netherlands",
+      "season": "2021-22",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/netherlands/2021-22_nl1.txt",
+      "sourcePath": "netherlands/2021-22_nl1.txt",
+      "sourceSha": "6249665f226cf6259bfd2a9e72747295010394bb"
+    },
+    {
+      "competition": "netherlands",
+      "season": "2022-23",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/netherlands/2022-23_nl1.txt",
+      "sourcePath": "netherlands/2022-23_nl1.txt",
+      "sourceSha": "23268303742116f940ca5d763e1ba9b54ab65bf6"
+    },
+    {
+      "competition": "netherlands",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/netherlands/2023-24_nl1.txt",
+      "sourcePath": "netherlands/2023-24_nl1.txt",
+      "sourceSha": "6e44e6fbbb162b8475418e282b47ad10714c9d2f"
+    },
+    {
+      "competition": "netherlands",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/netherlands/2024-25_nl1.txt",
+      "sourcePath": "netherlands/2024-25_nl1.txt",
+      "sourceSha": "da18fab2c58b3c6850342f3679918ddaec64b882"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2009-10",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2009-10_ng1.txt",
+      "sourcePath": "africa/nigeria/2009-10_ng1.txt",
+      "sourceSha": "d25bad93a70ac377f956a7856fd16889eced025f"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2010-11",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2010-11_ng1.txt",
+      "sourcePath": "africa/nigeria/2010-11_ng1.txt",
+      "sourceSha": "ef6c2a1a1c6a1482a0e5133541b2c34ff3becf64"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2011-12",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2011-12_ng1.txt",
+      "sourcePath": "africa/nigeria/2011-12_ng1.txt",
+      "sourceSha": "b4a779d11c16961e34b13e367254235b76a0647e"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2012-13",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2012-13_ng1.txt",
+      "sourcePath": "africa/nigeria/2012-13_ng1.txt",
+      "sourceSha": "22e3158bb56e8219d42b398e8ca27cedde5dbaa8"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2013-14",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2013-14_ng1.txt",
+      "sourcePath": "africa/nigeria/2013-14_ng1.txt",
+      "sourceSha": "d55ec18f3e3a65ac1ffb692cf451b3b5b1450895"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2014-15",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2014-15_ng1.txt",
+      "sourcePath": "africa/nigeria/2014-15_ng1.txt",
+      "sourceSha": "de62bad1913015a19db05ee9eec6a1d9d46150b5"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2015-16",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2015-16_ng1.txt",
+      "sourcePath": "africa/nigeria/2015-16_ng1.txt",
+      "sourceSha": "dface8b0c30db1786e58c76a99c85c77ca13bf2e"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2016-17",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2016-17_ng1.txt",
+      "sourcePath": "africa/nigeria/2016-17_ng1.txt",
+      "sourceSha": "6376601cc532cc7609b5ea4f63f94249f1eca262"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2017-18",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2017-18_ng1.txt",
+      "sourcePath": "africa/nigeria/2017-18_ng1.txt",
+      "sourceSha": "427f0fa52679a206c596ce3f19ee138143fa4488"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2018-19_ng1.txt",
+      "sourcePath": "africa/nigeria/2018-19_ng1.txt",
+      "sourceSha": "d37eff7de8b9e15f4afa2796aca2cb1323afc377"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2020-21_ng1.txt",
+      "sourcePath": "africa/nigeria/2020-21_ng1.txt",
+      "sourceSha": "de8d720ffa5672412f03354b37100a0e7242645f"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2021-22",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2021-22_ng1.txt",
+      "sourcePath": "africa/nigeria/2021-22_ng1.txt",
+      "sourceSha": "d683a15338a0cf20cd7d0689d7a903f9863de744"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2022-23",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2022-23_ng1.txt",
+      "sourcePath": "africa/nigeria/2022-23_ng1.txt",
+      "sourceSha": "44836adc293c042fbcb0f82e787be575a3d25647"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2023-24_ng1.txt",
+      "sourcePath": "africa/nigeria/2023-24_ng1.txt",
+      "sourceSha": "f62cf8641c4ecf5a6f210dc9f929e1d849fa83c8"
+    },
+    {
+      "competition": "nigeria",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/nigeria/2024-25_ng1.txt",
+      "sourcePath": "africa/nigeria/2024-25_ng1.txt",
+      "sourceSha": "376c5ad4e46cdf84fc02b69dda9f243dc404476f"
+    },
+    {
+      "competition": "north-macedonia",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/north-macedonia/2023-24_mk1.txt",
+      "sourcePath": "north-macedonia/2023-24_mk1.txt",
+      "sourceSha": "58c793e6118eeca8f29b7859d2203c1eb8bdcc60"
+    },
+    {
+      "competition": "north-macedonia",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/north-macedonia/2024-25_mk1.txt",
+      "sourcePath": "north-macedonia/2024-25_mk1.txt",
+      "sourceSha": "142ccbc39a2b1a8f8efe396e697e676550a78aff"
+    },
+    {
+      "competition": "northern-ireland",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/northern-ireland/2023-24_nir1.txt",
+      "sourcePath": "northern-ireland/2023-24_nir1.txt",
+      "sourceSha": "74f83ca038d931cc2b42b51b6747e58ebf4e805b"
+    },
+    {
+      "competition": "northern-ireland",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/northern-ireland/2024-25_nir1.txt",
+      "sourcePath": "northern-ireland/2024-25_nir1.txt",
+      "sourceSha": "2dec13221aaee2a3f9e68b620ddc8cf2c7f056a8"
+    },
+    {
+      "competition": "norway",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/norway/2023_no1.txt",
+      "sourcePath": "norway/2023_no1.txt",
+      "sourceSha": "218e299112b81896097c6810e8299b54ad8adac8"
+    },
+    {
+      "competition": "norway",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/norway/2024_no1.txt",
+      "sourcePath": "norway/2024_no1.txt",
+      "sourceSha": "b36cddb57fad72cb20be40de6864f39da57f7a54"
+    },
+    {
+      "competition": "norway",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/norway/2025_no1.txt",
+      "sourcePath": "norway/2025_no1.txt",
+      "sourceSha": "ffe9c95bfa1a0fbb39c34c3f5c8ffc0a4f70eada"
+    },
+    {
+      "competition": "paraguay",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/south-america/4371c453d0cb8882b85bbc665ab336561e60e125/paraguay/2025_py1.txt",
+      "sourcePath": "paraguay/2025_py1.txt",
+      "sourceSha": "57e68948b07adee48f483ed44099d7f061cbf58e"
+    },
+    {
+      "competition": "poland",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/poland/2023-24_pl1.txt",
+      "sourcePath": "poland/2023-24_pl1.txt",
+      "sourceSha": "9feddfa0258443dfd578d699270ca741d1193026"
+    },
+    {
+      "competition": "poland",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/poland/2024-25_pl1.txt",
+      "sourcePath": "poland/2024-25_pl1.txt",
+      "sourceSha": "72efce0dc34526e9e1e8ef0ee880d58a8a7f6129"
+    },
+    {
+      "competition": "portugal",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/portugal/2018-19_pt1.txt",
+      "sourcePath": "portugal/2018-19_pt1.txt",
+      "sourceSha": "fda4562db066b03c72bc7892e5a21527e9e41c5d"
+    },
+    {
+      "competition": "portugal",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/portugal/2019-20_pt1.txt",
+      "sourcePath": "portugal/2019-20_pt1.txt",
+      "sourceSha": "7d5d7a2df26e2b21be46bb9b08c9c8b007b89632"
+    },
+    {
+      "competition": "portugal",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/portugal/2020-21_pt1.txt",
+      "sourcePath": "portugal/2020-21_pt1.txt",
+      "sourceSha": "ca49d56b7fdb7818f7309ef1b07fd2a33b39de3f"
+    },
+    {
+      "competition": "portugal",
+      "season": "2021-22",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/portugal/2021-22_pt1.txt",
+      "sourcePath": "portugal/2021-22_pt1.txt",
+      "sourceSha": "c448a04c11ae5b96e6bdbedabed75d1558f447df"
+    },
+    {
+      "competition": "portugal",
+      "season": "2022-23",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/portugal/2022-23_pt1.txt",
+      "sourcePath": "portugal/2022-23_pt1.txt",
+      "sourceSha": "02fcf01267c8ae5305acec400e031519954600bd"
+    },
+    {
+      "competition": "portugal",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/portugal/2023-24_pt1.txt",
+      "sourcePath": "portugal/2023-24_pt1.txt",
+      "sourceSha": "5b82a592e07f16ad42be4d24e0318cbac4ecf020"
+    },
+    {
+      "competition": "portugal",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/portugal/2024-25_pt1.txt",
+      "sourcePath": "portugal/2024-25_pt1.txt",
+      "sourceSha": "0bf964ac3c7767645b4a084a8b11ec1cc0db0e6d"
+    },
+    {
+      "competition": "romania",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/romania/2023-24_ro1.txt",
+      "sourcePath": "romania/2023-24_ro1.txt",
+      "sourceSha": "3a01148a9fbb013b75c93f4be8110c5177cfde0a"
+    },
+    {
+      "competition": "romania",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/romania/2024-25_ro1.txt",
+      "sourcePath": "romania/2024-25_ro1.txt",
+      "sourceSha": "73063e5f4853a6967ad65d43905af0c4e5b03b59"
+    },
+    {
+      "competition": "russia",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/russia/2018-19_ru1.txt",
+      "sourcePath": "russia/2018-19_ru1.txt",
+      "sourceSha": "e5efe22ce8ac11b76d0b8aa31527533a44d5a325"
+    },
+    {
+      "competition": "russia",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/russia/2019-20_ru1.txt",
+      "sourcePath": "russia/2019-20_ru1.txt",
+      "sourceSha": "233597390aeb5b4cf4cd2a0a3279ae4fc6e02c68"
+    },
+    {
+      "competition": "russia",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/russia/2020-21_ru1.txt",
+      "sourcePath": "russia/2020-21_ru1.txt",
+      "sourceSha": "272185a808d69ce90574e9eff40ff6d53bf7f322"
+    },
+    {
+      "competition": "russia",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/russia/2023-24_ru1.txt",
+      "sourcePath": "russia/2023-24_ru1.txt",
+      "sourceSha": "3ea6829a971d1cbdf56552be0519cc125707bd99"
+    },
+    {
+      "competition": "russia",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/russia/2024-25_ru1.txt",
+      "sourcePath": "russia/2024-25_ru1.txt",
+      "sourceSha": "6d8b62e4345df9ccd00e98c3bf6a91757b7dc8bc"
+    },
+    {
+      "competition": "rwanda",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/rwanda/2023-24_rw1.txt",
+      "sourcePath": "africa/rwanda/2023-24_rw1.txt",
+      "sourceSha": "2b4e83d48f23a74c272ca6e1e361f5dc76b4b8e2"
+    },
+    {
+      "competition": "rwanda",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/rwanda/2024-25_rw1.txt",
+      "sourcePath": "africa/rwanda/2024-25_rw1.txt",
+      "sourceSha": "94bf1e87bdd4134d1a02b478f4970117ec657a49"
+    },
+    {
+      "competition": "san-marino",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/san-marino/2023-24_sm1.txt",
+      "sourcePath": "san-marino/2023-24_sm1.txt",
+      "sourceSha": "adbdb42ad3cb8729e3ae5fd2502c0a4c0446333b"
+    },
+    {
+      "competition": "san-marino",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/san-marino/2024-25_sm1.txt",
+      "sourcePath": "san-marino/2024-25_sm1.txt",
+      "sourceSha": "400467ba42540ecdde9a1bb0ff6a69be9401cd96"
+    },
+    {
+      "competition": "saudi-arabia",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/middle-east/saudi-arabia/2024-25_sa1.txt",
+      "sourcePath": "middle-east/saudi-arabia/2024-25_sa1.txt",
+      "sourceSha": "e316da8746a1c981f68964ff24c84cb05fbdc8f9"
+    },
+    {
+      "competition": "scotland",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/scotland/2018-19_sco1.txt",
+      "sourcePath": "scotland/2018-19_sco1.txt",
+      "sourceSha": "567e7cd8fde48e8c1fc61d72474a9499cb662ac9"
+    },
+    {
+      "competition": "scotland",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/scotland/2019-20_sco1.txt",
+      "sourcePath": "scotland/2019-20_sco1.txt",
+      "sourceSha": "5e8a06bb3f8eb3120d91d6ce085ac404b8cfbd8c"
+    },
+    {
+      "competition": "scotland",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/scotland/2020-21_sco1.txt",
+      "sourcePath": "scotland/2020-21_sco1.txt",
+      "sourceSha": "a057f7e98f837ab1eb3ea9b81a86bb57bfb3b337"
+    },
+    {
+      "competition": "scotland",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/scotland/2023-24_sco1.txt",
+      "sourcePath": "scotland/2023-24_sco1.txt",
+      "sourceSha": "c6c242e025d638eff357ee145b1caa4db20ca227"
+    },
+    {
+      "competition": "scotland",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/scotland/2024-25_sco1.txt",
+      "sourcePath": "scotland/2024-25_sco1.txt",
+      "sourceSha": "3c65a9f923674ae72bcb3f3245a6ff5eeca57c28"
+    },
+    {
+      "competition": "serbia",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/serbia/2023-24_rs1.txt",
+      "sourcePath": "serbia/2023-24_rs1.txt",
+      "sourceSha": "85dd4ffdadf5b73c7aac792803387a2191625b25"
+    },
+    {
+      "competition": "serbia",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/serbia/2024-25_rs1.txt",
+      "sourcePath": "serbia/2024-25_rs1.txt",
+      "sourceSha": "c748b2ff7daa06830c2aedd64d34558e87f79c75"
+    },
+    {
+      "competition": "slovakia",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/slovakia/2023-24_sk1.txt",
+      "sourcePath": "slovakia/2023-24_sk1.txt",
+      "sourceSha": "7b0aca47dd38ba565d49fc7b0d0c9677764efa33"
+    },
+    {
+      "competition": "slovakia",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/slovakia/2024-25_sk1.txt",
+      "sourcePath": "slovakia/2024-25_sk1.txt",
+      "sourceSha": "42fffd154acf337e53db1d89f102e0b600f7e74e"
+    },
+    {
+      "competition": "slovenia",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/slovenia/2023-24_si1.txt",
+      "sourcePath": "slovenia/2023-24_si1.txt",
+      "sourceSha": "d0afcfae556c605548123888be63a1dd356a97c3"
+    },
+    {
+      "competition": "slovenia",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/slovenia/2024-25_si1.txt",
+      "sourcePath": "slovenia/2024-25_si1.txt",
+      "sourceSha": "a478780828a7f3a52238a45334d7f603b61f7f9b"
+    },
+    {
+      "competition": "south-africa",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/south-africa/2024-25_za1.txt",
+      "sourcePath": "africa/south-africa/2024-25_za1.txt",
+      "sourceSha": "5c9cbd824dd8a824c753e103eb39672d0fff4c37"
+    },
+    {
+      "competition": "spain",
+      "season": "2012-13",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2012-13/1-liga.txt",
+      "sourcePath": "2012-13/1-liga.txt",
+      "sourceSha": "1b29b3cf766d072821e1eacbb7037d25487c6acc"
+    },
+    {
+      "competition": "spain",
+      "season": "2013-14",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2013-14/1-liga.txt",
+      "sourcePath": "2013-14/1-liga.txt",
+      "sourceSha": "2636a93379804e2395856f15996372113464debd"
+    },
+    {
+      "competition": "spain",
+      "season": "2014-15",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2014-15/1-liga.txt",
+      "sourcePath": "2014-15/1-liga.txt",
+      "sourceSha": "e403fa660dd1cb19ebb3764723b6653725cb25f1"
+    },
+    {
+      "competition": "spain",
+      "season": "2015-16",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2015-16/1-liga.txt",
+      "sourcePath": "2015-16/1-liga.txt",
+      "sourceSha": "7a5c6b4419164070417e8c256cd1a6285065a2ef"
+    },
+    {
+      "competition": "spain",
+      "season": "2016-17",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2016-17/1-liga.txt",
+      "sourcePath": "2016-17/1-liga.txt",
+      "sourceSha": "54b52d22debb423f3153e9155f867dfdda9d20a6"
+    },
+    {
+      "competition": "spain",
+      "season": "2017-18",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2017-18/1-liga.txt",
+      "sourcePath": "2017-18/1-liga.txt",
+      "sourceSha": "e7da3a175975c973834562c9c8db44fef7a6bfdc"
+    },
+    {
+      "competition": "spain",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2018-19/1-liga.txt",
+      "sourcePath": "2018-19/1-liga.txt",
+      "sourceSha": "6aa23341deab4583d8b457e8324f87058f4091be"
+    },
+    {
+      "competition": "spain",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2019-20/1-liga.txt",
+      "sourcePath": "2019-20/1-liga.txt",
+      "sourceSha": "608ccbe5f827989bfcabf2b64fb70a68c5ee57ea"
+    },
+    {
+      "competition": "spain",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2020-21/1-liga.txt",
+      "sourcePath": "2020-21/1-liga.txt",
+      "sourceSha": "a7adc112f75d6b4ed59e2c93c0f1c57e13721ede"
+    },
+    {
+      "competition": "spain",
+      "season": "2021-22",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2021-22/1-liga.txt",
+      "sourcePath": "2021-22/1-liga.txt",
+      "sourceSha": "8bc8976e67889c7a16203580f82d18ad2fc874d5"
+    },
+    {
+      "competition": "spain",
+      "season": "2022-23",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2022-23/1-liga.txt",
+      "sourcePath": "2022-23/1-liga.txt",
+      "sourceSha": "4a5532c651b1ed0c1bb824e91ad96d31010dcda3"
+    },
+    {
+      "competition": "spain",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2023-24/1-liga.txt",
+      "sourcePath": "2023-24/1-liga.txt",
+      "sourceSha": "1ba747e149a5f0909614245392a5040d6033fc15"
+    },
+    {
+      "competition": "spain",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/espana/35aa00a19cafa72953cc92ccee060352c9ae6e39/2024-25/1-liga.txt",
+      "sourcePath": "2024-25/1-liga.txt",
+      "sourceSha": "a2ad0779a7c0f315737ce0c7d54f25d83c2ed219"
+    },
+    {
+      "competition": "sweden",
+      "season": "2023",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/sweden/2023_se1.txt",
+      "sourcePath": "sweden/2023_se1.txt",
+      "sourceSha": "603969e62598a2921bcb3c12bbf052c9557d7458"
+    },
+    {
+      "competition": "sweden",
+      "season": "2024",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/sweden/2024_se1.txt",
+      "sourcePath": "sweden/2024_se1.txt",
+      "sourceSha": "a124d0053f30f42a4dc6808a58f025c40e46004b"
+    },
+    {
+      "competition": "sweden",
+      "season": "2025",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/sweden/2025_se1.txt",
+      "sourcePath": "sweden/2025_se1.txt",
+      "sourceSha": "9aebebce181f4f9ffb6d581eb8487a661f1b1396"
+    },
+    {
+      "competition": "switzerland",
+      "season": "2014-15",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/switzerland/2014-15_ch1.txt",
+      "sourcePath": "switzerland/2014-15_ch1.txt",
+      "sourceSha": "121836dd71bd1c0aeb97f290913793bdf2de2aac"
+    },
+    {
+      "competition": "switzerland",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/switzerland/2018-19_ch1.txt",
+      "sourcePath": "switzerland/2018-19_ch1.txt",
+      "sourceSha": "01cc63f0ed8fc26431254f3aa6894dfabdd46a3d"
+    },
+    {
+      "competition": "switzerland",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/switzerland/2019-20_ch1.txt",
+      "sourcePath": "switzerland/2019-20_ch1.txt",
+      "sourceSha": "76defbc1bd8f5441a5264156d147d20c5fe4d2c6"
+    },
+    {
+      "competition": "switzerland",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/switzerland/2020-21_ch1.txt",
+      "sourcePath": "switzerland/2020-21_ch1.txt",
+      "sourceSha": "70d9628d775583a70231cdf9d80fe3a46413676b"
+    },
+    {
+      "competition": "switzerland",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/switzerland/2023-24_ch1.txt",
+      "sourcePath": "switzerland/2023-24_ch1.txt",
+      "sourceSha": "74083cba506b175064d12f83b3e7c49c79f3b4f7"
+    },
+    {
+      "competition": "switzerland",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/switzerland/2024-25_ch1.txt",
+      "sourcePath": "switzerland/2024-25_ch1.txt",
+      "sourceSha": "91b5af25584f3458420f5e57878415501c16409f"
+    },
+    {
+      "competition": "tanzania",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/tanzania/2023-24_tz1.txt",
+      "sourcePath": "africa/tanzania/2023-24_tz1.txt",
+      "sourceSha": "44ecff2dc5d21446b4ab32f068b60e880eb46aff"
+    },
+    {
+      "competition": "tanzania",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/tanzania/2024-25_tz1.txt",
+      "sourcePath": "africa/tanzania/2024-25_tz1.txt",
+      "sourceSha": "8ec63bf23d17b563a48c9e7f3db6c157c334ae19"
+    },
+    {
+      "competition": "turkey",
+      "season": "2018-19",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/turkey/2018-19_tr1.txt",
+      "sourcePath": "turkey/2018-19_tr1.txt",
+      "sourceSha": "e2fccfab752e9d0ee6e068c8b8c1a756b4b0fcae"
+    },
+    {
+      "competition": "turkey",
+      "season": "2019-20",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/turkey/2019-20_tr1.txt",
+      "sourcePath": "turkey/2019-20_tr1.txt",
+      "sourceSha": "dd214be0fe3477a8e28bec7e46c6fdcaeceff093"
+    },
+    {
+      "competition": "turkey",
+      "season": "2020-21",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/turkey/2020-21_tr1.txt",
+      "sourcePath": "turkey/2020-21_tr1.txt",
+      "sourceSha": "bafa71f445e4120955233d441308239c972ba6ac"
+    },
+    {
+      "competition": "turkey",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/turkey/2023-24_tr1.txt",
+      "sourcePath": "turkey/2023-24_tr1.txt",
+      "sourceSha": "d021ba166912a8ee41c1d327ddb113ba7ee27ebb"
+    },
+    {
+      "competition": "turkey",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/turkey/2024-25_tr1.txt",
+      "sourcePath": "turkey/2024-25_tr1.txt",
+      "sourceSha": "ec48704c3249ce0f030fbd63162df333bdf9461b"
+    },
+    {
+      "competition": "uganda",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/uganda/2023-24_ug1.txt",
+      "sourcePath": "africa/uganda/2023-24_ug1.txt",
+      "sourceSha": "51054eae24e27dfe2bff0dd34b45d2a144dcdeb6"
+    },
+    {
+      "competition": "uganda",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/uganda/2024-25_ug1.txt",
+      "sourcePath": "africa/uganda/2024-25_ug1.txt",
+      "sourceSha": "dbc38d29b95abac6c0930257f012ebe221522809"
+    },
+    {
+      "competition": "ukraine",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/ukraine/2023-24_ua1.txt",
+      "sourcePath": "ukraine/2023-24_ua1.txt",
+      "sourceSha": "414d9a34204d45b87c7a42a75ec92f8f375cbfcf"
+    },
+    {
+      "competition": "ukraine",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/ukraine/2024-25_ua1.txt",
+      "sourcePath": "ukraine/2024-25_ua1.txt",
+      "sourceSha": "03ed47b0da23058e5a29512004bca45e4b6664cb"
+    },
+    {
+      "competition": "wales",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/wales/2023-24_wal1.txt",
+      "sourcePath": "wales/2023-24_wal1.txt",
+      "sourceSha": "12db88fca087896e6c924f59768876cdad87cc7f"
+    },
+    {
+      "competition": "wales",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/europe/a475af95da7a3b0b811148d9479efc15f4a8fd65/wales/2024-25_wal1.txt",
+      "sourcePath": "wales/2024-25_wal1.txt",
+      "sourceSha": "b149069f62a1cfb54db9d616420a7b366ea0be0c"
+    },
+    {
+      "competition": "zambia",
+      "season": "2023-24",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/zambia/2023-24_zm1.txt",
+      "sourcePath": "africa/zambia/2023-24_zm1.txt",
+      "sourceSha": "b63b295047ac66f191307a5b398ba3688345ed05"
+    },
+    {
+      "competition": "zambia",
+      "season": "2024-25",
+      "url": "https://raw.githubusercontent.com/openfootball/world/4eff3ecf17a23404f492095aaf28fbf45d66861b/africa/zambia/2024-25_zm1.txt",
+      "sourcePath": "africa/zambia/2024-25_zm1.txt",
+      "sourceSha": "87fcb52833f38732678888812bb7fe3d5892db8a"
+    }
+  ]
+}

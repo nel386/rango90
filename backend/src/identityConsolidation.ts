@@ -389,6 +389,66 @@ export async function consolidateApiFootballIdentities(client: PoolClient): Prom
   return { players, clubs, skipped, conflicts, moved };
 }
 
+/**
+ * football-data does not expose a stable club identifier in the normalized
+ * ranking. Its generated names include a country suffix, so strip only that
+ * explicit presentation suffix and require an otherwise unique canonical
+ * name. Ambiguous clubs remain untouched; this command is for deterministic
+ * identity joins, not fuzzy matching.
+ */
+export async function consolidateFootballDataClubIdentities(client: PoolClient): Promise<{
+  linked: number;
+  skipped: number;
+  conflicts: Array<{ sourceEntityId: string; canonicalEntityId: string; error: string }>;
+  moved: IdentityMoveCounts;
+}> {
+  const sourceKey = 'schochastics-football-data';
+  const sourceEntities = await client.query<{ id: string; canonical_name: string }>(
+    `SELECT DISTINCT e.id, e.canonical_name
+       FROM entities e
+       JOIN ranking_entries re ON re.entity_id = e.id AND re.rank <= 200
+       JOIN ranking_snapshots rs ON rs.id = re.snapshot_id AND rs.status <> 'superseded'
+      WHERE e.id LIKE 'football-data:club:%'
+        AND e.entity_type = 'club'
+        AND e.catalog_status = 'active'
+      ORDER BY e.canonical_name, e.id`
+  );
+  const moved = emptyMoveCounts();
+  const conflicts: Array<{ sourceEntityId: string; canonicalEntityId: string; error: string }> = [];
+  let linked = 0;
+  let skipped = 0;
+  for (const source of sourceEntities.rows) {
+    const baseName = source.canonical_name.replace(/\s+\([^()]+\)$/u, '').trim();
+    const canonical = await findUniqueCanonicalEntity(client, 'club', 'football-data:', baseName);
+    if (!canonical || canonical === source.id) {
+      skipped += 1;
+      continue;
+    }
+    await client.query('SAVEPOINT consolidate_football_data_identity');
+    try {
+      await recordIdentityLink(
+        client,
+        source.id,
+        canonical,
+        sourceKey,
+        'Nombre de club único tras retirar el sufijo explícito de país de football-data; enlace conservador sin fuzzy matching'
+      );
+      addMoveCounts(moved, await moveEntityDataToCanonical(client, source.id, canonical));
+      await client.query('RELEASE SAVEPOINT consolidate_football_data_identity');
+      linked += 1;
+    } catch (error) {
+      await client.query('ROLLBACK TO SAVEPOINT consolidate_football_data_identity');
+      await client.query('RELEASE SAVEPOINT consolidate_football_data_identity');
+      conflicts.push({
+        sourceEntityId: source.id,
+        canonicalEntityId: canonical,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
+  return { linked, skipped, conflicts, moved };
+}
+
 export async function consolidateUefaChampionsLeagueIdentities(client: PoolClient): Promise<{
   linked: number;
   skipped: number;

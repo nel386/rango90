@@ -67,6 +67,15 @@ assert.equal(ranking.entries[0]?.name, 'Alpha FC');
 assert.equal(ranking.entries[0]?.rawValue, 1);
 assert.ok(ranking.partialDraftReason?.includes('sistema de puntos'));
 
+const numericDateMatches = parseFootballTxtResults(`
+= Example League 2009/10
+  14.10.
+    16:00  Kano Pillars FC v Shooting Stars SC 1-0
+`, '2009-10');
+assert.deepEqual(numericDateMatches, [
+  { date: '2009-10-14', home: 'Kano Pillars FC', away: 'Shooting Stars SC', homeGoals: 1, awayGoals: 0 }
+]);
+
 const homonymRanking = buildOpenFootballClubTitleRanking([
   {
     competition: 'england',

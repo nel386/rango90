@@ -24,24 +24,26 @@ La auditoría `npm run audit:7x7` valida ahora exclusivamente las siete categor�
 
 Resultado verificado el 14 de septiembre de 2026 tras aplicar la migración `078_admit_selected_historical_daily_matrix_players.sql`: `ready=false`, sin combinación común válida de cinco jugadores y dos equipos para esta matriz. Los números de esta tabla son una fotografía de la auditoría; deben regenerarse tras cada nueva carga o consolidación.
 
+Como evidencia auxiliar, `enrich:wikidata:birth-dates --category world-cup-goals --limit 70 --apply` registró el snapshot `src_2f76a3d3829f0f05b4d422e9`: 34 fechas exactas aplicadas, 28 coincidencias no únicas y 8 errores. Wikidata se usa aquí solo para enriquecer identidad/fecha; no aporta los goles ni aprueba la fuente estadística.
+
 ## Contadores verificados
 
 | Métrica | Valor |
 | --- | ---: |
 | Límite por categoría | 200 |
-| Categorías activas | 113 |
-| Categorías con cobertura completa | 75 / 113 = 66,4% |
+| Categorías activas | 115 |
+| Categorías con cobertura completa | 75 / 115 = 65,2% |
 | Snapshots publicados | 0 |
 | Fuentes con derechos aprobados | 0 |
 | Jugadores canónicos | 72.809 |
 | Jugadores canónicos fuera del corte | 62.614 |
-| Jugadores jugables | 6.675 |
+| Jugadores jugables | 6.793 |
 | Jugadores jugables fuera del top 200 | 0 |
 | Retratos legales aprobados | 1.795 assets / 1.659 personas |
-| Jugadores jugables con retrato | 1.030 |
-| Jugadores jugables sin retrato | 5.645 |
-| Cobertura legal de retratos | 1.030 / 6.675 = 15,43% |
-| Disponibilidad visual del juego (licenciado o fallback) | 6.675 / 6.675 = 100% |
+| Jugadores jugables con retrato | 1.032 |
+| Jugadores jugables sin retrato | 5.761 |
+| Cobertura legal de retratos | 1.032 / 6.793 = 15,19% |
+| Disponibilidad visual del juego (licenciado o fallback) | 6.793 / 6.793 = 100% |
 | Retratos pendientes | 4.087 |
 | Retratos pendientes fuera del top 200 | 0 |
 | Personas con múltiples retratos locales | 0 |

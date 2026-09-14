@@ -14,16 +14,18 @@ export type DailyChallengeCandidate = {
 };
 
 /**
- * Selects only entities present in every selected ranking. The top-rank band
- * controls deterministic variety, but cannot relax the common-entity rule.
+ * Selects one entity from one category's ranking. Categories are deliberately
+ * independent: an entity does not have to occur in any of the other rankings.
+ * The game materializer assigns the score cap when this entity is absent from
+ * another compatible category.
  */
-export function selectCommonDailyEntities(
+export function selectDailyCategoryEntity(
   entries: readonly DailyChallengeRankingEntry[],
-  snapshotIds: readonly string[],
+  snapshotId: string,
   selectionSeed: string,
   candidateRankLimit: number,
-  count: number
-): DailyChallengeCandidate[] {
+  excludedEntityIds: ReadonlySet<string> = new Set()
+): DailyChallengeCandidate | null {
   const byEntity = new Map<string, Map<string, DailyChallengeRankingEntry>>();
   for (const entry of entries) {
     const bySnapshot = byEntity.get(entry.entityId) ?? new Map<string, DailyChallengeRankingEntry>();
@@ -31,15 +33,15 @@ export function selectCommonDailyEntities(
     byEntity.set(entry.entityId, bySnapshot);
   }
   return [...byEntity.entries()]
-    .filter(([, bySnapshot]) =>
-      snapshotIds.every((snapshotId) => bySnapshot.has(snapshotId))
-      && snapshotIds.some((snapshotId) => (bySnapshot.get(snapshotId)?.rank ?? Number.POSITIVE_INFINITY) <= candidateRankLimit)
+    .filter(([entityId, bySnapshot]) =>
+      !excludedEntityIds.has(entityId)
+      && (bySnapshot.get(snapshotId)?.rank ?? Number.POSITIVE_INFINITY) <= candidateRankLimit
     )
     .map(([entityId, bySnapshot]) => ({
       entityId,
       bySnapshot,
-      selectionKey: createHash('sha256').update(`${selectionSeed}|${entityId}`).digest('hex')
+      selectionKey: createHash('sha256').update(`${selectionSeed}|${snapshotId}|${entityId}`).digest('hex')
     }))
     .sort((left, right) => left.selectionKey.localeCompare(right.selectionKey) || left.entityId.localeCompare(right.entityId))
-    .slice(0, count);
+    [0] ?? null;
 }

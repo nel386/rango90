@@ -2,7 +2,7 @@
 
 Fecha: 14 de septiembre de 2026 (UTC)
 
-La elección de una opción fija el alcance del reto. No aprueba por sí sola las fuentes ni convierte datos parciales en publicables. En todos los casos se mantienen estas reglas técnicas: siete categorías y siete decisiones, 200 entradas reales por categoría abierta (o universo cerrado completo), entidades comunes dentro de cada tipo, selección diaria dentro del top 90, identidades canónicas, empates reproducibles y cero conflictos.
+La elección de una opción fija el alcance del reto. No aprueba por sí sola las fuentes ni convierte datos parciales en publicables. En todos los casos se mantienen estas reglas técnicas: siete categorías y siete decisiones, 200 entradas reales por categoría abierta (o universo cerrado completo), selección independiente dentro del top 90 de cada categoría, identidades canónicas, empates reproducibles y cero conflictos. No se exige que las entidades sean comunes: una ausencia en otra categoría compatible recibe el score máximo (`100`).
 
 ## A — Mantener el candidato actual
 
@@ -16,7 +16,7 @@ Es la opción que conserva el diseño que ya existe y cambia menos el producto:
 6. `uefa-champions-league-goals`
 7. `uefa-champions-league-yellow-cards`
 
-Ventaja: ya tiene ocho jugadores comunes calculados. Coste: seis snapshots no tienen cobertura completa y uno conserva 12 conflictos.
+Ventaja: ya tiene parte del material estadístico calculado. Coste: seis snapshots no tienen cobertura completa y uno conserva 12 conflictos.
 
 ## B — Carrera global de jugadores
 
@@ -36,11 +36,11 @@ Ventaja: relato de producto claro y sin depender de una única competición. Cos
 
 Concentrar las siete categorías en rankings históricos de competiciones UEFA, por ejemplo goles, asistencias y tarjetas de Champions, Europa League y Conference League.
 
-Ventaja: marco competitivo coherente. Coste: hay que elegir las siete métricas exactas y verificar que cada una alcance 200 jugadores y siete comunes; las auditorías actuales muestran varias categorías europeas todavía parciales.
+Ventaja: marco competitivo coherente. Coste: hay que elegir las siete métricas exactas y verificar cada categoría por separado; las auditorías actuales muestran varias categorías europeas todavía parciales.
 
 ## D — Reducir el requisito para publicar antes
 
-Mantener una matriz de siete categorías, pero cambiar mediante decisión de producto uno de los límites actuales: menos de 200 entradas, menos de siete comunes o selección diaria fuera de la banda top 90.
+Mantener una matriz de siete categorías, pero cambiar mediante decisión de producto uno de los límites actuales: menos de 200 entradas o selección diaria fuera de la banda top 90.
 
 Ventaja: reduce el trabajo de cobertura. Coste: cambia la dificultad, la comparabilidad y los guards del juego; requiere modificar especificación, validadores, interfaz y documentación.
 

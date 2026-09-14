@@ -6,7 +6,7 @@ export class ApiFootballClient {
 
   constructor(baseUrl = config.apiFootballBaseUrl, apiKey = config.apiFootballKey) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
-    this.apiKey = apiKey;
+    this.apiKey = apiKey.trim();
   }
 
   async request<T>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T> {
@@ -26,6 +26,9 @@ export class ApiFootballClient {
         signal: AbortSignal.timeout(config.apiFootballTimeoutMs)
       });
       if (response.ok) return (await response.json()) as T;
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(`API-Football ${response.status}: la API ha rechazado la credencial; comprueba API_FOOTBALL_KEY, que no sea un placeholder, el host ${this.baseUrl} y que la suscripción esté activa`);
+      }
       if (response.status !== 429 && response.status < 500) {
         throw new Error(`API-Football ${response.status}: ${await response.text()}`);
       }

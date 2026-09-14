@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 
 const mode = process.argv[2];
-const basePathByMode = { pages: "/rango90", android: "" };
+const basePathByMode = { pages: process.env.NEXT_PUBLIC_BASE_PATH?.trim() || "/rango90", android: "" };
 
 if (!(mode in basePathByMode)) {
   console.error("Uso: node scripts/build-frontend.mjs <pages|android>");

@@ -93,8 +93,9 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
      matrix_summary AS (
        SELECT game_challenge_id,
               COUNT(*)::int AS expected_answer_count,
-              COUNT(*) FILTER (WHERE ranking_score IS NULL)::int AS missing_ranking_entries,
-              COUNT(*) FILTER (WHERE ranking_score IS NOT NULL AND answer_score IS DISTINCT FROM ranking_score)::int AS score_mismatches
+              COUNT(*) FILTER (WHERE ranking_score IS NULL AND answer_score IS DISTINCT FROM 100)::int AS missing_ranking_entries,
+              COUNT(*) FILTER (WHERE (ranking_score IS NOT NULL AND answer_score IS DISTINCT FROM ranking_score)
+                                    OR (ranking_score IS NULL AND answer_score IS DISTINCT FROM 100))::int AS score_mismatches
          FROM decision_category_matrix
         GROUP BY game_challenge_id
      )
@@ -215,7 +216,7 @@ async function verifyReleaseReadiness(): Promise<{ ready: boolean; checks: Recor
         && daily.score_mismatches === 0
         && daily.entity_type_count >= 1),
       dailyShape,
-      'Existe un reto diario publicado con matriz 7×7, entidades comunes y valores derivados de sus snapshots'
+      'Existe un reto diario publicado con matriz 7×7; cada categoría selecciona de forma independiente y las ausencias usan scoreCap'
     ),
     dailyCategoryContracts: check(
       Boolean(daily && dailyCategories.rows.length === 7 && categoryFailures.length === 0),

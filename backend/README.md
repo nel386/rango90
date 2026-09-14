@@ -123,7 +123,7 @@ El `docker-compose.yml` usa las variables `POSTGRES_*` del `.env`; el ejemplo ya
 
 El backend no llama a proveedores durante una partida. Las fuentes se usan en trabajos de importación y los retos publicados apuntan a un snapshot inmutable.
 
-La categoría real de la fase 5 está documentada en [PHASE5_PREMIER_LEAGUE.md](PHASE5_PREMIER_LEAGUE.md). La migración `029_phase5_premier_league_club_titles.sql` conserva la evidencia histórica; no alimenta el contrato online legacy. Los comandos `create-daily-draft` y `create-daily` requieren siete slugs homogéneos separados por comas, seleccionan siete entidades comunes jugables de sus snapshots y escriben únicamente `game_challenges`, `game_challenge_categories`, `game_challenge_decisions` y `game_challenge_answers`:
+La categoría real de la fase 5 está documentada en [PHASE5_PREMIER_LEAGUE.md](PHASE5_PREMIER_LEAGUE.md). La migración `029_phase5_premier_league_club_titles.sql` conserva la evidencia histórica; no alimenta el contrato online legacy. Los comandos `create-daily-draft` y `create-daily` requieren siete slugs únicos separados por comas, seleccionan una entidad jugable por categoría desde su banda top 90 y completan con `scoreCap` las ausencias en otras categorías compatibles. No se exige que los jugadores o clubes sean comunes:
 
 ```bash
 npm run challenge:daily:draft -- --date YYYY-MM-DD --categories slug1,slug2,slug3,slug4,slug5,slug6,slug7
@@ -197,7 +197,7 @@ npm run audit:7x7
 
 `audit:data-readiness` genera un informe por categoría con snapshot vigente, cobertura, derechos de la fuente, entidades jugables e imágenes aprobadas. `readyForPublish` solo es `true` cuando se cumplen todas las comprobaciones de publicación; no modifica datos.
 
-`audit:7x7` es una auditoría de solo lectura que busca combinaciones de siete categorías de jugadores con 200 jugadores canónicos jugables por categoría, cobertura completa, cero conflictos y siete jugadores comunes; también exige que esos siete estén dentro de la banda top 90 usada por el reto diario. Devuelve código distinto de cero si no encuentra una combinación y no aprueba licencias ni activos visuales.
+`audit:7x7` es una auditoría de solo lectura que comprueba las siete categorías elegidas de forma independiente: 200 entidades canónicas jugables por categoría abierta (o universo cerrado completo), cobertura completa, cero conflictos y al menos una entidad seleccionable dentro de la banda top 90. El solapamiento entre categorías se muestra solo como diagnóstico; no es un requisito. Devuelve código distinto de cero si alguna categoría no está lista y no aprueba licencias ni activos visuales.
 
 La curación del pool jugable está bloqueada por defecto para que una nueva
 importación no cambie silenciosamente el denominador de imágenes ni los

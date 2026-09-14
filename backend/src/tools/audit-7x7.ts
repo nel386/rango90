@@ -105,14 +105,13 @@ try {
     const snapshotEntries = bySnapshot.get(row.snapshot_id) ?? new Map<string, number>();
     const playableTop90 = [...snapshotEntries.values()].filter((rank) => rank <= DAILY_CHALLENGE_CANDIDATE_RANK).length;
     const minimumEntries = row.closed_universe ? 1 : MAX_GAME_RANKING_ENTRIES;
-    const requiredCommon = row.entity_type === 'player' ? 5 : row.entity_type === 'club' ? 2 : 2;
     const blockingReasons: string[] = [];
     if (!row.coverage_complete) blockingReasons.push('coverage_incomplete');
     if (row.unresolved_conflicts !== 0) blockingReasons.push('unresolved_conflicts');
     if (row.eligible_count < minimumEntries) blockingReasons.push(row.closed_universe ? 'source_entry_count_below_closed_universe_minimum' : 'source_entry_count_below_200');
     if (row.score_cap !== 100) blockingReasons.push('score_cap_not_100');
     if (snapshotEntries.size < minimumEntries) blockingReasons.push(row.entity_type === 'player' ? 'playable_canonical_players_below_200' : 'playable_canonical_entities_below_required_size');
-    if (playableTop90 < requiredCommon) blockingReasons.push(`fewer_than_${requiredCommon}_${row.entity_type}_in_top_90`);
+    if (playableTop90 < 1) blockingReasons.push(`no_${row.entity_type}_in_top_90`);
     return {
       slug: row.slug,
       snapshotId: row.snapshot_id,
@@ -225,17 +224,18 @@ try {
       blockingReasons: diagnostic?.blockingReasons ?? ['missing_snapshot']
     };
   });
-  const selectedMatrixReady = selectedPlayerAudit.matches.length > 0 && selectedClubAudit.matches.length > 0;
+  const selectedMatrixReady = selectedMatrix.length === SELECTED_DAILY_CATEGORY_SLUGS.length
+    && selectedMatrix.every((category) => category.blockingReasons.length === 0 && category.playableTop90 >= 1);
   console.log(JSON.stringify({
     ready: selectedMatrixReady,
     requirements: {
       categories: 7,
       playerCategories: 5,
       clubCategories: 2,
-      commonPlayers: 5,
-      commonClubs: 2,
       entriesPerCategory: MAX_GAME_RANKING_ENTRIES,
       candidateRankLimit: DAILY_CHALLENGE_CANDIDATE_RANK,
+      independentCategorySelection: true,
+      absentCompatibleCategoryScore: 'score_cap',
       requiresCoverageComplete: true,
       requiresZeroConflicts: true,
       requiresPlayableCanonicalPlayers: true
@@ -246,7 +246,7 @@ try {
       slugs: SELECTED_DAILY_CATEGORY_SLUGS,
       player: selectedPlayerAudit,
       club: selectedClubAudit,
-      dataIntersection: {
+      overlapDiagnostics: {
         player: selectedDataIntersection('player', SELECTED_DAILY_CATEGORY_COUNTS.player),
         club: selectedDataIntersection('club', SELECTED_DAILY_CATEGORY_COUNTS.club)
       },
@@ -256,7 +256,7 @@ try {
       .sort((left, right) => right.playableTop200 - left.playableTop200 || right.playableTop90 - left.playableTop90 || left.slug.localeCompare(right.slug))
       .slice(0, 20),
     typedAudit: audit,
-    note: 'Esta auditoría valida datos locales y no aprueba derechos de redistribución ni activos visuales.'
+    note: 'Cada categoría se valida de forma independiente. El solapamiento entre categorías es solo diagnóstico y no bloquea la matriz; las entidades ausentes en una categoría compatible reciben scoreCap al materializar el reto. Esta auditoría no aprueba derechos de redistribución ni activos visuales.'
   }, null, 2));
   if (!selectedMatrixReady) process.exitCode = 1;
 } catch (error) {

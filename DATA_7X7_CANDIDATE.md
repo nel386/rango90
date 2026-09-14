@@ -20,7 +20,7 @@ La matriz elegida para el producto es la de [DATA_7X7_OPTIONS.md](/home/ubuntu/r
 
 En la verificación del 14 de septiembre de 2026 no existe todavía una combinación válida para la matriz elegida. `world-cup-goals` ya tiene 200 entradas completas y la Champions de clubes representa su universo cerrado de 24 clubes; las demás categorías siguen siendo parciales o no tienen todavía derechos aprobados. Por ello, la auditoría devuelve `ready=false` y no se ha publicado ningún reto.
 
-Esta conclusión se puede reproducir con `cd backend && npm run audit:7x7`. El comando agrupa por tipo de entidad, deduplica por identidad canónica y comprueba la combinación objetivo de cinco categorías de jugadores y dos de equipos, con entidades comunes en la banda top 90 utilizada por el reto diario. Devuelve código distinto de cero si no existe ninguna combinación válida.
+Esta conclusión se puede reproducir con `cd backend && npm run audit:7x7`. El comando comprueba cada categoría de forma independiente, deduplica por identidad canónica y exige al menos una entidad seleccionable en la banda top 90; el solapamiento entre listas es únicamente informativo. Devuelve código distinto de cero si alguna categoría no está lista.
 
 ## Bloqueos para convertirlo en reto real
 

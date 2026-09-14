@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const mode = process.argv[2];
-const expectedBasePathByMode = { pages: "/rango90", android: "" };
+const expectedBasePathByMode = { pages: process.env.NEXT_PUBLIC_BASE_PATH?.trim() || "/rango90", android: "" };
 
 if (!(mode in expectedBasePathByMode)) {
   console.error("Uso: node scripts/verify-static-build.mjs <pages|android>");

@@ -70,7 +70,7 @@ export async function fetchApiFootballPremierLeagueSeason(seasonYear: number): P
     endpoints[endpoint] = payload;
   }
 
-  const merged = mergeRows(endpoints, seasonYear, 39);
+  const merged = mergeApiFootballSeasonRows(endpoints, seasonYear, 39);
   return {
     leagueId: 39,
     seasonYear,
@@ -133,7 +133,7 @@ export async function fetchApiFootballLeagueCompleteSeason(
     const payload = await fetchPage(page, totalPages, false);
     endpoints[`playersPage${page}`] = payload;
   }
-  const merged = mergeRows(endpoints, seasonYear, leagueId);
+  const merged = mergeApiFootballSeasonRows(endpoints, seasonYear, leagueId);
   const rows = merged.rows;
   const sourceRowCount = Object.values(endpoints).reduce((sum, payload) => sum + (payload.response?.length ?? 0), 0);
   // A player can have one statistic row per team in the same season, so the
@@ -264,7 +264,7 @@ export async function cleanupApiFootballSeasonCache(cacheDir: string, leagueId: 
   }
 }
 
-function mergeRows(endpoints: Record<string, ApiFootballPayload>, seasonYear: number, leagueId: number): { rows: SeasonPlayerStat[]; validationAnomalies: Array<{ endpoint: string; playerId: number; reason: string }> } {
+export function mergeApiFootballSeasonRows(endpoints: Record<string, ApiFootballPayload>, seasonYear: number, leagueId: number): { rows: SeasonPlayerStat[]; validationAnomalies: Array<{ endpoint: string; playerId: number; reason: string }> } {
   const merged = new Map<string, SeasonPlayerStat>();
   const seenSourceKeys = new Set<string>();
   const validationAnomalies: Array<{ endpoint: string; playerId: number; reason: string }> = [];
@@ -418,8 +418,21 @@ function mergeStatistic(left: ApiFootballStatistic, right: ApiFootballStatistic)
     ...right,
     games: { ...left.games, ...right.games },
     goals: { ...left.goals, ...right.goals },
-    cards: { ...left.cards, ...right.cards }
+    cards: {
+      ...left.cards,
+      ...right.cards,
+      yellow: mergeNullableCount(left.cards?.yellow, right.cards?.yellow, 'yellow cards'),
+      red: mergeNullableCount(left.cards?.red, right.cards?.red, 'red cards')
+    }
   };
+}
+
+function mergeNullableCount(left: number | null | undefined, right: number | null | undefined, label: string): number | null | undefined {
+  if (left === undefined) return right;
+  if (right === undefined || right === null) return left;
+  if (left === null) return right;
+  if (left !== right) throw new Error(`API-Football devolvió ${label} incompatibles para la misma pareja jugador/equipo`);
+  return left;
 }
 
 function hasApiErrors(errors: unknown): boolean {

@@ -11,6 +11,17 @@ export type FootballDataResult = OpenFootballMatch & {
   level: string;
 };
 
+export type FootballDataSeasonWinner = {
+  competition: string;
+  season: string;
+  seasonStartYear: number;
+  clubName: string;
+  sourceUrl: string;
+  derivation: 'reconstructed_table';
+  status: 'deterministic' | 'ambiguous';
+  ambiguityReason?: string;
+};
+
 type ParquetResult = {
   date?: unknown;
   competition?: unknown;
@@ -181,4 +192,57 @@ export function buildFootballDataNationalLeagueRanking(
     },
     entries
   };
+}
+
+/**
+ * Expose the season-level observations used by the ranking builder so a
+ * second provider can contrast them before totals are accumulated. No row is
+ * invented for an incomplete or ambiguous season.
+ */
+export function deriveFootballDataSeasonWinners(
+  matches: FootballDataResult[],
+  options: { now?: Date; sourceUrl?: string } = {}
+): FootballDataSeasonWinner[] {
+  const now = options.now ?? new Date();
+  const currentYear = now.getUTCFullYear();
+  const winners: FootballDataSeasonWinner[] = [];
+  const domesticByCompetition = new Map<string, FootballDataResult[]>();
+  for (const match of matches.filter(isDomesticTopFlightCandidate)) {
+    const group = domesticByCompetition.get(match.competition) ?? [];
+    group.push(match);
+    domesticByCompetition.set(match.competition, group);
+  }
+  for (const [competition, competitionMatches] of domesticByCompetition) {
+    const mode = selectSeasonMode(competitionMatches);
+    for (const [season, seasonMatches] of seasonGroups(competitionMatches, mode)) {
+      const startYear = seasonStartYear(season);
+      const completeByDate = mode === 'july-to-june' ? startYear < currentYear - 1 : startYear < currentYear;
+      const teams = new Set(seasonMatches.flatMap((match) => [match.home, match.away]));
+      if (!completeByDate || seasonMatches.length < 20 || teams.size < 4) continue;
+      const winner = calculateOpenFootballWinner(seasonMatches);
+      if (!winner.winner) {
+        winners.push({
+          competition,
+          season,
+          seasonStartYear: startYear,
+          clubName: '',
+          sourceUrl: options.sourceUrl ?? footballDataResultsUrl,
+          derivation: 'reconstructed_table',
+          status: 'ambiguous',
+          ambiguityReason: 'El desempate reconstruido no produce un campeón único'
+        });
+        continue;
+      }
+      winners.push({
+        competition,
+        season,
+        seasonStartYear: startYear,
+        clubName: winner.winner,
+        sourceUrl: options.sourceUrl ?? footballDataResultsUrl,
+        derivation: 'reconstructed_table',
+        status: 'deterministic'
+      });
+    }
+  }
+  return winners.sort((left, right) => left.competition.localeCompare(right.competition) || left.seasonStartYear - right.seasonStartYear || left.season.localeCompare(right.season));
 }

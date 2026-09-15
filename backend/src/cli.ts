@@ -73,6 +73,7 @@ import { SELECTED_DAILY_CATEGORY_SLUGS } from './dailyMatrix.js';
 import { buildOpenFootballClubTitleRanking, openFootballLeaguesUrl, parseFootballTxtResults, type OpenFootballSeasonSource } from './providers/openFootballClient.js';
 import { buildFootballDataNationalLeagueRanking, fetchFootballDataResults, footballDataResultsUrl } from './providers/footballDataResultsClient.js';
 import { buildFootballDataCareerCardsRankings, fetchFootballDataIncidents, type FootballDataCardMetric } from './providers/footballDataIncidentsClient.js';
+import { buildPlayerCareerGoalsRanking } from './playerCareerGoals.js';
 
 const [command, ...args] = process.argv.slice(2);
 const argument = (name: string): string | undefined => {
@@ -1951,6 +1952,50 @@ try {
     );
     const competitions = competitionRows.rows.map((row) => row.competition_id);
     if (competitions.length === 0) throw new Error('No hay estadísticas API-Football importadas para construir rankings globales');
+    const coverageRows = await pool.query<{
+      competition_id: string;
+      first_season: number;
+      last_season: number;
+      observed_rows: number;
+      unknown_yellow_rows: number;
+      unknown_red_rows: number;
+    }>(
+      `SELECT p.competition_id,
+              MIN(p.season_year)::int AS first_season,
+              MAX(p.season_year)::int AS last_season,
+              COUNT(*)::int AS observed_rows,
+              COUNT(*) FILTER (WHERE p.yellow_cards IS NULL)::int AS unknown_yellow_rows,
+              COUNT(*) FILTER (WHERE p.red_cards IS NULL)::int AS unknown_red_rows
+         FROM player_season_stats p
+         JOIN competitions c ON c.id = p.competition_id
+        WHERE p.source_key = 'api-football'
+          AND c.competition_type <> 'national_team'
+          AND p.competition_id = ANY($1::text[])
+          AND p.season_year BETWEEN $2 AND $3
+        GROUP BY p.competition_id
+        ORDER BY p.competition_id`,
+      [competitions, fromSeason, toSeason]
+    );
+    const coverageAudit = {
+      policy: 'api-football-imported-club-scope-v1',
+      source: 'api-football',
+      competitionCount: coverageRows.rows.length,
+      competitions: coverageRows.rows.map((row) => ({
+        id: row.competition_id,
+        firstSeason: row.first_season,
+        lastSeason: row.last_season,
+        rows: row.observed_rows,
+        unknownYellowRows: row.unknown_yellow_rows,
+        unknownRedRows: row.unknown_red_rows
+      })),
+      requestedWindow: { fromSeason, toSeason },
+      coverageComplete: false,
+      blockingReasons: [
+        'api_football_scope_is_not_all_worldwide_club_competitions',
+        'api_football_scope_does_not_cover_every_club_season',
+        'source_rights_review_required'
+      ]
+    };
     const careerMetricCategorySlug: Record<string, string> = {
       goals: 'club-career-goals',
       assists: 'club-career-assists',
@@ -1993,6 +2038,7 @@ try {
         },
         dataVersion: `api-football-club-career-${metric}-${fromSeason}-${toSeason}`,
         coverageComplete: false,
+        audit: { coverage: coverageAudit, unresolvedConflicts: 0 },
         reviewed: false,
         entries: rows.rows.map((row, index) => ({
           entityId: row.entity_id,
@@ -2011,7 +2057,7 @@ try {
       });
       results.push({ metric, rankingId, entries: rows.rows.length, availableSeasons });
     }
-    console.log(JSON.stringify({ source: 'api-football', scope: 'imported-club-competitions', excludedCompetitionType: 'national_team', requestedWindow: { fromSeason, toSeason }, competitions, results, coverageComplete: false, note: 'Snapshots globales de las competiciones de clubes API-Football importadas; permanecen en draft hasta completar el histórico y revisar derechos.' }, null, 2));
+    console.log(JSON.stringify({ source: 'api-football', scope: 'imported-club-competitions', excludedCompetitionType: 'national_team', requestedWindow: { fromSeason, toSeason }, competitions, coverage: coverageAudit, results, coverageComplete: false, note: 'Snapshots globales de las competiciones de clubes API-Football importadas; permanecen en draft hasta completar el histórico y revisar derechos.' }, null, 2));
   } else if (command === 'build-player-career-goals') {
     const categorySlug = 'player-career-goals';
     const nationalSnapshot = await pool.query<{ id: string; data_version: string }>(
@@ -2029,52 +2075,75 @@ try {
     const rows = await pool.query<{
       entity_id: string;
       canonical_name: string;
-      club_goals: string;
-      national_goals: string;
-      source_snapshots: string[];
+      club_goals: string | null;
+      national_goals: string | null;
+      club_source_snapshots: string[] | null;
+      national_source_snapshots: string[] | null;
+      national_source_entities: string;
+      national_min_goals: string | null;
+      national_max_goals: string | null;
     }>(
-      `WITH playable_players AS (
+      `WITH RECURSIVE identity_walk AS (
+         SELECT eil.source_entity_id, eil.canonical_entity_id,
+                ARRAY[eil.source_entity_id, eil.canonical_entity_id]::text[] AS path
+           FROM entity_identity_links eil
+          UNION ALL
+         SELECT iw.source_entity_id, eil.canonical_entity_id,
+                iw.path || eil.canonical_entity_id
+           FROM identity_walk iw
+           JOIN entity_identity_links eil ON eil.source_entity_id = iw.canonical_entity_id
+          WHERE NOT eil.canonical_entity_id = ANY(iw.path)
+            AND cardinality(iw.path) < 20
+       ), resolved_identity AS (
+         SELECT DISTINCT ON (source_entity_id) source_entity_id, canonical_entity_id
+           FROM identity_walk
+          ORDER BY source_entity_id, cardinality(path) DESC
+       ), playable_players AS (
          SELECT DISTINCT COALESCE(link.canonical_entity_id, source_entity.id) AS entity_id
            FROM entity_game_profiles egp
            JOIN entities source_entity
              ON source_entity.id = egp.entity_id
             AND source_entity.entity_type = 'player'
             AND source_entity.catalog_status = 'active'
-           LEFT JOIN entity_identity_links link ON link.source_entity_id = source_entity.id
+           LEFT JOIN resolved_identity link ON link.source_entity_id = source_entity.id
           WHERE egp.playable_default = TRUE
        ), club_totals AS (
          SELECT COALESCE(link.canonical_entity_id, stats.entity_id) AS entity_id,
                 SUM(stats.goals)::numeric AS club_goals,
                 ARRAY_AGG(DISTINCT stats.source_snapshot_id ORDER BY stats.source_snapshot_id)
-                  FILTER (WHERE stats.source_snapshot_id IS NOT NULL) AS source_snapshots
+                  FILTER (WHERE stats.source_snapshot_id IS NOT NULL) AS club_source_snapshots
            FROM player_season_stats stats
            JOIN competitions competition
              ON competition.id = stats.competition_id
             AND competition.competition_type <> 'national_team'
-           LEFT JOIN entity_identity_links link ON link.source_entity_id = stats.entity_id
+           LEFT JOIN resolved_identity link ON link.source_entity_id = stats.entity_id
           WHERE stats.source_key = 'api-football'
           GROUP BY COALESCE(link.canonical_entity_id, stats.entity_id)
        ), national_totals AS (
          SELECT COALESCE(link.canonical_entity_id, entries.entity_id) AS entity_id,
                 MAX(entries.raw_value)::numeric AS national_goals,
-                ARRAY_AGG(DISTINCT entries.snapshot_id ORDER BY entries.snapshot_id) AS source_snapshots
+                ARRAY_AGG(DISTINCT entries.snapshot_id ORDER BY entries.snapshot_id) AS national_source_snapshots,
+                COUNT(DISTINCT entries.entity_id)::text AS national_source_entities,
+                MIN(entries.raw_value)::numeric AS national_min_goals,
+                MAX(entries.raw_value)::numeric AS national_max_goals
            FROM ranking_entries entries
            JOIN ranking_snapshots snapshot ON snapshot.id = entries.snapshot_id
            JOIN category_definitions category
              ON category.id = snapshot.category_id
             AND category.slug = 'national-team-official-goals'
-           LEFT JOIN entity_identity_links link ON link.source_entity_id = entries.entity_id
+           LEFT JOIN resolved_identity link ON link.source_entity_id = entries.entity_id
           WHERE entries.snapshot_id = $1
           GROUP BY COALESCE(link.canonical_entity_id, entries.entity_id)
        )
        SELECT playable.entity_id,
               entity.canonical_name,
-              COALESCE(club.club_goals, 0)::text AS club_goals,
-              COALESCE(national.national_goals, 0)::text AS national_goals,
-              ARRAY_REMOVE(ARRAY_CAT(
-                COALESCE(club.source_snapshots, '{}'::text[]),
-                COALESCE(national.source_snapshots, '{}'::text[])
-              ), NULL) AS source_snapshots
+              club.club_goals::text AS club_goals,
+              national.national_goals::text AS national_goals,
+              club.club_source_snapshots,
+              national.national_source_snapshots,
+              COALESCE(national.national_source_entities, '0') AS national_source_entities,
+              national.national_min_goals::text AS national_min_goals,
+              national.national_max_goals::text AS national_max_goals
          FROM playable_players playable
          JOIN entities entity
            ON entity.id = playable.entity_id
@@ -2082,39 +2151,42 @@ try {
           AND entity.catalog_status = 'active'
          LEFT JOIN club_totals club ON club.entity_id = playable.entity_id
          LEFT JOIN national_totals national ON national.entity_id = playable.entity_id
-        WHERE COALESCE(club.club_goals, 0) + COALESCE(national.national_goals, 0) > 0
-        ORDER BY COALESCE(club.club_goals, 0) + COALESCE(national.national_goals, 0) DESC,
-                 entity.canonical_name, playable.entity_id
-        LIMIT 200`,
+        WHERE COALESCE(club.club_goals, national.national_goals, 0) > 0`,
       [selectedNationalSnapshot.id]
     );
-    if (rows.rows.length < 200) throw new Error(`Se necesitan 200 jugadores jugables con goles observados; disponibles ${rows.rows.length}`);
+    const build = buildPlayerCareerGoalsRanking(rows.rows);
+    if (build.entries.length < 200) throw new Error(`Se necesitan 200 jugadores jugables con goles observados; disponibles ${build.entries.length}`);
     const rankingId = await importRankingInput({
       categorySlug,
       source: {
         key: 'rango90-global-career-goals-derived',
         name: 'Agregado Rango90 de goles de clubes y selección absoluta',
         sourceType: 'reference',
-        baseUrl: 'https://www.rango90.local/data/global-career-goals',
+        baseUrl: 'https://v3.football.api-sports.io/players',
         rightsStatus: 'review_required'
       },
       dataVersion: `rango90-player-career-goals-${new Date().toISOString().slice(0, 10)}`,
       coverageComplete: false,
       allowPartialDraft: true,
-      partialDraftReason: 'El componente de clubes procede de las temporadas y competiciones API-Football actualmente importadas; el componente internacional procede del snapshot RSSSF disponible. El agregado no demuestra todavía una carrera mundial completa ni derechos de redistribución.',
+      partialDraftReason: 'El ranking conserva explícitamente los componentes desconocidos. Los goles de clubes proceden de las temporadas y competiciones API-Football importadas; los goles internacionales proceden del snapshot RSSSF disponible. El valor puede ser un mínimo observado y no demuestra una carrera mundial completa ni derechos de redistribución.',
       reviewed: false,
-      entries: rows.rows.map((row, index) => ({
-        entityId: row.entity_id,
+      audit: {
+        ...build.audit,
+        nationalGoalsSnapshotId: selectedNationalSnapshot.id,
+        nationalGoalsDataVersion: selectedNationalSnapshot.data_version,
+        clubProvider: 'api-football',
+        nationalProvider: 'rsssf-international-records'
+      },
+      entries: build.entries.map((entry, index) => ({
+        entityId: entry.entityId,
         entityType: 'player' as const,
-        name: row.canonical_name,
-        rawValue: Number(row.club_goals) + Number(row.national_goals),
+        name: entry.name,
+        rawValue: entry.observedGoals,
         evidence: {
           sourceRank: index + 1,
-          clubGoals: Number(row.club_goals),
-          nationalTeamGoals: Number(row.national_goals),
-          sourceSnapshotIds: row.source_snapshots,
+          ...entry.evidence,
           nationalGoalsSnapshotId: selectedNationalSnapshot.id,
-          definition: 'Suma provisional de goles observados en competiciones de clubes API-Football importadas y goles internacionales del snapshot RSSSF seleccionado; clubes + selección absoluta, sin afirmar cobertura completa de todas las temporadas o competiciones.'
+          definition: 'Suma de componentes observados de clubes API-Football y selección absoluta RSSSF. Cuando falta un componente, el valor es un mínimo observado y el componente queda marcado como desconocido; no se imputa cero.'
         }
       }))
     });
@@ -2122,7 +2194,8 @@ try {
       source: 'rango90-global-career-goals-derived',
       categorySlug,
       rankingId,
-      entries: rows.rows.length,
+      entries: build.entries.length,
+      audit: build.audit,
       nationalSnapshotId: selectedNationalSnapshot.id,
       coverageComplete: false,
       published: false,
@@ -3882,8 +3955,11 @@ try {
         // unknown value for an observed zero.
         const assists = nonNegativeInteger(statistic.goals?.assists);
         const goalsConceded = nonNegativeInteger(statistic.goals?.conceded);
-        const yellowCards = nonNegativeInteger(statistic.cards?.yellow) ?? 0;
-        const redCards = nonNegativeInteger(statistic.cards?.red) ?? 0;
+        // NULL means the provider did not record cards for this historical
+        // row. Keep it distinct from an observed zero; the career ranking
+        // query can then sum only observed values without fabricating data.
+        const yellowCards = nonNegativeInteger(statistic.cards?.yellow);
+        const redCards = nonNegativeInteger(statistic.cards?.red);
         const appearances = nonNegativeInteger(statistic.games?.appearences);
         const minutes = nonNegativeInteger(statistic.games?.minutes);
         await client.query(

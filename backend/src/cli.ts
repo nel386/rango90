@@ -2989,10 +2989,11 @@ try {
            JOIN source_snapshots ss ON ss.id = f.source_snapshot_id
            JOIN entities subject ON subject.id = f.subject_entity_id AND subject.entity_type = 'player'
            LEFT JOIN resolved_identity ON resolved_identity.source_entity_id = f.subject_entity_id
-          WHERE f.fact_type = ANY($1::text[])
+          WHERE f.fact_type LIKE 'player_trophy_record:%'
             AND f.value->>'place' = 'Winner'
             AND NULLIF(BTRIM(f.value->>'competition'), '') IS NOT NULL
             AND NULLIF(BTRIM(f.value->>'season'), '') IS NOT NULL
+            AND f.value->>'competition' <> ALL($1::text[])
             AND f.review_status IN ('pending', 'approved')
             AND ss.source_key = 'api-football'
             AND ss.metadata->>'importType' = 'api-football-player-trophies'
@@ -3030,14 +3031,7 @@ try {
          JOIN entities e ON e.id = totals.entity_id AND e.entity_type = 'player'
         ORDER BY totals.titles::numeric DESC, e.canonical_name, totals.entity_id
         LIMIT 200`,
-      [[
-        'player_trophy_record:premier-league',
-        'player_trophy_record:la-liga',
-        'player_trophy_record:bundesliga',
-        'player_trophy_record:serie-a',
-        'player_trophy_record:ligue-1',
-        'player_trophy_record:primeira-liga'
-      ]]
+      [['copa-america', 'world-cup', 'euro', 'nations-league']]
     );
     if (rows.rows.length === 0) throw new Error('No hay hechos de títulos de clubes importados y trazables para construir el ranking');
     const rankingId = await importRankingInput({
@@ -3052,7 +3046,7 @@ try {
       dataVersion: 'api-football-club-career-titles-' + new Date().toISOString().slice(0, 10),
       coverageComplete: false,
       allowPartialDraft: true,
-      partialDraftReason: 'El snapshot agrega únicamente hechos de títulos de clubes ya importados de seis competiciones; no se añaden jugadores sin hechos ni se afirma que cubra todas las competiciones y temporadas de la carrera.',
+      partialDraftReason: 'El snapshot agrega hechos Winner de competiciones sénior de clubes devueltos por API-Football y excluye las competiciones de selecciones; no se añaden jugadores sin hechos ni se afirma que cubra todas las competiciones y temporadas de la carrera.',
       reviewed: false,
       entries: rows.rows.map((row, index) => ({
         entityId: row.entity_id,
@@ -3065,7 +3059,7 @@ try {
           sourceFactIds: row.source_fact_ids,
           competitions: row.competitions,
           seasons: row.seasons,
-          definition: 'Cuenta de hechos player_trophy_record:* con place=Winner, fuente API-Football /trophies y snapshot de importación trazable; cada combinación jugador canónico–competición–temporada cuenta una sola vez. Solo se incluyen las seis competiciones de clubes importadas y no se aplica padding.'
+          definition: 'Cuenta de hechos player_trophy_record:* con place=Winner, fuente API-Football /trophies y snapshot de importación trazable; cada combinación jugador canónico–competición–temporada cuenta una sola vez. Se excluyen competiciones de selecciones y no se aplica padding.'
         }
       }))
     });

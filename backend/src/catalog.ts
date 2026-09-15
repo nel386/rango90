@@ -240,10 +240,11 @@ export const categories: CategorySeed[] = [
       officialOnly: true,
       seniorClubCompetitions: true,
       playerRule: 'provider_recorded_winner',
-      includedCompetitions: ['premier-league', 'la-liga', 'bundesliga', 'serie-a', 'ligue-1', 'primeira-liga'],
+      includedCompetitions: 'all_api_football_senior_club_competitions',
+      excludedCompetitions: ['copa-america', 'world-cup', 'euro', 'nations-league'],
       excluded: ['national_team', 'friendlies', 'youth', 'reserve', 'testimonial']
     },
-    definition: 'Número de títulos de clubes registrados como Winner en los hechos importados de API-Football, agregados por jugador, competición y temporada. El corte actual solo cubre las seis competiciones de clubes importadas y no afirma todavía la carrera mundial completa.'
+    definition: 'Número de títulos sénior de clubes registrados como Winner en los hechos importados de API-Football, agregados por jugador, competición y temporada. Se excluyen las competiciones de selecciones, amistosos, categorías juveniles, reservas y testimoniales; el resultado sigue siendo un mínimo observado hasta completar y contrastar todo el historial mundial.'
   },
   {
     id: 'category-player-career-titles',

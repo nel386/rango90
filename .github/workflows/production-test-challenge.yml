@@ -45,6 +45,10 @@ jobs:
         working-directory: backend
         run: npm run seed
 
+      - name: Rebuild observed career card rankings from API-Football
+        working-directory: backend
+        run: npm run build:rankings:api-football:career -- --from-season 2000 --to-season 2026 --metric yellow_cards,red_cards
+
       - name: Remove non-positive ranking padding
         working-directory: backend
         run: npm run cleanup:ranking-padding -- --apply

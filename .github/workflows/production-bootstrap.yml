@@ -48,9 +48,9 @@ jobs:
         working-directory: backend
         run: npm run seed
 
-      - name: Import real World Cup goals
+      - name: Import real World Cup goals from a 200-row historical table
         working-directory: backend
-        run: npm run import:world-cup:goals
+        run: npm run import:world-cup:goals:transfermarkt
 
       - name: Import UEFA Champions League club titles
         working-directory: backend

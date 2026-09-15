@@ -1,0 +1,47 @@
+name: Audit Rango90 production data
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.RANGO90_DATABASE_URL }}
+      DATABASE_SSL: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Verify private database credential exists
+        shell: bash
+        run: test -n "$DATABASE_URL"
+
+      - name: Audit data readiness
+        continue-on-error: true
+        working-directory: backend
+        run: npm run audit:data-readiness
+
+      - name: Audit selected 7x7 matrix
+        continue-on-error: true
+        working-directory: backend
+        run: npm run audit:7x7
+
+      - name: Verify release readiness
+        continue-on-error: true
+        working-directory: backend
+        run: npm run verify:release-readiness

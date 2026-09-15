@@ -226,7 +226,7 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
                   ))
         )
       ORDER BY (status = 'published') DESC, challenge_date DESC NULLS LAST,
-               published_at DESC NULLS LAST, id
+               published_at DESC NULLS LAST, updated_at DESC, created_at DESC, id
       LIMIT 1`,
     [challengeId ?? null, kind ?? null]
   );

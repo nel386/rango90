@@ -324,6 +324,19 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
          published_at = NULL, retired_at = NULL, metadata = EXCLUDED.metadata, updated_at = NOW()`,
       [challengeId, date, sourceVersion, challengeSha256, JSON.stringify({ materialization: 'daily-multicategory-v5-independent-category-draw', categories: categorySlugs, snapshotIds, decisionCount: decisions.length, entityTypes: [...new Set(categories.map((category) => category.entity_type))], candidateRankLimit: DAILY_CHALLENGE_CANDIDATE_RANK, selection: 'deterministic-shuffle-v3', selectionSeed: challengeSeed, commonWithinEntityType: false, absentCompatibleCategoryScore: 'score_cap', testOnly, testException: testOnly ? 'coverage_and_source_rights_review_pending; real_rows_and_fallback_media_only' : null })]
     );
+    // A new materialization gets a new id when any source snapshot changes.
+    // Retire the previous drafts for the same date so the runtime can never
+    // serve an obsolete test board (for example one generated before a
+    // ranking correction). Published challenges remain immutable.
+    await client.query(
+      `UPDATE game_challenges
+          SET status = 'retired', retired_at = NOW(), updated_at = NOW()
+        WHERE challenge_kind = 'daily'
+          AND challenge_date = $1
+          AND status = 'draft'
+          AND id <> $2`,
+      [date, challengeId]
+    );
     await client.query('DELETE FROM game_challenge_answers WHERE game_challenge_id = $1', [challengeId]);
     await client.query('DELETE FROM game_challenge_decisions WHERE game_challenge_id = $1', [challengeId]);
     await client.query('DELETE FROM game_challenge_categories WHERE game_challenge_id = $1', [challengeId]);

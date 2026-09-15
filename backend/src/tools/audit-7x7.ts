@@ -25,15 +25,41 @@ type RankingEntryRow = {
   rank: number;
 };
 
+type SnapshotIntegrityRow = {
+  snapshot_id: string;
+  entry_count: number;
+  top_entry_count: number;
+  missing_entity_count: number;
+  duplicate_canonical_count: number;
+  non_positive_count: number;
+  not_playable_count: number;
+  type_mismatch_count: number;
+  rank_mismatch_count: number;
+  tie_group_mismatch_count: number;
+  score_mismatch_count: number;
+};
+
 type CategoryDiagnostic = {
   slug: string;
   snapshotId: string;
+  rawEntryCount: number;
   playableTop200: number;
   playableTop90: number;
   coverageComplete: boolean;
   unresolvedConflicts: number;
   eligibleCount: number;
   scoreCap: number;
+  integrity: {
+    ready: boolean;
+    missingEntities: number;
+    duplicateCanonicalEntries: number;
+    nonPositiveValues: number;
+    notPlayableEntries: number;
+    typeMismatches: number;
+    rankMismatches: number;
+    tieGroupMismatches: number;
+    scoreMismatches: number;
+  };
   blockingReasons: string[];
 };
 
@@ -93,6 +119,75 @@ try {
     )
     : { rows: [] as RankingEntryRow[] };
 
+  // This is deliberately independent from the 7×7 intersection check. It
+  // validates every selected/latest category snapshot on its own, so a
+  // category cannot look healthy merely because it has 200 database rows.
+  const integrity = snapshotRows.rows.length > 0
+    ? await pool.query<SnapshotIntegrityRow>(
+      `WITH ranked_entries AS (
+         SELECT re.snapshot_id, re.raw_value, re.rank, re.score_value, re.tie_group,
+                COALESCE(link.canonical_entity_id, re.entity_id) AS canonical_entity_id,
+                category.entity_type AS category_entity_type, category.score_cap,
+                CASE WHEN category.ranking_direction = 'desc'
+                  THEN RANK() OVER (PARTITION BY re.snapshot_id ORDER BY re.raw_value DESC)
+                  ELSE RANK() OVER (PARTITION BY re.snapshot_id ORDER BY re.raw_value ASC)
+                END AS expected_rank,
+                CASE WHEN category.ranking_direction = 'desc'
+                  THEN DENSE_RANK() OVER (PARTITION BY re.snapshot_id ORDER BY re.raw_value DESC)
+                  ELSE DENSE_RANK() OVER (PARTITION BY re.snapshot_id ORDER BY re.raw_value ASC)
+                END AS expected_tie_group
+           FROM ranking_entries re
+           LEFT JOIN entity_identity_links link ON link.source_entity_id = re.entity_id
+           JOIN ranking_snapshots snapshot ON snapshot.id = re.snapshot_id
+           JOIN category_definitions category ON category.id = snapshot.category_id
+          WHERE re.snapshot_id = ANY($1::text[])
+        ), top_entries AS (
+         SELECT * FROM ranked_entries WHERE rank <= $2
+        ), counts AS (
+         SELECT top_entries.snapshot_id,
+                COUNT(*)::int AS top_entry_count,
+                COUNT(*) FILTER (WHERE canonical_entity.id IS NULL)::int AS missing_entity_count,
+                (COUNT(*) FILTER (WHERE canonical_entity.id IS NOT NULL) - COUNT(DISTINCT canonical_entity.id))::int AS duplicate_canonical_count,
+                COUNT(*) FILTER (WHERE top_entries.raw_value <= 0 OR top_entries.score_value <= 0)::int AS non_positive_count,
+                COUNT(*) FILTER (
+                  WHERE canonical_entity.id IS NULL
+                     OR canonical_entity.catalog_status <> 'active'
+                     OR (canonical_entity.entity_type = 'player' AND NOT EXISTS (
+                       SELECT 1 FROM entity_game_profiles playable_profile
+                        WHERE playable_profile.entity_id = canonical_entity.id
+                          AND playable_profile.playable_default = TRUE
+                     ))
+                )::int AS not_playable_count,
+                COUNT(*) FILTER (WHERE canonical_entity.id IS NULL OR canonical_entity.entity_type <> top_entries.category_entity_type)::int AS type_mismatch_count,
+                COUNT(*) FILTER (WHERE top_entries.rank <> top_entries.expected_rank)::int AS rank_mismatch_count,
+                COUNT(*) FILTER (WHERE top_entries.tie_group <> top_entries.expected_tie_group)::int AS tie_group_mismatch_count,
+                COUNT(*) FILTER (WHERE top_entries.score_value <> LEAST(top_entries.rank, top_entries.score_cap))::int AS score_mismatch_count
+           FROM top_entries
+           LEFT JOIN entities canonical_entity ON canonical_entity.id = top_entries.canonical_entity_id
+          GROUP BY top_entries.snapshot_id
+        ), totals AS (
+         SELECT snapshot_id, COUNT(*)::int AS entry_count
+           FROM ranked_entries
+          GROUP BY snapshot_id
+        )
+       SELECT totals.snapshot_id, totals.entry_count,
+              COALESCE(counts.top_entry_count, 0)::int AS top_entry_count,
+              COALESCE(counts.missing_entity_count, 0)::int AS missing_entity_count,
+              COALESCE(counts.duplicate_canonical_count, 0)::int AS duplicate_canonical_count,
+              COALESCE(counts.non_positive_count, 0)::int AS non_positive_count,
+              COALESCE(counts.not_playable_count, 0)::int AS not_playable_count,
+              COALESCE(counts.type_mismatch_count, 0)::int AS type_mismatch_count,
+              COALESCE(counts.rank_mismatch_count, 0)::int AS rank_mismatch_count,
+              COALESCE(counts.tie_group_mismatch_count, 0)::int AS tie_group_mismatch_count,
+              COALESCE(counts.score_mismatch_count, 0)::int AS score_mismatch_count
+         FROM totals
+         LEFT JOIN counts ON counts.snapshot_id = totals.snapshot_id`,
+      [snapshotRows.rows.map((row) => row.snapshot_id), MAX_GAME_RANKING_ENTRIES]
+    )
+    : { rows: [] as SnapshotIntegrityRow[] };
+
+  const integrityBySnapshot = new Map(integrity.rows.map((row) => [row.snapshot_id, row]));
+
   const bySnapshot = new Map<string, Map<string, number>>();
   for (const entry of entries.rows) {
     const snapshotEntries = bySnapshot.get(entry.snapshot_id) ?? new Map<string, number>();
@@ -103,6 +198,7 @@ try {
 
   const diagnostics: CategoryDiagnostic[] = snapshotRows.rows.map((row) => {
     const snapshotEntries = bySnapshot.get(row.snapshot_id) ?? new Map<string, number>();
+    const integrityRow = integrityBySnapshot.get(row.snapshot_id);
     const playableTop90 = [...snapshotEntries.values()].filter((rank) => rank <= DAILY_CHALLENGE_CANDIDATE_RANK).length;
     const minimumEntries = row.closed_universe ? 1 : MAX_GAME_RANKING_ENTRIES;
     const blockingReasons: string[] = [];
@@ -112,15 +208,48 @@ try {
     if (row.score_cap !== 100) blockingReasons.push('score_cap_not_100');
     if (snapshotEntries.size < minimumEntries) blockingReasons.push(row.entity_type === 'player' ? 'playable_canonical_players_below_200' : 'playable_canonical_entities_below_required_size');
     if (playableTop90 < 1) blockingReasons.push(`no_${row.entity_type}_in_top_90`);
+    if (!integrityRow) {
+      blockingReasons.push('integrity_audit_missing');
+    } else {
+      if (integrityRow.missing_entity_count > 0) blockingReasons.push('missing_entities');
+      if (integrityRow.duplicate_canonical_count > 0) blockingReasons.push('duplicate_canonical_entries');
+      if (integrityRow.non_positive_count > 0) blockingReasons.push('non_positive_values');
+      if (integrityRow.not_playable_count > 0) blockingReasons.push('not_playable_entries');
+      if (integrityRow.type_mismatch_count > 0) blockingReasons.push('entity_type_mismatch');
+      if (integrityRow.rank_mismatch_count > 0) blockingReasons.push('rank_mismatch');
+      if (integrityRow.tie_group_mismatch_count > 0) blockingReasons.push('tie_group_mismatch');
+      if (integrityRow.score_mismatch_count > 0) blockingReasons.push('score_mismatch');
+    }
     return {
       slug: row.slug,
       snapshotId: row.snapshot_id,
+      rawEntryCount: integrityRow?.entry_count ?? 0,
       playableTop200: snapshotEntries.size,
       playableTop90,
       coverageComplete: row.coverage_complete,
       unresolvedConflicts: row.unresolved_conflicts,
       eligibleCount: row.eligible_count,
       scoreCap: row.score_cap,
+      integrity: {
+        ready: Boolean(integrityRow) && [
+          integrityRow?.missing_entity_count,
+          integrityRow?.duplicate_canonical_count,
+          integrityRow?.non_positive_count,
+          integrityRow?.not_playable_count,
+          integrityRow?.type_mismatch_count,
+          integrityRow?.rank_mismatch_count,
+          integrityRow?.tie_group_mismatch_count,
+          integrityRow?.score_mismatch_count
+        ].every((count) => count === 0),
+        missingEntities: integrityRow?.missing_entity_count ?? 0,
+        duplicateCanonicalEntries: integrityRow?.duplicate_canonical_count ?? 0,
+        nonPositiveValues: integrityRow?.non_positive_count ?? 0,
+        notPlayableEntries: integrityRow?.not_playable_count ?? 0,
+        typeMismatches: integrityRow?.type_mismatch_count ?? 0,
+        rankMismatches: integrityRow?.rank_mismatch_count ?? 0,
+        tieGroupMismatches: integrityRow?.tie_group_mismatch_count ?? 0,
+        scoreMismatches: integrityRow?.score_mismatch_count ?? 0
+      },
       blockingReasons
     };
   });
@@ -240,6 +369,9 @@ try {
       },
       categories: selectedMatrix
     },
+    allCategoryDiagnostics: diagnostics
+      .slice()
+      .sort((left, right) => left.slug.localeCompare(right.slug)),
     closestCategoryDiagnostics: diagnostics
       .sort((left, right) => right.playableTop200 - left.playableTop200 || right.playableTop90 - left.playableTop90 || left.slug.localeCompare(right.slug))
       .slice(0, 20),

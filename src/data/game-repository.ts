@@ -47,7 +47,7 @@ type ApiChallenge = {
   id: string; kind: "daily" | "weekly" | "duel"; challengeDate: string | null; sourceVersion: string; challengeSha256: string; engineVersion: string; timeLimitSeconds: number; scoreCap: number;
   testOnly?: boolean;
   categories: Array<{ ordinal: number; id: string; rankingSnapshotId: string; slug: string; entityType?: string; labelEs: string; labelEn: string }>;
-  decisions: Array<{ ordinal: number; entityId: string; name: string; shortName: string | null; entityType: string; imageUrl?: string; imageStatus?: "licensed" | "fallback" }>;
+  decisions: Array<{ ordinal: number; entityId: string; name: string; shortName: string | null; entityType: string; imageUrl?: string; imageStatus?: "licensed" | "unlicensed" | "fallback" }>;
 };
 
 function resolveApiAssetUrl(baseUrl: string, path?: string): string | undefined {

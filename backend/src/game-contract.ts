@@ -51,7 +51,7 @@ type ChallengeDecisionRow = {
   short_name: string | null;
   entity_type: GameEntityType;
   image_url: string;
-  image_status: 'licensed' | 'fallback';
+  image_status: 'licensed' | 'unlicensed' | 'fallback';
 };
 
 type ChallengeAnswerRow = {
@@ -228,11 +228,22 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
   );
   const decisionsResult = await db.query<ChallengeDecisionRow>(
     `SELECT gcd.decision_ordinal, gcd.entity_id, e.canonical_name, e.short_name, e.entity_type,
-            CASE WHEN ia.id IS NOT NULL
-                 THEN '/v1/media/' || e.id || '/file'
-                 ELSE '/v1/media/' || e.id || '/fallback'
+            CASE
+              WHEN ia.id IS NOT NULL THEN '/v1/media/' || e.id || '/file'
+              WHEN $2::boolean
+                AND e.metadata->>'provider' = 'api-football'
+                AND NULLIF(e.metadata->>'photoUrl', '') IS NOT NULL
+                THEN e.metadata->>'photoUrl'
+              ELSE '/v1/media/' || e.id || '/fallback'
             END AS image_url,
-            CASE WHEN ia.id IS NOT NULL THEN 'licensed' ELSE 'fallback' END AS image_status
+            CASE
+              WHEN ia.id IS NOT NULL THEN 'licensed'
+              WHEN $2::boolean
+                AND e.metadata->>'provider' = 'api-football'
+                AND NULLIF(e.metadata->>'photoUrl', '') IS NOT NULL
+                THEN 'unlicensed'
+              ELSE 'fallback'
+            END AS image_status
        FROM game_challenge_decisions gcd
        LEFT JOIN entity_identity_links decision_identity
          ON decision_identity.source_entity_id = gcd.entity_id
@@ -258,7 +269,7 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
              AND playable_profile.playable_default = TRUE
         ))
       ORDER BY gcd.decision_ordinal`,
-    [row.id]
+    [row.id, row.test_only]
   );
   const answersResult = await db.query<ChallengeAnswerRow>(
     `SELECT gca.decision_ordinal, gca.category_id, cd.slug, gca.score_value

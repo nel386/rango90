@@ -19,7 +19,7 @@ export type MockEntity = {
   position: string;
   imageUrl?: string;
   imageFallbackUrl?: string;
-  imageStatus?: "licensed" | "fallback";
+  imageStatus?: "licensed" | "unlicensed" | "fallback";
   ordinal?: number;
   scores: Record<string, number>;
 };

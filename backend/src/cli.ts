@@ -1964,6 +1964,7 @@ try {
     if (requestedMetrics.length === 0 || requestedMetrics.some((metric) => !metricColumns[metric])) {
       throw new Error('Métricas válidas: goals, assists, yellow_cards, red_cards');
     }
+    const allowPartialDraft = args.includes('--allow-partial');
     // The career categories are explicitly club-career categories.  The
     // stats table also stores national-team competitions (World Cup, EURO,
     // Copa América and Nations League), so selecting every imported
@@ -2048,12 +2049,14 @@ try {
             AND p.competition_id = ANY($1::text[])
             AND p.season_year BETWEEN $2 AND $3
           GROUP BY p.entity_id, e.canonical_name
-          HAVING SUM(p.${column}) IS NOT NULL
+          HAVING SUM(p.${column}) > 0
           ORDER BY SUM(p.${column}) DESC, p.entity_id
           LIMIT 200`,
         [competitions, fromSeason, toSeason]
       );
-      if (rows.rows.length < 200) throw new Error(`${categorySlug}: se requieren 200 jugadores; disponibles ${rows.rows.length}`);
+      if (rows.rows.length < 200 && !allowPartialDraft) {
+        throw new Error(`${categorySlug}: se requieren 200 jugadores con valor positivo observado; disponibles ${rows.rows.length}`);
+      }
       const availableSeasons = [...new Set(rows.rows.flatMap((row) => row.seasons.map(Number)))].sort((left, right) => left - right);
       const rankingId = await importRankingInput({
         categorySlug,
@@ -2066,6 +2069,10 @@ try {
         },
         dataVersion: `api-football-club-career-${metric}-${fromSeason}-${toSeason}`,
         coverageComplete: false,
+        allowPartialDraft: allowPartialDraft && rows.rows.length < 200,
+        partialDraftReason: allowPartialDraft && rows.rows.length < 200
+          ? `La ventana API-Football solo contiene ${rows.rows.length} jugadores con valor positivo observado; se conserva ese conjunto real y no se añaden ceros de relleno.`
+          : undefined,
         audit: { coverage: coverageAudit, unresolvedConflicts: 0 },
         reviewed: false,
         entries: rows.rows.map((row, index) => ({
@@ -2085,7 +2092,7 @@ try {
       });
       results.push({ metric, rankingId, entries: rows.rows.length, availableSeasons });
     }
-    console.log(JSON.stringify({ source: 'api-football', scope: 'imported-club-competitions', excludedCompetitionType: 'national_team', requestedWindow: { fromSeason, toSeason }, competitions, coverage: coverageAudit, results, coverageComplete: false, note: 'Snapshots globales de las competiciones de clubes API-Football importadas; permanecen en draft hasta completar el histórico y revisar derechos.' }, null, 2));
+    console.log(JSON.stringify({ source: 'api-football', scope: 'imported-club-competitions', excludedCompetitionType: 'national_team', requestedWindow: { fromSeason, toSeason }, competitions, coverage: coverageAudit, results, allowPartialDraft, coverageComplete: false, note: 'Snapshots globales de las competiciones de clubes API-Football importadas; permanecen en draft hasta completar el histórico y revisar derechos. Los ceros no se usan para fabricar puestos.' }, null, 2));
   } else if (command === 'build-player-career-goals') {
     const categorySlug = 'player-career-goals';
     const nationalSnapshot = await pool.query<{ id: string; data_version: string }>(

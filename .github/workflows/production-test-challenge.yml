@@ -47,7 +47,7 @@ jobs:
 
       - name: Rebuild observed career card rankings from API-Football
         working-directory: backend
-        run: npm run build:rankings:api-football:career -- --from-season 2000 --to-season 2026 --metric yellow_cards,red_cards
+        run: npm run build:rankings:api-football:career -- --from-season 2000 --to-season 2026 --metric yellow_cards,red_cards --allow-partial
 
       - name: Remove non-positive ranking padding
         working-directory: backend

@@ -28,7 +28,8 @@ npm run --silent sync:api-football:season -- --season "$season" --skip-media
 npm run --silent build:rankings:api-football:career -- \
   --from-season 2000 \
   --to-season "$season" \
-  --metric goals,assists,yellow_cards,red_cards
+  --metric goals,assists,yellow_cards,red_cards \
+  --allow-partial
 
 # The selected career-goals category is global: it combines the refreshed
 # API-Football club component with the latest reviewed senior-national-team

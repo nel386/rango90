@@ -73,7 +73,7 @@ jobs:
 
       - name: Build observed career card rankings
         working-directory: backend
-        run: npm run build:rankings:api-football:career -- --from-season 2000 --to-season 2026 --metric yellow_cards,red_cards
+        run: npm run build:rankings:api-football:career -- --from-season 2000 --to-season 2026 --metric yellow_cards,red_cards --allow-partial
 
       - name: Expand the reviewed historical game audience
         working-directory: backend

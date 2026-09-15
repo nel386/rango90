@@ -93,7 +93,20 @@ else
     sync_args=(--season "$season" --skip-media --only "$only_competitions")
   fi
   npm run --silent sync:api-football:season -- "${sync_args[@]}"
-  RANGO90_SEASON="$season" npm run --silent refresh:api-football:current
+  if [[ -n "$only_competitions" ]]; then
+    # A manually selected competition must remain scoped to that competition.
+    # The full current-season refresh would otherwise re-import all six
+    # domestic leagues and make incremental historical backfill needlessly
+    # expensive on the free Render database.
+    npm run --silent build:rankings:api-football:career -- \
+      --from-season 2000 \
+      --to-season "$season" \
+      --metric goals,assists,yellow_cards,red_cards \
+      --allow-partial
+    npm run --silent build:rankings:player-career-goals
+  else
+    RANGO90_SEASON="$season" npm run --silent refresh:api-football:current
+  fi
 
   # /trophies is intentionally batched to control quota. --missing-only makes
   # successive weekly runs advance through the playable API-Football cohort;

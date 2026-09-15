@@ -9,6 +9,7 @@ export type MockCategory = {
   label: Record<Locale, string>;
   definition: Record<Locale, string>;
   entityType?: EntityType;
+  competitionLabel?: Record<Locale, string>;
 };
 
 export type MockEntity = {

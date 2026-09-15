@@ -188,6 +188,8 @@ export function registerAuthRoutes(app: FastifyInstance) {
     return reply.redirect(url.toString());
   });
 
+  app.get('/v1/auth/google/status', async () => ({ configured: googleConfigReady() }));
+
   app.get('/v1/auth/google/callback', async (request, reply) => {
     if (!googleConfigReady()) return reply.code(503).send({ error: 'Google authentication is not configured' });
     const query = z.object({ code: z.string().min(1), state: z.string().min(1) }).parse(request.query);

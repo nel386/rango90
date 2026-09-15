@@ -173,8 +173,8 @@ try {
     group.push(candidate);
     candidatesByEntityType.set(row.entity_type, group);
   }
-  const playerAudit = auditSevenBySeven(candidatesByEntityType.get('player') ?? [], 5, 5, DAILY_CHALLENGE_CANDIDATE_RANK, 20);
-  const clubAudit = auditSevenBySeven(candidatesByEntityType.get('club') ?? [], 2, 2, DAILY_CHALLENGE_CANDIDATE_RANK, 20);
+  const playerAudit = auditSevenBySeven(candidatesByEntityType.get('player') ?? [], 7, 7, DAILY_CHALLENGE_CANDIDATE_RANK, 20);
+  const clubAudit = auditSevenBySeven(candidatesByEntityType.get('club') ?? [], 1, 1, DAILY_CHALLENGE_CANDIDATE_RANK, 20);
   const audit = {
     player: playerAudit,
     club: clubAudit,
@@ -186,24 +186,12 @@ try {
     })))
   };
   const selectedPlayerCandidates = candidates.filter((candidate) =>
-    SELECTED_DAILY_CATEGORY_SLUGS.slice(0, SELECTED_DAILY_CATEGORY_COUNTS.player)
-      .includes(candidate.slug as typeof SELECTED_DAILY_CATEGORY_SLUGS[number])
-  );
-  const selectedClubCandidates = candidates.filter((candidate) =>
-    SELECTED_DAILY_CATEGORY_SLUGS.slice(SELECTED_DAILY_CATEGORY_COUNTS.player)
-      .includes(candidate.slug as typeof SELECTED_DAILY_CATEGORY_SLUGS[number])
+    SELECTED_DAILY_CATEGORY_SLUGS.includes(candidate.slug as typeof SELECTED_DAILY_CATEGORY_SLUGS[number])
   );
   const selectedPlayerAudit = auditSevenBySeven(
     selectedPlayerCandidates,
     SELECTED_DAILY_CATEGORY_COUNTS.player,
     SELECTED_DAILY_CATEGORY_COUNTS.player,
-    DAILY_CHALLENGE_CANDIDATE_RANK,
-    1
-  );
-  const selectedClubAudit = auditSevenBySeven(
-    selectedClubCandidates,
-    SELECTED_DAILY_CATEGORY_COUNTS.club,
-    SELECTED_DAILY_CATEGORY_COUNTS.club,
     DAILY_CHALLENGE_CANDIDATE_RANK,
     1
   );
@@ -230,8 +218,8 @@ try {
     ready: selectedMatrixReady,
     requirements: {
       categories: 7,
-      playerCategories: 5,
-      clubCategories: 2,
+      playerCategories: 7,
+      clubCategories: 0,
       entriesPerCategory: MAX_GAME_RANKING_ENTRIES,
       candidateRankLimit: DAILY_CHALLENGE_CANDIDATE_RANK,
       independentCategorySelection: true,
@@ -245,10 +233,10 @@ try {
     selectedMatrix: {
       slugs: SELECTED_DAILY_CATEGORY_SLUGS,
       player: selectedPlayerAudit,
-      club: selectedClubAudit,
+      club: { categoryCount: 0, matchingCombinationCount: 0, matches: [] },
       overlapDiagnostics: {
         player: selectedDataIntersection('player', SELECTED_DAILY_CATEGORY_COUNTS.player),
-        club: selectedDataIntersection('club', SELECTED_DAILY_CATEGORY_COUNTS.club)
+        club: { categoryCount: 0, requiredCategoryCount: 0, commonTop200Count: 0, commonCandidateBandCount: 0, commonCandidateBandEntityIds: [] }
       },
       categories: selectedMatrix
     },

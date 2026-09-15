@@ -18,16 +18,33 @@ export type SevenBySevenAuditResult = {
   matches: SevenBySevenMatch[];
 };
 
-function intersect(left: ReadonlySet<string>, right: ReadonlySet<string>): Set<string> {
-  const smaller = left.size <= right.size ? left : right;
-  const larger = left.size <= right.size ? right : left;
-  return new Set([...smaller].filter((value) => larger.has(value)));
+function canMatch(categories: readonly SevenBySevenCategory[], band: 'top200EntityIds' | 'candidateBandEntityIds'): string[] | null {
+  const matchedByEntity = new Map<string, number>();
+  const ordered = [...categories].sort((left, right) => left[band].size - right[band].size || left.slug.localeCompare(right.slug));
+  const visit = (categoryIndex: number, seen: Set<string>): boolean => {
+    const category = ordered[categoryIndex];
+    if (!category) return true;
+    for (const entityId of category[band]) {
+      if (seen.has(entityId)) continue;
+      seen.add(entityId);
+      const previousCategory = matchedByEntity.get(entityId);
+      if (previousCategory === undefined || visit(previousCategory, seen)) {
+        matchedByEntity.set(entityId, categoryIndex);
+        return true;
+      }
+    }
+    return false;
+  };
+  for (let index = 0; index < ordered.length; index += 1) {
+    if (!visit(index, new Set())) return null;
+  }
+  return [...matchedByEntity.keys()].sort();
 }
 
 /**
- * Finds seven-category player matrices without padding or reusing a player
- * that is absent from any selected snapshot. The candidate band mirrors the
- * daily selector's stronger top-90 requirement.
+ * Finds category combinations with a valid one-to-one assignment. Categories
+ * are intentionally independent: a player does not need to appear in every
+ * ranking. This is the same rule used by the daily materializer.
  */
 export function auditSevenBySeven(
   categories: readonly SevenBySevenCategory[],
@@ -46,21 +63,19 @@ export function auditSevenBySeven(
 
   function visit(
     startIndex: number,
-    selected: SevenBySevenCategory[],
-    commonTop200: Set<string> | null,
-    commonCandidateBand: Set<string> | null
+    selected: SevenBySevenCategory[]
   ): void {
     if (selected.length === requiredCategoryCount) {
-      const top200 = commonTop200 ?? new Set<string>();
-      const candidateBand = commonCandidateBand ?? new Set<string>();
-      if (top200.size < requiredCommonEntityCount || candidateBand.size < requiredCommonEntityCount) return;
+      const top200Ids = canMatch(selected, 'top200EntityIds');
+      const candidateBandIds = canMatch(selected, 'candidateBandEntityIds');
+      if (!top200Ids || !candidateBandIds || candidateBandIds.length < requiredCommonEntityCount) return;
       matchingCombinationCount += 1;
       if (matches.length < maxReturnedMatches) {
         matches.push({
           categories: selected.map((category) => category.slug),
-          commonTop200Count: top200.size,
-          commonCandidateBandCount: candidateBand.size,
-          commonCandidateBandEntityIds: [...candidateBand].sort()
+          commonTop200Count: top200Ids.length,
+          commonCandidateBandCount: candidateBandIds.length,
+          commonCandidateBandEntityIds: candidateBandIds
         });
       }
       return;
@@ -72,18 +87,13 @@ export function auditSevenBySeven(
     for (let index = startIndex; index <= ordered.length - remaining; index += 1) {
       const category = ordered[index];
       if (!category) continue;
-      const nextTop200 = commonTop200 ? intersect(commonTop200, category.top200EntityIds) : new Set(category.top200EntityIds);
-      const nextCandidateBand = commonCandidateBand
-        ? intersect(commonCandidateBand, category.candidateBandEntityIds)
-        : new Set(category.candidateBandEntityIds);
-
-      // Intersections only shrink, so no later category can recover a failed
-      // minimum. This also keeps the audit bounded when the catalogue grows.
-      if (nextTop200.size < requiredCommonEntityCount || nextCandidateBand.size < requiredCommonEntityCount) continue;
-      visit(index + 1, [...selected, category], nextTop200, nextCandidateBand);
+      const nextSelected = [...selected, category];
+      if (nextSelected.every((item) => item.candidateBandEntityIds.size >= requiredCommonEntityCount)) {
+        visit(index + 1, nextSelected);
+      }
     }
   }
 
-  visit(0, [], null, null);
+  visit(0, []);
   return { categoryCount: ordered.length, matchingCombinationCount, matches };
 }

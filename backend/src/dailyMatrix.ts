@@ -9,17 +9,14 @@ export const SELECTED_DAILY_CATEGORY_SLUGS = [
   'club-career-titles',
   'world-cup-goals',
   'player-career-goals',
-  'national-league-club-titles',
-  'european-cup-champions-league-club-titles'
+  'uefa-champions-league-assists',
+  'uefa-champions-league-goals'
 ] as const;
 
 export const SELECTED_DAILY_CATEGORY_COUNTS = {
-  player: 5,
-  club: 2,
+  player: 7,
+  club: 0,
   national_team: 0
 } as const;
 
-export const SELECTED_DAILY_PLAYER_CATEGORY_SLUGS = SELECTED_DAILY_CATEGORY_SLUGS.slice(
-  0,
-  SELECTED_DAILY_CATEGORY_COUNTS.player
-);
+export const SELECTED_DAILY_PLAYER_CATEGORY_SLUGS = [...SELECTED_DAILY_CATEGORY_SLUGS];

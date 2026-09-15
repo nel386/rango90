@@ -33,8 +33,17 @@ export const mockGameRepository: GameRepository = {
   login: async () => { throw new RepositoryError("Backend unavailable", "offline"); },
   register: async () => { throw new RepositoryError("Backend unavailable", "offline"); },
   logout: async () => undefined,
+  getGoogleAuthStatus: async () => false,
   getDailyChallenge: async () => mockDailyChallenge,
   startGame: async (challengeId) => ({ id: `mock-game-${Date.now()}`, challengeId, status: "active", startedAt: new Date().toISOString(), deadlineAt: new Date(Date.now() + mockDailyChallenge.timeLimitSeconds * 1000).toISOString(), currentOrdinal: 0, sessionToken: `mock-session-${Date.now()}`, challenge: mockDailyChallenge }),
+  submitDecision: async (session, decision, previousAssignments) => {
+    const entity = session.challenge.entities[decision.ordinal];
+    const scoreValue = entity?.scores[decision.categorySlug] ?? 100;
+    const best = session.challenge.categories
+      .filter((category) => entity?.scores[category.slug] !== undefined)
+      .sort((left, right) => (entity?.scores[left.slug] ?? 100) - (entity?.scores[right.slug] ?? 100))[0];
+    return { assignment: { ...decision, scoreValue }, selectedRank: scoreValue, bestCategorySlug: best?.slug ?? decision.categorySlug, bestRank: best ? entity?.scores[best.slug] ?? null : null, complete: previousAssignments.length + 1 >= session.challenge.entities.length };
+  },
   submitResult: async (session, assignments) => mockResult(session, assignments),
   expireGame: async (session, knownAssignments = []) => {
     const used = new Set(knownAssignments.map((assignment) => assignment.categorySlug));

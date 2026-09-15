@@ -7,13 +7,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
-import { createGameRepository, RepositoryError, type AuthUser, type DuelState, type GameResult, type GameSession, type LeaderboardEntry } from "@/data/game-repository";
+import { createGameRepository, RepositoryError, type AuthUser, type DecisionFeedback, type DuelState, type GameResult, type GameSession, type LeaderboardEntry } from "@/data/game-repository";
 import type { Locale, MockCategory, MockChallenge, MockEntity } from "@/data/game-types";
 
 type View = "home" | "game" | "result" | "ranking" | "duels" | "account";
 type GamePhase = "playing" | "feedback" | "finished" | "abandoned";
 type ChallengeLoadState = "ready" | "loading" | "error";
-type Assignment = { ordinal: number; entity: MockEntity; category: MockCategory; score: number | null; timedOut?: boolean };
+type Assignment = { ordinal: number; entity: MockEntity; category: MockCategory; score: number | null; timedOut?: boolean; feedback?: DecisionFeedback };
 type GameMode = "daily" | "duel";
 type DuelToken = { code: string; token: string; slot: number; startedAt?: string; deadlineAt?: string };
 type ActiveDuel = DuelToken & { startedAt: string; deadlineAt: string; challenge: MockChallenge };
@@ -100,6 +100,8 @@ export function Rango90App({ locale }: { locale: Locale }) {
   const [entityIndex, setEntityIndex] = useState(0);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [latestFeedback, setLatestFeedback] = useState<DecisionFeedback | null>(null);
+  const [decisionPending, setDecisionPending] = useState(false);
   const [showCategoryInfo, setShowCategoryInfo] = useState(false);
   const [showAccountPanel, setShowAccountPanel] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
@@ -360,6 +362,8 @@ export function Rango90App({ locale }: { locale: Locale }) {
       setAssignments([]);
       setEntityIndex(0);
       setSelectedCategory(null);
+      setLatestFeedback(null);
+      setDecisionPending(false);
       setSecondsLeft(startedSession.challenge.timeLimitSeconds);
       setTimedOut(false);
       timeoutHandled.current = false;
@@ -473,13 +477,22 @@ export function Rango90App({ locale }: { locale: Locale }) {
     }
   }
 
-  function startGoogleAuth() {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
-    if (!baseUrl) {
-      setAuthMessage(t("errors.server"));
-      return;
+  async function startGoogleAuth() {
+    setAuthBusy(true);
+    setAuthMessage("");
+    try {
+      if (!await gameRepository.getGoogleAuthStatus()) {
+        setAuthMessage(locale === "es" ? "Google no está configurado todavía en el servidor." : "Google is not configured on the server yet.");
+        return;
+      }
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+      if (!baseUrl) throw new RepositoryError("Frontend API is not configured", "server", 500, "api_not_configured");
+      window.open(`${baseUrl.replace(/\/$/u, "")}/v1/auth/google/start?returnTo=${encodeURIComponent(window.location.href)}`, "_self");
+    } catch (error: unknown) {
+      setAuthMessage(error instanceof RepositoryError ? repositoryErrorMessage(error) : t("errors.server"));
+    } finally {
+      setAuthBusy(false);
     }
-    window.open(`${baseUrl.replace(/\/$/u, "")}/v1/auth/google/start?returnTo=${encodeURIComponent(window.location.href)}`, "_self", "noopener,noreferrer");
   }
 
   async function logout() {
@@ -677,27 +690,40 @@ export function Rango90App({ locale }: { locale: Locale }) {
     }
   }
 
-  function assignCategory(category: MockCategory) {
-    if (!currentEntity || phase !== "playing" || usedCategorySlugs.has(category.slug)) return;
+  async function assignCategory(category: MockCategory) {
+    if (!currentEntity || phase !== "playing" || usedCategorySlugs.has(category.slug) || decisionPending) return;
     setSelectedCategory(category.slug);
-    setAssignments((current) => [...current, { ordinal: currentEntity.ordinal ?? entityIndex, entity: currentEntity, category, score: null }]);
-    setPhase("feedback");
-  }
-
-  function continueGame() {
-    if (secondsLeft <= 0) {
-      expireCurrentGame();
-      return;
+    setDecisionPending(true);
+    try {
+      const ordinal = currentEntity.ordinal ?? entityIndex;
+      const claim = { ordinal, entityId: currentEntity.id, categorySlug: category.slug };
+      const previousClaims = assignments.map((assignment) => ({ ordinal: assignment.ordinal, entityId: assignment.entity.id, categorySlug: assignment.category.slug, ...(assignment.timedOut ? { timedOut: true } : {}) }));
+      const feedback = gameMode === "daily" && session
+        ? await gameRepository.submitDecision(session, claim, previousClaims)
+        : { assignment: { ...claim, scoreValue: 0 }, selectedRank: null, bestCategorySlug: category.slug, bestRank: null, complete: false };
+      const nextAssignment = { ordinal, entity: currentEntity, category, score: gameMode === "daily" ? feedback.assignment.scoreValue : null, feedback };
+      const nextAssignments = [...assignments, nextAssignment];
+      setAssignments(nextAssignments);
+      setLatestFeedback(feedback);
+      setPhase("feedback");
+      window.setTimeout(() => {
+        if (feedback.complete || entityIndex >= mockDailyChallenge.entities.length - 1) {
+          setPhase("finished");
+          setView("result");
+          return;
+        }
+        setEntityIndex((current) => current + 1);
+        setSelectedCategory(null);
+        setLatestFeedback(null);
+        setPhase("playing");
+      }, 1200);
+    } catch (error: unknown) {
+      setSelectedCategory(null);
+      setRepositoryError(error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline"));
+    } finally {
+      setDecisionPending(false);
     }
-    if (entityIndex >= mockDailyChallenge.entities.length - 1) {
-      setPhase("finished");
-      return;
-    }
-    setEntityIndex((current) => current + 1);
-    setSelectedCategory(null);
-    setPhase("playing");
   }
-
 
   function renderHeader() {
     const languageHref = initialDuelCode ? `/?duel=${encodeURIComponent(initialDuelCode)}` : "/";
@@ -745,7 +771,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
 
   function renderGame() {
     const latestAssignment = assignments[assignments.length - 1];
-    const isLastDecision = entityIndex === mockDailyChallenge.entities.length - 1;
+    const bestCategory = latestFeedback ? mockDailyChallenge.categories.find((category) => category.slug === latestFeedback.bestCategorySlug) : undefined;
     const scoreDisplay = assignments.some((assignment) => assignment.score !== null) ? totalScore : "—";
     return <section className="game-view" aria-labelledby="game-title">
       <div className="game-topline"><div><p className="kicker">{t("game.kicker")}</p><h1 id="game-title">{mockDailyChallenge.title[locale]}</h1></div><div className="game-topline-actions"><div className={`timer ${secondsLeft <= 20 ? "timer-warning" : ""}`} aria-label={t("game.timerLabel")}><span aria-live="polite">{formatTime(secondsLeft)}</span><small>{t("game.remaining")}</small></div><button className="abandon-button" type="button" onClick={abandonGame} disabled={phase === "finished" || phase === "abandoned"}>{t("game.abandon")}</button></div></div>
@@ -753,9 +779,9 @@ export function Rango90App({ locale }: { locale: Locale }) {
       <div className="decision-layout">
         <article className="entity-card"><div className="entity-card-topline"><span>{t("game.entityPosition", { current: Math.min(entityIndex + 1, decisionCount), total: decisionCount })}</span><span className="entity-type">{currentEntity ? currentEntity.entityType === "player" ? t("game.entityType.player") : currentEntity.entityType === "club" ? t("game.entityType.club") : t("game.entityType.nationalTeam") : null}</span></div>{currentEntity ? <>{currentEntity.imageUrl ? <img className="entity-image" src={currentEntity.imageUrl} alt={currentEntity.name} loading="eager" onError={(event) => { if (currentEntity.imageFallbackUrl && event.currentTarget.src !== currentEntity.imageFallbackUrl) event.currentTarget.src = currentEntity.imageFallbackUrl; }} /> : <div className="entity-monogram" aria-hidden="true">{currentEntity.shortName}</div>}<h2>{currentEntity.name}</h2><p>{t("game.entityPrompt")}</p></> : null}</article>
         <div className="category-panel"><div className="panel-heading"><div><p className="kicker">{t("game.categoryKicker")}</p><h2>{t("game.categoryTitle")}</h2></div><button className="icon-button" type="button" onClick={() => setShowCategoryInfo(true)} aria-label={t("game.infoLabel")}>i</button></div><div className="category-list">
-          {mockDailyChallenge.categories.map((category) => { const assignment = assignments.find((item) => item.category.slug === category.slug); const isUsed = Boolean(assignment); const isCompatible = !category.entityType || !currentEntity || category.entityType === currentEntity.entityType; return <button className={`category-row ${isUsed ? "category-row-used" : ""} ${!isCompatible ? "category-row-unavailable" : ""} ${selectedCategory === category.slug ? "category-row-selected" : ""}`} disabled={isUsed || !isCompatible || phase !== "playing"} key={category.slug} onClick={() => assignCategory(category)} type="button"><span className="category-mark" aria-hidden="true">{category.code}</span><span className="category-copy"><strong>{category.label[locale]}</strong><small>{isUsed ? t("game.used") : !isCompatible ? (locale === "es" ? "No aplica" : "Not applicable") : t("game.available")}</small></span>{assignment ? <span className={`category-score ${assignment.score === null ? "score-pending" : assignment.score >= 70 ? "score-bad" : assignment.score >= 25 ? "score-mid" : "score-good"}`}>{assignment.score === null ? "—" : `+${assignment.score}`}</span> : <span className="category-arrow" aria-hidden="true">↗</span>}</button>; })}
+          {mockDailyChallenge.categories.map((category) => { const assignment = assignments.find((item) => item.category.slug === category.slug); const isUsed = Boolean(assignment); const isCompatible = !category.entityType || !currentEntity || category.entityType === currentEntity.entityType; return <button className={`category-row ${isUsed ? "category-row-used" : ""} ${!isCompatible ? "category-row-unavailable" : ""} ${selectedCategory === category.slug ? "category-row-selected" : ""}`} disabled={isUsed || !isCompatible || phase !== "playing" || decisionPending} key={category.slug} onClick={() => void assignCategory(category)} type="button"><span className="category-mark" aria-hidden="true">{category.code}</span><span className="category-copy"><strong>{category.label[locale]}</strong><small>{category.competitionLabel?.[locale] ?? (locale === "es" ? "Fútbol · global" : "Football · global")}</small><small>{isUsed ? t("game.used") : !isCompatible ? (locale === "es" ? "No aplica" : "Not applicable") : t("game.available")}</small></span>{assignment ? <span className={`category-score ${assignment.score === null ? "score-pending" : assignment.score >= 70 ? "score-bad" : assignment.score >= 25 ? "score-mid" : "score-good"}`}>{assignment.score === null ? "—" : `+${assignment.score}`}</span> : <span className="category-arrow" aria-hidden="true">↗</span>}</button>; })}
         </div>
-        {phase === "feedback" && latestAssignment ? <div className={`feedback-card ${latestAssignment.score === null ? "feedback-pending" : latestAssignment.score >= 70 ? "feedback-bad" : latestAssignment.score >= 25 ? "feedback-mid" : "feedback-good"}`}><div><span className="feedback-label">{t("game.feedback.label")}</span><strong>{latestAssignment.entity.name}</strong></div><div className="feedback-score"><strong>{latestAssignment.score === null ? "—" : latestAssignment.score}</strong><span>{latestAssignment.score === null ? t("game.feedback.pending") : t("game.feedback.points")}</span></div><p>{latestAssignment.score === null ? t("game.feedback.pendingCopy") : t("game.feedback.copy", { category: latestAssignment.category.label[locale] })}</p><button className="button button-dark" type="button" onClick={continueGame}>{isLastDecision ? t("game.finish") : t("game.next")} <span aria-hidden="true">↗</span></button></div> : null}
+        {phase === "feedback" && latestAssignment && latestFeedback ? <div className={`feedback-card ${latestAssignment.score === null ? "feedback-pending" : latestAssignment.score >= 70 ? "feedback-bad" : latestAssignment.score >= 25 ? "feedback-mid" : "feedback-good"}`}><div><span className="feedback-label">{t("game.feedback.label")}</span><strong>{latestAssignment.entity.name}</strong></div><div className="feedback-score"><strong>{latestAssignment.score === null ? "—" : latestAssignment.score}</strong><span>{latestAssignment.score === null ? t("game.feedback.pending") : t("game.feedback.points")}</span></div><p>{locale === "es" ? `Puesto elegido: ${latestFeedback.selectedRank ?? "—"} · mejor puesto: ${latestFeedback.bestRank ?? "—"}` : `Selected rank: ${latestFeedback.selectedRank ?? "—"} · best rank: ${latestFeedback.bestRank ?? "—"}`}</p><p>{locale === "es" ? `La mejor categoría era ${bestCategory?.label.es ?? "—"}.` : `The best category was ${bestCategory?.label.en ?? "—"}.`}</p><span className="feedback-advance">{locale === "es" ? "Siguiente jugada automática" : "Advancing automatically"}</span></div> : null}
         {phase === "finished" ? <div className="feedback-card feedback-timeout"><div><span className="feedback-label">{t(timedOut ? "game.timeout.label" : "game.complete.label")}</span><strong>{t(timedOut ? "game.timeout.title" : "game.complete.title")}</strong></div><p>{t(timedOut ? "game.timeout.copy" : "game.complete.copy")}</p><button className="button button-dark" type="button" onClick={() => setView("result")}>{t("game.resultCta")} <span aria-hidden="true">↗</span></button></div> : null}
         {phase === "abandoned" ? <div className="feedback-card feedback-abandoned"><div><span className="feedback-label">{t("game.abandoned.label")}</span><strong>{t("game.abandoned.title")}</strong></div><p>{t("game.abandoned.copy")}</p><div className="feedback-actions"><button className="button button-dark" type="button" onClick={startDaily}>{t("game.abandoned.restart")}</button><button className="button button-secondary" type="button" onClick={resetGameToHome}>{t("game.abandoned.home")}</button></div></div> : null}
         </div>

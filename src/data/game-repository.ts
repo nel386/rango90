@@ -1,6 +1,13 @@
 import type { MockChallenge, MockEntity } from "./game-types";
 
 export type AssignmentClaim = { ordinal: number; entityId: string; categorySlug: string; timedOut?: boolean };
+export type DecisionFeedback = {
+  assignment: AssignmentClaim & { scoreValue: number };
+  selectedRank: number | null;
+  bestCategorySlug: string;
+  bestRank: number | null;
+  complete: boolean;
+};
 export type OfficialAssignment = AssignmentClaim & { scoreValue: number };
 export type GameResult = {
   challengeId: string; sourceVersion: string; challengeSha256?: string; engineVersion: string; startedAtMs: number; finishedAtMs: number;
@@ -31,8 +38,10 @@ export interface GameRepository {
   login(email: string, password: string): Promise<AuthUser>;
   register(email: string, password: string, displayName: string): Promise<AuthUser>;
   logout(): Promise<void>;
+  getGoogleAuthStatus(): Promise<boolean>;
   getDailyChallenge(): Promise<MockChallenge>;
   startGame(challengeId: string): Promise<GameSession>;
+  submitDecision(session: GameSession, decision: AssignmentClaim, previousAssignments: AssignmentClaim[]): Promise<DecisionFeedback>;
   submitResult(session: GameSession, assignments: AssignmentClaim[]): Promise<ResultResponse>;
   expireGame(session: GameSession, knownAssignments?: AssignmentClaim[]): Promise<ResultResponse>;
   getLeaderboard(challengeId: string): Promise<LeaderboardEntry[]>;
@@ -68,7 +77,7 @@ function normalizeChallenge(raw: ApiChallenge, baseUrl = ""): MockChallenge {
       : { es: "Una combinación publicada y auditada.", en: "A published and audited combination." },
     entityType: raw.decisions[0]?.entityType === "club" || raw.decisions[0]?.entityType === "national_team" ? raw.decisions[0].entityType : "player",
     timeLimitSeconds: raw.timeLimitSeconds, qualificationScore: 250, scoreCap: raw.scoreCap, sourceVersion: raw.sourceVersion, challengeSha256: raw.challengeSha256, engineVersion: raw.engineVersion, difficulty: "balanced",
-    categories: raw.categories.map((category) => ({ slug: category.slug, code: category.slug.slice(0, 2).toUpperCase(), id: category.id, ordinal: category.ordinal, entityType: category.entityType === "club" || category.entityType === "national_team" ? category.entityType : "player", label: { es: category.labelEs, en: category.labelEn }, definition: { es: "Ranking publicado para este reto.", en: "Published ranking for this challenge." } })),
+    categories: raw.categories.map((category) => ({ slug: category.slug, code: category.slug === "club-career-yellow-cards" ? "AM" : category.slug === "club-career-red-cards" ? "RO" : category.slug.includes("champions-league") ? "CL" : category.slug === "world-cup-goals" ? "WC" : "90", id: category.id, ordinal: category.ordinal, entityType: category.entityType === "club" || category.entityType === "national_team" ? category.entityType : "player", label: { es: category.labelEs, en: category.labelEn }, competitionLabel: { es: category.slug.includes("champions-league") ? "UEFA · Champions League" : category.slug === "world-cup-goals" ? "FIFA · Mundial" : category.slug.includes("club-career") ? "Clubes · global" : "Carrera · global", en: category.slug.includes("champions-league") ? "UEFA · Champions League" : category.slug === "world-cup-goals" ? "FIFA · World Cup" : category.slug.includes("club-career") ? "Clubs · global" : "Career · global" }, definition: { es: "Ranking publicado para este reto.", en: "Published ranking for this challenge." } })),
     entities: raw.decisions.map((decision) => ({ id: decision.entityId, name: decision.name, shortName: decision.shortName ?? decision.name.slice(0, 2).toUpperCase(), entityType: decision.entityType === "club" || decision.entityType === "national_team" ? decision.entityType : "player", position: "", imageUrl: resolveApiAssetUrl(baseUrl, decision.imageUrl), imageFallbackUrl: resolveApiAssetUrl(baseUrl, `/v1/media/${encodeURIComponent(decision.entityId)}/fallback`), imageStatus: decision.imageStatus, ordinal: decision.ordinal, scores: {} })),
   };
 }
@@ -117,6 +126,11 @@ export class HttpGameRepository implements GameRepository {
     await this.request<{ ok: boolean }>("/v1/auth/logout", { method: "POST", body: "{}" });
   }
 
+  async getGoogleAuthStatus() {
+    const response = await this.request<{ configured: boolean }>("/v1/auth/google/status");
+    return response.configured;
+  }
+
   async getDailyChallenge() {
     const response = await this.request<{ challenge: ApiChallenge }>("/v1/challenges/daily");
     const challenge = normalizeChallenge(response.challenge, this.baseUrl);
@@ -129,6 +143,10 @@ export class HttpGameRepository implements GameRepository {
   async startGame(challengeId: string) {
     const response = await this.request<{ sessionToken: string; game: Omit<GameSession, "sessionToken" | "challenge">; challenge: ApiChallenge }>("/v1/games", { method: "POST", body: JSON.stringify({ challengeId }) });
     return { ...response.game, sessionToken: response.sessionToken, challenge: normalizeChallenge(response.challenge, this.baseUrl) };
+  }
+
+  async submitDecision(session: GameSession, decision: AssignmentClaim, previousAssignments: AssignmentClaim[]) {
+    return this.request<DecisionFeedback>(`/v1/games/${encodeURIComponent(session.id)}/decision`, { method: "POST", headers: { "Idempotency-Key": `rango90-decision-${session.id}-${decision.ordinal}` }, body: JSON.stringify({ sessionToken: session.sessionToken, decision, previousAssignments }) });
   }
 
   async submitResult(session: GameSession, assignments: AssignmentClaim[]) {
@@ -184,8 +202,10 @@ export function createGameRepository(): GameRepository {
     login: unavailable,
     register: unavailable,
     logout: unavailable,
+    getGoogleAuthStatus: unavailable,
     getDailyChallenge: unavailable,
     startGame: unavailable,
+    submitDecision: unavailable,
     submitResult: unavailable,
     expireGame: unavailable,
     getLeaderboard: unavailable,

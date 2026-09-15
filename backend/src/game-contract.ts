@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { pool } from './db.js';
 import { getCurrentUser } from './auth.js';
 import { MAX_GAME_RANKING_ENTRIES } from './catalogCleanup.js';
+import { selectDailyCategoryEntity, type DailyChallengeRankingEntry } from './dailyChallengeSelection.js';
 import {
   GameRuleError,
   buildOfficialGameResult,
@@ -85,6 +86,8 @@ type SessionRow = {
   deadline_at: Date | string;
   current_ordinal: number;
   state_version: number;
+  variant_sha256: string | null;
+  variant_decisions: unknown;
 };
 
 type StoredResult = { id: string; result_hash: string; payload: GameResult };
@@ -132,6 +135,20 @@ const resultClaimsSchema = z.object({
 });
 
 const sessionTokenSchema = z.string().min(20).max(200);
+
+const decisionRequestSchema = z.object({
+  sessionToken: sessionTokenSchema,
+  decision: resultAssignmentSchema,
+  previousAssignments: z.array(resultAssignmentSchema).max(7).default([])
+});
+
+const storedVariantDecisionSchema = z.object({
+  ordinal: z.number().int().nonnegative(),
+  entityId: z.string().min(1),
+  entityType: z.enum(['player', 'club', 'national_team']),
+  scoreByCategory: z.record(z.string(), z.number().int().positive())
+});
+const storedVariantSchema = z.array(storedVariantDecisionSchema).min(1).max(500);
 
 function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
@@ -341,6 +358,124 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
   };
 }
 
+type VariantEntryRow = DailyChallengeRankingEntry & {
+  canonicalName: string;
+  shortName: string | null;
+  entityType: GameEntityType;
+  imageUrl: string;
+  imageStatus: 'licensed' | 'unlicensed' | 'fallback';
+};
+
+async function buildDailyVariant(db: QueryExecutor, challenge: LoadedChallenge, selectionSeed: string): Promise<LoadedChallenge> {
+  if (challenge.kind !== 'daily') return challenge;
+  // Keep older test-only/mixed boards playable while the next seven-player
+  // daily snapshot is being materialized. New official daily boards use the
+  // independent player draw below.
+  if (challenge.categories.length !== 7 || challenge.categories.some((category) => category.entity_type !== 'player')) return challenge;
+  const snapshotIds = challenge.categories.map((category) => category.ranking_snapshot_id);
+  const entries = await db.query<VariantEntryRow>(
+    `SELECT DISTINCT ON (re.snapshot_id, canonical_entity.id)
+            re.snapshot_id AS "snapshotId", canonical_entity.id AS "entityId", re.rank, re.score_value AS "scoreValue",
+            canonical_entity.canonical_name AS "canonicalName", canonical_entity.short_name AS "shortName", canonical_entity.entity_type AS "entityType",
+            CASE
+              WHEN ia.id IS NOT NULL THEN '/v1/media/' || canonical_entity.id || '/file'
+              WHEN $3::boolean AND canonical_entity.metadata->>'provider' = 'api-football'
+                AND NULLIF(canonical_entity.metadata->>'photoUrl', '') IS NOT NULL
+                THEN canonical_entity.metadata->>'photoUrl'
+              ELSE '/v1/media/' || canonical_entity.id || '/fallback'
+            END AS "imageUrl",
+            CASE
+              WHEN ia.id IS NOT NULL THEN 'licensed'
+              WHEN $3::boolean AND canonical_entity.metadata->>'provider' = 'api-football'
+                AND NULLIF(canonical_entity.metadata->>'photoUrl', '') IS NOT NULL
+                THEN 'unlicensed'
+              ELSE 'fallback'
+            END AS "imageStatus"
+       FROM ranking_entries re
+       JOIN ranking_snapshots rs ON rs.id = re.snapshot_id AND rs.status <> 'superseded'
+       JOIN category_definitions category ON category.id = rs.category_id
+       LEFT JOIN entity_identity_links identity_link ON identity_link.source_entity_id = re.entity_id
+       JOIN entities canonical_entity ON canonical_entity.id = COALESCE(identity_link.canonical_entity_id, re.entity_id)
+       LEFT JOIN image_assets ia
+         ON ia.entity_id = canonical_entity.id
+        AND ia.asset_kind = 'portrait'
+        AND ia.is_primary = TRUE
+        AND ia.review_status = 'approved'
+        AND ia.rights_basis <> 'unknown'
+        AND ia.commercial_use = TRUE
+        AND ia.rights_verified_at IS NOT NULL
+        AND ia.rights_evidence_url IS NOT NULL
+        AND jsonb_array_length(ia.usage_scope) > 0
+        AND (ia.attribution_required = FALSE OR NULLIF(ia.attribution_text, '') IS NOT NULL)
+      WHERE re.snapshot_id = ANY($1::text[])
+        AND re.rank <= $2
+        AND canonical_entity.catalog_status = 'active'
+        AND canonical_entity.entity_type = category.entity_type
+        AND canonical_entity.entity_type = 'player'
+        AND EXISTS (
+          SELECT 1 FROM entity_game_profiles playable_profile
+           WHERE playable_profile.entity_id = canonical_entity.id
+             AND playable_profile.playable_default = TRUE
+        )
+      ORDER BY re.snapshot_id, canonical_entity.id, re.rank, re.entity_id`,
+    [snapshotIds, MAX_GAME_RANKING_ENTRIES, challenge.testOnly]
+  );
+  const selectedIds = new Set<string>();
+  const selected: VariantEntryRow[] = [];
+  for (const category of challenge.categories) {
+    const candidate = selectDailyCategoryEntity(entries.rows, category.ranking_snapshot_id, `${selectionSeed}|${category.slug}`, 90, selectedIds);
+    if (!candidate) throw new ContractError(503, 'daily_variant_unavailable', `No hay siete jugadores jugables disponibles para ${category.slug}`);
+    const row = entries.rows.find((entry) => entry.snapshotId === category.ranking_snapshot_id && entry.entityId === candidate.entityId);
+    if (!row) throw new ContractError(503, 'daily_variant_unavailable', 'No se pudo completar la variante diaria');
+    selectedIds.add(candidate.entityId);
+    selected.push(row);
+  }
+  const decisions = selected.map((entry, ordinal) => ({
+    ordinal,
+    entityId: entry.entityId,
+    entityType: entry.entityType,
+    scoreByCategory: Object.fromEntries(challenge.categories.map((category) => [
+      category.slug,
+      entries.rows.find((candidate) => candidate.entityId === entry.entityId && candidate.snapshotId === category.ranking_snapshot_id)?.scoreValue ?? challenge.scoreCap
+    ]))
+  }));
+  const challengeSha256 = calculateChallengeSha256({
+    id: challenge.id,
+    kind: challenge.kind,
+    challengeDate: challenge.challengeDate,
+    sourceVersion: challenge.sourceVersion,
+    engineVersion: challenge.engineVersion,
+    timeLimitSeconds: challenge.timeLimitSeconds,
+    scoreCap: challenge.scoreCap,
+    categories: challenge.categories.map((category) => ({ ordinal: category.category_ordinal, categoryId: category.category_id, rankingSnapshotId: category.ranking_snapshot_id, slug: category.slug, entityType: category.entity_type })),
+    decisions: decisions.map((decision) => ({ ordinal: decision.ordinal, entityId: decision.entityId, entityType: decision.entityType })),
+    answers: decisions.flatMap((decision) => challenge.categories.map((category) => ({ decisionOrdinal: decision.ordinal, categoryId: category.category_id, scoreValue: decision.scoreByCategory[category.slug] ?? challenge.scoreCap })))
+  });
+  const engine: PublishedGameChallenge = { ...challenge.engine, challengeSha256, decisions };
+  return {
+    ...challenge,
+    challengeSha256,
+    engine,
+    decisions: selected.map((entry, ordinal) => ({
+      decision_ordinal: ordinal,
+      entity_id: entry.entityId,
+      canonical_name: entry.canonicalName,
+      short_name: entry.shortName,
+      entity_type: entry.entityType,
+      image_url: entry.imageUrl,
+      image_status: entry.imageStatus
+    }))
+  };
+}
+
+function storedVariantChallenge(challenge: LoadedChallenge, session: SessionRow): LoadedChallenge {
+  if (!session.variant_sha256 || !session.variant_decisions) return challenge;
+  const stored = storedVariantSchema.parse(session.variant_decisions);
+  if (stored.length !== challenge.engine.decisions.length) throw new ContractError(503, 'daily_variant_invalid', 'La variante de la sesión no es válida');
+  const engine: PublishedGameChallenge = { ...challenge.engine, challengeSha256: session.variant_sha256, decisions: stored };
+  return { ...challenge, challengeSha256: session.variant_sha256, engine };
+}
+
 function publicChallenge(challenge: LoadedChallenge) {
   return {
     id: challenge.id,
@@ -404,7 +539,7 @@ function resultResponse(result: GameResult, resultId: string, status: 'accepted'
 
 async function getSession(db: QueryExecutor, gameId: string, token: string, forUpdate = false): Promise<SessionRow | null> {
   const result = await db.query<SessionRow>(
-    `SELECT id, game_challenge_id, player_id, status, started_at, deadline_at, current_ordinal, state_version
+    `SELECT id, game_challenge_id, player_id, status, started_at, deadline_at, current_ordinal, state_version, variant_sha256, variant_decisions
        FROM game_sessions
       WHERE id = $1 AND session_token_hash = $2
       ${forUpdate ? 'FOR UPDATE' : ''}`,
@@ -414,16 +549,17 @@ async function getSession(db: QueryExecutor, gameId: string, token: string, forU
 }
 
 async function createGameSession(db: QueryExecutor, challenge: LoadedChallenge, userId: string | null, startedAtMsValue: number, replayOfSessionId: string | null = null) {
+  const sessionChallenge = await buildDailyVariant(db, challenge, `${startedAtMsValue}|${randomBytes(16).toString('hex')}`);
   const id = `gs_${randomUUID()}`;
   const token = randomBytes(32).toString('base64url');
   const deadlineAtMsValue = startedAtMsValue + challenge.timeLimitSeconds * 1000;
   await db.query(
     `INSERT INTO game_sessions
-       (id, game_challenge_id, player_id, session_token_hash, started_at, deadline_at, replay_of_session_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-    [id, challenge.id, userId, hashToken(token), new Date(startedAtMsValue), new Date(deadlineAtMsValue), replayOfSessionId]
+       (id, game_challenge_id, player_id, session_token_hash, started_at, deadline_at, replay_of_session_id, variant_sha256, variant_decisions)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)`,
+    [id, challenge.id, userId, hashToken(token), new Date(startedAtMsValue), new Date(deadlineAtMsValue), replayOfSessionId, sessionChallenge.challengeSha256, JSON.stringify(sessionChallenge.engine.decisions)]
   );
-  return { id, token, startedAtMs: startedAtMsValue, deadlineAtMs: deadlineAtMsValue };
+  return { id, token, startedAtMs: startedAtMsValue, deadlineAtMs: deadlineAtMsValue, challenge: sessionChallenge };
 }
 
 function assertUserCanUseSession(session: SessionRow, userId: string | null): void {
@@ -439,6 +575,19 @@ function asSubmittedAssignments(value: z.infer<typeof resultClaimsSchema>): Subm
     categorySlug: assignment.categorySlug,
     ...(assignment.timedOut === undefined ? {} : { timedOut: assignment.timedOut })
   }));
+}
+
+function replayDecisionState(challenge: LoadedChallenge, session: SessionRow, previousAssignments: Array<z.infer<typeof resultAssignmentSchema>>): ReturnType<typeof startGame> {
+  let state = startGame(challenge.engine, epoch(session.started_at));
+  for (const assignment of previousAssignments.sort((left, right) => left.ordinal - right.ordinal)) {
+    if (assignment.timedOut) break;
+    state = submitDecision(challenge.engine, state, {
+      ordinal: assignment.ordinal,
+      entityId: assignment.entityId,
+      categorySlug: assignment.categorySlug
+    }, epoch(session.started_at));
+  }
+  return state;
 }
 
 function officialResultFromClaims(challenge: LoadedChallenge, sessionStartedAtMs: number, deadlineAtMs: number, claims: z.infer<typeof resultClaimsSchema>, serverNowMs: number): GameResult {
@@ -625,8 +774,56 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
     const session = await createGameSession(db, challenge, user?.id ?? null, startedAtMsValue);
     return reply.code(201).send({
       ...sessionResponse({ id: session.id, challengeId: challenge.id, status: 'active', startedAtMs: session.startedAtMs, deadlineAtMs: session.deadlineAtMs, currentOrdinal: 0 }, session.token),
-      challenge: publicChallenge(challenge)
+      challenge: publicChallenge(session.challenge)
     });
+  });
+
+  app.post('/v1/games/:gameId/decision', async (request, reply) => {
+    try {
+      const params = z.object({ gameId: z.string().min(1).max(200) }).parse(request.params);
+      const body = decisionRequestSchema.parse(request.body);
+      const user = await getCurrentUser(request);
+      const session = await getSession(db, params.gameId, body.sessionToken);
+      if (!session) return reply.code(404).send({ error: 'game_session_not_found' });
+      assertUserCanUseSession(session, user?.id ?? null);
+      const baseChallenge = await loadPublishedChallenge(db, session.game_challenge_id);
+      if (!baseChallenge) return reply.code(409).send({ error: 'challenge_unavailable' });
+      const challenge = storedVariantChallenge(baseChallenge, session);
+      const state = replayDecisionState(challenge, session, body.previousAssignments);
+      const next = submitDecision(challenge.engine, state, {
+        ordinal: body.decision.ordinal,
+        entityId: body.decision.entityId,
+        categorySlug: body.decision.categorySlug
+      }, nowMs(clock));
+      const assignment = next.assignments[next.assignments.length - 1];
+      if (!assignment) throw new ContractError(422, 'result_invalid', 'No se ha podido evaluar la jugada');
+      const decision = challenge.engine.decisions[body.decision.ordinal];
+      if (!decision) throw new ContractError(422, 'decision_order_invalid', 'La decisión no existe');
+      const bestCategory = challenge.engine.categories
+        .filter((category) => decision.scoreByCategory[category.slug] !== undefined)
+        .sort((left, right) => (decision.scoreByCategory[left.slug] ?? challenge.scoreCap) - (decision.scoreByCategory[right.slug] ?? challenge.scoreCap))[0];
+      const ranks = await db.query<{ slug: string; rank: number | string }>(
+        `SELECT cd.slug, MIN(re.rank)::int AS rank
+           FROM game_challenge_categories gcc
+           JOIN category_definitions cd ON cd.id = gcc.category_id
+           JOIN ranking_entries re ON re.snapshot_id = gcc.ranking_snapshot_id
+           LEFT JOIN entity_identity_links link ON link.source_entity_id = re.entity_id
+          WHERE gcc.game_challenge_id = $1
+            AND COALESCE(link.canonical_entity_id, re.entity_id) = $2
+          GROUP BY cd.slug`,
+        [challenge.id, body.decision.entityId]
+      );
+      const rankBySlug = new Map(ranks.rows.map((row) => [row.slug, Number(row.rank)]));
+      return {
+        assignment: { ordinal: assignment.ordinal, entityId: assignment.entityId, categorySlug: assignment.categorySlug, scoreValue: assignment.scoreValue },
+        selectedRank: rankBySlug.get(assignment.categorySlug) ?? null,
+        bestCategorySlug: bestCategory?.slug ?? assignment.categorySlug,
+        bestRank: bestCategory ? rankBySlug.get(bestCategory.slug) ?? null : null,
+        complete: next.phase === 'finished'
+      };
+    } catch (error) {
+      return mapContractError(error);
+    }
   });
 
   app.post('/v1/games/:gameId/result', async (request, reply) => {
@@ -637,13 +834,15 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
       const session = await getSession(db, params.gameId, body.sessionToken);
       if (!session) return reply.code(404).send({ error: 'game_session_not_found' });
       assertUserCanUseSession(session, user?.id ?? null);
-      const challenge = await loadPublishedChallenge(db, session.game_challenge_id);
-      if (!challenge) return reply.code(409).send({ error: 'challenge_unavailable' });
+      const baseChallenge = await loadPublishedChallenge(db, session.game_challenge_id);
+      if (!baseChallenge) return reply.code(409).send({ error: 'challenge_unavailable' });
+      const challenge = storedVariantChallenge(baseChallenge, session);
       const stored = await withTransaction(db, async (client) => {
         const lockedSession = await getSession(client, params.gameId, body.sessionToken, true);
         if (!lockedSession) throw new ContractError(404, 'game_session_not_found', 'Game session not found');
         assertUserCanUseSession(lockedSession, user?.id ?? null);
-        const result = officialResultFromClaims(challenge, epoch(lockedSession.started_at), epoch(lockedSession.deadline_at), body.result, nowMs(clock));
+        const lockedChallenge = storedVariantChallenge(baseChallenge, lockedSession);
+        const result = officialResultFromClaims(lockedChallenge, epoch(lockedSession.started_at), epoch(lockedSession.deadline_at), body.result, nowMs(clock));
         const persisted = await storeResult(client, challenge, result, {
           sessionId: lockedSession.id,
           playerId: user?.id ?? lockedSession.player_id,
@@ -674,8 +873,9 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
         const session = await getSession(client, params.gameId, body.sessionToken, true);
         if (!session) throw new ContractError(404, 'game_session_not_found', 'Game session not found');
         assertUserCanUseSession(session, user?.id ?? null);
-        const challenge = await loadPublishedChallenge(client, session.game_challenge_id);
-        if (!challenge) throw new ContractError(409, 'challenge_unavailable', 'Challenge is unavailable');
+        const baseChallenge = await loadPublishedChallenge(client, session.game_challenge_id);
+        if (!baseChallenge) throw new ContractError(409, 'challenge_unavailable', 'Challenge is unavailable');
+        const challenge = storedVariantChallenge(baseChallenge, session);
         const existing = await existingResult(client, 'game_session_id', session.id);
         if (existing) return { status: 'duplicate' as const, resultId: existing.id, result: existing.payload };
         let result: GameResult;
@@ -718,7 +918,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
     const session = await createGameSession(db, challenge, user?.id ?? oldSession.player_id, nowMs(clock), oldSession.id);
     return reply.code(201).send({
       ...sessionResponse({ id: session.id, challengeId: challenge.id, status: 'active', startedAtMs: session.startedAtMs, deadlineAtMs: session.deadlineAtMs, currentOrdinal: 0 }, session.token),
-      challenge: publicChallenge(challenge)
+      challenge: publicChallenge(session.challenge)
     });
   });
 

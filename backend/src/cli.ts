@@ -216,8 +216,8 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
       ...counts,
       [category.entity_type]: (counts[category.entity_type] ?? 0) + 1
     }), {});
-    if (categoryTypeCounts.player !== 5 || categoryTypeCounts.club !== 2 || (categoryTypeCounts.national_team ?? 0) !== 0) {
-      throw new Error(`La matriz diaria elegida requiere exactamente cinco categorías de jugadores y dos de equipos; recibido: ${JSON.stringify(categoryTypeCounts)}`);
+    if (categoryTypeCounts.player !== 7 || (categoryTypeCounts.club ?? 0) !== 0 || (categoryTypeCounts.national_team ?? 0) !== 0) {
+      throw new Error(`La matriz diaria elegida requiere exactamente siete categorías de jugadores; recibido: ${JSON.stringify(categoryTypeCounts)}`);
     }
     const incomplete = categories.filter((category) => {
       const minimumEntries = category.entity_type === 'player' || category.scope?.closedUniverse !== true

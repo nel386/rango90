@@ -226,10 +226,12 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
       return !category.coverage_complete || category.unresolved_conflicts > 0 || category.eligible_count < minimumEntries || category.score_cap !== 100;
     });
     const testBlocking = categories.filter((category) => {
-      const isExplicitPartialUefaTest = testOnly
-        && category.slug.startsWith('uefa-champions-league-')
-        && !category.coverage_complete;
-      const minimumEntries = isExplicitPartialUefaTest
+      // A test board may use a deliberately incomplete source, but only with
+      // real positive rows. Seven rows is the minimum useful pool for the
+      // seven independent category draws; production publication still uses
+      // the full 200-entry and coverage gates above.
+      const isExplicitPartialTest = testOnly && !category.coverage_complete;
+      const minimumEntries = isExplicitPartialTest
         ? 7
         : category.entity_type === 'player' || category.scope?.closedUniverse !== true
         ? MAX_GAME_RANKING_ENTRIES

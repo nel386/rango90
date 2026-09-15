@@ -48,6 +48,10 @@ jobs:
         working-directory: backend
         run: npm run seed
 
+      - name: Import real Champions League player rankings
+        working-directory: backend
+        run: npm run import:uefa-champions-league
+
       - name: Import real World Cup goals from a 200-row historical table
         working-directory: backend
         run: npm run import:world-cup:goals:transfermarkt
@@ -90,7 +94,7 @@ jobs:
 
       - name: Create test-only daily challenge with real data and fallback media
         working-directory: backend
-        run: npm run challenge:daily:test -- --date "$(date -u +%F)" --categories club-career-yellow-cards,club-career-red-cards,club-career-titles,world-cup-goals,player-career-goals,national-league-club-titles,european-cup-champions-league-club-titles --confirm-test
+        run: npm run challenge:daily:test -- --date "$(date -u +%F)" --categories club-career-yellow-cards,club-career-red-cards,club-career-titles,world-cup-goals,player-career-goals,uefa-champions-league-assists,uefa-champions-league-goals --confirm-test
 
       - name: Audit prepared production data
         continue-on-error: true

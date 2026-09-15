@@ -49,13 +49,21 @@ jobs:
         working-directory: backend
         run: npm run build:rankings:club-career-titles
 
+      - name: Refresh real Champions League player rankings
+        working-directory: backend
+        run: npm run import:uefa-champions-league -- --metric goals
+
+      - name: Refresh real Champions League assists ranking
+        working-directory: backend
+        run: npm run import:uefa-champions-league -- --metric assists
+
       - name: Recalculate game audience
         working-directory: backend
         run: npm run seed:game-audience -- --expand
 
       - name: Materialize test-only daily challenge
         working-directory: backend
-        run: npm run challenge:daily:test -- --date "$(date -u +%F)" --categories club-career-yellow-cards,club-career-red-cards,club-career-titles,world-cup-goals,player-career-goals,national-league-club-titles,european-cup-champions-league-club-titles --confirm-test
+        run: npm run challenge:daily:test -- --date "$(date -u +%F)" --categories club-career-yellow-cards,club-career-red-cards,club-career-titles,world-cup-goals,player-career-goals,uefa-champions-league-assists,uefa-champions-league-goals --confirm-test
 
       - name: Audit selected matrix
         continue-on-error: true

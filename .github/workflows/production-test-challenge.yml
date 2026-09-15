@@ -1,0 +1,63 @@
+name: Prepare Rango90 test challenge
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Escribe TEST para materializar el reto de prueba con los datos archivados'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rango90-production-test-challenge
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: ${{ inputs.confirm == 'TEST' }}
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.RANGO90_DATABASE_URL }}
+      DATABASE_SSL: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Verify private database credential exists
+        shell: bash
+        run: test -n "$DATABASE_URL"
+
+      - name: Refresh catalog scope
+        working-directory: backend
+        run: npm run seed
+
+      - name: Rebuild club career titles from archived real facts
+        working-directory: backend
+        run: npm run build:rankings:club-career-titles
+
+      - name: Recalculate game audience
+        working-directory: backend
+        run: npm run seed:game-audience -- --expand
+
+      - name: Materialize test-only daily challenge
+        working-directory: backend
+        run: npm run challenge:daily:test -- --date "$(date -u +%F)" --categories club-career-yellow-cards,club-career-red-cards,club-career-titles,world-cup-goals,player-career-goals,national-league-club-titles,european-cup-champions-league-club-titles --confirm-test
+
+      - name: Audit selected matrix
+        continue-on-error: true
+        working-directory: backend
+        run: npm run audit:7x7

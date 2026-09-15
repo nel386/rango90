@@ -1,0 +1,101 @@
+name: Prepare Rango90 production data
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Escribe PREPARE para ejecutar imports reales en Render'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rango90-production-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: ${{ inputs.confirm == 'PREPARE' }}
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.RANGO90_DATABASE_URL }}
+      DATABASE_SSL: 'true'
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      NODE_ENV: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Verify private credentials exist
+        shell: bash
+        run: |
+          test -n "$DATABASE_URL"
+          test -n "$API_FOOTBALL_KEY"
+
+      - name: Seed catalog
+        working-directory: backend
+        run: npm run seed
+
+      - name: Import real World Cup goals
+        working-directory: backend
+        run: npm run import:world-cup:goals
+
+      - name: Import UEFA Champions League club titles
+        working-directory: backend
+        run: npm run import:uefa-club-titles -- --competition champions
+
+      - name: Build national league titles from contrasted feeds
+        working-directory: backend
+        run: npm run build:national-league-club-titles:contrasted
+
+      - name: Build observed career card rankings
+        working-directory: backend
+        run: npm run build:rankings:api-football:career -- --from-season 2000 --to-season 2026 --metric yellow_cards,red_cards
+
+      - name: Expand the reviewed historical game audience
+        working-directory: backend
+        run: npm run seed:game-audience -- --expand
+
+      - name: Import real senior-national-team goals
+        working-directory: backend
+        run: npm run import:national-team-goals
+
+      - name: Build observed global career goals
+        working-directory: backend
+        run: npm run build:rankings:player-career-goals
+
+      - name: Import real player club-title evidence
+        working-directory: backend
+        run: npm run import:api-football:player-trophies -- --limit 400 --missing-only --delay-ms 150 --build-provisional
+
+      - name: Build observed club-title ranking
+        working-directory: backend
+        run: npm run build:rankings:club-career-titles
+
+      - name: Reapply historical audience exception for selected matrix
+        working-directory: backend
+        run: npm run seed:game-audience -- --expand
+
+      - name: Audit prepared production data
+        continue-on-error: true
+        working-directory: backend
+        run: npm run audit:7x7
+
+      - name: Verify no premature publication
+        working-directory: backend
+        run: |
+          test "$(psql "$DATABASE_URL" -Atc "SELECT COUNT(*) FROM ranking_snapshots WHERE status = 'published'")" = 0
+          test "$(psql "$DATABASE_URL" -Atc "SELECT COUNT(*) FROM game_challenges WHERE status = 'published'")" = 0

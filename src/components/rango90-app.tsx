@@ -709,7 +709,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
   }
 
   function renderNav() {
-    return <nav className="bottom-nav" aria-label={t("navigation.label")}>
+    return <nav className={`bottom-nav ${view === "game" ? "bottom-nav-game" : ""}`} aria-label={t("navigation.label")}>
       <button className={view === "home" || view === "game" || view === "result" ? "active" : ""} onClick={resetToHome} type="button"><span className="nav-mark">01</span>{t("navigation.home")}</button>
       <button className={view === "ranking" ? "active" : ""} onClick={openRanking} type="button"><span className="nav-mark">90</span>{t("navigation.ranking")}</button>
       <button className={view === "duels" ? "active" : ""} onClick={() => setView("duels")} type="button"><span className="nav-mark">VS</span>{t("navigation.duels")}</button>
@@ -797,5 +797,5 @@ return <section className="result-view" aria-labelledby="result-title"><div clas
     </>;
   }
 
-  return <main className="app-shell">{renderHeader()}{isOffline ? <div className="offline-banner" role="status">{t("offline.banner")}</div> : null}<div className="app-content">{challengeLoadState === "loading" && view !== "duels" ? renderChallengeLoading() : null}{challengeLoadState === "error" && view !== "duels" ? renderChallengeError() : null}{(challengeLoadState === "ready" || view === "duels") && view === "home" ? renderHome() : null}{(challengeLoadState === "ready" || view === "duels") && view === "game" ? renderGame() : null}{(challengeLoadState === "ready" || view === "duels") && view === "result" ? renderResult() : null}{(challengeLoadState === "ready" || view === "duels") && view === "ranking" ? renderRanking() : null}{(challengeLoadState === "ready" || view === "duels") && view === "duels" ? renderDuels() : null}{(challengeLoadState === "ready" || view === "duels") && view === "account" ? renderAccount() : null}</div>{renderNav()}{renderOverlays()}</main>;
+  return <main className={`app-shell ${view === "game" ? "app-shell-game" : ""}`}>{renderHeader()}{isOffline ? <div className="offline-banner" role="status">{t("offline.banner")}</div> : null}<div className="app-content">{challengeLoadState === "loading" && view !== "duels" ? renderChallengeLoading() : null}{challengeLoadState === "error" && view !== "duels" ? renderChallengeError() : null}{(challengeLoadState === "ready" || view === "duels") && view === "home" ? renderHome() : null}{(challengeLoadState === "ready" || view === "duels") && view === "game" ? renderGame() : null}{(challengeLoadState === "ready" || view === "duels") && view === "result" ? renderResult() : null}{(challengeLoadState === "ready" || view === "duels") && view === "ranking" ? renderRanking() : null}{(challengeLoadState === "ready" || view === "duels") && view === "duels" ? renderDuels() : null}{(challengeLoadState === "ready" || view === "duels") && view === "account" ? renderAccount() : null}</div>{renderNav()}{renderOverlays()}</main>;
 }

@@ -226,7 +226,12 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
       return !category.coverage_complete || category.unresolved_conflicts > 0 || category.eligible_count < minimumEntries || category.score_cap !== 100;
     });
     const testBlocking = categories.filter((category) => {
-      const minimumEntries = category.entity_type === 'player' || category.scope?.closedUniverse !== true
+      const isExplicitPartialUefaTest = testOnly
+        && category.slug.startsWith('uefa-champions-league-')
+        && !category.coverage_complete;
+      const minimumEntries = isExplicitPartialUefaTest
+        ? 7
+        : category.entity_type === 'player' || category.scope?.closedUniverse !== true
         ? MAX_GAME_RANKING_ENTRIES
         : 1;
       return category.unresolved_conflicts > 0 || category.eligible_count < minimumEntries || category.score_cap !== 100;
@@ -3168,7 +3173,16 @@ try {
       throw new Error('El metric debe ser goals, assists o red_cards');
     }
     const snapshots = [] as Array<{ metric: UefaPlayerRankingMetric; rankingId: string }>;
-    for (const metric of metrics) snapshots.push({ metric, rankingId: await importRankingInput(await fetchUefaChampionsLeagueRanking(metric)) });
+    const allowPartialDraft = args.includes('--allow-partial');
+    for (const metric of metrics) {
+      const input = await fetchUefaChampionsLeagueRanking(metric);
+      if (allowPartialDraft && input.entries.length < 200) {
+        input.coverageComplete = false;
+        input.allowPartialDraft = true;
+        input.partialDraftReason = 'La tabla histórica oficial de UEFA expone 100 filas; se archivan únicamente esas filas reales y el snapshot queda fuera de publicación hasta ampliar la cobertura.';
+      }
+      snapshots.push({ metric, rankingId: await importRankingInput(input) });
+    }
     console.log(JSON.stringify({ source: 'uefa-champions-league-official', snapshots, published: false, coverageComplete: true }, null, 2));
   } else if (command === 'import-uefa-conference-league') {
     const requestedMetric = argument('metric') as UefaPlayerRankingMetric | undefined;

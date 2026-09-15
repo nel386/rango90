@@ -178,7 +178,8 @@ async function verifySnapshotRankingEntries(client: Pick<PoolClient, 'query'>, s
   }
 }
 
-async function materializeDailyGameChallenge(date: string, categorySlugs: string[], publish: boolean): Promise<{ challengeId: string; snapshotIds: string[]; decisionIds: string[] }> {
+async function materializeDailyGameChallenge(date: string, categorySlugs: string[], publish: boolean, options: { testOnly?: boolean } = {}): Promise<{ challengeId: string; snapshotIds: string[]; decisionIds: string[] }> {
+  const testOnly = options.testOnly === true;
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -224,8 +225,15 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
         : 1;
       return !category.coverage_complete || category.unresolved_conflicts > 0 || category.eligible_count < minimumEntries || category.score_cap !== 100;
     });
-    if (incomplete.length > 0) {
-      throw new Error(`Las categorías no cumplen su tamaño mínimo de universo, cobertura completa, conflictos resueltos y scoreCap=100: ${incomplete.map((category) => category.slug).join(', ')}`);
+    const testBlocking = categories.filter((category) => {
+      const minimumEntries = category.entity_type === 'player' || category.scope?.closedUniverse !== true
+        ? MAX_GAME_RANKING_ENTRIES
+        : 1;
+      return category.unresolved_conflicts > 0 || category.eligible_count < minimumEntries || category.score_cap !== 100;
+    });
+    if ((!testOnly && incomplete.length > 0) || (testOnly && testBlocking.length > 0)) {
+      const blockingCategories = testOnly ? testBlocking : incomplete;
+      throw new Error(`Las categorías no cumplen su tamaño mínimo de universo, cobertura completa, conflictos resueltos y scoreCap=100: ${blockingCategories.map((category) => category.slug).join(', ')}`);
     }
     if (publish && categories.some((category) => !['approved', 'published'].includes(category.category_status) || category.snapshot_status !== 'published' || category.source_rights_status !== 'approved')) {
       throw new Error('La publicación requiere categorías aprobadas, snapshots publicados y fuentes con derechos approved');
@@ -309,7 +317,7 @@ async function materializeDailyGameChallenge(date: string, categorySlugs: string
          engine_version = EXCLUDED.engine_version, time_limit_seconds = EXCLUDED.time_limit_seconds,
          score_cap = EXCLUDED.score_cap, challenge_sha256 = EXCLUDED.challenge_sha256,
          published_at = NULL, retired_at = NULL, metadata = EXCLUDED.metadata, updated_at = NOW()`,
-      [challengeId, date, sourceVersion, challengeSha256, JSON.stringify({ materialization: 'daily-multicategory-v5-independent-category-draw', categories: categorySlugs, snapshotIds, decisionCount: decisions.length, entityTypes: [...new Set(categories.map((category) => category.entity_type))], candidateRankLimit: DAILY_CHALLENGE_CANDIDATE_RANK, selection: 'deterministic-shuffle-v3', selectionSeed: challengeSeed, commonWithinEntityType: false, absentCompatibleCategoryScore: 'score_cap' })]
+      [challengeId, date, sourceVersion, challengeSha256, JSON.stringify({ materialization: 'daily-multicategory-v5-independent-category-draw', categories: categorySlugs, snapshotIds, decisionCount: decisions.length, entityTypes: [...new Set(categories.map((category) => category.entity_type))], candidateRankLimit: DAILY_CHALLENGE_CANDIDATE_RANK, selection: 'deterministic-shuffle-v3', selectionSeed: challengeSeed, commonWithinEntityType: false, absentCompatibleCategoryScore: 'score_cap', testOnly, testException: testOnly ? 'coverage_and_source_rights_review_pending; real_rows_and_fallback_media_only' : null })]
     );
     await client.query('DELETE FROM game_challenge_answers WHERE game_challenge_id = $1', [challengeId]);
     await client.query('DELETE FROM game_challenge_decisions WHERE game_challenge_id = $1', [challengeId]);
@@ -7556,6 +7564,12 @@ try {
     if (!date || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date)) throw new Error('Falta --date YYYY-MM-DD');
     const result = await materializeDailyGameChallenge(date, parseDailyChallengeCategories(), false);
     console.log(JSON.stringify({ ...result, status: 'draft', reason: 'rights_and_publication_review_required' }, null, 2));
+  } else if (command === 'create-daily-test') {
+    const date = argument('date');
+    if (!date || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date)) throw new Error('Falta --date YYYY-MM-DD');
+    if (!args.includes('--confirm-test')) throw new Error('El modo de prueba requiere --confirm-test');
+    const result = await materializeDailyGameChallenge(date, parseDailyChallengeCategories(), false, { testOnly: true });
+    console.log(JSON.stringify({ ...result, status: 'draft', testOnly: true, reason: 'test_only_real_data_with_fallback_media' }, null, 2));
   } else if (command === '__legacy_create_daily_draft_disabled__') {
     const date = argument('date');
     const categorySlug = argument('category');

@@ -88,6 +88,10 @@ jobs:
         working-directory: backend
         run: npm run seed:game-audience -- --expand
 
+      - name: Create test-only daily challenge with real data and fallback media
+        working-directory: backend
+        run: npm run challenge:daily:test -- --date "$(date -u +%F)" --categories club-career-yellow-cards,club-career-red-cards,club-career-titles,world-cup-goals,player-career-goals,national-league-club-titles,european-cup-champions-league-club-titles --confirm-test
+
       - name: Audit prepared production data
         continue-on-error: true
         working-directory: backend

@@ -229,6 +229,7 @@
     "media:player-license-requests": "tsx src/cli-player-license-requests.ts",
     "enrich:wikidata:birth-dates": "tsx src/tools/enrich-wikidata-birth-dates.ts",
     "challenge:daily": "tsx src/cli.ts create-daily",
+    "challenge:daily:test": "tsx src/cli.ts create-daily-test",
     "challenge:daily:draft": "tsx src/cli.ts create-daily-draft",
     "seed:integration": "tsx src/integration-seed.ts"
   },

@@ -70,6 +70,7 @@ type LoadedChallenge = {
   timeLimitSeconds: number;
   scoreCap: number;
   challengeSha256: string;
+  testOnly: boolean;
   engine: PublishedGameChallenge;
   categories: readonly ChallengeCategoryRow[];
   decisions: readonly ChallengeDecisionRow[];
@@ -169,11 +170,13 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
     time_limit_seconds: number | string;
     score_cap: number | string;
     challenge_sha256: string;
+    test_only: boolean;
   }>(
     `SELECT id, challenge_kind, challenge_date, source_version, engine_version,
-            time_limit_seconds, score_cap, challenge_sha256
+            time_limit_seconds, score_cap, challenge_sha256,
+            (status = 'draft' AND metadata->>'testOnly' = 'true') AS test_only
        FROM game_challenges
-      WHERE status = 'published'
+      WHERE (status = 'published' OR (status = 'draft' AND metadata->>'testOnly' = 'true'))
         AND ($1::text IS NULL OR id = $1)
         AND ($2::text IS NULL OR challenge_kind = $2)
         AND NOT EXISTS (
@@ -205,7 +208,8 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
                       AND COALESCE(ranked_identity.canonical_entity_id, ranked_entry.entity_id) = decision_entity.id
                   ))
         )
-      ORDER BY challenge_date DESC NULLS LAST, published_at DESC NULLS LAST, id
+      ORDER BY (status = 'published') DESC, challenge_date DESC NULLS LAST,
+               published_at DESC NULLS LAST, id
       LIMIT 1`,
     [challengeId ?? null, kind ?? null]
   );
@@ -319,6 +323,7 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
     timeLimitSeconds: engine.timeLimitSeconds,
     scoreCap: engine.scoreCap,
     challengeSha256: row.challenge_sha256,
+    testOnly: row.test_only,
     engine,
     categories,
     decisions: decisionsResult.rows
@@ -335,6 +340,7 @@ function publicChallenge(challenge: LoadedChallenge) {
     engineVersion: challenge.engineVersion,
     timeLimitSeconds: challenge.timeLimitSeconds,
     scoreCap: challenge.scoreCap,
+    testOnly: challenge.testOnly,
     decisionCount: challenge.decisions.length,
     categories: challenge.categories.map((category) => ({
       ordinal: category.category_ordinal,

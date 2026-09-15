@@ -45,6 +45,7 @@ export interface GameRepository {
 
 type ApiChallenge = {
   id: string; kind: "daily" | "weekly" | "duel"; challengeDate: string | null; sourceVersion: string; challengeSha256: string; engineVersion: string; timeLimitSeconds: number; scoreCap: number;
+  testOnly?: boolean;
   categories: Array<{ ordinal: number; id: string; rankingSnapshotId: string; slug: string; entityType?: string; labelEs: string; labelEn: string }>;
   decisions: Array<{ ordinal: number; entityId: string; name: string; shortName: string | null; entityType: string; imageUrl?: string; imageStatus?: "licensed" | "fallback" }>;
 };
@@ -62,7 +63,9 @@ function normalizeChallenge(raw: ApiChallenge, baseUrl = ""): MockChallenge {
   return {
     id: raw.id, kind: raw.kind === "duel" ? "duel" : "daily",
     title: { es: raw.challengeDate ? `Reto diario · ${raw.challengeDate}` : "Reto publicado", en: raw.challengeDate ? `Daily challenge · ${raw.challengeDate}` : "Published challenge" },
-    subtitle: { es: "Una combinación publicada y auditada.", en: "A published and audited combination." },
+    subtitle: raw.testOnly
+      ? { es: "Modo de prueba con datos reales y fallback visual.", en: "Test mode with real data and fallback visuals." }
+      : { es: "Una combinación publicada y auditada.", en: "A published and audited combination." },
     entityType: raw.decisions[0]?.entityType === "club" || raw.decisions[0]?.entityType === "national_team" ? raw.decisions[0].entityType : "player",
     timeLimitSeconds: raw.timeLimitSeconds, qualificationScore: 250, scoreCap: raw.scoreCap, sourceVersion: raw.sourceVersion, challengeSha256: raw.challengeSha256, engineVersion: raw.engineVersion, difficulty: "balanced",
     categories: raw.categories.map((category) => ({ slug: category.slug, code: category.slug.slice(0, 2).toUpperCase(), id: category.id, ordinal: category.ordinal, entityType: category.entityType === "club" || category.entityType === "national_team" ? category.entityType : "player", label: { es: category.labelEs, en: category.labelEn }, definition: { es: "Ranking publicado para este reto.", en: "Published ranking for this challenge." } })),

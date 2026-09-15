@@ -48,6 +48,10 @@ jobs:
         working-directory: backend
         run: npm run seed
 
+      - name: Remove non-positive ranking padding
+        working-directory: backend
+        run: npm run cleanup:ranking-padding -- --apply
+
       - name: Archive real Champions League goals ranking
         working-directory: backend
         run: npm run import:uefa-champions-league -- --metric goals --allow-partial

@@ -45,6 +45,10 @@ jobs:
         working-directory: backend
         run: npm run seed
 
+      - name: Remove non-positive ranking padding
+        working-directory: backend
+        run: npm run cleanup:ranking-padding -- --apply
+
       - name: Rebuild club career titles from archived real facts
         working-directory: backend
         run: npm run build:rankings:club-career-titles

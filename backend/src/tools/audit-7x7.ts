@@ -19,6 +19,12 @@ type SnapshotRow = {
   score_cap: number;
 };
 
+type CategoryDefinitionRow = {
+  slug: string;
+  category_status: string;
+  entity_type: 'player' | 'club' | 'national_team';
+};
+
 type RankingEntryRow = {
   snapshot_id: string;
   entity_id: string;
@@ -77,6 +83,12 @@ function intersectSets(sets: ReadonlySet<string>[]): Set<string> {
 }
 
 try {
+  const categoryDefinitions = await pool.query<CategoryDefinitionRow>(
+    `SELECT slug, status AS category_status, entity_type
+       FROM category_definitions
+      WHERE status <> 'retired'
+      ORDER BY slug`
+  );
   const snapshotRows = await pool.query<SnapshotRow>(
       `SELECT DISTINCT ON (c.id)
             c.id AS category_id, c.slug, c.status AS category_status,
@@ -187,6 +199,8 @@ try {
     : { rows: [] as SnapshotIntegrityRow[] };
 
   const integrityBySnapshot = new Map(integrity.rows.map((row) => [row.snapshot_id, row]));
+  const snapshotSlugs = new Set(snapshotRows.rows.map((row) => row.slug));
+  const missingSnapshotCategories = categoryDefinitions.rows.filter((category) => !snapshotSlugs.has(category.slug));
 
   const bySnapshot = new Map<string, Map<string, number>>();
   for (const entry of entries.rows) {
@@ -356,6 +370,12 @@ try {
       requiresCoverageComplete: true,
       requiresZeroConflicts: true,
       requiresPlayableCanonicalPlayers: true
+    },
+    catalogReview: {
+      nonRetiredCategoryDefinitions: categoryDefinitions.rows.length,
+      categoriesWithCurrentSnapshot: snapshotRows.rows.length,
+      categoriesMissingCurrentSnapshot: missingSnapshotCategories.length,
+      missingSnapshotCategories
     },
     activeCategoriesByEntityType: Object.fromEntries([...candidatesByEntityType.entries()].map(([entityType, group]) => [entityType, group.length])),
     individuallyEligibleCategories: candidates.map((category) => ({ slug: category.slug, snapshotId: category.snapshotId })),

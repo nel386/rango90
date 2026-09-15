@@ -71,7 +71,7 @@ function resolveApiAssetUrl(baseUrl: string, path?: string): string | undefined 
 function normalizeChallenge(raw: ApiChallenge, baseUrl = ""): MockChallenge {
   return {
     id: raw.id, kind: raw.kind === "duel" ? "duel" : "daily",
-    title: { es: raw.challengeDate ? `Reto diario · ${raw.challengeDate}` : "Reto publicado", en: raw.challengeDate ? `Daily challenge · ${raw.challengeDate}` : "Published challenge" },
+    title: { es: "Reto diario", en: "Daily challenge" },
     subtitle: raw.testOnly
       ? { es: "Modo de prueba con datos reales y fallback visual.", en: "Test mode with real data and fallback visuals." }
       : { es: "Una combinación publicada y auditada.", en: "A published and audited combination." },

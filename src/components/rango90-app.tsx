@@ -352,7 +352,11 @@ export function Rango90App({ locale }: { locale: Locale }) {
     setChallengeLoadState("loading");
     setRepositoryError(null);
     try {
-      const loadedChallenge = await gameRepository.getDailyChallenge();
+      // The home screen already preloads the daily challenge. Reusing it avoids
+      // a second sequential request before the session can start.
+      const loadedChallenge = challengeLoadState === "ready"
+        ? challenge
+        : await gameRepository.getDailyChallenge();
       const startedSession = await gameRepository.startGame(loadedChallenge.id);
       setChallenge(startedSession.challenge);
       setGameMode("daily");

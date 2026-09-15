@@ -58,7 +58,35 @@ const daily = await request(`${apiOrigin}/v1/challenges/daily`);
 assert(daily.response.status === 200 || daily.response.status === 404, `Reto diario: HTTP ${daily.response.status}`);
 const dailyBody = JSON.parse(daily.body);
 if (daily.response.status === 200) {
-  assert(dailyBody.id && dailyBody.kind === "daily", "Reto diario publicado: contrato inválido");
+  const challenge = dailyBody.challenge;
+  assert(challenge?.id && challenge.kind === "daily", "Reto diario: contrato inválido");
+  assert(Array.isArray(challenge.categories) && challenge.categories.length > 0, "Reto diario: faltan categorías");
+  assert(Array.isArray(challenge.decisions) && challenge.decisions.length === challenge.decisionCount, "Reto diario: faltan decisiones");
+
+  const game = await request(`${apiOrigin}/v1/games`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ challengeId: challenge.id }),
+  });
+  assert(game.response.status === 201, `Partida: HTTP ${game.response.status}`);
+  const gameBody = JSON.parse(game.body);
+  assert(gameBody.game?.id && gameBody.sessionToken, "Partida: sesión inválida");
+
+  const usedCategories = new Set();
+  const assignments = challenge.decisions.map((decision) => {
+    const category = challenge.categories.find((candidate) => candidate.entityType === decision.entityType && !usedCategories.has(candidate.slug));
+    assert(category, `Partida: no hay categoría compatible para ${decision.entityType}`);
+    usedCategories.add(category.slug);
+    return { ordinal: decision.ordinal, entityId: decision.entityId, categorySlug: category.slug };
+  });
+  const result = await request(`${apiOrigin}/v1/games/${encodeURIComponent(gameBody.game.id)}/result`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Idempotency-Key": `smoke-public-${Date.now()}` },
+    body: JSON.stringify({ sessionToken: gameBody.sessionToken, result: { assignments } }),
+  });
+  assert(result.response.status === 200, `Resultado: HTTP ${result.response.status}`);
+  const resultBody = JSON.parse(result.body);
+  assert(resultBody.accepted === true && resultBody.result?.assignments?.length === challenge.decisionCount, "Resultado: no aceptado");
 } else {
   assert(dailyBody.error === "daily_challenge_not_found", "Reto diario ausente: error inesperado");
 }
@@ -67,5 +95,5 @@ console.log(JSON.stringify({
   ok: true,
   pages: { es: pages[0].response.status, en: pages[1].response.status },
   api: { health: health.response.status, cors: cors.response.status, categories: categories.response.status, daily: daily.response.status },
-  dailyState: daily.response.status === 200 ? "published" : "not_published_yet",
+  dailyState: daily.response.status === 200 ? (dailyBody.challenge.testOnly ? "test_only" : "published") : "not_published_yet",
 }, null, 2));

@@ -59,7 +59,7 @@ function parseSeasonStartYear(seasonLabel: string): number {
   return year;
 }
 
-function parseDateLine(line: string, seasonStartYear: number): { month: number; day: number; year?: number } | null {
+function parseDateLine(line: string): { month: number; day: number; year?: number } | null {
   const match = line.trim().match(/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+([A-Z][a-z]{2})\s+(\d{1,2})(?:\s+(\d{4}))?$/);
   const numericMatch = line.trim().match(/^(\d{1,2})\.(\d{1,2})\.?$/);
   if (!match && !numericMatch) return null;
@@ -111,7 +111,7 @@ export function parseFootballTxtResults(text: string, seasonLabel: string): Open
 
   for (const [lineNumber, rawLine] of text.split(/\r?\n/).entries()) {
     const line = rawLine.trimEnd();
-    const date = parseDateLine(line, seasonStartYear);
+    const date = parseDateLine(line);
     if (date) {
       currentDate = date;
       continue;

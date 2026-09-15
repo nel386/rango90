@@ -2098,15 +2098,12 @@ try {
          SELECT DISTINCT ON (source_entity_id) source_entity_id, canonical_entity_id
            FROM identity_walk
           ORDER BY source_entity_id, cardinality(path) DESC
-       ), playable_players AS (
+       ), active_catalog_players AS (
          SELECT DISTINCT COALESCE(link.canonical_entity_id, source_entity.id) AS entity_id
-           FROM entity_game_profiles egp
-           JOIN entities source_entity
-             ON source_entity.id = egp.entity_id
-            AND source_entity.entity_type = 'player'
-            AND source_entity.catalog_status = 'active'
+           FROM entities source_entity
            LEFT JOIN resolved_identity link ON link.source_entity_id = source_entity.id
-          WHERE egp.playable_default = TRUE
+          WHERE source_entity.entity_type = 'player'
+            AND source_entity.catalog_status = 'active'
        ), club_totals AS (
          SELECT COALESCE(link.canonical_entity_id, stats.entity_id) AS entity_id,
                 SUM(stats.goals)::numeric AS club_goals,
@@ -2144,7 +2141,7 @@ try {
               COALESCE(national.national_source_entities, '0') AS national_source_entities,
               national.national_min_goals::text AS national_min_goals,
               national.national_max_goals::text AS national_max_goals
-         FROM playable_players playable
+         FROM active_catalog_players playable
          JOIN entities entity
            ON entity.id = playable.entity_id
           AND entity.entity_type = 'player'
@@ -2155,7 +2152,7 @@ try {
       [selectedNationalSnapshot.id]
     );
     const build = buildPlayerCareerGoalsRanking(rows.rows);
-    if (build.entries.length < 200) throw new Error(`Se necesitan 200 jugadores jugables con goles observados; disponibles ${build.entries.length}`);
+    if (build.entries.length < 200) throw new Error(`Se necesitan 200 jugadores activos con goles observados; disponibles ${build.entries.length}`);
     const rankingId = await importRankingInput({
       categorySlug,
       source: {

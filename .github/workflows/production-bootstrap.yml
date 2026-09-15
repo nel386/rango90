@@ -48,9 +48,12 @@ jobs:
         working-directory: backend
         run: npm run seed
 
-      - name: Import real Champions League player rankings
+      - name: Import real Champions League goals and assists rankings
         working-directory: backend
-        run: npm run import:uefa-champions-league
+        run: npm run import:statbunker:champions-league -- --metric goals
+      - name: Import real Champions League assists ranking
+        working-directory: backend
+        run: npm run import:statbunker:champions-league -- --metric assists
 
       - name: Import real World Cup goals from a 200-row historical table
         working-directory: backend

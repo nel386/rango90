@@ -49,13 +49,13 @@ jobs:
         working-directory: backend
         run: npm run build:rankings:club-career-titles
 
-      - name: Refresh real Champions League player rankings
+      - name: Refresh real Champions League goals ranking
         working-directory: backend
-        run: npm run import:uefa-champions-league -- --metric goals
+        run: npm run import:statbunker:champions-league -- --metric goals
 
       - name: Refresh real Champions League assists ranking
         working-directory: backend
-        run: npm run import:uefa-champions-league -- --metric assists
+        run: npm run import:statbunker:champions-league -- --metric assists
 
       - name: Recalculate game audience
         working-directory: backend

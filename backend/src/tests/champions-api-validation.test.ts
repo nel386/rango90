@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import { buildLiveValidation, pendingChampionsApiValidation, stableJson } from '../championsApiValidation.js';
+
+const pending = pendingChampionsApiValidation({ baselineSnapshotId: 'rs_test', baselineContentSha256: 'd'.repeat(64) });
+const query = { endpoint: '/leagues?id=2', httpStatus: 200, ok: true, resultCount: 1, errorCount: 0, responseSha256: 'e'.repeat(64), dailyLimit: 100, dailyRemaining: 99, minuteLimit: 10, minuteRemaining: 9, seasons: [2000, 2025], players: [], errorCode: null };
+const live = buildLiveValidation({ queries: [query], baselineSnapshotId: 'rs_test', baselineContentSha256: 'd'.repeat(64) });
+assert.equal(pending.credential.source, 'API_FOOTBALL_KEY');
+assert.equal(pending.credential.persisted, false);
+assert.equal(pending.credential.printed, false);
+assert.equal(pending.networkRequests, 0);
+assert.equal(pending.readyForApproval, false);
+assert.equal(live.limits.dailyLimit, 100);
+assert.equal(live.limits.dailyRemaining, 99);
+assert.equal(live.plan.status, 'observed_quota_only');
+assert.equal(live.historicalWindowAssessment, 'not_sufficient_for_v2');
+assert.equal(live.fullRankingReconstruction, 'not_proven');
+assert.equal(live.rawResponsesStored, false);
+assert.equal(live.imagesQueried, false);
+assert.equal(live.mutationCount, 0);
+assert.equal(stableJson(pending), stableJson(pendingChampionsApiValidation({ baselineSnapshotId: 'rs_test', baselineContentSha256: 'd'.repeat(64) })));
+console.log('champions API validation tests passed');

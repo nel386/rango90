@@ -1,0 +1,80 @@
+{
+  "artifactKind": "champions_api_validation",
+  "reportVersion": "1",
+  "reviewDate": "2026-09-16",
+  "provider": "API-Football / API-Sports",
+  "competition": {
+    "leagueId": 2,
+    "slug": "uefa-champions-league",
+    "onlyCompetitionQueried": true
+  },
+  "credential": {
+    "source": "API_FOOTBALL_KEY",
+    "present": false,
+    "persisted": false,
+    "printed": false
+  },
+  "status": "integration_pending",
+  "reason": "API_FOOTBALL_KEY no está presente; no se ejecutaron llamadas de red.",
+  "networkRequests": 0,
+  "databaseAccess": "none",
+  "mutationCount": 0,
+  "queries": [],
+  "seasonsAvailable": [],
+  "historicalWindowAssessment": "not_run",
+  "topScorersAvailability": "not_run",
+  "fullRankingReconstruction": "not_run",
+  "limits": {
+    "dailyLimit": null,
+    "dailyRemaining": null,
+    "minuteLimit": null,
+    "minuteRemaining": null,
+    "source": "not_observed"
+  },
+  "plan": {
+    "status": "not_verified",
+    "name": null,
+    "evidence": "El plan solo puede verificarse con el dashboard o contrato de la cuenta; la API key no se persiste ni revela el plan contractual."
+  },
+  "documentationEvidence": [
+    {
+      "topic": "terms",
+      "url": "https://www.api-football.com/terms"
+    },
+    {
+      "topic": "pricing",
+      "url": "https://www.api-football.com/pricing"
+    },
+    {
+      "topic": "rate_limits",
+      "url": "https://www.api-football.com/news/post/how-ratelimit-works"
+    },
+    {
+      "topic": "leagues_endpoint",
+      "url": "https://www.api-football.com/documentation-v3#tag/Leagues/operation/get-leagues"
+    },
+    {
+      "topic": "top_scorers_endpoint",
+      "url": "https://www.api-football.com/documentation-v3#tag/Players/operation/get-players-topscorers"
+    }
+  ],
+  "rights": {
+    "dataStorage": "public_terms_claim_storage_allowed_but_contract_required",
+    "derivedRankings": "not_authorized",
+    "attribution": "must_confirm_in_contract",
+    "commercialRestrictions": "third_party_rights_and_no_competition_rights_granted",
+    "images": "not_authorized_by_api_access"
+  },
+  "comparison": {
+    "baselineSnapshotId": "rs_870f1dff967bb160f2d132cc",
+    "baselineContentSha256": "870f1dff967bb160f2d132cc7d9ca1f2483b26d32681e6a55985efc744cc718b",
+    "mode": "differences_only",
+    "differences": []
+  },
+  "rawResponsesStored": false,
+  "imagesQueried": false,
+  "importPerformed": false,
+  "snapshotCreated": false,
+  "readyForApproval": false,
+  "sha256": "45192ce0dac078a56b05361eb722a6d4d2d8c51da6f0c396bfc22868529a6810"
+}

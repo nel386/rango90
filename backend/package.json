@@ -204,6 +204,7 @@
     "audit:7x7": "tsx src/tools/audit-7x7.ts",
     "audit:ranking-truth": "tsx src/tools/audit-ranking-truth.ts",
     "audit:playable-media": "tsx src/tools/audit-playable-media.ts",
+    "audit:official-candidates": "tsx src/tools/audit-official-candidates.ts",
     "validate:priority-rankings": "tsx src/tools/validate-priority-rankings.ts",
     "build:ranking-scope-decisions": "tsx src/tools/build-ranking-scope-decisions.ts",
     "audit:national-league-club-titles": "tsx src/tools/audit-national-league-club-titles.ts",

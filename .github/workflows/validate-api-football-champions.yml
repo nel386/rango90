@@ -1,0 +1,78 @@
+name: Validate API-Football Champions access
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-api-football-champions
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install backend dependencies without lifecycle mutations
+        run: npm ci --prefix backend --ignore-scripts
+
+      - name: Validate Champions API access
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          test -n "$API_FOOTBALL_KEY" || {
+            echo "Repository secret API_FOOTBALL_KEY is missing." >&2
+            exit 1
+          }
+          npm --prefix backend run validate:api-football:champions
+
+      - name: Verify reports contain no credential material
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          test -n "$API_FOOTBALL_KEY"
+          if rg --fixed-strings -- "$API_FOOTBALL_KEY" \
+            backend/audits/block7e/champions-api-validation.json \
+            backend/audits/block7e/champions-api-validation.md >/dev/null 2>&1; then
+            echo "The generated reports contain credential material." >&2
+            exit 1
+          fi
+
+      - name: Write redacted validation summary
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const report = JSON.parse(fs.readFileSync('backend/audits/block7e/champions-api-validation.json', 'utf8'));
+          const lines = [
+            '# API-Football Champions validation',
+            '',
+            `- Estado: **${report.status}**`,
+            `- Peticiones realizadas: **${report.networkRequests}**`,
+            `- Temporadas observadas: **${report.seasonsAvailable.length}**`,
+            `- Cobertura histórica: **${report.historicalWindowAssessment}**`,
+            `- Goleadores: **${report.topScorersAvailability}**`,
+            `- Reconstrucción completa: **${report.fullRankingReconstruction}**`,
+            `- Cuota diaria observada: **${report.limits.dailyLimit ?? 'no observada'}**`,
+            `- Peticiones diarias restantes: **${report.limits.dailyRemaining ?? 'no observadas'}**`,
+            `- Límite por minuto observado: **${report.limits.minuteLimit ?? 'no observado'}**`,
+            `- Peticiones restantes este minuto: **${report.limits.minuteRemaining ?? 'no observadas'}**`,
+            `- Plan: **${report.plan.status}**`,
+            `- readyForApproval: **${report.readyForApproval}**`,
+            '',
+            'La clave no se incluye en logs ni artefactos. No se ejecutaron migraciones, seeds, imports, aprobaciones ni despliegues.'
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`);
+          NODE
+
+      - name: Upload only redacted reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: champions-api-validation-${{ github.run_id }}
+          if-no-files-found: error
+          path: |
+            backend/audits/block7e/champions-api-validation.json
+            backend/audits/block7e/champions-api-validation.md

@@ -7,6 +7,7 @@ import { getCurrentUser } from './auth.js';
 import { MAX_GAME_RANKING_ENTRIES } from './catalogCleanup.js';
 import { selectDailyCategoryEntity, type DailyChallengeRankingEntry } from './dailyChallengeSelection.js';
 import { officialNotReadyDetails, validateOfficialChallenge, type OfficialCategoryCheck, type PublicationBlocker } from './publicationGuard.js';
+import { readHistoricalScope } from './championsHistoricalSourcePolicy.js';
 import { type RuntimeMode } from './runtimeMode.js';
 import {
   GameRuleError,
@@ -53,6 +54,8 @@ type ChallengeCategoryRow = {
   score_mismatches?: number;
   image_policy_required?: boolean;
   non_publishable_images?: number;
+  category_scope?: unknown;
+  snapshot_metadata?: unknown;
 };
 
 type ChallengeDecisionRow = {
@@ -255,6 +258,10 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
             rs.status AS snapshot_status,
             rs.coverage_complete,
             rs.unresolved_conflicts,
+            cd.scope AS category_scope,
+            rs.metadata AS snapshot_metadata,
+            cd.scope AS category_scope,
+            rs.metadata AS snapshot_metadata,
             COALESCE(source.rights_status, 'unknown') AS rights_status,
             COALESCE((cd.scope->>'imagesRequired')::boolean, (rs.metadata->>'imagesRequired')::boolean, FALSE) AS image_policy_required,
             (
@@ -385,7 +392,8 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
       rightsStatus: category.rights_status ?? 'unknown',
       scoreMismatches: Number(category.score_mismatches ?? 0),
       imagePolicyRequired: category.image_policy_required === true,
-      nonPublishableImages: Number(category.non_publishable_images ?? 0)
+      nonPublishableImages: Number(category.non_publishable_images ?? 0),
+      historicalScope: readHistoricalScope(category.slug, category.category_scope, category.snapshot_metadata)
     }));
     const blockers = validateOfficialChallenge({
       challengeId: row.id,

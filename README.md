@@ -122,6 +122,8 @@ La matriz requisito-evidencia de la salida está en [`RELEASE_READINESS.md`](./R
 
 La revisión de proveedores y derechos está en [`DATA_PROVIDER_LICENSE_REVIEW.md`](./DATA_PROVIDER_LICENSE_REVIEW.md). La aplicación no tratará una API o una imagen descargable como autorización de redistribución.
 
+La decisión de fuente histórica de Champions está en [`backend/audits/block8/champions-historical-source-policy.md`](./backend/audits/block8/champions-historical-source-policy.md). Transfermarkt y API-Football/API-Sports están congeladas para esa categoría; el rango observado 2011–2026 no puede presentarse como histórico desde 1955/56. El ranking histórico se mantiene provisional en `lab` y no se sirve en `official` hasta seleccionar una fuente con cobertura y derechos demostrados.
+
 La revisión arquitectónica inicial está documentada en [`ARCHITECTURE_REVIEW.md`](./ARCHITECTURE_REVIEW.md). La decisión actual es conservar Next.js para el frontend estático y mantener el backend como servicio independiente. La capa inicial de datos ya está preparada en [`backend/`](./backend/); la plataforma Android nativa ya está inicializada con Capacitor.
 
 ## Comprobaciones locales

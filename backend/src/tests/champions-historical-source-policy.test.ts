@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import { buildChampionsSourcePolicy, readHistoricalScope, stableJson, validateHistoricalScope } from '../championsHistoricalSourcePolicy.js';
+import { validateOfficialChallenge } from '../publicationGuard.js';
+
+const validScope = { scopeVersion: 'uefa-champions-league-goals-v2', startSeason: 1955, endSeason: 2026, competition: 'Copa de Europa / UEFA Champions League', tournamentPhase: 'torneo principal/fase final; sin clasificación', gender: 'masculino', coverageComplete: true };
+assert.deepEqual(validateHistoricalScope('uefa-champions-league-goals', validScope), []);
+assert.ok(validateHistoricalScope('uefa-champions-league-goals', { ...validScope, startSeason: 2011 }).length > 0);
+assert.ok(validateHistoricalScope('uefa-champions-league-goals', undefined).length > 0);
+assert.deepEqual(validateHistoricalScope('uefa-champions-league-goals-2011-2026', { startSeason: 2011 }), []);
+assert.deepEqual(readHistoricalScope('uefa-champions-league-goals', { historicalScope: validScope }, {}), validScope);
+const categories = Array.from({ length: 7 }, (_, index) => ({ slug: index === 0 ? 'uefa-champions-league-goals' : `ranking-${index}`, snapshotId: `snapshot-${index}`, categoryStatus: 'approved', snapshotStatus: 'published', coverageComplete: true, unresolvedConflicts: 0, rightsStatus: 'approved', scoreMismatches: 0, imagePolicyRequired: false, nonPublishableImages: 0, ...(index === 0 ? { historicalScope: { ...validScope, startSeason: 2011 } } : {}) }));
+const challenge = { challengeId: 'daily-1', status: 'published', testOnly: false, categories, decisionCount: 7, answerCount: 49, entityNotPlayable: 0 };
+assert.ok(validateOfficialChallenge(challenge).some((blocker) => blocker.code === 'historical_scope'));
+const first = buildChampionsSourcePolicy({ apiValidation: { status: 'passed' }, apiValidationSha256: 'a'.repeat(64) });
+const second = buildChampionsSourcePolicy({ apiValidation: { status: 'passed' }, apiValidationSha256: 'a'.repeat(64) });
+assert.equal(first.readyForApproval, false);
+assert.equal(first.snapshots.databaseModified, false);
+assert.equal(first.partialRangePolicy.alternativeCategoryCreated, false);
+assert.equal(stableJson(first), stableJson(second));
+console.log('champions historical source policy tests passed');

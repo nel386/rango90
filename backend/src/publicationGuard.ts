@@ -1,4 +1,5 @@
 import type { RuntimeMode } from './runtimeMode.js';
+import { validateHistoricalScope, type HistoricalScope } from './championsHistoricalSourcePolicy.js';
 
 export type PublicationBlockerCode =
   | 'challenge_status'
@@ -12,7 +13,8 @@ export type PublicationBlockerCode =
   | 'score_mismatch'
   | 'answer_matrix'
   | 'entity_not_playable'
-  | 'image_not_publishable';
+  | 'image_not_publishable'
+  | 'historical_scope';
 
 export type PublicationBlocker = {
   code: PublicationBlockerCode;
@@ -32,6 +34,7 @@ export type OfficialCategoryCheck = {
   scoreMismatches: number;
   imagePolicyRequired: boolean;
   nonPublishableImages: number;
+  historicalScope?: HistoricalScope;
 };
 
 export type OfficialChallengeCheck = {
@@ -63,7 +66,8 @@ const reasonForCode: Record<PublicationBlockerCode, string> = {
   score_mismatch: 'Hay scores que no coinciden con el snapshot.',
   answer_matrix: 'La matriz de respuestas no está completa.',
   entity_not_playable: 'Hay entidades fuera del catálogo jugable válido.',
-  image_not_publishable: 'La política de la categoría exige imágenes publicables.'
+  image_not_publishable: 'La política de la categoría exige imágenes publicables.',
+  historical_scope: 'El alcance histórico de la categoría no está validado desde 1955/56.'
 };
 
 export function validateOfficialChallenge(input: OfficialChallengeCheck): PublicationBlocker[] {
@@ -83,6 +87,7 @@ export function validateOfficialChallenge(input: OfficialChallengeCheck): Public
     if (category.rightsStatus !== 'approved') blockers.push({ code: 'source_rights', message: reasonForCode.source_rights, ...context });
     if (category.scoreMismatches > 0) blockers.push({ code: 'score_mismatch', message: reasonForCode.score_mismatch, ...context });
     if (category.imagePolicyRequired && category.nonPublishableImages > 0) blockers.push({ code: 'image_not_publishable', message: reasonForCode.image_not_publishable, ...context });
+    for (const scopeBlocker of validateHistoricalScope(category.slug, category.historicalScope)) blockers.push({ code: scopeBlocker.code, message: scopeBlocker.message, ...context });
   }
   return blockers;
 }

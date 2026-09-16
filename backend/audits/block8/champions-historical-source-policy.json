@@ -1,0 +1,134 @@
+{
+  "artifactKind": "champions_historical_source_policy",
+  "reportVersion": "1",
+  "categorySlug": "uefa-champions-league-goals",
+  "reviewDate": "2026-09-16",
+  "readOnly": true,
+  "productionData": false,
+  "mutationCount": 0,
+  "approvalsGranted": false,
+  "published": false,
+  "runId": "block8-champions-5f4d7368c90cc216",
+  "inputArtifact": {
+    "path": "audits/block7e/champions-api-validation.json",
+    "sha256": "5f4d7368c90cc2162befe9c18a79bd7ff021e7f2b0252b17ba50df8afe3378a5",
+    "status": "integration_pending"
+  },
+  "sourceFreeze": [
+    {
+      "provider": "Transfermarkt",
+      "status": "frozen_non_publishable",
+      "reason": "Sin autorización de redistribución demostrada; conservar solo como snapshot histórico draft y baseline de auditoría."
+    },
+    {
+      "provider": "API-Football / API-Sports",
+      "status": "frozen_non_publishable",
+      "reason": "La prueba observó 2011–2026, no demuestra 1955/56 ni derechos para publicar el ranking derivado."
+    }
+  ],
+  "snapshots": {
+    "currentStatus": "draft",
+    "newSnapshotCreated": false,
+    "importPerformed": false,
+    "databaseModified": false
+  },
+  "minimumRequirements": [
+    {
+      "key": "historical_coverage",
+      "requirement": "Cobertura demostrada desde 1955/56 hasta el corte exacto.",
+      "blocking": true
+    },
+    {
+      "key": "competition_definition",
+      "requirement": "Definición inequívoca de Copa de Europa / UEFA Champions League masculina, torneo principal y exclusiones.",
+      "blocking": true
+    },
+    {
+      "key": "cumulative_scorers",
+      "requirement": "Goleadores acumulados, no solo top scorers por temporada.",
+      "blocking": true
+    },
+    {
+      "key": "traceability",
+      "requirement": "Valor, identidad, posición, empate y evidencia trazables por fila.",
+      "blocking": true
+    },
+    {
+      "key": "derived_rights",
+      "requirement": "Permiso escrito para almacenar y publicar rankings derivados.",
+      "blocking": true
+    },
+    {
+      "key": "attribution",
+      "requirement": "Condiciones de atribución documentadas y aplicables al producto.",
+      "blocking": true
+    },
+    {
+      "key": "image_rights",
+      "requirement": "Derechos de imágenes, logos y marcas revisados por separado.",
+      "blocking": true
+    }
+  ],
+  "providerMatrix": [
+    {
+      "provider": "Transfermarkt",
+      "historicalCoverage": "snapshot top 200; alcance por fila no certificado",
+      "traceability": "parcial respecto a snapshot archivado",
+      "derivedRankingRights": "no demostrados",
+      "attribution": "no documentada para Rango90",
+      "imageRights": "separados y no aprobados",
+      "status": "not_eligible"
+    },
+    {
+      "provider": "API-Football / API-Sports",
+      "historicalCoverage": "observado 2011–2026; insuficiente para v2",
+      "traceability": "muestra de 20 por temporada consultada",
+      "derivedRankingRights": "no autorizados por la evidencia actual",
+      "attribution": "requiere confirmación contractual",
+      "imageRights": "no concedidos automáticamente",
+      "status": "candidate_requires_evidence"
+    },
+    {
+      "provider": "UEFA / proveedor autorizado",
+      "historicalCoverage": "a demostrar mediante exportación o licencia",
+      "traceability": "requisito por fila",
+      "derivedRankingRights": "requiere licencia escrita",
+      "attribution": "a pactar",
+      "imageRights": "licencia separada",
+      "status": "candidate_requires_evidence"
+    }
+  ],
+  "partialRangePolicy": {
+    "historicalSlug": "uefa-champions-league-goals",
+    "requiredStartSeason": 1955,
+    "partialRangeExample": "2011–2026",
+    "allowedAlternativeSlug": "uefa-champions-league-goals-2011-2026",
+    "alternativeCategoryCreated": false,
+    "officialHistoricalAllowed": false
+  },
+  "runtimePolicy": {
+    "lab": [
+      "Puede mostrar el snapshot draft o ranking provisional.",
+      "Debe mostrar Modo laboratorio y Datos provisionales.",
+      "Debe advertir que no representa una publicación oficial."
+    ],
+    "official": [
+      "Debe rechazar cualquier snapshot draft, parcial o sin alcance estructurado.",
+      "Nunca puede hacer fallback al ranking de laboratorio.",
+      "Solo puede servir una categoría histórica con cobertura v2 y derechos aprobados."
+    ],
+    "historicalRankingStatus": "provisional_only_until_source_approved",
+    "warningRequired": true
+  },
+  "openBlocks": [
+    "historical_source_not_selected",
+    "transfermarkt_frozen",
+    "api_football_coverage_starts_2011_in_observed_probe",
+    "derived_ranking_rights_missing",
+    "provider_plan_and_contract_not_verified",
+    "image_rights_separate_and_unverified"
+  ],
+  "readyForApproval": false,
+  "readyForPublication": false,
+  "sha256": "2e61ebe13bdb2fbdf094e2be689f27a45a002662c12562b08efdc842fb473695"
+}

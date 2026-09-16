@@ -6,6 +6,8 @@ import { pool } from './db.js';
 import { getCurrentUser } from './auth.js';
 import { MAX_GAME_RANKING_ENTRIES } from './catalogCleanup.js';
 import { selectDailyCategoryEntity, type DailyChallengeRankingEntry } from './dailyChallengeSelection.js';
+import { officialNotReadyDetails, validateOfficialChallenge, type OfficialCategoryCheck, type PublicationBlocker } from './publicationGuard.js';
+import { type RuntimeMode } from './runtimeMode.js';
 import {
   GameRuleError,
   buildOfficialGameResult,
@@ -43,6 +45,14 @@ type ChallengeCategoryRow = {
   label_es: string;
   label_en: string;
   entity_type: GameEntityType;
+  category_status?: string;
+  snapshot_status?: string;
+  coverage_complete?: boolean;
+  unresolved_conflicts?: number;
+  rights_status?: string;
+  score_mismatches?: number;
+  image_policy_required?: boolean;
+  non_publishable_images?: number;
 };
 
 type ChallengeDecisionRow = {
@@ -72,6 +82,7 @@ type LoadedChallenge = {
   scoreCap: number;
   challengeSha256: string;
   testOnly: boolean;
+  runtimeMode: RuntimeMode;
   engine: PublishedGameChallenge;
   categories: readonly ChallengeCategoryRow[];
   decisions: readonly ChallengeDecisionRow[];
@@ -177,7 +188,7 @@ function toNumber(value: number | string): number {
   return parsed;
 }
 
-async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, kind?: 'daily' | 'weekly' | 'duel'): Promise<LoadedChallenge | null> {
+async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, kind?: 'daily' | 'weekly' | 'duel', runtimeMode: RuntimeMode = 'lab'): Promise<LoadedChallenge | null> {
   const challenge = await db.query<{
     id: string;
     challenge_kind: 'daily' | 'weekly' | 'duel';
@@ -193,10 +204,13 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
             time_limit_seconds, score_cap, challenge_sha256,
             (status = 'draft' AND metadata->>'testOnly' = 'true') AS test_only
        FROM game_challenges
-      WHERE (status = 'published' OR (status = 'draft' AND metadata->>'testOnly' = 'true'))
+      WHERE (
+              ($3::text = 'lab' AND (status = 'published' OR (status = 'draft' AND metadata->>'testOnly' = 'true')))
+              OR ($3::text = 'official' AND status = 'published' AND metadata->>'testOnly' IS DISTINCT FROM 'true')
+            )
         AND ($1::text IS NULL OR id = $1)
         AND ($2::text IS NULL OR challenge_kind = $2)
-        AND NOT EXISTS (
+        AND ($3::text = 'official' OR NOT EXISTS (
           SELECT 1
             FROM game_challenge_decisions gcd
             LEFT JOIN entity_identity_links decision_identity
@@ -224,11 +238,11 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
                     WHERE ranked_entry.rank <= ${MAX_GAME_RANKING_ENTRIES}
                       AND COALESCE(ranked_identity.canonical_entity_id, ranked_entry.entity_id) = decision_entity.id
                   ))
-        )
+        ))
       ORDER BY (status = 'published') DESC, challenge_date DESC NULLS LAST,
                published_at DESC NULLS LAST, updated_at DESC, created_at DESC, id
       LIMIT 1`,
-    [challengeId ?? null, kind ?? null]
+    [challengeId ?? null, kind ?? null, runtimeMode]
   );
   const row = challenge.rows[0];
   if (!row) return null;
@@ -236,9 +250,57 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
 
   const categoriesResult = await db.query<ChallengeCategoryRow>(
     `SELECT gcc.category_ordinal, gcc.category_id, gcc.ranking_snapshot_id,
-            cd.slug, cd.label_es, cd.label_en, cd.entity_type
+            cd.slug, cd.label_es, cd.label_en, cd.entity_type,
+            cd.status AS category_status,
+            rs.status AS snapshot_status,
+            rs.coverage_complete,
+            rs.unresolved_conflicts,
+            COALESCE(source.rights_status, 'unknown') AS rights_status,
+            COALESCE((cd.scope->>'imagesRequired')::boolean, (rs.metadata->>'imagesRequired')::boolean, FALSE) AS image_policy_required,
+            (
+              SELECT COUNT(*)::int
+              FROM game_challenge_decisions score_decision
+              JOIN game_challenge_answers score_answer
+                ON score_answer.game_challenge_id = score_decision.game_challenge_id
+               AND score_answer.decision_ordinal = score_decision.decision_ordinal
+               AND score_answer.category_id = gcc.category_id
+              LEFT JOIN LATERAL (
+                SELECT re.score_value
+                  FROM ranking_entries re
+                  LEFT JOIN entity_identity_links score_identity ON score_identity.source_entity_id = re.entity_id
+                 WHERE re.snapshot_id = gcc.ranking_snapshot_id
+                   AND COALESCE(score_identity.canonical_entity_id, re.entity_id) = score_decision.entity_id
+                 ORDER BY re.rank, re.entity_id
+                 LIMIT 1
+              ) expected_score ON TRUE
+             WHERE score_decision.game_challenge_id = gcc.game_challenge_id
+               AND score_answer.score_value IS DISTINCT FROM COALESCE(expected_score.score_value, (SELECT score_cap FROM game_challenges WHERE id = gcc.game_challenge_id))
+            ) AS score_mismatches,
+            (
+              SELECT COUNT(*)::int
+                FROM game_challenge_decisions image_decision
+                LEFT JOIN entity_identity_links image_identity ON image_identity.source_entity_id = image_decision.entity_id
+                JOIN entities image_entity ON image_entity.id = COALESCE(image_identity.canonical_entity_id, image_decision.entity_id)
+                LEFT JOIN image_assets image_asset
+                  ON image_asset.entity_id = image_entity.id
+                 AND image_asset.asset_kind = CASE WHEN image_entity.entity_type = 'player' THEN 'portrait' ELSE 'badge' END
+                 AND image_asset.is_primary = TRUE
+                 AND image_asset.review_status = 'approved'
+                 AND image_asset.rights_basis <> 'unknown'
+                 AND image_asset.commercial_use = TRUE
+                 AND image_asset.rights_verified_at IS NOT NULL
+                 AND image_asset.rights_evidence_url IS NOT NULL
+                 AND jsonb_array_length(image_asset.usage_scope) > 0
+                 AND (image_entity.entity_type <> 'club' OR image_asset.trademark_status = 'cleared')
+                 AND (image_asset.attribution_required = FALSE OR NULLIF(image_asset.attribution_text, '') IS NOT NULL)
+               WHERE image_decision.game_challenge_id = gcc.game_challenge_id
+                 AND image_asset.id IS NULL
+            )::int AS non_publishable_images
        FROM game_challenge_categories gcc
        JOIN category_definitions cd ON cd.id = gcc.category_id
+       JOIN ranking_snapshots rs ON rs.id = gcc.ranking_snapshot_id
+       LEFT JOIN source_snapshots source_snapshot ON source_snapshot.id = rs.metadata->>'sourceSnapshotId'
+       LEFT JOIN sources source ON source.key = source_snapshot.source_key
       WHERE gcc.game_challenge_id = $1
       ORDER BY gcc.category_ordinal`,
     [row.id]
@@ -297,6 +359,48 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
     [row.id]
   );
 
+  if (runtimeMode === 'official') {
+    const entityResult = await db.query<{ entity_not_playable: number }>(
+      `SELECT COUNT(*)::int AS entity_not_playable
+         FROM game_challenge_decisions gcd
+         LEFT JOIN entity_identity_links identity_link
+           ON identity_link.source_entity_id = gcd.entity_id
+         JOIN entities entity
+           ON entity.id = COALESCE(identity_link.canonical_entity_id, gcd.entity_id)
+         LEFT JOIN entity_game_profiles profile ON profile.entity_id = entity.id
+        WHERE gcd.game_challenge_id = $1
+          AND (
+            entity.catalog_status <> 'active'
+            OR (entity.entity_type = 'player' AND COALESCE(profile.playable_default, FALSE) = FALSE)
+          )`,
+      [row.id]
+    );
+    const categoryChecks: OfficialCategoryCheck[] = categoriesResult.rows.map((category) => ({
+      slug: category.slug,
+      snapshotId: category.ranking_snapshot_id,
+      categoryStatus: category.category_status ?? 'unknown',
+      snapshotStatus: category.snapshot_status ?? 'unknown',
+      coverageComplete: category.coverage_complete === true,
+      unresolvedConflicts: Number(category.unresolved_conflicts ?? 0),
+      rightsStatus: category.rights_status ?? 'unknown',
+      scoreMismatches: Number(category.score_mismatches ?? 0),
+      imagePolicyRequired: category.image_policy_required === true,
+      nonPublishableImages: Number(category.non_publishable_images ?? 0)
+    }));
+    const blockers = validateOfficialChallenge({
+      challengeId: row.id,
+      status: 'published',
+      testOnly: row.test_only,
+      categories: categoryChecks,
+      decisionCount: decisionsResult.rows.length,
+      answerCount: answersResult.rows.length,
+      entityNotPlayable: Number(entityResult.rows[0]?.entity_not_playable ?? 0)
+    });
+    if (blockers.length > 0) {
+      throw new ContractError(503, 'official_not_ready', 'El producto oficial todavía no tiene un reto publicable.', officialNotReadyDetails(row.id, blockers));
+    }
+  }
+
   const categories = categoriesResult.rows;
   const expectedChallengeSha256 = calculateChallengeSha256({
     id: row.id,
@@ -352,6 +456,7 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
     scoreCap: engine.scoreCap,
     challengeSha256: row.challenge_sha256,
     testOnly: row.test_only,
+    runtimeMode,
     engine,
     categories,
     decisions: decisionsResult.rows
@@ -487,6 +592,8 @@ function publicChallenge(challenge: LoadedChallenge) {
     timeLimitSeconds: challenge.timeLimitSeconds,
     scoreCap: challenge.scoreCap,
     testOnly: challenge.testOnly,
+    runtimeMode: challenge.runtimeMode,
+    provisionalData: challenge.runtimeMode === 'lab',
     decisionCount: challenge.decisions.length,
     categories: challenge.categories.map((category) => ({
       ordinal: category.category_ordinal,
@@ -748,27 +855,72 @@ function mapContractError(error: unknown): never {
   throw error;
 }
 
-export function registerGameContractRoutes(app: FastifyInstance, options: { db?: ContractDatabase; clock?: () => Date } = {}): void {
+async function officialNotReadyForSelection(db: QueryExecutor, challengeId?: string, kind?: 'daily' | 'weekly' | 'duel') {
+  const candidate = await db.query<{
+    id: string;
+    status: string;
+    test_only: boolean;
+    slug: string | null;
+    snapshot_id: string | null;
+    snapshot_status: string | null;
+  }>(
+    `SELECT gc.id, gc.status,
+            (gc.metadata->>'testOnly' = 'true') AS test_only,
+            cd.slug,
+            rs.id AS snapshot_id,
+            rs.status AS snapshot_status
+       FROM game_challenges gc
+       LEFT JOIN game_challenge_categories gcc ON gcc.game_challenge_id = gc.id
+       LEFT JOIN category_definitions cd ON cd.id = gcc.category_id
+       LEFT JOIN ranking_snapshots rs ON rs.id = gcc.ranking_snapshot_id
+      WHERE ($1::text IS NULL OR gc.id = $1)
+        AND ($2::text IS NULL OR gc.challenge_kind = $2)
+        AND gc.status <> 'retired'
+      ORDER BY (gc.status = 'published') DESC, gc.challenge_date DESC NULLS LAST,
+               gc.updated_at DESC, gc.created_at DESC, gc.id, gcc.category_ordinal
+      LIMIT 50`,
+    [challengeId ?? null, kind ?? null]
+  );
+  const first = candidate.rows[0];
+  if (!first) return officialNotReadyDetails(challengeId ?? null);
+  const blockers: PublicationBlocker[] = [];
+  if (first.status !== 'published') blockers.push({ code: 'challenge_status', message: 'El reto no está publicado.' });
+  if (first.test_only) blockers.push({ code: 'test_only', message: 'El reto está marcado como testOnly.' });
+  for (const row of candidate.rows.filter((item) => item.id === first.id && item.slug)) {
+    if (row.snapshot_status !== 'published') blockers.push({ code: 'snapshot_status', message: 'El snapshot no está publicado.', categorySlug: row.slug ?? undefined, snapshotId: row.snapshot_id ?? undefined });
+  }
+  return officialNotReadyDetails(first.id, blockers);
+}
+
+export function registerGameContractRoutes(app: FastifyInstance, options: { db?: ContractDatabase; clock?: () => Date; runtimeMode?: RuntimeMode } = {}): void {
   const db = options.db ?? pool;
   const clock = options.clock ?? (() => new Date());
+  const runtimeMode = options.runtimeMode ?? 'lab';
+  const loadChallenge = (challengeId?: string, kind?: 'daily' | 'weekly' | 'duel') => loadPublishedChallenge(db, challengeId, kind, runtimeMode);
 
   app.get('/v1/challenges/daily', async (_request, reply) => {
-    const challenge = await loadPublishedChallenge(db, undefined, 'daily');
-    if (!challenge) return reply.code(404).send({ error: 'daily_challenge_not_found' });
+    const challenge = await loadChallenge(undefined, 'daily');
+    if (!challenge) return runtimeMode === 'official'
+      ? reply.code(503).send({ error: 'official_not_ready', message: 'El producto oficial todavía no tiene un reto publicable.', details: await officialNotReadyForSelection(db, undefined, 'daily') })
+      : reply.code(404).send({ error: 'daily_challenge_not_found' });
     return { challenge: publicChallenge(challenge) };
   });
 
   app.get('/v1/challenges/:challengeId', async (request, reply) => {
     const params = z.object({ challengeId: z.string().min(1).max(200) }).parse(request.params);
-    const challenge = await loadPublishedChallenge(db, params.challengeId);
-    if (!challenge) return reply.code(404).send({ error: 'challenge_not_found' });
+    const challenge = await loadChallenge(params.challengeId);
+    if (!challenge) return runtimeMode === 'official'
+      ? reply.code(503).send({ error: 'official_not_ready', message: 'El reto solicitado no es publicable en modo oficial.', details: await officialNotReadyForSelection(db, params.challengeId) })
+      : reply.code(404).send({ error: 'challenge_not_found' });
     return { challenge: publicChallenge(challenge) };
   });
 
   app.post('/v1/games', async (request, reply) => {
     const body = z.object({ challengeId: z.string().min(1).max(200) }).parse(request.body);
-    const challenge = await loadPublishedChallenge(db, body.challengeId);
-    if (!challenge) return reply.code(404).send({ error: 'challenge_not_found' });
+    const challenge = await loadChallenge(body.challengeId);
+    if (!challenge) return runtimeMode === 'official'
+      ? reply.code(503).send({ error: 'official_not_ready', message: 'El reto solicitado no es publicable en modo oficial.', details: await officialNotReadyForSelection(db, body.challengeId) })
+      : reply.code(404).send({ error: 'challenge_not_found' });
     const user = await getCurrentUser(request);
     const startedAtMsValue = nowMs(clock);
     const session = await createGameSession(db, challenge, user?.id ?? null, startedAtMsValue);
@@ -786,7 +938,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
       const session = await getSession(db, params.gameId, body.sessionToken);
       if (!session) return reply.code(404).send({ error: 'game_session_not_found' });
       assertUserCanUseSession(session, user?.id ?? null);
-      const baseChallenge = await loadPublishedChallenge(db, session.game_challenge_id);
+      const baseChallenge = await loadPublishedChallenge(db, session.game_challenge_id, undefined, runtimeMode);
       if (!baseChallenge) return reply.code(409).send({ error: 'challenge_unavailable' });
       const challenge = storedVariantChallenge(baseChallenge, session);
       const state = replayDecisionState(challenge, session, body.previousAssignments);
@@ -834,7 +986,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
       const session = await getSession(db, params.gameId, body.sessionToken);
       if (!session) return reply.code(404).send({ error: 'game_session_not_found' });
       assertUserCanUseSession(session, user?.id ?? null);
-      const baseChallenge = await loadPublishedChallenge(db, session.game_challenge_id);
+      const baseChallenge = await loadPublishedChallenge(db, session.game_challenge_id, undefined, runtimeMode);
       if (!baseChallenge) return reply.code(409).send({ error: 'challenge_unavailable' });
       const challenge = storedVariantChallenge(baseChallenge, session);
       const stored = await withTransaction(db, async (client) => {
@@ -873,7 +1025,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
         const session = await getSession(client, params.gameId, body.sessionToken, true);
         if (!session) throw new ContractError(404, 'game_session_not_found', 'Game session not found');
         assertUserCanUseSession(session, user?.id ?? null);
-        const baseChallenge = await loadPublishedChallenge(client, session.game_challenge_id);
+        const baseChallenge = await loadPublishedChallenge(client, session.game_challenge_id, undefined, runtimeMode);
         if (!baseChallenge) throw new ContractError(409, 'challenge_unavailable', 'Challenge is unavailable');
         const challenge = storedVariantChallenge(baseChallenge, session);
         const existing = await existingResult(client, 'game_session_id', session.id);
@@ -913,7 +1065,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
     if (!oldSession) return reply.code(404).send({ error: 'game_session_not_found' });
     assertUserCanUseSession(oldSession, user?.id ?? null);
     if (oldSession.status === 'active') return reply.code(409).send({ error: 'game_still_active' });
-    const challenge = await loadPublishedChallenge(db, oldSession.game_challenge_id);
+    const challenge = await loadPublishedChallenge(db, oldSession.game_challenge_id, undefined, runtimeMode);
     if (!challenge) return reply.code(409).send({ error: 'challenge_unavailable' });
     const session = await createGameSession(db, challenge, user?.id ?? oldSession.player_id, nowMs(clock), oldSession.id);
     return reply.code(201).send({
@@ -925,7 +1077,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
   app.get('/v1/challenges/:challengeId/leaderboard', async (request, reply) => {
     const params = z.object({ challengeId: z.string().min(1).max(200) }).parse(request.params);
     const query = z.object({ limit: z.coerce.number().int().min(1).max(100).default(100) }).parse(request.query);
-    const challenge = await loadPublishedChallenge(db, params.challengeId);
+    const challenge = await loadPublishedChallenge(db, params.challengeId, undefined, runtimeMode);
     if (!challenge) return reply.code(404).send({ error: 'challenge_not_found' });
     const rows = await db.query(
       `WITH best_per_player AS (
@@ -968,7 +1120,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
 
   app.post('/v1/duels', async (request, reply) => {
     const body = z.object({ challengeId: z.string().min(1).max(200) }).parse(request.body);
-    const challenge = await loadPublishedChallenge(db, body.challengeId);
+    const challenge = await loadPublishedChallenge(db, body.challengeId, undefined, runtimeMode);
     if (!challenge) return reply.code(404).send({ error: 'challenge_not_found' });
     const user = await getCurrentUser(request);
     const startedAtMsValue = nowMs(clock);
@@ -1015,7 +1167,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
     );
     const row = duel.rows[0];
     if (!row) return reply.code(404).send({ error: 'duel_not_found' });
-    const challenge = await loadPublishedChallenge(db, row.game_challenge_id);
+    const challenge = await loadPublishedChallenge(db, row.game_challenge_id, undefined, runtimeMode);
     if (!challenge) return reply.code(409).send({ error: 'challenge_unavailable' });
     const participants = await db.query(
       `SELECT dp.slot, dp.status, dp.joined_at,
@@ -1069,7 +1221,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
       const slots = await client.query<{ slot: number; player_id: string | null }>(`SELECT slot, player_id FROM duel_participants WHERE duel_id = $1`, [row.id]);
       if (slots.rows.length >= 2) throw new ContractError(409, 'duel_full', 'Duel already has two participants');
       if (user && slots.rows.some((slot) => slot.player_id === user.id)) throw new ContractError(409, 'duel_participant_exists', 'Player is already in this duel');
-      const challenge = await loadPublishedChallenge(client, row.game_challenge_id);
+      const challenge = await loadPublishedChallenge(client, row.game_challenge_id, undefined, runtimeMode);
       if (!challenge) throw new ContractError(409, 'challenge_unavailable', 'Challenge is unavailable');
       await client.query(
         `INSERT INTO duel_participants
@@ -1107,7 +1259,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
         const alreadyStored = await existingResult(client, 'duel_participant_id', row.id);
         if (alreadyStored) return { duelId: row.duel_id, status: 'duplicate' as const, resultId: alreadyStored.id, result: alreadyStored.payload };
         if (row.duel_status === 'expired' || row.expires_at.getTime() <= serverNowMs) throw new ContractError(410, 'duel_expired', 'Duel has expired');
-        const challenge = await loadPublishedChallenge(client, row.game_challenge_id);
+        const challenge = await loadPublishedChallenge(client, row.game_challenge_id, undefined, runtimeMode);
         if (!challenge) throw new ContractError(409, 'challenge_unavailable', 'Challenge is unavailable');
         const result = officialResultFromClaims(challenge, epoch(row.started_at), epoch(row.deadline_at), body.result, serverNowMs);
         const persisted = await storeResult(client, challenge, result, {
@@ -1141,7 +1293,7 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
     if (!oldRow) return reply.code(404).send({ error: 'duel_participant_not_found' });
     if (oldRow.participant_player_id && oldRow.participant_player_id !== (user?.id ?? null)) return reply.code(403).send({ error: 'duel_forbidden' });
     if (!['completed', 'expired'].includes(oldRow.status)) return reply.code(409).send({ error: 'duel_still_active' });
-    const challenge = await loadPublishedChallenge(db, oldRow.game_challenge_id);
+    const challenge = await loadPublishedChallenge(db, oldRow.game_challenge_id, undefined, runtimeMode);
     if (!challenge) return reply.code(409).send({ error: 'challenge_unavailable' });
     const startedAtMsValue = nowMs(clock);
     const newDuelId = `duel_${randomUUID()}`;

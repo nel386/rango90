@@ -2,6 +2,29 @@
 
 Backend independiente para datos, rankings y retos de Rango 90.
 
+## Separación laboratorio / producto oficial
+
+Configura obligatoriamente el modo antes de arrancar el servicio:
+
+```bash
+RANGO90_RUNTIME_MODE=lab npm run dev
+RANGO90_RUNTIME_MODE=official npm start
+```
+
+Si `RANGO90_RUNTIME_MODE` falta fuera de `NODE_ENV=test`, o contiene cualquier valor distinto de `lab` u `official`, el proceso falla al arrancar. También en producción son válidos ambos modos, pero `lab` queda siempre visible como laboratorio.
+
+`lab` acepta el reto `draft` marcado `metadata.testOnly=true`, categorías provisionales y fallback visual. La respuesta y el frontend lo identifican como laboratorio y datos provisionales. `official` solo considera retos `published` con `testOnly=false` y ejecuta el guard de publicación en lectura: siete categorías distintas, snapshots no `superseded` publicados, cobertura completa, identidad resuelta, categorías aprobadas, fuentes `rights_status=approved`, matriz y scores coherentes, entidades jugables e imágenes publicables cuando la política lo exige. No hace fallback a un reto de laboratorio.
+
+El modo se fija durante la construcción de la aplicación, se registra en logs y aparece en `/health`, `/v1/config` y el payload. Cuando no hay un reto oficial válido, `GET /v1/challenges/daily` devuelve HTTP 503 con `error=official_not_ready`, `blockingCategories`, `snapshotRequired` y `reason`. Este estado no aprueba, publica, sobrescribe ni borra snapshots, fuentes o derechos.
+
+Las pruebas puras están en `src/tests/runtime-modes.test.ts`; el contrato del cliente en `../src/data/runtime-contract.test.ts`. La verificación reproducible de este bloque está en [RUNTIME_MODES_VERIFICATION.md](RUNTIME_MODES_VERIFICATION.md).
+
+Las reglas server-side que protegen el ciclo de una partida (orden, categorías duplicadas, deadline y expiración idempotente) tienen cobertura en `src/tests/game-engine.test.ts` y `src/tests/game-flow-boundaries.test.ts`. La verificación del flujo completo de cliente está en [../BLOCK4_VERIFICATION.md](../BLOCK4_VERIFICATION.md); sus tests usan mocks y no escriben en PostgreSQL.
+
+`GET /v1/rankings/:categorySlug` es la superficie de ranking futbolístico y está separada de la clasificación competitiva del reto. Es un `rankingScope=historical_snapshot`: conserva las filas del snapshot aunque una entidad no sea jugable y añade `playable` sin filtrarla. En `official` solo devuelve snapshots publicados; en `lab` puede devolver el último `draft` como `status=provisional`. Cada fila expone `raw_value`, `score_value`, `rank`, `tie_group`, identidad canónica y el contrato de media `imageStatus`, `reviewStatus`, `rightsStatus` e `isPublishable` (también en snake_case para compatibilidad). Si no hay snapshot válido devuelve `ranking_not_available` con `category`, `mode` y `reason=no_published_snapshot` en official. `GET /v1/categories` enumera todas las categorías disponibles para rankings en el modo actual, no solo las del reto diario. La auditoría no destructiva del pool jugable se ejecuta con `npm run audit:playable-media` y queda descrita en [../BLOCK5_VERIFICATION.md](../BLOCK5_VERIFICATION.md).
+
+La prueba real de la ruta se ejecuta con `npm run test:rankings:isolated` y exige `RANGO90_ISOLATED_DATABASE_URL`, distinta de `DATABASE_URL`, apuntando a PostgreSQL efímero o aislado con el esquema aplicado. Sin esa variable se omite de forma explícita; nunca se usa la base real por accidente.
+
 Las reglas del motor están documentadas en [GAME_ENGINE.md](GAME_ENGINE.md) y el contrato HTTP de la fase 3 en [API_CONTRACT.md](API_CONTRACT.md). El backend ya persiste sesiones, resultados y duelos mediante la migración `028_game_contract.sql`.
 
 La fixture publicada exclusivamente para integración está documentada en [INTEGRATION_FIXTURE.md](INTEGRATION_FIXTURE.md). Tras levantar PostgreSQL y aplicar las migraciones, `npm run seed:integration -- --date YYYY-MM-DD` elimina el 404 de `/v1/challenges/daily` en el entorno local sin publicar datos reales ni habilitarse en producción.
@@ -193,11 +216,39 @@ npm run approve:snapshot -- --snapshot rs_xxx
 npm run publish -- --snapshot rs_xxx
 npm run audit:data-readiness
 npm run audit:7x7
+npm run audit:ranking-truth
+# Una categoría concreta o un snapshot histórico:
+npm run audit:ranking-truth -- --category world-cup-goals
+npm run audit:ranking-truth -- --category world-cup-goals --snapshot rs_xxx --out-dir audits/manual-review
 ```
 
 `audit:data-readiness` genera un informe por categoría con snapshot vigente, cobertura, derechos de la fuente, entidades jugables e imágenes aprobadas. `readyForPublish` solo es `true` cuando se cumplen todas las comprobaciones de publicación; no modifica datos.
 
 `audit:7x7` es una auditoría de solo lectura que comprueba las siete categorías elegidas de forma independiente: 200 entidades canónicas jugables por categoría abierta (o universo cerrado completo), cobertura completa, cero conflictos y al menos una entidad seleccionable dentro de la banda top 90. El solapamiento entre categorías se muestra solo como diagnóstico; no es un requisito. Devuelve código distinto de cero si alguna categoría no está lista y no aprueba licencias ni activos visuales.
+
+`audit:ranking-truth` es el informe no destructivo del BLOQUE 0. Para cada
+categoría seleccionada exporta `ranking-truth.md`, `ranking-truth.json` y
+`ranking-truth.csv` con definición, alcance temporal observado, snapshots de
+fuente y ranking, top 20 trazable, identidades, cobertura, empates, derechos,
+media y anomalías agrupadas por severidad. Por defecto audita las siete
+categorías de `dailyMatrix.ts`; `--category` acepta una lista separada por
+comas, `--snapshot` fija un snapshot concreto y `--out-dir` cambia la carpeta
+de salida. El JSON incluye una huella de datos independiente con IDs, hashes de
+contenido, versiones y watermark, y marca el resultado como artefacto de
+auditoría (`productionData=false`, `editorialApproval=false`); no modifica
+PostgreSQL ni aprueba categorías.
+
+`validate:priority-rankings` es el BLOQUE 1 para `uefa-champions-league-goals`
+y `world-cup-goals`. Lee el informe del BLOQUE 0, snapshots de fuente y datos
+de identidad/media mediante consultas de solo lectura, y escribe informes de
+discrepancias en `audits/ranking-validation/`. No repara, publica ni aprueba
+datos.
+
+`build:ranking-scope-decisions` es el BLOQUE 2. Compara los snapshots
+archivados de Champions y Mundial con sus artefactos de contraste, genera las
+decisiones de alcance y conserva todos los conflictos abiertos. Solo escribe
+artefactos documentales en `audits/ranking-scope/`; no crea ni modifica
+snapshots de PostgreSQL.
 
 La curación del pool jugable está bloqueada por defecto para que una nueva
 importación no cambie silenciosamente el denominador de imágenes ni los

@@ -1,0 +1,780 @@
+{
+  "artifactKind": "scope_decision_bundle",
+  "readOnly": true,
+  "productionData": false,
+  "editorialApproval": false,
+  "decisions": [
+    {
+      "artifactKind": "scope_decision",
+      "readOnly": true,
+      "productionData": false,
+      "editorialApproval": false,
+      "categorySlug": "uefa-champions-league-goals",
+      "currentLabel": "Goles históricos — UEFA Champions League",
+      "proposedExactLabel": "Goles históricos — Copa de Europa / UEFA Champions League (sin rondas de clasificación)",
+      "decisionStatus": "proposed_not_approved",
+      "whatItMeasures": "Goles oficiales de jugadores en la Copa de Europa y la UEFA Champions League masculina, contados en el torneo principal desde su inauguración.",
+      "finalDefinition": {
+        "entityType": "player",
+        "metric": "goals",
+        "competition": "Copa de Europa / UEFA Champions League",
+        "temporalWindow": "1955/56–2025/26; corte del dato al 2026-09-12",
+        "snapshotCutoff": "2026-09-12 (snapshot recuperado; no se presume inclusión de partidos posteriores)",
+        "tournamentPhase": "torneo principal/fase final; sin rondas de clasificación ni fases previas",
+        "gender": "masculino",
+        "countingRule": "un gol por anotación oficial registrada por la fuente adoptada; empates por valor exacto y ranking de competición"
+      },
+      "included": [
+        "Ediciones desde 1955/56, incluida la etapa denominada Copa de Europa.",
+        "Partidos oficiales del torneo principal de clubes.",
+        "Jugadores que hayan anotado en esas ediciones, sin limitar por nacionalidad ni estado de retiro."
+      ],
+      "excluded": [
+        "Rondas de clasificación y fases previas.",
+        "Amistosos, juveniles, reservas, testimoniales y otras competiciones UEFA.",
+        "Filas sintéticas: el límite de 200 es de filas reales de la fuente, no una afirmación de cobertura universal."
+      ],
+      "sourceAuthority": {
+        "semanticAuthority": "UEFA oficial para resolver qué competición, rondas y periodización significa “Copa de Europa / Champions League”.",
+        "numericPrimarySource": "Transfermarkt archivado, actualmente conservado como fuente numérica primaria provisional; rightsStatus=review_required.",
+        "conflictRule": "No se mezclan ni promedian valores. UEFA fija la semántica; ningún valor sustituye al otro hasta resolver cada conflicto con evidencia de partido o una decisión del titular."
+      },
+      "lineage": {
+        "rankingSnapshotId": "rs_870f1dff967bb160f2d132cc",
+        "rankingDataVersion": "uefa-champions-league-goals-transfermarkt-top-200-2026-09-12",
+        "rankingAlgorithmVersion": "ranking-v1",
+        "rankingContentSha256": "870f1dff967bb160f2d132cc7d9ca1f2483b26d32681e6a55985efc744cc718b",
+        "primarySourceSnapshotId": "src_257235808020fc330123b522",
+        "primarySourceContentSha256": "257235808020fc330123b52274a0e7ee38094114021b287527f0a4a996e72a36",
+        "officialContrastSnapshotId": "src_c9359c9f91bba9215af8fef6",
+        "officialContrastContentSha256": "c9359c9f91bba9215af8fef602e0b4826b505fd96fd19072212748aeb1ee51f9"
+      },
+      "valueCheck": {
+        "top20Checked": 20,
+        "top20ValuesMatchArchivedPrimary": true,
+        "definitionScopeExplicit": false,
+        "note": "La coincidencia demuestra consistencia con el snapshot archivado, no que Transfermarkt sea definitivamente correcto frente a UEFA; el snapshot no explicita por fila el tratamiento de rondas."
+      },
+      "conflicts": [
+        {
+          "player": "Cristiano Ronaldo",
+          "primaryValue": 140,
+          "officialValue": 141,
+          "storedValue": 140,
+          "primaryRank": 1,
+          "officialRank": 1,
+          "classification": "diferencia de alcance",
+          "classificationBasis": "La referencia UEFA separa explícitamente una lista sin clasificación (140) de otra con clasificación (141); el snapshot archivado no documenta qué corte explica este caso.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Eusébio",
+          "primaryValue": 46,
+          "officialValue": 47,
+          "storedValue": 46,
+          "primaryRank": 16,
+          "officialRank": 17,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Ferenc Puskás",
+          "primaryValue": 36,
+          "officialValue": 35,
+          "storedValue": 36,
+          "primaryRank": 23,
+          "officialRank": 24,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Luis Suárez",
+          "primaryValue": 27,
+          "officialValue": 31,
+          "storedValue": 27,
+          "primaryRank": 41,
+          "officialRank": 34,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Rivaldo",
+          "primaryValue": 27,
+          "officialValue": 31,
+          "storedValue": 27,
+          "primaryRank": 43,
+          "officialRank": 34,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Jardel",
+          "primaryValue": 25,
+          "officialValue": 28,
+          "storedValue": 25,
+          "primaryRank": 52,
+          "officialRank": 44,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Gonzalo Higuaín",
+          "primaryValue": 24,
+          "officialValue": 25,
+          "storedValue": 24,
+          "primaryRank": 57,
+          "officialRank": 55,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Marco Simone",
+          "primaryValue": 24,
+          "officialValue": 25,
+          "storedValue": 24,
+          "primaryRank": 59,
+          "officialRank": 55,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Claudio Pizarro",
+          "primaryValue": 21,
+          "officialValue": 24,
+          "storedValue": 21,
+          "primaryRank": 71,
+          "officialRank": 61,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Luiz Adriano",
+          "primaryValue": 21,
+          "officialValue": 22,
+          "storedValue": 21,
+          "primaryRank": 77,
+          "officialRank": 73,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Luis Enrique",
+          "primaryValue": 19,
+          "officialValue": 20,
+          "storedValue": 19,
+          "primaryRank": 91,
+          "officialRank": 91,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        },
+        {
+          "player": "Heung-min Son",
+          "primaryValue": 19,
+          "officialValue": 21,
+          "storedValue": 19,
+          "primaryRank": 93,
+          "officialRank": 81,
+          "classification": "discrepancia no resoluble",
+          "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+          "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+          "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+          "includesEuropeanCup": "no documentado",
+          "includesQualifying": "no documentado",
+          "includesPreliminaryRounds": "no documentado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ],
+          "status": "abierta"
+        }
+      ],
+      "abbreviatedIdentities": [
+        {
+          "categorySlug": "uefa-champions-league-goals",
+          "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b8cc45b74357d05470f9fa6c",
+          "canonicalName": "Raúl",
+          "sourceName": "Raúl",
+          "sourceProfileUrl": "https://www.transfermarkt.com/raul/profil/spieler/7349",
+          "sourceExternalId": "https://www.transfermarkt.com/raul/profil/spieler/7349",
+          "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/raul/profil/spieler/7349)."
+        },
+        {
+          "categorySlug": "uefa-champions-league-goals",
+          "canonicalEntityId": "france-football:player:10294",
+          "canonicalName": "Eusébio",
+          "sourceName": "Eusébio",
+          "sourceProfileUrl": "https://www.transfermarkt.com/eusebio/profil/spieler/89230",
+          "sourceExternalId": "https://www.transfermarkt.com/eusebio/profil/spieler/89230",
+          "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/eusebio/profil/spieler/89230)."
+        },
+        {
+          "categorySlug": "uefa-champions-league-goals",
+          "canonicalEntityId": "bdfutbol:la-liga:player:8496753b629895ff211f4d41",
+          "canonicalName": "Neymar da Silva Santos Júnior",
+          "sourceName": "Neymar",
+          "sourceProfileUrl": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+          "sourceExternalId": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+          "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/neymar/profil/spieler/68290)."
+        }
+      ],
+      "openDiscrepancies": [
+        "Los 12 conflictos de contraste siguen abiertos: 1 clasificado provisionalmente como diferencia de alcance y 11 como discrepancias no resolubles con la evidencia disponible.",
+        "El snapshot actual de Transfermarkt y el snapshot oficial de UEFA tienen cortes/metadatos distintos; hay que conservar ambos y documentar el desglose por partido/ronda.",
+        "La etiqueta visible actual omite Copa de Europa y la exclusión de clasificación; debe actualizarse junto con una nueva versión draft, no mediante edición destructiva."
+      ],
+      "approvalGates": [
+        "Resolver los 12 conflictos con desglose de alcance/definición o declarar formalmente una fuente autoridad.",
+        "Confirmar una definición de sin clasificación y su ventana temporal exacta con el titular/fuente oficial.",
+        "Crear, si procede, un nuevo snapshot con data_version, algorithm_version, content_sha256 y definición completa; mantenerlo en draft.",
+        "Obtener rights_status=approved para la fuente numérica que vaya a redistribuirse y revisar los assets por separado."
+      ],
+      "rightsStatus": "review_required",
+      "hashes": {
+        "decisionSha256": "523645149076749d22dbf7515329abc405b5b70d7e5fe716aabcf2eb056be2d5"
+      }
+    },
+    {
+      "artifactKind": "scope_decision",
+      "readOnly": true,
+      "productionData": false,
+      "editorialApproval": false,
+      "categorySlug": "world-cup-goals",
+      "currentLabel": "Goles históricos — FIFA World Cup",
+      "proposedExactLabel": "Goles históricos — Copa Mundial masculina (fases finales)",
+      "decisionStatus": "proposed_not_approved",
+      "whatItMeasures": "Goles de jugadores en las fases finales de la Copa Mundial masculina de la FIFA, sumados por edición de torneo.",
+      "finalDefinition": {
+        "entityType": "player",
+        "metric": "goals",
+        "competition": "FIFA World Cup masculina",
+        "temporalWindow": "1930–2026 inclusive; corte del dato al 2026-09-12",
+        "snapshotCutoff": "2026-09-12 (posterior al cierre de la edición 2026)",
+        "tournamentPhase": "solo fases finales del torneo",
+        "gender": "masculino",
+        "countingRule": "goles anotados en partidos de las fases finales; empates por valor exacto y ranking de competición"
+      },
+      "included": [
+        "Ediciones de la Copa Mundial masculina desde 1930 hasta 2026 inclusive.",
+        "Futbolistas participantes en las fases finales, incluido cualquier estado de retiro.",
+        "La edición 2026 solo hasta el cierre documentado del snapshot."
+      ],
+      "excluded": [
+        "Clasificatorias, repescas y partidos de preparación.",
+        "Torneos femeninos, juveniles, olímpicos, confederativos o de clubes.",
+        "Filas sintéticas: el top 200 es un corte de filas reales y no añade jugadores con cero goles."
+      ],
+      "sourceAuthority": {
+        "semanticAuthority": "FIFA oficial para la definición de Copa Mundial masculina y sus fases finales.",
+        "numericPrimarySource": "Transfermarkt archivado, conservado como fuente numérica primaria provisional; rightsStatus=review_required.",
+        "conflictRule": "No se sustituyen valores por coincidencia nominal; la definición adoptada debe comprobarse contra la fuente antes de aprobar."
+      },
+      "lineage": {
+        "rankingSnapshotId": "rs_7cc0d9cf795a275b93106c43",
+        "rankingDataVersion": "transfermarkt-fifa-world-cup-final-tournaments-goals-top-200-2026-09-12",
+        "rankingAlgorithmVersion": "ranking-v1",
+        "rankingContentSha256": "7cc0d9cf795a275b93106c43eb12dc800629d29e64ee68bcdb6c6bd9f4af8a63",
+        "primarySourceSnapshotId": "src_a5862ab2e594939ddfa99181",
+        "primarySourceContentSha256": "a5862ab2e594939ddfa99181bb0a5408697478685f2e6993b49c2d589418b9f8",
+        "officialContrastSnapshotId": null,
+        "officialContrastContentSha256": null
+      },
+      "valueCheck": {
+        "top20Checked": 20,
+        "top20ValuesMatchArchivedPrimary": true,
+        "definitionScopeExplicit": true,
+        "note": "Los 20 valores coinciden con el snapshot primario archivado y su scope declara final tournaments; la referencia FIFA se conserva como autoridad semántica y contraste, no como sustitución numérica automática."
+      },
+      "conflicts": [],
+      "abbreviatedIdentities": [
+        {
+          "categorySlug": "world-cup-goals",
+          "canonicalEntityId": "transfermarkt:world-cup:player:ee353ea3ec0b143f6f5fb032",
+          "canonicalName": "Ronaldo",
+          "sourceName": "Ronaldo",
+          "sourceProfileUrl": "https://www.transfermarkt.com/ronaldo/profil/spieler/3140",
+          "sourceExternalId": "https://www.transfermarkt.com/ronaldo/profil/spieler/3140",
+          "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/ronaldo/profil/spieler/3140)."
+        },
+        {
+          "categorySlug": "world-cup-goals",
+          "canonicalEntityId": "transfermarkt:world-cup:player:0f03fc0cf25d0c58202b8f98",
+          "canonicalName": "Pelé",
+          "sourceName": "Pelé",
+          "sourceProfileUrl": "https://www.transfermarkt.com/pele/profil/spieler/17121",
+          "sourceExternalId": "https://www.transfermarkt.com/pele/profil/spieler/17121",
+          "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/pele/profil/spieler/17121)."
+        },
+        {
+          "categorySlug": "world-cup-goals",
+          "canonicalEntityId": "transfermarkt:world-cup:player:3885ec2e25136d206ab6b3f2",
+          "canonicalName": "Neymar",
+          "sourceName": "Neymar",
+          "sourceProfileUrl": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+          "sourceExternalId": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+          "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/neymar/profil/spieler/68290)."
+        }
+      ],
+      "openDiscrepancies": [
+        "La fuente primaria mantiene rightsStatus=review_required.",
+        "La fuente archivada no expone una trazabilidad partido por partido en este artefacto; debe documentarse antes de aprobar.",
+        "Las imágenes pendientes quedan fuera de esta decisión de alcance y se abordarán en el bloque de media."
+      ],
+      "approvalGates": [
+        "Confirmar que el corte 1930–2026 y la exclusión de clasificatorias están explícitos en la fuente adoptada.",
+        "Conservar la definición completa en metadatos de una nueva versión draft si se modifica el snapshot.",
+        "Resolver derechos de redistribución de la fuente numérica antes de aprobar o publicar."
+      ],
+      "rightsStatus": "review_required",
+      "hashes": {
+        "decisionSha256": "4470ddef7886d2b8d95d103a5d01687d58349a88f2723fea5a66dc68506c6577"
+      }
+    }
+  ],
+  "allConflicts": [
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Cristiano Ronaldo",
+      "primaryValue": 140,
+      "officialValue": 141,
+      "storedValue": 140,
+      "primaryRank": 1,
+      "officialRank": 1,
+      "classification": "diferencia de alcance",
+      "classificationBasis": "La referencia UEFA separa explícitamente una lista sin clasificación (140) de otra con clasificación (141); el snapshot archivado no documenta qué corte explica este caso.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Eusébio",
+      "primaryValue": 46,
+      "officialValue": 47,
+      "storedValue": 46,
+      "primaryRank": 16,
+      "officialRank": 17,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Ferenc Puskás",
+      "primaryValue": 36,
+      "officialValue": 35,
+      "storedValue": 36,
+      "primaryRank": 23,
+      "officialRank": 24,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Luis Suárez",
+      "primaryValue": 27,
+      "officialValue": 31,
+      "storedValue": 27,
+      "primaryRank": 41,
+      "officialRank": 34,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Rivaldo",
+      "primaryValue": 27,
+      "officialValue": 31,
+      "storedValue": 27,
+      "primaryRank": 43,
+      "officialRank": 34,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Jardel",
+      "primaryValue": 25,
+      "officialValue": 28,
+      "storedValue": 25,
+      "primaryRank": 52,
+      "officialRank": 44,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Gonzalo Higuaín",
+      "primaryValue": 24,
+      "officialValue": 25,
+      "storedValue": 24,
+      "primaryRank": 57,
+      "officialRank": 55,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Marco Simone",
+      "primaryValue": 24,
+      "officialValue": 25,
+      "storedValue": 24,
+      "primaryRank": 59,
+      "officialRank": 55,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Claudio Pizarro",
+      "primaryValue": 21,
+      "officialValue": 24,
+      "storedValue": 21,
+      "primaryRank": 71,
+      "officialRank": 61,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Luiz Adriano",
+      "primaryValue": 21,
+      "officialValue": 22,
+      "storedValue": 21,
+      "primaryRank": 77,
+      "officialRank": 73,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Luis Enrique",
+      "primaryValue": 19,
+      "officialValue": 20,
+      "storedValue": 19,
+      "primaryRank": 91,
+      "officialRank": 91,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "player": "Heung-min Son",
+      "primaryValue": 19,
+      "officialValue": 21,
+      "storedValue": 19,
+      "primaryRank": 93,
+      "officialRank": 81,
+      "classification": "discrepancia no resoluble",
+      "classificationBasis": "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+      "primaryDefinition": "Tabla histórica de Transfermarkt para European Cup / Champions League; el snapshot no conserva desglose por partido ni una declaración verificable de rondas para este contraste.",
+      "officialDefinition": "Ranking histórico oficial UEFA de goles; el snapshot archivado no conserva el desglose por partido/ronda de esta fila.",
+      "includesEuropeanCup": "no documentado",
+      "includesQualifying": "no documentado",
+      "includesPreliminaryRounds": "no documentado",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "status": "abierta"
+    }
+  ],
+  "allAbbreviatedIdentities": [
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "canonicalEntityId": "transfermarkt:european-cup-champions-league:player:b8cc45b74357d05470f9fa6c",
+      "canonicalName": "Raúl",
+      "sourceName": "Raúl",
+      "sourceProfileUrl": "https://www.transfermarkt.com/raul/profil/spieler/7349",
+      "sourceExternalId": "https://www.transfermarkt.com/raul/profil/spieler/7349",
+      "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/raul/profil/spieler/7349)."
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "canonicalEntityId": "france-football:player:10294",
+      "canonicalName": "Eusébio",
+      "sourceName": "Eusébio",
+      "sourceProfileUrl": "https://www.transfermarkt.com/eusebio/profil/spieler/89230",
+      "sourceExternalId": "https://www.transfermarkt.com/eusebio/profil/spieler/89230",
+      "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/eusebio/profil/spieler/89230)."
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "canonicalEntityId": "bdfutbol:la-liga:player:8496753b629895ff211f4d41",
+      "canonicalName": "Neymar da Silva Santos Júnior",
+      "sourceName": "Neymar",
+      "sourceProfileUrl": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+      "sourceExternalId": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+      "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/neymar/profil/spieler/68290)."
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "canonicalEntityId": "transfermarkt:world-cup:player:ee353ea3ec0b143f6f5fb032",
+      "canonicalName": "Ronaldo",
+      "sourceName": "Ronaldo",
+      "sourceProfileUrl": "https://www.transfermarkt.com/ronaldo/profil/spieler/3140",
+      "sourceExternalId": "https://www.transfermarkt.com/ronaldo/profil/spieler/3140",
+      "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/ronaldo/profil/spieler/3140)."
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "canonicalEntityId": "transfermarkt:world-cup:player:0f03fc0cf25d0c58202b8f98",
+      "canonicalName": "Pelé",
+      "sourceName": "Pelé",
+      "sourceProfileUrl": "https://www.transfermarkt.com/pele/profil/spieler/17121",
+      "sourceExternalId": "https://www.transfermarkt.com/pele/profil/spieler/17121",
+      "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/pele/profil/spieler/17121)."
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "canonicalEntityId": "transfermarkt:world-cup:player:3885ec2e25136d206ab6b3f2",
+      "canonicalName": "Neymar",
+      "sourceName": "Neymar",
+      "sourceProfileUrl": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+      "sourceExternalId": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+      "disambiguation": "Perfil externo exacto de Transfermarkt; se conserva el nombre canónico del catálogo y no se resuelve por nombre libre (https://www.transfermarkt.com/neymar/profil/spieler/68290)."
+    }
+  ],
+  "recommendation": "Mantener los snapshots actuales en draft y rights_required/review_required. Resolver alcance, definición y derechos antes de cambiar valores, aprobar o publicar.",
+  "hashes": {
+    "bundleSha256": "3c9b519328f240ea285c0be178eee1635f907f11caf81f5ef9f7d1129d5ab04e"
+  }
+}

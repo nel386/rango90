@@ -316,7 +316,20 @@ async function run(): Promise<void> {
     const rankingBody = JSON.parse(ranking.body) as { entries: Array<Record<string, unknown>> };
     assert.equal(rankingBody.entries.length, 2);
     assert.equal(rankingBody.entries[0]?.image_status, 'fallback');
+    assert.equal(rankingBody.entries[0]?.review_status, 'missing');
+    assert.equal(rankingBody.entries[0]?.rights_status, 'missing');
+    assert.equal(rankingBody.entries[0]?.is_publishable, false);
+    assert.equal(rankingBody.entries[0]?.playable, true);
+    assert.equal((JSON.parse(ranking.body) as { rankingScope: string }).rankingScope, 'historical_snapshot');
     assert.match(String(rankingBody.entries[0]?.image_url), /\/v1\/media\/it-entity-[^/]+\/fallback$/u);
+    const officialApp = buildApp({ gameDb: pool, runtimeMode: 'official' });
+    try {
+      const missingOfficialRanking = await officialApp.inject({ method: 'GET', url: '/v1/rankings/category-that-does-not-exist' });
+      assert.equal(missingOfficialRanking.statusCode, 404);
+      assert.deepEqual(JSON.parse(missingOfficialRanking.body), { error: 'ranking_not_available', category: 'category-that-does-not-exist', mode: 'official', reason: 'no_published_snapshot' });
+    } finally {
+      await officialApp.close();
+    }
     const media = await app.inject({ method: 'GET', url: `/v1/media/${entityA}` });
     assert.equal(media.statusCode, 200);
     const mediaBody = JSON.parse(media.body) as { image_status: string; image_url: string };

@@ -1,0 +1,45 @@
+{
+  "readyForRelease": false,
+  "blockingReasons": [
+    "mobile_audit:not_run",
+    "public_read_only_audit:failed"
+  ],
+  "evidence": {
+    "isolatedIntegration": {
+      "status": "passed",
+      "detail": "La suite de integración se ejecutó contra la URL aislada declarada."
+    },
+    "mobileAudit": {
+      "status": "not_run",
+      "p0": 0,
+      "p1": 0,
+      "detail": "No hay navegador/capturador disponible en esta sesión; no se han inventado capturas."
+    },
+    "publicReadOnlyAudit": {
+      "status": "failed",
+      "detail": "Auditoría pública de solo lectura: failed."
+    },
+    "officialPublication": {
+      "status": "passed",
+      "detail": "Fixture oficial sintética aislada verificada; no se publicó ningún dato productivo."
+    },
+    "artifactHashes": {
+      "/home/ubuntu/rango90/backend/audits/ranking-truth/ranking-truth.json": "a022a6d734c4bff1a2ba384ef8b6c6e68596e5ca218d071d56646019bffcf54b",
+      "/home/ubuntu/rango90/backend/audits/ranking-scope/ranking-scope-decisions.json": "6af6a19198cebc42cfb4bf44790d90fc9334492d6b41eded8cefbd23b685fb80",
+      "/home/ubuntu/rango90/backend/audits/media/playable-media-audit.json": "15939410a92f33f17f7c32662037f47c62ac6bf27daf23467ad36bea0d810104",
+      "/home/ubuntu/rango90/backend/audits/block6/public-readonly.json": "8f7fe02a49bb8e0a9344271155c94cdabe425236f41e32076578dac0cc769bcc"
+    },
+    "run": {
+      "runId": "block6a-20260916-001",
+      "timestamp": "2026-09-16T00:00:00.000Z",
+      "runtimeMode": "lab",
+      "isolatedDatabase": {
+        "configured": true,
+        "distinctFromDatabaseUrl": true,
+        "databaseName": "rango90_block6a",
+        "fingerprintSha256": "655ebebed442500f5a6f7a91a6a216b00253ae0a79efd7ee675b4a93236770da"
+      }
+    }
+  },
+  "evidenceSha256": "5d2a8f0e335a336f370ab64937a062522d1d259b71f443a5129f9ce92d5e23a7"
+}

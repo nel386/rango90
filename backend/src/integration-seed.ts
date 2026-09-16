@@ -84,7 +84,7 @@ async function seed(): Promise<void> {
       `INSERT INTO game_challenges
          (id, challenge_kind, challenge_date, status, source_version, engine_version,
           time_limit_seconds, score_cap, challenge_sha256, published_at, metadata)
-         VALUES ($1, 'daily', $2, 'draft', 'integration-v1', $4, 120, 100, $3, NULL, '{"fixture":true,"integrationOnly":true}'::jsonb)
+         VALUES ($1, 'daily', $2, 'draft', 'integration-v1', $4, 120, 100, $3, NULL, '{"fixture":true,"integrationOnly":true,"testOnly":true}'::jsonb)
        ON CONFLICT (id) DO UPDATE SET challenge_date = EXCLUDED.challenge_date, status = 'draft', published_at = NULL,
          source_version = EXCLUDED.source_version, engine_version = EXCLUDED.engine_version,
          challenge_sha256 = EXCLUDED.challenge_sha256, metadata = EXCLUDED.metadata`,

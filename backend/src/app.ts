@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 import { z } from 'zod';
 import { config, corsOrigins } from './config.js';
+import { runtimeConfigPayload, type RuntimeMode } from './runtimeMode.js';
 import { pool } from './db.js';
 import { registerAuthRoutes } from './auth.js';
 import { ContractError, registerGameContractRoutes, type ContractDatabase } from './game-contract.js';
@@ -34,9 +35,12 @@ function playableTop200Predicate(entityAlias: string, profileAlias: string): str
   )`;
 }
 
-export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Date } = {}) {
+export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Date; runtimeMode?: RuntimeMode } = {}) {
   const app = Fastify({ logger: true, trustProxy: config.trustProxy });
+  const appDb = options.gameDb ?? pool;
   const rateLimiter = new SlidingWindowRateLimiter();
+  const runtimeMode = options.runtimeMode ?? config.runtimeMode;
+  app.log.info({ runtimeMode }, 'Rango90 runtime mode configured');
 
   app.addHook('onSend', async (_request, reply, payload) => {
     reply.header('X-Content-Type-Options', 'nosniff');
@@ -73,7 +77,12 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
   });
 
   registerAuthRoutes(app);
-  registerGameContractRoutes(app, { db: options.gameDb, clock: options.clock });
+  registerGameContractRoutes(app, { db: options.gameDb, clock: options.clock, runtimeMode });
+
+  app.get('/v1/config', async () => ({
+    service: 'rango90-backend',
+    ...runtimeConfigPayload(runtimeMode)
+  }));
 
   app.get('/health', async (_request, reply) => {
     const requiredTables = [
@@ -101,50 +110,72 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
       return {
         ok: missingTables.length === 0,
         service: 'rango90-backend',
+        ...runtimeConfigPayload(runtimeMode),
         database: { connected: true, schemaReady: missingTables.length === 0, missingTables }
       };
     } catch {
-      return reply.code(503).send({ ok: false, service: 'rango90-backend', database: { connected: false } });
+      return reply.code(503).send({ ok: false, service: 'rango90-backend', ...runtimeConfigPayload(runtimeMode), database: { connected: false } });
     }
   });
 
   app.get('/v1/categories', async (request) => {
     z.object({}).parse(request.query);
-    const result = await pool.query(
-      `SELECT id, slug, label_es, label_en, entity_type, metric_key, scope_kind, scope, ranking_direction, tie_policy, score_cap, definition_version, definition_md, status
-       FROM category_definitions
-       WHERE status = 'published'
-       ORDER BY slug`,
-      []
+    const result = await appDb.query(
+      `SELECT c.id, c.slug, c.label_es, c.label_en, c.entity_type, c.metric_key, c.scope_kind, c.scope, c.ranking_direction, c.tie_policy, c.score_cap, c.definition_version, c.definition_md, c.status,
+              latest.status AS snapshot_status, latest.id AS snapshot_id
+       FROM category_definitions c
+       JOIN LATERAL (
+         SELECT rs.id, rs.status
+           FROM ranking_snapshots rs
+          WHERE rs.category_id = c.id
+            AND (rs.status = 'published' OR ($1::text = 'lab' AND rs.status = 'draft'))
+          ORDER BY rs.generated_at DESC
+          LIMIT 1
+       ) latest ON TRUE
+       WHERE (c.status = 'published' OR ($1::text = 'lab' AND c.status = 'draft'))
+       ORDER BY c.slug`,
+      [runtimeMode]
     );
-    return { categories: result.rows };
+    return { categories: result.rows.map((row) => ({ ...row, availability: row.snapshot_status === 'draft' ? 'provisional' : 'official' })) };
   });
 
   app.get('/v1/rankings/:categorySlug', async (request, reply) => {
     const params = z.object({ categorySlug: z.string().min(1) }).parse(request.params);
     const query = z.object({ limit: z.coerce.number().int().min(1).max(200).default(200) }).parse(request.query);
-    const result = await pool.query(
+    const result = await appDb.query(
       `WITH latest_snapshot AS (
          SELECT rs.* FROM ranking_snapshots rs
          JOIN category_definitions c0 ON c0.id = rs.category_id
-         WHERE c0.slug = $1 AND rs.status = 'published'
+         WHERE c0.slug = $1 AND c0.status <> 'retired'
+           AND (rs.status = 'published' OR ($3::text = 'lab' AND rs.status = 'draft'))
          ORDER BY rs.generated_at DESC LIMIT 1
        )
-       SELECT c.slug, c.label_es, c.label_en, rs.id AS snapshot_id, rs.data_version, rs.generated_at,
+       SELECT c.slug, c.label_es, c.label_en, c.status AS category_status,
+              rs.id AS snapshot_id, rs.status AS snapshot_status, rs.data_version, rs.generated_at,
               ce.id AS entity_id, re.entity_id AS source_entity_id,
               ce.entity_type, ce.canonical_name, ce.short_name, ce.is_goalkeeper,
               re.raw_value, re.rank, re.score_value, re.tie_group,
+              (COALESCE(egp.playable_default, FALSE) AND ce.catalog_status = 'active') AS playable,
               COALESCE(egp.playable_default, FALSE) AS playable_default,
               CASE WHEN ia.id IS NOT NULL
                    THEN '/v1/media/' || ce.id || '/file'
                    ELSE '/v1/media/' || ce.id || '/fallback'
               END AS image_url,
               CASE WHEN ia.id IS NOT NULL THEN 'licensed' ELSE 'fallback' END AS image_status,
-              ia.source_url AS image_source_url,
-              ia.provider AS image_provider,
-              ia.license_name AS image_license_name,
-              ia.license_url AS image_license_url,
-              ia.metadata->>'author' AS image_author
+              COALESCE(media_state.review_status, 'missing') AS review_status,
+              CASE
+                WHEN ia.id IS NOT NULL THEN 'approved'
+                WHEN media_state.review_status = 'pending' THEN 'review_required'
+                WHEN media_state.review_status = 'rejected' THEN 'rejected'
+                WHEN media_state.review_status = 'approved' THEN 'review_required'
+                ELSE 'missing'
+              END AS rights_status,
+              (ia.id IS NOT NULL) AS is_publishable,
+              COALESCE(ia.source_url, media_state.source_url) AS image_source_url,
+              COALESCE(ia.provider, media_state.provider) AS image_provider,
+              COALESCE(ia.license_name, media_state.license_name) AS image_license_name,
+              COALESCE(ia.license_url, media_state.license_url) AS image_license_url,
+              COALESCE(ia.metadata, media_state.metadata)->>'author' AS image_author
        FROM category_definitions c
        JOIN latest_snapshot rs ON rs.category_id = c.id
        JOIN ranking_entries re ON re.snapshot_id = rs.id AND re.rank <= $2
@@ -160,16 +191,23 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
          AND jsonb_array_length(ia.usage_scope) > 0
          AND (ce.entity_type <> 'club' OR ia.trademark_status = 'cleared')
          AND (ia.attribution_required = FALSE OR NULLIF(ia.attribution_text, '') IS NOT NULL)
+       LEFT JOIN LATERAL (
+         SELECT candidate.review_status, candidate.source_url, candidate.provider, candidate.license_name, candidate.license_url, candidate.metadata
+           FROM image_assets candidate
+          WHERE candidate.entity_id = ce.id
+            AND candidate.asset_kind = CASE WHEN ce.entity_type = 'player' THEN 'portrait' ELSE 'badge' END
+          ORDER BY candidate.is_primary DESC, CASE candidate.review_status WHEN 'pending' THEN 1 WHEN 'approved' THEN 2 ELSE 3 END, candidate.id
+          LIMIT 1
+       ) media_state ON TRUE
        WHERE c.slug = $1
-         AND ce.catalog_status = 'active'
-         AND ${playableTop200Predicate('ce', 'egp')}
        ORDER BY rs.generated_at DESC, re.rank, e.canonical_name
        LIMIT $2`,
-      [params.categorySlug, query.limit]
+      [params.categorySlug, query.limit, runtimeMode]
     );
-    if (result.rows.length === 0) return reply.code(404).send({ error: 'Published ranking not found' });
+    if (result.rows.length === 0) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: runtimeMode === 'official' ? 'no_published_snapshot' : 'no_available_snapshot' });
     const snapshotId = result.rows[0]?.snapshot_id;
-    return { category: result.rows[0]?.slug, snapshotId, entries: result.rows };
+    const provisional = runtimeMode === 'lab' && result.rows[0]?.snapshot_status !== 'published';
+    return { category: result.rows[0]?.slug, rankingScope: 'historical_snapshot', snapshotId, mode: runtimeMode, status: provisional ? 'provisional' : 'official', entries: result.rows.map((row) => ({ ...row, imageStatus: row.image_status, reviewStatus: row.review_status, rightsStatus: row.rights_status, isPublishable: Boolean(row.is_publishable), playable: Boolean(row.playable), media: { status: row.image_status, imageStatus: row.image_status, reviewStatus: row.review_status, rightsStatus: row.rights_status, isPublishable: Boolean(row.is_publishable), url: row.image_url, sourceUrl: row.image_source_url, licenseName: row.image_license_name } })) };
   });
 
   app.get('/v1/entities/:entityId', async (request, reply) => {

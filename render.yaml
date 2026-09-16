@@ -12,6 +12,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: RANGO90_RUNTIME_MODE
+        value: official
       - key: DATABASE_URL
         fromDatabase:
           name: rango90-db

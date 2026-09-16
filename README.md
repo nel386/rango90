@@ -128,6 +128,16 @@ La revisión arquitectónica inicial está documentada en [`ARCHITECTURE_REVIEW.
 
 `NEXT_PUBLIC_API_BASE_URL` debe estar definido en cualquier build distribuible del frontend. Sin esa variable, la aplicación muestra un error de configuración y no simula partidas que no se validan ni se guardan en el backend. Los datos sintéticos quedan fuera del runtime distribuible.
 
+### Modos de ejecución
+
+El backend exige un modo explícito mediante `RANGO90_RUNTIME_MODE=lab` u `RANGO90_RUNTIME_MODE=official`; la variable es obligatoria fuera de tests y el proceso falla si falta o contiene otro valor. El valor no se deduce del host, localhost ni de una consulta SQL. `lab` permite probar retos `draft`, `testOnly`, categorías provisionales y fallback visual, y la interfaz muestra “Modo laboratorio”, “Datos provisionales” y “Este reto no representa una publicación oficial”. `official` solo sirve retos publicables; nunca hace fallback a laboratorio. Si no existe uno válido, `/v1/challenges/daily` devuelve `official_not_ready` con los bloqueos y el snapshot requerido.
+
+El modo se fija al arrancar el proceso y se expone en `/health`, `/v1/config`, los logs y el payload del reto. La aplicación web toma el modo del backend y rechaza un reto `testOnly` si está en `official`.
+
+El flujo de juego está documentado y verificado en [`BLOCK4_VERIFICATION.md`](./BLOCK4_VERIFICATION.md). La carga del reto se deduplica y cancela, `Jugar` y `Reintentar carga` tienen semánticas separadas, las sesiones se validan antes de mostrar la partida, el reloj usa `deadlineAt`, las imágenes se precargan con fallback y el feedback procede del servidor. Estas mejoras no modifican rankings, snapshots, fuentes, derechos ni retos.
+
+La clasificación competitiva y los rankings futbolísticos son superficies distintas. [`BLOCK5_VERIFICATION.md`](./BLOCK5_VERIFICATION.md) documenta la pantalla de clasificación del reto, los rankings por categoría y la auditoría de medios del pool jugable, con prioridad para los jugadores sin retrato aprobado del Mundial. El endpoint por categoría conserva el valor bruto, la puntuación, el empate, el snapshot y el estado de media sin aprobar ni publicar cambios.
+
 ```bash
 npm install
 npm run lint

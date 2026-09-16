@@ -1,0 +1,28 @@
+import assert from "node:assert/strict";
+import { canStartGame, canSubmitDecision, transitionGameFlow, type GameFlowState } from "./game-flow";
+
+let state: GameFlowState = "idle";
+state = transitionGameFlow(state, { type: "START_GAME" });
+assert.equal(state, "idle");
+state = transitionGameFlow(state, { type: "LOAD_CHALLENGE" });
+state = transitionGameFlow(state, { type: "CHALLENGE_READY" });
+assert.equal(canStartGame(state), true);
+state = transitionGameFlow(state, { type: "START_GAME" });
+assert.equal(state, "starting_game");
+state = transitionGameFlow(state, { type: "GAME_STARTED" });
+assert.equal(state, "playing");
+assert.equal(canSubmitDecision(state), true);
+state = transitionGameFlow(state, { type: "SUBMIT_DECISION" });
+assert.equal(state, "submitting_decision");
+assert.equal(canSubmitDecision(state), false);
+state = transitionGameFlow(state, { type: "SUBMIT_DECISION" });
+assert.equal(state, "submitting_decision");
+state = transitionGameFlow(state, { type: "FEEDBACK_SHOWN" });
+state = transitionGameFlow(state, { type: "CONTINUE" });
+assert.equal(state, "playing");
+state = transitionGameFlow(state, { type: "ABANDON" });
+assert.equal(state, "abandoned");
+assert.equal(transitionGameFlow(state, { type: "CONTINUE" }), "abandoned");
+assert.equal(transitionGameFlow("loading_challenge", { type: "ERROR", officialNotReady: true }), "official_not_ready");
+assert.equal(transitionGameFlow("starting_game", { type: "ERROR" }), "error");
+console.log("game-flow tests passed");

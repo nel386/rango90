@@ -1,5 +1,5 @@
 import { mockDailyChallenge } from "./mock-game";
-import { RepositoryError, type AssignmentClaim, type GameRepository, type GameResult, type GameSession, type LeaderboardEntry, type OfficialAssignment } from "./game-repository";
+import { RepositoryError, type AssignmentClaim, type CategoryRanking, type GameRepository, type GameResult, type GameSession, type LeaderboardEntry, type OfficialAssignment, type RankingCategoryOption } from "./game-repository";
 
 function hashMockResult(assignments: OfficialAssignment[]) {
   return assignments.map((assignment) => `${assignment.ordinal}:${assignment.entityId}:${assignment.categorySlug}:${assignment.scoreValue}`).join("|");
@@ -29,6 +29,7 @@ const mockLeaderboard: LeaderboardEntry[] = [
 ];
 
 export const mockGameRepository: GameRepository = {
+  getRuntimeConfig: async () => ({ runtimeMode: "lab", modeLabel: "Modo laboratorio", provisionalDataAllowed: true, officialPublicationOnly: false }),
   getCurrentUser: async () => null,
   login: async () => { throw new RepositoryError("Backend unavailable", "offline"); },
   register: async () => { throw new RepositoryError("Backend unavailable", "offline"); },
@@ -57,6 +58,16 @@ export const mockGameRepository: GameRepository = {
     return mockResult(session, claims, true);
   },
   getLeaderboard: async (challengeId) => challengeId === mockDailyChallenge.id ? mockLeaderboard : [],
+  getCategoryRanking: async (categorySlug): Promise<CategoryRanking> => {
+    const category = mockDailyChallenge.categories.find((item) => item.slug === categorySlug);
+    if (!category) throw new RepositoryError("Ranking not found", "not_found", 404, "ranking_not_found");
+    const entries = mockDailyChallenge.entities
+      .map((entity) => ({ entity, value: entity.scores[categorySlug] ?? 100 }))
+      .sort((left, right) => left.value - right.value || left.entity.name.localeCompare(right.entity.name))
+      .map(({ entity, value }, index) => ({ rank: index + 1, entityId: entity.id, canonicalName: entity.name, rawValue: value, scoreValue: value, tieGroup: null, imageUrl: entity.imageUrl, imageStatus: "fallback" as const, reviewStatus: "missing" as const, rightsStatus: "missing" as const, isPublishable: false, playable: true, snapshotId: `mock-snapshot-${categorySlug}`, dataVersion: "mock-v1", generatedAt: new Date(0).toISOString() }));
+    return { category: { slug: category.slug, labelEs: category.label.es, labelEn: category.label.en }, rankingScope: "historical_snapshot", snapshotId: `mock-snapshot-${categorySlug}`, mode: "lab", status: "provisional", entries };
+  },
+  getRankingCategories: async (): Promise<RankingCategoryOption[]> => mockDailyChallenge.categories.map((category) => ({ slug: category.slug, labelEs: category.label.es, labelEn: category.label.en, availability: "provisional" })),
   createDuel: async (challengeId) => ({ id: `mock-duel-${challengeId}`, code: "MOCK90", status: "open", challengeId, expiresAt: new Date(Date.now() + 604800000).toISOString(), joinable: true, challenge: mockDailyChallenge, participantToken: "mock-participant" }),
   getDuel: async () => ({ id: "mock-duel", code: "MOCK90", status: "open", challengeId: mockDailyChallenge.id, expiresAt: new Date(Date.now() + 604800000).toISOString(), joinable: true, challenge: mockDailyChallenge, participants: [{ slot: 1, status: "active", hasResult: false, totalScore: null, elapsedSeconds: null, timedOut: null }] }),
   joinDuel: async () => ({ id: "mock-duel", code: "MOCK90", status: "active", challengeId: mockDailyChallenge.id, expiresAt: new Date(Date.now() + 604800000).toISOString(), joinable: false, challenge: mockDailyChallenge, participantToken: "mock-participant-2" }),

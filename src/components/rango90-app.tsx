@@ -7,10 +7,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
-import { createGameRepository, RepositoryError, type AuthUser, type DecisionFeedback, type DuelState, type GameResult, type GameSession, type LeaderboardEntry } from "@/data/game-repository";
+import { createGameRepository, RepositoryError, type AuthUser, type CategoryRanking, type DecisionFeedback, type DuelState, type GameResult, type GameSession, type LeaderboardEntry, type RankingCategoryOption, type RuntimeConfig } from "@/data/game-repository";
 import type { Locale, MockCategory, MockChallenge, MockEntity } from "@/data/game-types";
+import { canStartGame, canSubmitDecision, transitionGameFlow, type GameFlowEvent, type GameFlowState } from "@/data/game-flow";
+import { imageRequestIsCurrent, preloadImage } from "@/data/image-preload";
+import { nowRuntimeMetric, recordRuntimeMetric } from "@/data/runtime-metrics";
+import { secondsUntilDeadline } from "@/data/game-clock";
 
-type View = "home" | "game" | "result" | "ranking" | "duels" | "account";
+type View = "home" | "game" | "result" | "ranking" | "category-ranking" | "duels" | "account";
 type GamePhase = "playing" | "feedback" | "finished" | "abandoned";
 type ChallengeLoadState = "ready" | "loading" | "error";
 type Assignment = { ordinal: number; entity: MockEntity; category: MockCategory; score: number | null; timedOut?: boolean; feedback?: DecisionFeedback };
@@ -64,7 +68,7 @@ function futureIso(seconds: number) {
 }
 
 function secondsUntil(isoDate: string) {
-  return Math.max(0, Math.ceil((Date.parse(isoDate) - Date.now()) / 1000));
+  return secondsUntilDeadline(isoDate);
 }
 
 async function copyText(text: string) {
@@ -92,7 +96,9 @@ export function Rango90App({ locale }: { locale: Locale }) {
   const [phase, setPhase] = useState<GamePhase>("playing");
   const [gameMode, setGameMode] = useState<GameMode>("daily");
   const [challenge, setChallenge] = useState(fallbackChallenge);
+  const [runtimeConfig, setRuntimeConfig] = useState<RuntimeConfig | null>(null);
   const [challengeLoadState, setChallengeLoadState] = useState<ChallengeLoadState>("loading");
+  const [flowState, setFlowState] = useState<GameFlowState>("loading_challenge");
   const [secondsLeft, setSecondsLeft] = useState(fallbackChallenge.timeLimitSeconds);
   const [session, setSession] = useState<GameSession | null>(null);
   const [officialResult, setOfficialResult] = useState<GameResult | null>(null);
@@ -115,6 +121,10 @@ export function Rango90App({ locale }: { locale: Locale }) {
   const [shareMessage, setShareMessage] = useState("");
   const [leaderboardRows, setLeaderboardRows] = useState<LeaderboardEntry[]>([]);
   const [leaderboardState, setLeaderboardState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [categoryRanking, setCategoryRanking] = useState<CategoryRanking | null>(null);
+  const [rankingCategories, setRankingCategories] = useState<RankingCategoryOption[]>([]);
+  const [categoryRankingState, setCategoryRankingState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [selectedRankingCategory, setSelectedRankingCategory] = useState("");
   const [submissionState, setSubmissionState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [leaderboardEligible, setLeaderboardEligible] = useState<boolean | null>(null);
   const [duel, setDuel] = useState<DuelState | null>(null);
@@ -126,15 +136,81 @@ export function Rango90App({ locale }: { locale: Locale }) {
   const [duelComparisonState, setDuelComparisonState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [submissionDuplicate, setSubmissionDuplicate] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  const [imageOverrides, setImageOverrides] = useState<Record<string, string | null>>({});
   const lastFocusedElementRef = useRef<HTMLElement | null>(null);
   const timeoutHandled = useRef(false);
   const submittedResultKey = useRef<string | null>(null);
   const expireRequestStarted = useRef(false);
   const secondsLeftRef = useRef(fallbackChallenge.timeLimitSeconds);
+  const mountedRef = useRef(true);
+  const challengeAbortRef = useRef<AbortController | null>(null);
+  const challengeLoadGenerationRef = useRef(0);
+  const startRequestStarted = useRef(false);
+  const gameGenerationRef = useRef(0);
+  const feedbackTimerRef = useRef<number | null>(null);
+  const feedbackGenerationRef = useRef(0);
+  const imageRequestIdRef = useRef(0);
+  const imageAbortRef = useRef<AbortController | null>(null);
+  const imageMetricStartedRef = useRef<number | null>(null);
+  const firstPlayerMetricRecordedRef = useRef(false);
+  const deadlineAtRef = useRef<string | null>(null);
+  const decisionStartedAtRef = useRef<number | null>(null);
+
+  const transitionFlow = useCallback((event: GameFlowEvent) => {
+    setFlowState((current) => transitionGameFlow(current, event));
+  }, []);
 
   useEffect(() => {
     secondsLeftRef.current = secondsLeft;
   }, [secondsLeft]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      challengeAbortRef.current?.abort();
+      imageAbortRef.current?.abort();
+      if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
+      imageRequestIdRef.current += 1;
+    };
+  }, []);
+
+  const loadDailyChallenge = useCallback(async () => {
+    const generation = ++challengeLoadGenerationRef.current;
+    challengeAbortRef.current?.abort();
+    const controller = new AbortController();
+    challengeAbortRef.current = controller;
+    const startedAt = nowRuntimeMetric();
+    setChallengeLoadState("loading");
+    setRepositoryError(null);
+    transitionFlow({ type: "LOAD_CHALLENGE" });
+    try {
+      const loadedChallenge = await gameRepository.getDailyChallenge({ signal: controller.signal });
+      if (!mountedRef.current || generation !== challengeLoadGenerationRef.current) return;
+      setChallenge(loadedChallenge);
+      setSecondsLeft(loadedChallenge.timeLimitSeconds);
+      deadlineAtRef.current = null;
+      setImageOverrides({});
+      setChallengeLoadState("ready");
+      transitionFlow({ type: "CHALLENGE_READY" });
+      recordRuntimeMetric("challenge_load", startedAt, { challengeId: loadedChallenge.id });
+    } catch (error: unknown) {
+      if (!mountedRef.current || generation !== challengeLoadGenerationRef.current || (error instanceof RepositoryError && error.code === "request_cancelled")) return;
+      const normalized = error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline");
+      setRepositoryError(normalized);
+      setChallengeLoadState("error");
+      transitionFlow({ type: "ERROR", officialNotReady: normalized.code === "official_not_ready" });
+      recordRuntimeMetric("request_error", startedAt, { operation: "daily_challenge", code: normalized.code, kind: normalized.kind });
+    }
+  }, [transitionFlow]);
+
+  useEffect(() => {
+    const kickoff = window.setTimeout(() => { void loadDailyChallenge(); }, 0);
+    return () => {
+      window.clearTimeout(kickoff);
+      challengeAbortRef.current?.abort();
+    };
+  }, [loadDailyChallenge]);
 
   useEffect(() => {
     const updateConnection = () => setIsOffline(!navigator.onLine);
@@ -145,6 +221,17 @@ export function Rango90App({ locale }: { locale: Locale }) {
       window.removeEventListener("online", updateConnection);
       window.removeEventListener("offline", updateConnection);
     };
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    gameRepository.getRuntimeConfig({ signal: controller.signal }).then((config) => {
+      if (mountedRef.current) setRuntimeConfig(config);
+    }).catch(() => {
+      // The challenge response remains authoritative when the config endpoint
+      // is temporarily unavailable.
+    });
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -204,6 +291,28 @@ export function Rango90App({ locale }: { locale: Locale }) {
   const decisionCount = mockDailyChallenge.entities.length;
   const progress = decisionCount > 0 ? assignments.length / decisionCount : 0;
   const isQualified = officialResult ? leaderboardEligible === true : false;
+
+  useEffect(() => {
+    if (view !== "game" || !currentEntity || typeof window === "undefined") return;
+    const requestId = ++imageRequestIdRef.current;
+    imageAbortRef.current?.abort();
+    const imageController = new AbortController();
+    imageAbortRef.current = imageController;
+    imageMetricStartedRef.current = nowRuntimeMetric();
+    const nextEntity = mockDailyChallenge.entities[entityIndex + 1];
+    const targets = [currentEntity, nextEntity].filter((entity): entity is MockEntity => Boolean(entity));
+    void Promise.all(targets.map(async (entity) => {
+      const primaryStarted = nowRuntimeMetric();
+      const primary = await preloadImage({ primary: entity.imageUrl, signal: imageController.signal });
+      if (!mountedRef.current || !imageRequestIsCurrent(requestId, imageRequestIdRef.current)) return;
+      recordRuntimeMetric("image_primary_load", primaryStarted, { entityId: entity.id, result: primary });
+      const fallbackStarted = nowRuntimeMetric();
+      const fallback = await preloadImage({ primary: entity.imageFallbackUrl, signal: imageController.signal });
+      if (!mountedRef.current || !imageRequestIsCurrent(requestId, imageRequestIdRef.current)) return;
+      recordRuntimeMetric("image_fallback_load", fallbackStarted, { entityId: entity.id, result: fallback });
+    }));
+  }, [currentEntity, entityIndex, mockDailyChallenge.entities, view]);
+
   const applyOfficialResult = useCallback((result: GameResult) => {
     setOfficialResult(result);
     setAssignments(result.assignments.map((assignment) => {
@@ -212,21 +321,6 @@ export function Rango90App({ locale }: { locale: Locale }) {
       return { ordinal: assignment.ordinal, entity: entity ?? mockDailyChallenge.entities[0], category: category ?? mockDailyChallenge.categories[0], score: assignment.scoreValue, timedOut: assignment.timedOut };
     }).filter((assignment) => Boolean(assignment.entity && assignment.category)));
   }, [mockDailyChallenge]);
-
-  useEffect(() => {
-    let active = true;
-    gameRepository.getDailyChallenge().then((loadedChallenge) => {
-      if (!active) return;
-      setChallenge(loadedChallenge);
-      setSecondsLeft(loadedChallenge.timeLimitSeconds);
-      setChallengeLoadState("ready");
-    }).catch((error: unknown) => {
-      if (!active) return;
-      setRepositoryError(error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline"));
-      setChallengeLoadState("error");
-    });
-    return () => { active = false; };
-  }, []);
 
   async function refreshDuelComparison(code: string, ownSlot: number) {
     setDuelComparisonState("loading");
@@ -243,8 +337,11 @@ export function Rango90App({ locale }: { locale: Locale }) {
   }
 
   const expireCurrentGame = useCallback(() => {
-    if (timeoutHandled.current || (phase === "finished" && !timedOut && repositoryError?.code !== "time_expired") || phase === "abandoned") return;
+    if (timeoutHandled.current || (phase !== "playing" && phase !== "feedback")) return;
     timeoutHandled.current = true;
+    gameGenerationRef.current += 1;
+    if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
+    feedbackTimerRef.current = null;
     const used = new Set(assignments.map((assignment) => assignment.category.slug));
     const categories = mockDailyChallenge.categories.filter((category) => !used.has(category.slug));
     const entities = mockDailyChallenge.entities.slice(assignments.length);
@@ -259,16 +356,21 @@ export function Rango90App({ locale }: { locale: Locale }) {
     setAssignments([...assignments, ...timeoutAssignments]);
     setTimedOut(true);
     setPhase("finished");
+    transitionFlow({ type: "FINISH" });
+    deadlineAtRef.current = null;
     expireRequestStarted.current = true;
     setSubmissionState("saving");
+    const gameGeneration = gameGenerationRef.current;
     if (gameMode === "duel" && activeDuel) {
       gameRepository.submitDuelResult(activeDuel.code, activeDuel.token, claims).then((response) => {
+        if (!mountedRef.current || gameGeneration !== gameGenerationRef.current) return;
         applyOfficialResult(response.result);
         setLeaderboardEligible(response.leaderboardEligible);
         setSubmissionDuplicate(response.duplicate);
         setSubmissionState("saved");
         void refreshDuelComparison(activeDuel.code, activeDuel.slot);
       }).catch((error: unknown) => {
+        if (!mountedRef.current || gameGeneration !== gameGenerationRef.current) return;
         setRepositoryError(error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline"));
         setSubmissionState("error");
       });
@@ -280,29 +382,33 @@ export function Rango90App({ locale }: { locale: Locale }) {
       return;
     }
     gameRepository.expireGame(session, claims).then((response) => {
+      if (!mountedRef.current || gameGenerationRef.current !== gameGeneration) return;
       applyOfficialResult(response.result);
       setLeaderboardEligible(response.leaderboardEligible);
       setSubmissionDuplicate(response.duplicate);
       setSubmissionState("saved");
     }).catch((error: unknown) => {
+      if (!mountedRef.current || gameGenerationRef.current !== gameGeneration) return;
       setRepositoryError(error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline"));
       setSubmissionState("error");
     });
-  }, [activeDuel, applyOfficialResult, assignments, gameMode, mockDailyChallenge, phase, repositoryError, session, timedOut]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeDuel, applyOfficialResult, assignments, gameMode, mockDailyChallenge, phase, repositoryError, session, timedOut, transitionFlow]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (view !== "game" || (phase !== "playing" && phase !== "feedback")) return;
-    const timer = window.setInterval(() => {
-      if (secondsLeftRef.current <= 1) {
-        secondsLeftRef.current = 0;
-        setSecondsLeft(0);
-        expireCurrentGame();
-        return;
-      }
-      secondsLeftRef.current -= 1;
-      setSecondsLeft(secondsLeftRef.current);
-    }, 1000);
-    return () => window.clearInterval(timer);
+    if (view !== "game" || !deadlineAtRef.current || (phase !== "playing" && phase !== "feedback")) return;
+    const tick = () => {
+      const remaining = secondsUntil(deadlineAtRef.current!);
+      secondsLeftRef.current = remaining;
+      setSecondsLeft(remaining);
+      if (remaining <= 0) expireCurrentGame();
+    };
+    tick();
+    const timer = window.setInterval(tick, 250);
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", tick);
+    };
   }, [expireCurrentGame, phase, view]);
 
   useEffect(() => {
@@ -324,7 +430,26 @@ export function Rango90App({ locale }: { locale: Locale }) {
   }, [mockDailyChallenge.id, view]);
 
   useEffect(() => {
+    if (view !== "category-ranking" || !selectedRankingCategory) return;
+    let active = true;
+    gameRepository.getCategoryRanking(selectedRankingCategory)
+      .then((ranking) => {
+        if (!active) return;
+        setCategoryRanking(ranking);
+        setCategoryRankingState("ready");
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setCategoryRanking(null);
+        setRepositoryError(error instanceof RepositoryError ? error : new RepositoryError("Ranking unavailable", "server"));
+        setCategoryRankingState("error");
+      });
+    return () => { active = false; };
+  }, [selectedRankingCategory, view]);
+
+  useEffect(() => {
     if (view !== "result" || assignments.length !== mockDailyChallenge.entities.length) return;
+    let active = true;
     if ((!session && !(gameMode === "duel" && activeDuel)) || officialResult || expireRequestStarted.current) return;
     const resultKey = `${gameMode}:${activeDuel?.code ?? mockDailyChallenge.id}:${assignments.map((assignment) => `${assignment.entity.id}-${assignment.category.slug}`).join(",")}`;
     if (submittedResultKey.current === resultKey) return;
@@ -337,27 +462,32 @@ export function Rango90App({ locale }: { locale: Locale }) {
         ? gameRepository.submitResult(session, claims)
         : Promise.reject(new RepositoryError("Game session is missing", "session"));
     request.then((response) => {
+      if (!active) return;
       applyOfficialResult(response.result);
       setLeaderboardEligible(response.leaderboardEligible);
       setSubmissionDuplicate(response.duplicate);
       setSubmissionState("saved");
       if (gameMode === "duel" && activeDuel) void refreshDuelComparison(activeDuel.code, activeDuel.slot);
     }).catch((error: unknown) => {
+      if (!active) return;
       setRepositoryError(error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline"));
       setSubmissionState("error");
     });
+    return () => { active = false; };
   }, [activeDuel, applyOfficialResult, assignments, gameMode, mockDailyChallenge.entities.length, mockDailyChallenge.id, officialResult, session, view]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function startDaily() {
-    setChallengeLoadState("loading");
+    const intentionalRestart = (view === "result" || phase === "abandoned") && challengeLoadState === "ready";
+    if (startRequestStarted.current || (!canStartGame(flowState) && !intentionalRestart) || challengeLoadState !== "ready") return;
+    startRequestStarted.current = true;
+    const startedAt = nowRuntimeMetric();
+    if (!canStartGame(flowState)) transitionFlow({ type: "CHALLENGE_READY" });
+    transitionFlow({ type: "START_GAME" });
     setRepositoryError(null);
     try {
-      // The home screen already preloads the daily challenge. Reusing it avoids
-      // a second sequential request before the session can start.
-      const loadedChallenge = challengeLoadState === "ready"
-        ? challenge
-        : await gameRepository.getDailyChallenge();
-      const startedSession = await gameRepository.startGame(loadedChallenge.id);
+      const startedSession = await gameRepository.startGame(challenge.id);
+      if (!mountedRef.current) return;
+      gameGenerationRef.current += 1;
       setChallenge(startedSession.challenge);
       setGameMode("daily");
       setSession(startedSession);
@@ -378,25 +508,50 @@ export function Rango90App({ locale }: { locale: Locale }) {
       submittedResultKey.current = null;
       setShareMessage("");
       setSubmissionState("idle");
+      firstPlayerMetricRecordedRef.current = false;
       setPhase("playing");
+      deadlineAtRef.current = startedSession.deadlineAt;
+      transitionFlow({ type: "GAME_STARTED" });
       setChallengeLoadState("ready");
       setView("game");
+      recordRuntimeMetric("game_start", startedAt, { challengeId: startedSession.challengeId, sessionId: startedSession.id });
     } catch (error: unknown) {
-      setRepositoryError(error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline"));
-      setChallengeLoadState("error");
+      if (mountedRef.current) {
+        const normalized = error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline");
+        setRepositoryError(normalized);
+        setChallengeLoadState("ready");
+        transitionFlow({ type: "ERROR", officialNotReady: normalized.code === "official_not_ready" });
+        recordRuntimeMetric("request_error", startedAt, { operation: "start_game", code: normalized.code, kind: normalized.kind });
+      }
+    } finally {
+      startRequestStarted.current = false;
     }
   }
 
   function retryChallenge() {
-    startDaily();
+    recordRuntimeMetric("request_retry", nowRuntimeMetric(), { operation: "daily_challenge" });
+    void loadDailyChallenge();
   }
 
   function abandonGame() {
     if (view !== "game" || phase === "finished" || phase === "abandoned") return;
+    gameGenerationRef.current += 1;
+    imageRequestIdRef.current += 1;
+    imageAbortRef.current?.abort();
+    if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
+    feedbackTimerRef.current = null;
     setPhase("abandoned");
+    transitionFlow({ type: "ABANDON" });
+    setDecisionPending(false);
+    setSelectedCategory(null);
   }
 
   function resetGameToHome() {
+    gameGenerationRef.current += 1;
+    imageRequestIdRef.current += 1;
+    imageAbortRef.current?.abort();
+    if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
+    feedbackTimerRef.current = null;
     setAssignments([]);
     setEntityIndex(0);
     setSelectedCategory(null);
@@ -417,6 +572,8 @@ export function Rango90App({ locale }: { locale: Locale }) {
     submittedResultKey.current = null;
     setPhase("playing");
     setChallengeLoadState("ready");
+    transitionFlow({ type: "CHALLENGE_READY" });
+    deadlineAtRef.current = null;
     setView("home");
   }
 
@@ -433,6 +590,21 @@ export function Rango90App({ locale }: { locale: Locale }) {
     setLeaderboardRows([]);
     setLeaderboardState("loading");
     setView("ranking");
+  }
+
+  function openCategoryRanking() {
+    const firstCategory = selectedRankingCategory || mockDailyChallenge.categories[0]?.slug || "";
+    setSelectedRankingCategory(firstCategory);
+    setCategoryRanking(null);
+    setCategoryRankingState("loading");
+    setRepositoryError(null);
+    setView("category-ranking");
+    void gameRepository.getRankingCategories().then((categories) => {
+      if (categories.length > 0) {
+        setRankingCategories(categories);
+        if (!categories.some((category) => category.slug === firstCategory)) setSelectedRankingCategory(categories[0].slug);
+      }
+    }).catch(() => undefined);
   }
 
   function retrySubmission() {
@@ -534,6 +706,9 @@ export function Rango90App({ locale }: { locale: Locale }) {
   function repositoryErrorMessage(error: RepositoryError | null) {
     if (!error) return t("errors.generic");
     if (error.code === "daily_challenge_not_found") return t("states.error.noChallenge");
+    if (error.code === "official_not_ready") return t("states.officialNotReady.copy");
+    if (error.code === "official_test_challenge_rejected") return t("states.officialNotReady.testOnly");
+    if (error.code === "ranking_not_available") return t("categoryRanking.unavailable");
     return t(`errors.${error.kind}` as "errors.generic");
   }
 
@@ -625,6 +800,8 @@ export function Rango90App({ locale }: { locale: Locale }) {
 
   function startDuelGame() {
     if (!duel || !duelToken || !duel.challenge) return;
+    gameGenerationRef.current += 1;
+    imageRequestIdRef.current += 1;
     const startedAt = duelToken.startedAt ?? new Date().toISOString();
     const deadlineAt = duelToken.deadlineAt ?? new Date(Date.parse(startedAt) + duel.challenge.timeLimitSeconds * 1000).toISOString();
     setChallenge(duel.challenge);
@@ -636,6 +813,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
     setEntityIndex(0);
     setSelectedCategory(null);
     setSecondsLeft(secondsUntil(deadlineAt));
+    deadlineAtRef.current = deadlineAt;
     setTimedOut(false);
     timeoutHandled.current = false;
     expireRequestStarted.current = false;
@@ -646,7 +824,10 @@ export function Rango90App({ locale }: { locale: Locale }) {
     setRepositoryError(null);
     setDuelComparisonState("idle");
     setSubmissionState("idle");
+    firstPlayerMetricRecordedRef.current = false;
     setPhase("playing");
+    transitionFlow({ type: "CHALLENGE_READY" });
+    transitionFlow({ type: "GAME_STARTED" });
     setView("game");
   }
 
@@ -694,10 +875,32 @@ export function Rango90App({ locale }: { locale: Locale }) {
     }
   }
 
+  function continueAfterFeedback() {
+    if (phase !== "feedback") return;
+    if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
+    feedbackTimerRef.current = null;
+    recordRuntimeMetric("decision_to_next_player", decisionStartedAtRef.current ?? nowRuntimeMetric(), { ordinal: entityIndex });
+    if (latestFeedback?.complete || entityIndex >= mockDailyChallenge.entities.length - 1) {
+      setPhase("finished");
+      transitionFlow({ type: "FINISH" });
+      deadlineAtRef.current = null;
+      setView("result");
+      return;
+    }
+    setEntityIndex((current) => current + 1);
+    setSelectedCategory(null);
+    setLatestFeedback(null);
+    setPhase("playing");
+    transitionFlow({ type: "CONTINUE" });
+  }
+
   async function assignCategory(category: MockCategory) {
-    if (!currentEntity || phase !== "playing" || usedCategorySlugs.has(category.slug) || decisionPending) return;
+    if (!currentEntity || !canSubmitDecision(flowState) || phase !== "playing" || usedCategorySlugs.has(category.slug) || decisionPending) return;
     setSelectedCategory(category.slug);
     setDecisionPending(true);
+    transitionFlow({ type: "SUBMIT_DECISION" });
+    decisionStartedAtRef.current = nowRuntimeMetric();
+    const gameGeneration = gameGenerationRef.current;
     try {
       const ordinal = currentEntity.ordinal ?? entityIndex;
       const claim = { ordinal, entityId: currentEntity.id, categorySlug: category.slug };
@@ -705,27 +908,24 @@ export function Rango90App({ locale }: { locale: Locale }) {
       const feedback = gameMode === "daily" && session
         ? await gameRepository.submitDecision(session, claim, previousClaims)
         : { assignment: { ...claim, scoreValue: 0 }, selectedRank: null, bestCategorySlug: category.slug, bestRank: null, complete: false };
+      if (!mountedRef.current || gameGeneration !== gameGenerationRef.current || phase !== "playing") return;
       const nextAssignment = { ordinal, entity: currentEntity, category, score: gameMode === "daily" ? feedback.assignment.scoreValue : null, feedback };
       const nextAssignments = [...assignments, nextAssignment];
       setAssignments(nextAssignments);
       setLatestFeedback(feedback);
       setPhase("feedback");
-      window.setTimeout(() => {
-        if (feedback.complete || entityIndex >= mockDailyChallenge.entities.length - 1) {
-          setPhase("finished");
-          setView("result");
-          return;
-        }
-        setEntityIndex((current) => current + 1);
-        setSelectedCategory(null);
-        setLatestFeedback(null);
-        setPhase("playing");
-      }, 1200);
+      transitionFlow({ type: "FEEDBACK_SHOWN" });
+      const feedbackGeneration = ++feedbackGenerationRef.current;
+      feedbackTimerRef.current = window.setTimeout(() => {
+        if (mountedRef.current && feedbackGeneration === feedbackGenerationRef.current) continueAfterFeedback();
+      }, 700);
     } catch (error: unknown) {
+      if (!mountedRef.current || gameGeneration !== gameGenerationRef.current) return;
       setSelectedCategory(null);
       setRepositoryError(error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline"));
+      transitionFlow({ type: "DECISION_FAILED" });
     } finally {
-      setDecisionPending(false);
+      if (mountedRef.current && gameGeneration === gameGenerationRef.current) setDecisionPending(false);
     }
   }
 
@@ -741,7 +941,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
   function renderNav() {
     return <nav className={`bottom-nav ${view === "game" ? "bottom-nav-game" : ""}`} aria-label={t("navigation.label")}>
       <button className={view === "home" || view === "game" || view === "result" ? "active" : ""} onClick={resetToHome} type="button"><span className="nav-mark">01</span>{t("navigation.home")}</button>
-      <button className={view === "ranking" ? "active" : ""} onClick={openRanking} type="button"><span className="nav-mark">90</span>{t("navigation.ranking")}</button>
+      <button className={view === "ranking" || view === "category-ranking" ? "active" : ""} onClick={openRanking} type="button"><span className="nav-mark">90</span>{t("navigation.ranking")}</button>
       <button className={view === "duels" ? "active" : ""} onClick={() => setView("duels")} type="button"><span className="nav-mark">VS</span>{t("navigation.duels")}</button>
       <button className={view === "account" ? "active" : ""} onClick={() => setView("account")} type="button"><span className="nav-mark">ID</span>{t("navigation.account")}</button>
     </nav>;
@@ -751,7 +951,15 @@ export function Rango90App({ locale }: { locale: Locale }) {
     return <section className="state-view" aria-live="polite"><div className="state-index">01 / {t("states.loading.code")}</div><div className="state-pulse" aria-hidden="true" /><p className="kicker">{t("states.loading.kicker")}</p><h1>{t("states.loading.title")}</h1><p>{t("states.loading.copy")}</p></section>;
   }
 
+  function renderStartingGame() {
+    return <section className="state-view" aria-live="polite" aria-busy="true"><div className="state-index">02 / START</div><div className="state-pulse" aria-hidden="true" /><p className="kicker">{t("states.startingGame.title")}</p><h1>{t("states.startingGame.title")}</h1><p>{t("states.startingGame.copy")}</p></section>;
+  }
+
   function renderChallengeError() {
+    if (repositoryError?.code === "official_not_ready") {
+      const details = repositoryError.details as { blockingCategories?: Array<{ slug: string; reasons: string[] }>; snapshotRequired?: string } | undefined;
+      return <section className="state-view state-view-official" role="alert"><div className="state-index">OFF / 01</div><p className="kicker">{t("states.officialNotReady.kicker")}</p><h1>{t("states.officialNotReady.title")}</h1><p>{repositoryErrorMessage(repositoryError)}</p>{details?.blockingCategories?.length ? <div className="official-blockers"><strong>{t("states.officialNotReady.blockers")}</strong>{details.blockingCategories.map((blocker) => <div key={blocker.slug}><b>{blocker.slug}</b><span>{blocker.reasons.join(" ")}</span></div>)}</div> : null}<p className="micro-note">{details?.snapshotRequired ?? t("states.officialNotReady.snapshot")}</p><button className="button button-primary" type="button" onClick={retryChallenge}>{t("states.error.retry")}</button></section>;
+    }
     return <section className="state-view state-view-error" role="alert"><div className="state-index">ERR / 01</div><p className="kicker">{t("states.error.kicker")}</p><h1>{t("states.error.title")}</h1><p>{repositoryError ? repositoryErrorMessage(repositoryError) : t("states.error.copy")}</p><button className="button button-primary" type="button" onClick={retryChallenge}>{t("states.error.retry")}</button><button className="text-button" type="button" onClick={resetGameToHome}>{t("states.error.home")}</button></section>;
   }
 
@@ -759,7 +967,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
     return <section className="home-view" aria-labelledby="home-title">
       <div className="home-intro"><p className="kicker">{t("home.kicker")}</p><h1 id="home-title">{t("home.title")}</h1><p className="home-description">{t("home.description")}</p></div>
       <div className="hero-grid">
-        <article className="daily-card"><div className="card-index">01 / {t("home.daily.label")}</div><div className="daily-card-content"><p className="card-overline">{t("home.daily.overline")}</p><h2>{mockDailyChallenge.title[locale]}</h2><p>{mockDailyChallenge.subtitle[locale]}</p><div className="daily-meta"><span>{t("home.daily.categories", { count: mockDailyChallenge.categories.length })}</span><span>{t("home.daily.time", { seconds: mockDailyChallenge.timeLimitSeconds })}</span></div><button className="button button-primary" type="button" onClick={startDaily}>{t("home.daily.cta")} <span aria-hidden="true">↗</span></button></div></article>
+        <article className="daily-card"><div className="card-index">01 / {t("home.daily.label")}</div><div className="daily-card-content"><p className="card-overline">{t("home.daily.overline")}</p><h2>{mockDailyChallenge.title[locale]}</h2><p>{mockDailyChallenge.subtitle[locale]}</p><div className="daily-meta"><span>{t("home.daily.categories", { count: mockDailyChallenge.categories.length })}</span><span>{t("home.daily.time", { seconds: mockDailyChallenge.timeLimitSeconds })}</span></div><button className="button button-primary" type="button" onClick={() => void startDaily()} disabled={flowState === "starting_game"} aria-busy={flowState === "starting_game"}>{flowState === "starting_game" ? t("states.startingGame.title") : t("home.daily.cta")} <span aria-hidden="true">↗</span></button>{flowState === "starting_game" ? <p className="micro-note" role="status">{t("states.startingGame.copy")}</p> : null}{flowState === "error" && repositoryError ? <p className="micro-note" role="alert">{repositoryErrorMessage(repositoryError)}</p> : null}</div></article>
         <aside className="score-card"><span className="card-index">02 / {t("home.score.label")}</span><strong>—</strong><span>{t("home.score.caption")}</span><div className="score-rule"><span /></div><small>{mockDailyChallenge.scoreCap ? `${t("game.target")}: ${mockDailyChallenge.scoreCap}` : "—"}</small></aside>
       </div>
       <div className="home-lower-grid">
@@ -776,18 +984,23 @@ export function Rango90App({ locale }: { locale: Locale }) {
   function renderGame() {
     const latestAssignment = assignments[assignments.length - 1];
     const bestCategory = latestFeedback ? mockDailyChallenge.categories.find((category) => category.slug === latestFeedback.bestCategorySlug) : undefined;
+    const selectedRank = latestFeedback?.selectedRank ?? null;
+    const bestRank = latestFeedback?.bestRank ?? null;
+    const rankDifference = selectedRank !== null && bestRank !== null ? selectedRank - bestRank : null;
+    const imageSource = currentEntity ? (Object.prototype.hasOwnProperty.call(imageOverrides, currentEntity.id) ? imageOverrides[currentEntity.id] ?? undefined : currentEntity.imageUrl ?? currentEntity.imageFallbackUrl) : undefined;
     const scoreDisplay = assignments.some((assignment) => assignment.score !== null) ? totalScore : "—";
     return <section className="game-view" aria-labelledby="game-title">
       <div className="game-topline"><div><p className="kicker">{t("game.kicker")}</p><h1 id="game-title">{mockDailyChallenge.title[locale]}</h1></div><div className="game-topline-actions"><div className={`timer ${secondsLeft <= 20 ? "timer-warning" : ""}`} aria-label={t("game.timerLabel")}><span aria-live="polite">{formatTime(secondsLeft)}</span><small>{t("game.remaining")}</small></div><button className="abandon-button" type="button" onClick={abandonGame} disabled={phase === "finished" || phase === "abandoned"}>{t("game.abandon")}</button></div></div>
       <div className="game-scoreline"><div><span>{t("game.score")}</span><strong>{scoreDisplay}</strong></div><div className="game-progress" aria-label={t("game.progressLabel", { current: Math.min(assignments.length, decisionCount), total: decisionCount })}><span>{String(Math.min(assignments.length, decisionCount)).padStart(2, "0")}</span><div className="progress-track"><span style={{ width: `${Math.min(progress, 1) * 100}%` }} /></div><span>{String(decisionCount).padStart(2, "0")}</span></div><div className="game-target"><span>{t("game.target")}</span><strong>{mockDailyChallenge.scoreCap ?? "—"}</strong></div></div>
       <div className="decision-layout">
-        <article className="entity-card"><div className="entity-card-topline"><span>{t("game.entityPosition", { current: Math.min(entityIndex + 1, decisionCount), total: decisionCount })}</span><span className="entity-type">{currentEntity ? currentEntity.entityType === "player" ? t("game.entityType.player") : currentEntity.entityType === "club" ? t("game.entityType.club") : t("game.entityType.nationalTeam") : null}</span></div>{currentEntity ? <>{currentEntity.imageUrl ? <img className="entity-image" src={currentEntity.imageUrl} alt={currentEntity.name} loading="eager" onError={(event) => { if (currentEntity.imageFallbackUrl && event.currentTarget.src !== currentEntity.imageFallbackUrl) event.currentTarget.src = currentEntity.imageFallbackUrl; }} /> : <div className="entity-monogram" aria-hidden="true">{currentEntity.shortName}</div>}<h2>{currentEntity.name}</h2><p>{t("game.entityPrompt")}</p></> : null}</article>
+        <article className="entity-card"><div className="entity-card-topline"><span>{t("game.entityPosition", { current: Math.min(entityIndex + 1, decisionCount), total: decisionCount })}</span><span className="entity-type">{currentEntity ? currentEntity.entityType === "player" ? t("game.entityType.player") : currentEntity.entityType === "club" ? t("game.entityType.club") : t("game.entityType.nationalTeam") : null}</span></div>{currentEntity ? <>{imageSource ? <img className="entity-image" src={imageSource} alt={currentEntity.name} loading="eager" onLoad={() => { if (!firstPlayerMetricRecordedRef.current) { firstPlayerMetricRecordedRef.current = true; recordRuntimeMetric("first_player_visible", imageMetricStartedRef.current ?? nowRuntimeMetric(), { entityId: currentEntity.id }); } }} onError={(event) => { if (currentEntity.imageFallbackUrl && event.currentTarget.src !== currentEntity.imageFallbackUrl) setImageOverrides((current) => ({ ...current, [currentEntity.id]: currentEntity.imageFallbackUrl ?? null })); else setImageOverrides((current) => ({ ...current, [currentEntity.id]: null })); }} /> : <div className="entity-monogram" aria-hidden="true">{currentEntity.shortName}</div>}<h2>{currentEntity.name}</h2><p>{t("game.entityPrompt")}</p></> : null}</article>
         <div className="category-panel"><div className="panel-heading"><div><p className="kicker">{t("game.categoryKicker")}</p><h2>{t("game.categoryTitle")}</h2></div><button className="icon-button" type="button" onClick={() => setShowCategoryInfo(true)} aria-label={t("game.infoLabel")}>i</button></div><div className="category-list">
-          {mockDailyChallenge.categories.map((category) => { const assignment = assignments.find((item) => item.category.slug === category.slug); const isUsed = Boolean(assignment); const isCompatible = !category.entityType || !currentEntity || category.entityType === currentEntity.entityType; return <button className={`category-row ${isUsed ? "category-row-used" : ""} ${!isCompatible ? "category-row-unavailable" : ""} ${selectedCategory === category.slug ? "category-row-selected" : ""}`} disabled={isUsed || !isCompatible || phase !== "playing" || decisionPending} key={category.slug} onClick={() => void assignCategory(category)} type="button"><span className="category-mark" aria-hidden="true">{category.code}</span><span className="category-copy"><strong>{category.label[locale]}</strong><small>{category.competitionLabel?.[locale] ?? (locale === "es" ? "Fútbol · global" : "Football · global")}</small><small>{isUsed ? t("game.used") : !isCompatible ? (locale === "es" ? "No aplica" : "Not applicable") : t("game.available")}</small></span>{assignment ? <span className={`category-score ${assignment.score === null ? "score-pending" : assignment.score >= 70 ? "score-bad" : assignment.score >= 25 ? "score-mid" : "score-good"}`}>{assignment.score === null ? "—" : `+${assignment.score}`}</span> : <span className="category-arrow" aria-hidden="true">↗</span>}</button>; })}
+          {mockDailyChallenge.categories.map((category) => { const assignment = assignments.find((item) => item.category.slug === category.slug); const isUsed = Boolean(assignment); const isCompatible = !category.entityType || !currentEntity || category.entityType === currentEntity.entityType; return <button className={`category-row ${isUsed ? "category-row-used" : ""} ${!isCompatible ? "category-row-unavailable" : ""} ${selectedCategory === category.slug ? "category-row-selected" : ""}`} disabled={isUsed || !isCompatible || !canSubmitDecision(flowState) || decisionPending} key={category.slug} onClick={() => void assignCategory(category)} type="button"><span className="category-mark" aria-hidden="true">{category.code}</span><span className="category-copy"><strong>{category.label[locale]}</strong><small>{category.competitionLabel?.[locale] ?? (locale === "es" ? "Fútbol · global" : "Football · global")}</small><small>{isUsed ? t("game.used") : !isCompatible ? (locale === "es" ? "No aplica" : "Not applicable") : decisionPending ? t("game.feedback.submitting") : t("game.available")}</small></span>{assignment ? <span className={`category-score ${assignment.score === null ? "score-pending" : assignment.score >= 70 ? "score-bad" : assignment.score >= 25 ? "score-mid" : "score-good"}`}>{assignment.score === null ? "—" : `+${assignment.score}`}</span> : <span className="category-arrow" aria-hidden="true">↗</span>}</button>; })}
         </div>
-        {phase === "feedback" && latestAssignment && latestFeedback ? <div className={`feedback-card ${latestAssignment.score === null ? "feedback-pending" : latestAssignment.score >= 70 ? "feedback-bad" : latestAssignment.score >= 25 ? "feedback-mid" : "feedback-good"}`}><div><span className="feedback-label">{t("game.feedback.label")}</span><strong>{latestAssignment.entity.name}</strong></div><div className="feedback-score"><strong>{latestAssignment.score === null ? "—" : latestAssignment.score}</strong><span>{latestAssignment.score === null ? t("game.feedback.pending") : t("game.feedback.points")}</span></div><p>{locale === "es" ? `Puesto elegido: ${latestFeedback.selectedRank ?? "—"} · mejor puesto: ${latestFeedback.bestRank ?? "—"}` : `Selected rank: ${latestFeedback.selectedRank ?? "—"} · best rank: ${latestFeedback.bestRank ?? "—"}`}</p><p>{locale === "es" ? `La mejor categoría era ${bestCategory?.label.es ?? "—"}.` : `The best category was ${bestCategory?.label.en ?? "—"}.`}</p><span className="feedback-advance">{locale === "es" ? "Siguiente jugada automática" : "Advancing automatically"}</span></div> : null}
+        {phase === "feedback" && latestAssignment && latestFeedback ? <div className={`feedback-card ${latestAssignment.score === null ? "feedback-pending" : latestAssignment.score >= 70 ? "feedback-bad" : latestAssignment.score >= 25 ? "feedback-mid" : "feedback-good"}`} aria-live="polite"><div><span className="feedback-label">{t("game.feedback.label")}</span><strong>{latestAssignment.entity.name}</strong></div><div className="feedback-score"><strong>{latestAssignment.score === null ? "—" : latestAssignment.score}</strong><span>{latestAssignment.score === null ? t("game.feedback.pending") : t("game.feedback.points")}</span></div><p>{t("game.feedback.chosenCategory", { category: latestAssignment.category.label[locale] })}</p><p>{t("game.feedback.player", { player: latestAssignment.entity.name })}</p><p>{t("game.feedback.rank", { rank: selectedRank ?? "—" })}</p><p>{t("game.feedback.score", { score: latestAssignment.score ?? "—" })}</p><p>{t("game.feedback.bestCategory", { category: bestCategory?.label[locale] ?? "—" })}</p><p>{t("game.feedback.bestRank", { rank: bestRank ?? "—" })}</p>{rankDifference !== null ? <p>{t("game.feedback.difference", { difference: rankDifference })}</p> : null}<strong className="feedback-verdict">{selectedRank !== null && bestRank !== null && selectedRank === bestRank ? t("game.feedback.correct") : t("game.feedback.lessOptimal")}</strong><button className="button button-dark" type="button" onClick={continueAfterFeedback}>{latestFeedback.complete || entityIndex >= mockDailyChallenge.entities.length - 1 ? t("game.finish") : t("game.next")}</button></div> : null}
         {phase === "finished" ? <div className="feedback-card feedback-timeout"><div><span className="feedback-label">{t(timedOut ? "game.timeout.label" : "game.complete.label")}</span><strong>{t(timedOut ? "game.timeout.title" : "game.complete.title")}</strong></div><p>{t(timedOut ? "game.timeout.copy" : "game.complete.copy")}</p><button className="button button-dark" type="button" onClick={() => setView("result")}>{t("game.resultCta")} <span aria-hidden="true">↗</span></button></div> : null}
         {phase === "abandoned" ? <div className="feedback-card feedback-abandoned"><div><span className="feedback-label">{t("game.abandoned.label")}</span><strong>{t("game.abandoned.title")}</strong></div><p>{t("game.abandoned.copy")}</p><div className="feedback-actions"><button className="button button-dark" type="button" onClick={startDaily}>{t("game.abandoned.restart")}</button><button className="button button-secondary" type="button" onClick={resetGameToHome}>{t("game.abandoned.home")}</button></div></div> : null}
+        {phase === "playing" && repositoryError && !decisionPending ? <div className="result-status" role="alert"><p className="micro-note">{repositoryErrorMessage(repositoryError)}</p><button className="button button-secondary" type="button" onClick={() => setRepositoryError(null)}>{t("game.feedback.retry")}</button></div> : null}
         </div>
       </div>
     </section>;
@@ -806,7 +1019,14 @@ return <section className="result-view" aria-labelledby="result-title"><div clas
 
   function renderRanking() {
     const rows = leaderboardRows;
-    return <section className="simple-view" aria-labelledby="ranking-title"><p className="kicker">{t("ranking.kicker")}</p><h1 id="ranking-title">{t("ranking.title")}</h1><p className="simple-lead">{t("ranking.subtitle")}</p>{leaderboardState === "loading" ? <p className="micro-note">{t("ranking.loading")}</p> : null}{leaderboardState === "error" ? <div className="result-status" role="alert"><p className="micro-note">{repositoryErrorMessage(repositoryError)}</p><button className="button button-secondary" type="button" onClick={openRanking}>{t("ranking.retry")}</button></div> : null}<div className="leaderboard-card"><div className="leaderboard-head"><span>{t("ranking.player")}</span><span>{t("ranking.score")}</span></div>{rows.map((row) => <div className={`leaderboard-row ${row.displayName === t("ranking.you") ? "leaderboard-row-you" : ""}`} key={`${row.rank}-${row.displayName}`}><span className="leaderboard-place">{String(row.rank).padStart(2, "0")}</span><strong>{row.displayName}</strong><span>{row.totalScore}</span></div>)}</div></section>;
+    return <section className="simple-view" aria-labelledby="ranking-title"><p className="kicker">{t("ranking.kicker")}</p><h1 id="ranking-title">{t("ranking.title")}</h1><p className="simple-lead">{t("ranking.subtitle")}</p><button className="button button-secondary" type="button" onClick={openCategoryRanking}>{t("ranking.categoryCta")}</button>{leaderboardState === "loading" ? <p className="micro-note">{t("ranking.loading")}</p> : null}{leaderboardState === "error" ? <div className="result-status" role="alert"><p className="micro-note">{repositoryErrorMessage(repositoryError)}</p><button className="button button-secondary" type="button" onClick={openRanking}>{t("ranking.retry")}</button></div> : null}<div className="leaderboard-card"><div className="leaderboard-head"><span>{t("ranking.player")}</span><span>{t("ranking.score")}</span></div>{rows.map((row) => <div className={`leaderboard-row ${row.displayName === t("ranking.you") ? "leaderboard-row-you" : ""}`} key={`${row.rank}-${row.displayName}`}><span className="leaderboard-place">{String(row.rank).padStart(2, "0")}</span><strong>{row.displayName}</strong><span>{row.totalScore}</span></div>)}</div></section>;
+  }
+
+  function renderCategoryRanking() {
+    const entries = categoryRanking?.entries ?? [];
+    const fallbackCategories = mockDailyChallenge.categories.map((category) => ({ slug: category.slug, labelEs: category.label.es, labelEn: category.label.en, availability: "provisional" as const }));
+    const categories = rankingCategories.length > 0 ? rankingCategories : fallbackCategories;
+    return <section className="simple-view category-ranking-view" aria-labelledby="category-ranking-title"><p className="kicker">{t("categoryRanking.kicker")}</p><h1 id="category-ranking-title">{t("categoryRanking.title")}</h1><p className="simple-lead">{t("categoryRanking.subtitle")}</p><p className="micro-note">{t("categoryRanking.scopeNote")}</p><label className="ranking-selector" htmlFor="ranking-category-select">{t("categoryRanking.selector")}</label><select id="ranking-category-select" value={selectedRankingCategory} onChange={(event) => { setCategoryRankingState("loading"); setCategoryRanking(null); setSelectedRankingCategory(event.target.value); }}>{categories.map((category) => <option value={category.slug} key={category.slug}>{locale === "es" ? category.labelEs : category.labelEn}{category.availability === "provisional" ? ` · ${t("categoryRanking.provisionalShort")}` : ""}</option>)}</select>{categoryRankingState === "loading" ? <p className="micro-note" aria-live="polite">{t("categoryRanking.loading")}</p> : null}{categoryRankingState === "error" ? <div className="result-status" role="alert"><p className="micro-note">{repositoryErrorMessage(repositoryError)}</p><button className="button button-secondary" type="button" onClick={openCategoryRanking}>{t("categoryRanking.retry")}</button></div> : null}{categoryRankingState === "ready" && categoryRanking ? <><div className="ranking-status" role="status"><strong>{categoryRanking.status === "official" ? t("categoryRanking.official") : t("categoryRanking.provisional")}</strong><span>{t("categoryRanking.historical")}</span><span>{t("categoryRanking.snapshot", { snapshot: categoryRanking.snapshotId })}</span></div><div className="category-ranking-table" role="table" aria-label={categoryRanking.category.slug}><div className="category-ranking-head" role="row"><span>{t("categoryRanking.rank")}</span><span>{t("categoryRanking.player")}</span><span>{t("categoryRanking.value")}</span><span>{t("categoryRanking.score")}</span></div>{entries.map((entry) => <div className="category-ranking-row" role="row" key={`${entry.entityId}-${entry.rank}`}><span className="leaderboard-place">{String(entry.rank).padStart(2, "0")}{entry.tieGroup !== null ? <small>{t("categoryRanking.tie", { group: entry.tieGroup })}</small> : null}</span><span className="ranking-entity">{entry.imageUrl && entry.imageStatus !== "unavailable" ? <img src={entry.imageUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <span className="ranking-monogram" aria-hidden="true">{entry.canonicalName.slice(0, 2).toUpperCase()}</span>}<strong>{entry.canonicalName}</strong>{!entry.playable ? <small>{t("categoryRanking.notPlayable")}</small> : null}</span><span>{entry.rawValue}</span><span>{entry.scoreValue}</span><details><summary>{t("categoryRanking.details")}</summary><p>{t("categoryRanking.media", { status: t(`categoryRanking.mediaStatus.${entry.imageStatus}` as "categoryRanking.mediaStatus.licensed") })}</p><p>{t("categoryRanking.review", { status: t(`categoryRanking.reviewStatus.${entry.reviewStatus}` as "categoryRanking.reviewStatus.approved") })}</p><p>{t("categoryRanking.rights", { status: t(`categoryRanking.rightsStatus.${entry.rightsStatus}` as "categoryRanking.rightsStatus.approved") })}</p><p>{t("categoryRanking.publishable", { status: entry.isPublishable ? t("categoryRanking.yes") : t("categoryRanking.no") })}</p><p>{t("categoryRanking.source", { date: entry.generatedAt ?? "—" })}</p></details></div>)}</div></> : null}</section>;
   }
 
   function renderDuels() {
@@ -827,5 +1047,6 @@ return <section className="result-view" aria-labelledby="result-title"><div clas
     </>;
   }
 
-  return <main className={`app-shell ${view === "game" ? "app-shell-game" : ""}`}>{renderHeader()}{isOffline ? <div className="offline-banner" role="status">{t("offline.banner")}</div> : null}<div className="app-content">{challengeLoadState === "loading" && view !== "duels" ? renderChallengeLoading() : null}{challengeLoadState === "error" && view !== "duels" ? renderChallengeError() : null}{(challengeLoadState === "ready" || view === "duels") && view === "home" ? renderHome() : null}{(challengeLoadState === "ready" || view === "duels") && view === "game" ? renderGame() : null}{(challengeLoadState === "ready" || view === "duels") && view === "result" ? renderResult() : null}{(challengeLoadState === "ready" || view === "duels") && view === "ranking" ? renderRanking() : null}{(challengeLoadState === "ready" || view === "duels") && view === "duels" ? renderDuels() : null}{(challengeLoadState === "ready" || view === "duels") && view === "account" ? renderAccount() : null}</div>{renderNav()}{renderOverlays()}</main>;
+  const labMode = runtimeConfig?.runtimeMode === "lab" || challenge.runtimeMode === "lab";
+  return <main className={`app-shell ${view === "game" ? "app-shell-game" : ""}`}>{renderHeader()}{labMode ? <div className="runtime-banner" role="status"><strong>{t("runtime.labTitle")}</strong><span>{t("runtime.provisional")}</span><small>{t("runtime.notOfficial")}</small></div> : null}{isOffline ? <div className="offline-banner" role="status">{t("offline.banner")}</div> : null}<div className="app-content">{flowState === "starting_game" ? renderStartingGame() : null}{flowState !== "starting_game" && challengeLoadState === "loading" && view !== "duels" ? renderChallengeLoading() : null}{flowState !== "starting_game" && challengeLoadState === "error" && view !== "duels" ? renderChallengeError() : null}{flowState !== "starting_game" && (challengeLoadState === "ready" || view === "duels") && view === "home" ? renderHome() : null}{flowState !== "starting_game" && (challengeLoadState === "ready" || view === "duels") && view === "game" ? renderGame() : null}{flowState !== "starting_game" && (challengeLoadState === "ready" || view === "duels") && view === "result" ? renderResult() : null}{flowState !== "starting_game" && (challengeLoadState === "ready" || view === "duels") && view === "ranking" ? renderRanking() : null}{flowState !== "starting_game" && (challengeLoadState === "ready" || view === "duels") && view === "category-ranking" ? renderCategoryRanking() : null}{flowState !== "starting_game" && (challengeLoadState === "ready" || view === "duels") && view === "duels" ? renderDuels() : null}{flowState !== "starting_game" && (challengeLoadState === "ready" || view === "duels") && view === "account" ? renderAccount() : null}</div>{renderNav()}{renderOverlays()}</main>;
 }

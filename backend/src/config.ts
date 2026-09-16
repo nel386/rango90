@@ -1,7 +1,9 @@
 import 'dotenv/config';
+import { getConfiguredRuntimeMode } from './runtimeMode.js';
 
 export const config = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
+  runtimeMode: getConfiguredRuntimeMode(),
   port: Number(process.env.PORT ?? 4000),
   databaseUrl: process.env.DATABASE_URL ?? '',
   // Render PostgreSQL requires TLS for external connections. Keep local
@@ -27,6 +29,7 @@ export const config = {
   mediaRoot: process.env.MEDIA_ROOT ?? './storage/media',
   snapshotRoot: process.env.SNAPSHOT_ROOT ?? './storage/source-snapshots',
   mediaCandidateRoot: process.env.MEDIA_CANDIDATE_ROOT ?? './storage/media-candidates',
+  auditOutputRoot: process.env.AUDIT_OUTPUT_ROOT ?? './audits',
   mediaUserAgent: process.env.MEDIA_USER_AGENT ?? 'Rango90-media-review/0.1 (contact required)',
   mediaMaxAttempts: Math.min(Math.max(Number(process.env.MEDIA_MAX_ATTEMPTS ?? 3) || 3, 1), 5),
   mediaDiscoveryMaxAttempts: Math.min(Math.max(Number(process.env.MEDIA_DISCOVERY_MAX_ATTEMPTS ?? 1) || 1, 1), 3),
@@ -58,6 +61,9 @@ export function corsOrigins(): string[] {
 
 export function validateProductionConfig(): void {
   if (config.nodeEnv !== 'production') return;
+  if (!process.env.RANGO90_RUNTIME_MODE?.trim()) {
+    throw new Error('RANGO90_RUNTIME_MODE es obligatoria en producción');
+  }
   if (!config.databaseUrl) throw new Error('DATABASE_URL es obligatoria en producción');
   const origins = corsOrigins();
   if (origins.length === 0 || origins.some((origin) => !origin.startsWith('https://'))) {

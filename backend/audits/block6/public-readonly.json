@@ -1,0 +1,228 @@
+{
+  "status": "failed",
+  "runId": "block6a-20260916-001",
+  "timestamp": "2026-09-16T00:00:00.000Z",
+  "urls": {
+    "pagesOrigin": "https://nel386.github.io/rango90",
+    "apiOrigin": "https://rango90.onrender.com"
+  },
+  "runtimeMode": null,
+  "checks": [
+    {
+      "url": "https://nel386.github.io/rango90/es/",
+      "status": 200,
+      "ok": true,
+      "json": null,
+      "bodySha256": "e584ddfeab7357725e6a1d75160802834e47dd6ce7635c1d4cb0f4edda232931"
+    },
+    {
+      "url": "https://nel386.github.io/rango90/en/",
+      "status": 200,
+      "ok": true,
+      "json": null,
+      "bodySha256": "b36db57df37a8aa936cef2a8164ccd0444b9ce9f8ec9c46ae16f75d62aa5d3d6"
+    },
+    {
+      "url": "https://rango90.onrender.com/health",
+      "status": 200,
+      "ok": true,
+      "json": {
+        "ok": true,
+        "service": "rango90-backend",
+        "database": {
+          "connected": true,
+          "schemaReady": true,
+          "missingTables": []
+        }
+      },
+      "bodySha256": "d83fe09acdcbf43e8bc3e2d88fb81bac15722ece65798dc84bf460b734b6e44e"
+    },
+    {
+      "url": "https://rango90.onrender.com/v1/config",
+      "status": 404,
+      "ok": false,
+      "json": {
+        "message": "Route GET:/v1/config not found",
+        "error": "Not Found",
+        "statusCode": 404
+      },
+      "bodySha256": "fae5f6e563238f2cf2587ec452f03d905b5b77d65ec924aabd8e6010553ef9c0"
+    },
+    {
+      "url": "https://rango90.onrender.com/v1/categories",
+      "status": 200,
+      "ok": true,
+      "json": {
+        "categories": []
+      },
+      "bodySha256": "e0ab24f50c8a372e295a283ba4cab449dd247bd4642fded42325ddca349bdab1"
+    },
+    {
+      "url": "https://rango90.onrender.com/v1/challenges/daily",
+      "status": 200,
+      "ok": true,
+      "json": {
+        "challenge": {
+          "id": "daily_2026-09-15_ff7f5ad47d1c0b47",
+          "kind": "daily",
+          "challengeDate": "2026-09-15",
+          "sourceVersion": "club-career-yellow-cards@api-football-club-career-yellow_cards-2000-2026|club-career-red-cards@api-football-club-career-red_cards-2000-2026|club-career-titles@api-football-club-career-titles-2026-09-15|world-cup-goals@transfermarkt-fifa-world-cup-final-tournaments-goals-top-200-2026-09-15|player-career-goals@rango90-player-career-goals-2026-09-15|uefa-champions-league-assists@uefa-champions-league-assists-top-100-2026-09-15|uefa-champions-league-goals@uefa-champions-league-goals-top-100-2026-09-15",
+          "challengeSha256": "fe60137b2ba5ab50971e62b4735ba52b902e47fd9693151ace891cefe1200d39",
+          "engineVersion": "game-engine-v2",
+          "timeLimitSeconds": 90,
+          "scoreCap": 100,
+          "testOnly": true,
+          "decisionCount": 7,
+          "categories": [
+            {
+              "ordinal": 0,
+              "id": "category-club-career-yellow-cards",
+              "rankingSnapshotId": "rs_bf55be568429830a63dd27bd",
+              "slug": "club-career-yellow-cards",
+              "entityType": "player",
+              "labelEs": "Tarjetas amarillas globales en clubes",
+              "labelEn": "Global club career yellow cards"
+            },
+            {
+              "ordinal": 1,
+              "id": "category-club-career-red-cards",
+              "rankingSnapshotId": "rs_8c68922568c188269f28a447",
+              "slug": "club-career-red-cards",
+              "entityType": "player",
+              "labelEs": "Tarjetas rojas globales en clubes",
+              "labelEn": "Global club career red cards"
+            },
+            {
+              "ordinal": 2,
+              "id": "category-club-career-titles",
+              "rankingSnapshotId": "rs_be69df9e904b9dcbbb76576b",
+              "slug": "club-career-titles",
+              "entityType": "player",
+              "labelEs": "Títulos globales en clubes (carrera)",
+              "labelEn": "Global club career titles"
+            },
+            {
+              "ordinal": 3,
+              "id": "category-world-cup-goals",
+              "rankingSnapshotId": "rs_534a538e90f52b42d62d4d62",
+              "slug": "world-cup-goals",
+              "entityType": "player",
+              "labelEs": "Goles históricos — FIFA World Cup",
+              "labelEn": "Goles all time — FIFA World Cup"
+            },
+            {
+              "ordinal": 4,
+              "id": "category-player-career-goals",
+              "rankingSnapshotId": "rs_8d197969fbe8b6f6d490237a",
+              "slug": "player-career-goals",
+              "entityType": "player",
+              "labelEs": "Goles globales en la carrera",
+              "labelEn": "Global career goals"
+            },
+            {
+              "ordinal": 5,
+              "id": "category-uefa-champions-league-assists",
+              "rankingSnapshotId": "rs_615d6d239fdf0dfc0aac620c",
+              "slug": "uefa-champions-league-assists",
+              "entityType": "player",
+              "labelEs": "Asistencias históricas — UEFA Champions League",
+              "labelEn": "All-time assists — UEFA Champions League"
+            },
+            {
+              "ordinal": 6,
+              "id": "category-uefa-champions-league-goals",
+              "rankingSnapshotId": "rs_25df9971af0ef9d06ec47c4e",
+              "slug": "uefa-champions-league-goals",
+              "entityType": "player",
+              "labelEs": "Goles históricos — UEFA Champions League",
+              "labelEn": "All-time goals — UEFA Champions League"
+            }
+          ],
+          "decisions": [
+            {
+              "ordinal": 0,
+              "entityId": "api-football:player:332307",
+              "name": "Beñat Gerenabarrena",
+              "shortName": "Beñat Gerenabarrena",
+              "entityType": "player",
+              "imageUrl": "https://media.api-sports.io/football/players/332307.png",
+              "imageStatus": "unlicensed"
+            },
+            {
+              "ordinal": 1,
+              "entityId": "api-football:player:2278",
+              "name": "Marcos Alonso",
+              "shortName": "Marcos Alonso",
+              "entityType": "player",
+              "imageUrl": "https://media.api-sports.io/football/players/2278.png",
+              "imageStatus": "unlicensed"
+            },
+            {
+              "ordinal": 2,
+              "entityId": "api-football:player:10238",
+              "name": "Carlos Augusto",
+              "shortName": "Carlos Augusto",
+              "entityType": "player",
+              "imageUrl": "https://media.api-sports.io/football/players/10238.png",
+              "imageStatus": "unlicensed"
+            },
+            {
+              "ordinal": 3,
+              "entityId": "transfermarkt:world-cup:player:d91d0844bc1d9a2f83a3515c",
+              "name": "Mario Mandžukić",
+              "shortName": null,
+              "entityType": "player",
+              "imageUrl": "/v1/media/transfermarkt:world-cup:player:d91d0844bc1d9a2f83a3515c/fallback",
+              "imageStatus": "fallback"
+            },
+            {
+              "ordinal": 4,
+              "entityId": "rsssf:international:player:e00d4321f72acf2e7bb0cfcb",
+              "name": "Carlos Alberto Pavón",
+              "shortName": null,
+              "entityType": "player",
+              "imageUrl": "/v1/media/rsssf:international:player:e00d4321f72acf2e7bb0cfcb/fallback",
+              "imageStatus": "fallback"
+            },
+            {
+              "ordinal": 5,
+              "entityId": "uefa:player:e34af0e294aa05c0084b1d40",
+              "name": "Rooney",
+              "shortName": null,
+              "entityType": "player",
+              "imageUrl": "/v1/media/uefa:player:e34af0e294aa05c0084b1d40/fallback",
+              "imageStatus": "fallback"
+            },
+            {
+              "ordinal": 6,
+              "entityId": "uefa:player:eef203d5b5e5171817214edf",
+              "name": "Maksim Shatskikh",
+              "shortName": "Maksim Shatskikh",
+              "entityType": "player",
+              "imageUrl": "/v1/media/uefa:player:eef203d5b5e5171817214edf/fallback",
+              "imageStatus": "fallback"
+            }
+          ]
+        }
+      },
+      "bodySha256": "feb40437f9de2a4e3a6ed0ce24688863a33f125372cadd0f09baa58b182a0e93"
+    },
+    {
+      "url": "https://rango90.onrender.com/v1/rankings/uefa-champions-league-goals",
+      "status": 404,
+      "ok": false,
+      "json": {
+        "error": "Published ranking not found"
+      },
+      "bodySha256": "44ee21811a623ee3f6d597fd76a2f9b26290b5f93f5b02304b5c9b2a9236e752"
+    }
+  ],
+  "findings": {
+    "fiveXx": [],
+    "provisionalLeak": false,
+    "publicModeIsOfficial": false,
+    "challengeState": "test_only",
+    "rankingState": "not_available"
+  },
+  "readOnly": true
+}

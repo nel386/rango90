@@ -1,0 +1,1843 @@
+{
+  "artifactKind": "priority_ranking_validation_bundle",
+  "readOnly": true,
+  "productionData": false,
+  "editorialApproval": false,
+  "auditInput": "/home/ubuntu/rango90/backend/audits/ranking-truth/ranking-truth.json",
+  "categories": [
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "validationSha256": "7ffbe7427742a0eed54d6248d071410ba22d1307c904f08b1247532e904645f3",
+      "discrepancyCount": 6
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "validationSha256": "06c2e43d3f2629f1237c308c7d292d79fe8487bd0269f7aec4d26500de6ae698",
+      "discrepancyCount": 21
+    }
+  ],
+  "discrepancies": [
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "type": "error de identidad",
+      "code": "short_or_ambiguous_source_name",
+      "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/raul/profil/spieler/7349"
+      ],
+      "entityId": "transfermarkt:european-cup-champions-league:player:b8cc45b74357d05470f9fa6c"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "type": "error de identidad",
+      "code": "short_or_ambiguous_source_name",
+      "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/eusebio/profil/spieler/89230"
+      ],
+      "entityId": "france-football:player:10294"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "type": "error de identidad",
+      "code": "short_or_ambiguous_source_name",
+      "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/neymar/profil/spieler/68290"
+      ],
+      "entityId": "bdfutbol:la-liga:player:8496753b629895ff211f4d41"
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "type": "error de fuente",
+      "code": "source_snapshot_unresolved_conflicts",
+      "message": "El snapshot de fuente declara 12 conflictos sin resolver.",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0"
+      ]
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "type": "error de alcance",
+      "code": "source_contrast_value_discrepancy",
+      "message": "La fuente de contraste «UEFA Champions League official player statistics» registra 12 discrepancias de valor; hay que resolver si corresponden a alcance o definición estadística distinta.",
+      "evidenceUrls": [
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ]
+    },
+    {
+      "categorySlug": "uefa-champions-league-goals",
+      "type": "problema de derechos",
+      "code": "source_rights_not_approved",
+      "message": "La fuente mantiene rightsStatus=review_required; no puede publicarse como dato aprobado.",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0"
+      ]
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:e0cbd48e4220c983d0bc20e3"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:142f3bb04550dc5e2f02bdd8"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "error de identidad",
+      "code": "short_or_ambiguous_source_name",
+      "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/ronaldo/profil/spieler/3140"
+      ],
+      "entityId": "transfermarkt:world-cup:player:ee353ea3ec0b143f6f5fb032"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:ee353ea3ec0b143f6f5fb032"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:4a3c94c4023852ebc490ff8f"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:ba9459195f1c91f27eac05dc"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:60b9f1301d8ba69070e83af0"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "error de identidad",
+      "code": "short_or_ambiguous_source_name",
+      "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/pele/profil/spieler/17121"
+      ],
+      "entityId": "transfermarkt:world-cup:player:0f03fc0cf25d0c58202b8f98"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:0f03fc0cf25d0c58202b8f98"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:08acf787022849299b30ba6a"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:4e1e0ec1c733d4220521a4a4"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:70cc893c99cf8f0529a17150"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:82e85a04938cf6b187c8456d"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:a32bb03e7a3742893dd3f7a3"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:c3d6c2623b247e42120cbd68"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:e8ffdf6a1c959832f75eac0a"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:07764ef34483a7bdc0e228ba"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:37b048dc34b525d71f181e89"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "error de identidad",
+      "code": "short_or_ambiguous_source_name",
+      "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/neymar/profil/spieler/68290"
+      ],
+      "entityId": "transfermarkt:world-cup:player:3885ec2e25136d206ab6b3f2"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de imagen",
+      "code": "image_unavailable",
+      "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+      "evidenceUrls": [],
+      "entityId": "transfermarkt:world-cup:player:3885ec2e25136d206ab6b3f2"
+    },
+    {
+      "categorySlug": "world-cup-goals",
+      "type": "problema de derechos",
+      "code": "source_rights_not_approved",
+      "message": "La fuente mantiene rightsStatus=review_required; no puede publicarse como dato aprobado.",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+      ]
+    }
+  ],
+  "reports": [
+    {
+      "artifactKind": "priority_ranking_validation",
+      "readOnly": true,
+      "productionData": false,
+      "editorialApproval": false,
+      "categorySlug": "uefa-champions-league-goals",
+      "rankingSnapshotId": "rs_870f1dff967bb160f2d132cc",
+      "sourceSnapshotId": "src_257235808020fc330123b522",
+      "source": {
+        "key": "transfermarkt-european-cup-champions-league-historical-goals",
+        "name": "Transfermarkt — historical European Cup / Champions League top scorers",
+        "sourceType": "reference",
+        "baseUrl": "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "rightsStatus": "review_required"
+      },
+      "snapshot": {
+        "dataVersion": "uefa-champions-league-goals-transfermarkt-top-200-2026-09-12",
+        "algorithmVersion": "ranking-v1",
+        "contentSha256": "870f1dff967bb160f2d132cc7d9ca1f2483b26d32681e6a55985efc744cc718b",
+        "generatedAt": "2026-09-13T13:27:49.626Z",
+        "coverageComplete": true,
+        "reviewed": false,
+        "sourceContentSha256": "257235808020fc330123b52274a0e7ee38094114021b287527f0a4a996e72a36",
+        "sourceStorageUri": "storage/source-snapshots/src_257235808020fc330123b522.json"
+      },
+      "validationMethod": {
+        "archivedSourceSnapshot": "Se compara contra el JSON archivado que originó el ranking; el acceso web vivo requiere revisión del propietario del sitio.",
+        "liveSourceStatus": "not_automatable",
+        "liveSourceNote": "La página de Transfermarkt respondió con verificación anti-bot durante la comprobación. No se ha tratado ese bloqueo como aprobación ni como discrepancia de valor.",
+        "independentReferences": [
+          {
+            "name": "UEFA — ranking histórico de goleadores",
+            "url": "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/",
+            "scope": "contraste oficial; confirmar definición de competición y clasificatorias",
+            "status": "reference_only"
+          }
+        ]
+      },
+      "sourceAudit": {
+        "primarySourceRole": "ranking-values",
+        "contrastSources": [
+          {
+            "key": "uefa-champions-league-official",
+            "name": "UEFA Champions League official player statistics",
+            "url": "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/",
+            "archivedSnapshotId": "src_c9359c9f91bba9215af8fef6",
+            "observedRows": 100,
+            "comparison": "conservative_name_match_top_100",
+            "matchedNames": 24,
+            "equalValues": 12,
+            "valueDiscrepancies": 12,
+            "usedToBuildRanking": false,
+            "status": "review_required"
+          },
+          {
+            "key": "api-football",
+            "name": "API-Football / API-Sports",
+            "url": "https://v3.football.api-sports.io/players",
+            "archivedSnapshotId": "src_9f045034874eed9a0badd298",
+            "observedRows": 200,
+            "comparison": "historical_2000_2026_partial",
+            "usedToBuildRanking": false,
+            "status": "insufficient_historical_coverage"
+          }
+        ],
+        "identityPolicy": "The source player URL is the source key; only exact reviewed identity links may collapse records. Historical players remain in the ranking evidence and outside the modern playable default unless explicitly curated.",
+        "ties": "Competition ranking by exact raw value; equal values share rank and tie_group; subsequent ranks include skipped positions. The 200 source rows are retained even when rank exceeds 200 because the source cutoff is row-based.",
+        "rights": {
+          "data": "review_required",
+          "primarySourceRedistribution": "not_granted",
+          "images": "optional_and_separate",
+          "publicationGate": "source_rights_approved_and_each_playable_entry_has_legal_portrait_or_approved_owned_fallback"
+        },
+        "productionDecision": "draft_only_until_contrast_and_rights_are_resolved",
+        "unresolvedConflicts": 12
+      },
+      "entries": [
+        {
+          "entityId": "pl:player:2522",
+          "canonicalName": "Cristiano Ronaldo",
+          "sourceName": "Cristiano Ronaldo",
+          "sourceProfileUrl": "https://www.transfermarkt.com/cristiano-ronaldo/profil/spieler/8198",
+          "sourceValue": 140,
+          "rankingValue": 140,
+          "sourceRank": 1,
+          "rankingRank": 1,
+          "expectedRankFromSource": 1,
+          "rankingScore": 1,
+          "tieGroup": 1,
+          "expectedTieGroupFromSource": 1,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/cristiano-ronaldo/profil/spieler/8198"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "france-football:player:21740",
+          "canonicalName": "Lionel Messi",
+          "sourceName": "Lionel Messi",
+          "sourceProfileUrl": "https://www.transfermarkt.com/lionel-messi/profil/spieler/28003",
+          "sourceValue": 129,
+          "rankingValue": 129,
+          "sourceRank": 2,
+          "rankingRank": 2,
+          "expectedRankFromSource": 2,
+          "rankingScore": 2,
+          "tieGroup": 2,
+          "expectedTieGroupFromSource": 2,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/lionel-messi/profil/spieler/28003"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "uefa:player:5c3862ab1eb2e7e94c3cad87",
+          "canonicalName": "Lewandowski",
+          "sourceName": "Robert Lewandowski",
+          "sourceProfileUrl": "https://www.transfermarkt.com/robert-lewandowski/profil/spieler/38253",
+          "sourceValue": 109,
+          "rankingValue": 109,
+          "sourceRank": 3,
+          "rankingRank": 3,
+          "expectedRankFromSource": 3,
+          "rankingScore": 3,
+          "tieGroup": 3,
+          "expectedTieGroupFromSource": 3,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/robert-lewandowski/profil/spieler/38253"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "france-football:player:22047",
+          "canonicalName": "Karim Benzema",
+          "sourceName": "Karim Benzema",
+          "sourceProfileUrl": "https://www.transfermarkt.com/karim-benzema/profil/spieler/18922",
+          "sourceValue": 90,
+          "rankingValue": 90,
+          "sourceRank": 4,
+          "rankingRank": 4,
+          "expectedRankFromSource": 4,
+          "rankingScore": 4,
+          "tieGroup": 4,
+          "expectedTieGroupFromSource": 4,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/karim-benzema/profil/spieler/18922"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "transfermarkt:european-cup-champions-league:player:a071134f4896322ba99edf15",
+          "canonicalName": "Kylian Mbappé",
+          "sourceName": "Kylian Mbappé",
+          "sourceProfileUrl": "https://www.transfermarkt.com/kylian-mbappe/profil/spieler/342229",
+          "sourceValue": 71,
+          "rankingValue": 71,
+          "sourceRank": 6,
+          "rankingRank": 5,
+          "expectedRankFromSource": 5,
+          "rankingScore": 5,
+          "tieGroup": 5,
+          "expectedTieGroupFromSource": 5,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/kylian-mbappe/profil/spieler/342229"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "transfermarkt:european-cup-champions-league:player:b8cc45b74357d05470f9fa6c",
+          "canonicalName": "Raúl",
+          "sourceName": "Raúl",
+          "sourceProfileUrl": "https://www.transfermarkt.com/raul/profil/spieler/7349",
+          "sourceValue": 71,
+          "rankingValue": 71,
+          "sourceRank": 5,
+          "rankingRank": 5,
+          "expectedRankFromSource": 5,
+          "rankingScore": 5,
+          "tieGroup": 5,
+          "expectedTieGroupFromSource": 5,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/raul/profil/spieler/7349"
+          ],
+          "issues": [
+            {
+              "type": "error de identidad",
+              "code": "short_or_ambiguous_source_name",
+              "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+              "evidenceUrls": [
+                "https://www.transfermarkt.com/raul/profil/spieler/7349"
+              ]
+            }
+          ]
+        },
+        {
+          "entityId": "uefa:player:0484e7fe0d00a68288865d80",
+          "canonicalName": "Haaland",
+          "sourceName": "Erling Haaland",
+          "sourceProfileUrl": "https://www.transfermarkt.com/erling-haaland/profil/spieler/418560",
+          "sourceValue": 59,
+          "rankingValue": 59,
+          "sourceRank": 7,
+          "rankingRank": 7,
+          "expectedRankFromSource": 7,
+          "rankingScore": 7,
+          "tieGroup": 6,
+          "expectedTieGroupFromSource": 6,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/erling-haaland/profil/spieler/418560"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "dfb:bundesliga:player:c50065a141a513c2431d1c08",
+          "canonicalName": "Thomas Müller",
+          "sourceName": "Thomas Müller",
+          "sourceProfileUrl": "https://www.transfermarkt.com/thomas-muller/profil/spieler/58358",
+          "sourceValue": 57,
+          "rankingValue": 57,
+          "sourceRank": 8,
+          "rankingRank": 8,
+          "expectedRankFromSource": 8,
+          "rankingScore": 8,
+          "tieGroup": 7,
+          "expectedTieGroupFromSource": 7,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/thomas-muller/profil/spieler/58358"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "pl:player:2117",
+          "canonicalName": "Ruud van Nistelrooij",
+          "sourceName": "Ruud van Nistelrooy",
+          "sourceProfileUrl": "https://www.transfermarkt.com/ruud-van-nistelrooy/profil/spieler/3407",
+          "sourceValue": 56,
+          "rankingValue": 56,
+          "sourceRank": 9,
+          "rankingRank": 9,
+          "expectedRankFromSource": 9,
+          "rankingScore": 9,
+          "tieGroup": 8,
+          "expectedTieGroupFromSource": 8,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/ruud-van-nistelrooy/profil/spieler/3407"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "pl:player:3960",
+          "canonicalName": "Harry Kane",
+          "sourceName": "Harry Kane",
+          "sourceProfileUrl": "https://www.transfermarkt.com/harry-kane/profil/spieler/132098",
+          "sourceValue": 55,
+          "rankingValue": 55,
+          "sourceRank": 10,
+          "rankingRank": 10,
+          "expectedRankFromSource": 10,
+          "rankingScore": 10,
+          "tieGroup": 9,
+          "expectedTieGroupFromSource": 9,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/harry-kane/profil/spieler/132098"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "pl:player:1659",
+          "canonicalName": "Thierry Henry",
+          "sourceName": "Thierry Henry",
+          "sourceProfileUrl": "https://www.transfermarkt.com/thierry-henry/profil/spieler/3207",
+          "sourceValue": 50,
+          "rankingValue": 50,
+          "sourceRank": 11,
+          "rankingRank": 11,
+          "expectedRankFromSource": 11,
+          "rankingScore": 11,
+          "tieGroup": 10,
+          "expectedTieGroupFromSource": 10,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/thierry-henry/profil/spieler/3207"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "pl:player:5178",
+          "canonicalName": "Mohamed Salah",
+          "sourceName": "Mohamed Salah",
+          "sourceProfileUrl": "https://www.transfermarkt.com/mohamed-salah/profil/spieler/148455",
+          "sourceValue": 50,
+          "rankingValue": 50,
+          "sourceRank": 12,
+          "rankingRank": 11,
+          "expectedRankFromSource": 11,
+          "rankingScore": 11,
+          "tieGroup": 10,
+          "expectedTieGroupFromSource": 10,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/mohamed-salah/profil/spieler/148455"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "france-football:player:10288",
+          "canonicalName": "Alfredo Di Stefano",
+          "sourceName": "Alfredo di Stéfano",
+          "sourceProfileUrl": "https://www.transfermarkt.com/alfredo-di-stefano/profil/spieler/135778",
+          "sourceValue": 49,
+          "rankingValue": 49,
+          "sourceRank": 13,
+          "rankingRank": 13,
+          "expectedRankFromSource": 13,
+          "rankingScore": 13,
+          "tieGroup": 11,
+          "expectedTieGroupFromSource": 11,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/alfredo-di-stefano/profil/spieler/135778",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "pl:player:3106",
+          "canonicalName": "Andriy Shevchenko",
+          "sourceName": "Andriy Shevchenko",
+          "sourceProfileUrl": "https://www.transfermarkt.com/andriy-shevchenko/profil/spieler/3522",
+          "sourceValue": 48,
+          "rankingValue": 48,
+          "sourceRank": 15,
+          "rankingRank": 14,
+          "expectedRankFromSource": 14,
+          "rankingScore": 14,
+          "tieGroup": 12,
+          "expectedTieGroupFromSource": 12,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/andriy-shevchenko/profil/spieler/3522",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "transfermarkt:european-cup-champions-league:player:2ae2a8010ba024ac44267ca4",
+          "canonicalName": "Zlatan Ibrahimović",
+          "sourceName": "Zlatan Ibrahimović",
+          "sourceProfileUrl": "https://www.transfermarkt.com/zlatan-ibrahimovic/profil/spieler/3455",
+          "sourceValue": 48,
+          "rankingValue": 48,
+          "sourceRank": 14,
+          "rankingRank": 14,
+          "expectedRankFromSource": 14,
+          "rankingScore": 14,
+          "tieGroup": 12,
+          "expectedTieGroupFromSource": 12,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/zlatan-ibrahimovic/profil/spieler/3455"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "france-football:player:10294",
+          "canonicalName": "Eusébio",
+          "sourceName": "Eusébio",
+          "sourceProfileUrl": "https://www.transfermarkt.com/eusebio/profil/spieler/89230",
+          "sourceValue": 46,
+          "rankingValue": 46,
+          "sourceRank": 16,
+          "rankingRank": 16,
+          "expectedRankFromSource": 16,
+          "rankingScore": 16,
+          "tieGroup": 13,
+          "expectedTieGroupFromSource": 13,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/eusebio/profil/spieler/89230"
+          ],
+          "issues": [
+            {
+              "type": "error de identidad",
+              "code": "short_or_ambiguous_source_name",
+              "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+              "evidenceUrls": [
+                "https://www.transfermarkt.com/eusebio/profil/spieler/89230"
+              ]
+            }
+          ]
+        },
+        {
+          "entityId": "uefa:player:2ccf410479e84b2c69ebde7d",
+          "canonicalName": "F. Inzaghi",
+          "sourceName": "Filippo Inzaghi",
+          "sourceProfileUrl": "https://www.transfermarkt.com/filippo-inzaghi/profil/spieler/5821",
+          "sourceValue": 46,
+          "rankingValue": 46,
+          "sourceRank": 17,
+          "rankingRank": 16,
+          "expectedRankFromSource": 16,
+          "rankingScore": 16,
+          "tieGroup": 13,
+          "expectedTieGroupFromSource": 13,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/filippo-inzaghi/profil/spieler/5821"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "api-football:player:56",
+          "canonicalName": "Antoine Griezmann",
+          "sourceName": "Antoine Griezmann",
+          "sourceProfileUrl": "https://www.transfermarkt.com/antoine-griezmann/profil/spieler/125781",
+          "sourceValue": 44,
+          "rankingValue": 44,
+          "sourceRank": 18,
+          "rankingRank": 18,
+          "expectedRankFromSource": 18,
+          "rankingScore": 18,
+          "tieGroup": 14,
+          "expectedTieGroupFromSource": 14,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/antoine-griezmann/profil/spieler/125781",
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "pl:player:2662",
+          "canonicalName": "Didier Drogba",
+          "sourceName": "Didier Drogba",
+          "sourceProfileUrl": "https://www.transfermarkt.com/didier-drogba/profil/spieler/3924",
+          "sourceValue": 44,
+          "rankingValue": 44,
+          "sourceRank": 19,
+          "rankingRank": 18,
+          "expectedRankFromSource": 18,
+          "rankingScore": 18,
+          "tieGroup": 14,
+          "expectedTieGroupFromSource": 14,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/didier-drogba/profil/spieler/3924"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "bdfutbol:la-liga:player:8496753b629895ff211f4d41",
+          "canonicalName": "Neymar da Silva Santos Júnior",
+          "sourceName": "Neymar",
+          "sourceProfileUrl": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+          "sourceValue": 43,
+          "rankingValue": 43,
+          "sourceRank": 20,
+          "rankingRank": 20,
+          "expectedRankFromSource": 20,
+          "rankingScore": 20,
+          "tieGroup": 15,
+          "expectedTieGroupFromSource": 15,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+            "https://www.transfermarkt.com/neymar/profil/spieler/68290"
+          ],
+          "issues": [
+            {
+              "type": "error de identidad",
+              "code": "short_or_ambiguous_source_name",
+              "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+              "evidenceUrls": [
+                "https://www.transfermarkt.com/neymar/profil/spieler/68290"
+              ]
+            }
+          ]
+        }
+      ],
+      "discrepancies": [
+        {
+          "type": "error de identidad",
+          "code": "short_or_ambiguous_source_name",
+          "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/raul/profil/spieler/7349"
+          ],
+          "entityId": "transfermarkt:european-cup-champions-league:player:b8cc45b74357d05470f9fa6c"
+        },
+        {
+          "type": "error de identidad",
+          "code": "short_or_ambiguous_source_name",
+          "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/eusebio/profil/spieler/89230"
+          ],
+          "entityId": "france-football:player:10294"
+        },
+        {
+          "type": "error de identidad",
+          "code": "short_or_ambiguous_source_name",
+          "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/neymar/profil/spieler/68290"
+          ],
+          "entityId": "bdfutbol:la-liga:player:8496753b629895ff211f4d41"
+        },
+        {
+          "type": "error de fuente",
+          "code": "source_snapshot_unresolved_conflicts",
+          "message": "El snapshot de fuente declara 12 conflictos sin resolver.",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0"
+          ]
+        },
+        {
+          "type": "error de alcance",
+          "code": "source_contrast_value_discrepancy",
+          "message": "La fuente de contraste «UEFA Champions League official player statistics» registra 12 discrepancias de valor; hay que resolver si corresponden a alcance o definición estadística distinta.",
+          "evidenceUrls": [
+            "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+          ]
+        },
+        {
+          "type": "problema de derechos",
+          "code": "source_rights_not_approved",
+          "message": "La fuente mantiene rightsStatus=review_required; no puede publicarse como dato aprobado.",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0"
+          ]
+        }
+      ],
+      "recommendation": "No aprobar ni publicar automáticamente. Resolver discrepancias de identidad, confirmar los valores contra la fuente primaria, documentar el alcance y cerrar derechos/imágenes antes de promover el snapshot.",
+      "hashes": {
+        "validationSha256": "7ffbe7427742a0eed54d6248d071410ba22d1307c904f08b1247532e904645f3"
+      }
+    },
+    {
+      "artifactKind": "priority_ranking_validation",
+      "readOnly": true,
+      "productionData": false,
+      "editorialApproval": false,
+      "categorySlug": "world-cup-goals",
+      "rankingSnapshotId": "rs_7cc0d9cf795a275b93106c43",
+      "sourceSnapshotId": "src_a5862ab2e594939ddfa99181",
+      "source": {
+        "key": "transfermarkt-world-cup-historical-goals",
+        "name": "Transfermarkt — historical FIFA World Cup final tournaments top scorers",
+        "sourceType": "reference",
+        "baseUrl": "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0",
+        "rightsStatus": "review_required"
+      },
+      "snapshot": {
+        "dataVersion": "transfermarkt-fifa-world-cup-final-tournaments-goals-top-200-2026-09-12",
+        "algorithmVersion": "ranking-v1",
+        "contentSha256": "7cc0d9cf795a275b93106c43eb12dc800629d29e64ee68bcdb6c6bd9f4af8a63",
+        "generatedAt": "2026-09-12T23:47:30.370Z",
+        "coverageComplete": true,
+        "reviewed": false,
+        "sourceContentSha256": "a5862ab2e594939ddfa99181bb0a5408697478685f2e6993b49c2d589418b9f8",
+        "sourceStorageUri": "storage/source-snapshots/src_a5862ab2e594939ddfa99181.json"
+      },
+      "validationMethod": {
+        "archivedSourceSnapshot": "Se compara contra el JSON archivado que originó el ranking; el acceso web vivo requiere revisión del propietario del sitio.",
+        "liveSourceStatus": "not_automatable",
+        "liveSourceNote": "La página de Transfermarkt respondió con verificación anti-bot durante la comprobación. No se ha tratado ese bloqueo como aprobación ni como discrepancia de valor.",
+        "independentReferences": [
+          {
+            "name": "FIFA — máximos goleadores históricos del Mundial",
+            "url": "https://www.fifa.com/en/id/mens/worldcup/articles/fifa-world-cup-all-time-leading-scorers",
+            "scope": "contraste oficial; torneos finales de la Copa Mundial masculina",
+            "status": "reference_only"
+          }
+        ]
+      },
+      "entries": [
+        {
+          "entityId": "transfermarkt:world-cup:player:a071134f4896322ba99edf15",
+          "canonicalName": "Kylian Mbappé",
+          "sourceName": "Kylian Mbappé",
+          "sourceProfileUrl": "https://www.transfermarkt.com/kylian-mbappe/profil/spieler/342229",
+          "sourceValue": 22,
+          "rankingValue": 22,
+          "sourceRank": 1,
+          "rankingRank": 1,
+          "expectedRankFromSource": 1,
+          "rankingScore": 1,
+          "tieGroup": 1,
+          "expectedTieGroupFromSource": 1,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/kylian-mbappe/profil/spieler/342229",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:e0cbd48e4220c983d0bc20e3",
+          "canonicalName": "Lionel Messi",
+          "sourceName": "Lionel Messi",
+          "sourceProfileUrl": "https://www.transfermarkt.com/lionel-messi/profil/spieler/28003",
+          "sourceValue": 21,
+          "rankingValue": 21,
+          "sourceRank": 2,
+          "rankingRank": 2,
+          "expectedRankFromSource": 2,
+          "rankingScore": 2,
+          "tieGroup": 2,
+          "expectedTieGroupFromSource": 2,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/lionel-messi/profil/spieler/28003",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:142f3bb04550dc5e2f02bdd8",
+          "canonicalName": "Miroslav Klose",
+          "sourceName": "Miroslav Klose",
+          "sourceProfileUrl": "https://www.transfermarkt.com/miroslav-klose/profil/spieler/10",
+          "sourceValue": 16,
+          "rankingValue": 16,
+          "sourceRank": 3,
+          "rankingRank": 3,
+          "expectedRankFromSource": 3,
+          "rankingScore": 3,
+          "tieGroup": 3,
+          "expectedTieGroupFromSource": 3,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/miroslav-klose/profil/spieler/10",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:ee353ea3ec0b143f6f5fb032",
+          "canonicalName": "Ronaldo",
+          "sourceName": "Ronaldo",
+          "sourceProfileUrl": "https://www.transfermarkt.com/ronaldo/profil/spieler/3140",
+          "sourceValue": 15,
+          "rankingValue": 15,
+          "sourceRank": 4,
+          "rankingRank": 4,
+          "expectedRankFromSource": 4,
+          "rankingScore": 4,
+          "tieGroup": 4,
+          "expectedTieGroupFromSource": 4,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/ronaldo/profil/spieler/3140",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "error de identidad",
+              "code": "short_or_ambiguous_source_name",
+              "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+              "evidenceUrls": [
+                "https://www.transfermarkt.com/ronaldo/profil/spieler/3140"
+              ]
+            },
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:4a3c94c4023852ebc490ff8f",
+          "canonicalName": "Harry Kane",
+          "sourceName": "Harry Kane",
+          "sourceProfileUrl": "https://www.transfermarkt.com/harry-kane/profil/spieler/132098",
+          "sourceValue": 14,
+          "rankingValue": 14,
+          "sourceRank": 6,
+          "rankingRank": 5,
+          "expectedRankFromSource": 5,
+          "rankingScore": 5,
+          "tieGroup": 5,
+          "expectedTieGroupFromSource": 5,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/harry-kane/profil/spieler/132098",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:ba9459195f1c91f27eac05dc",
+          "canonicalName": "Gerd Müller",
+          "sourceName": "Gerd Müller",
+          "sourceProfileUrl": "https://www.transfermarkt.com/gerd-muller/profil/spieler/35604",
+          "sourceValue": 14,
+          "rankingValue": 14,
+          "sourceRank": 5,
+          "rankingRank": 5,
+          "expectedRankFromSource": 5,
+          "rankingScore": 5,
+          "tieGroup": 5,
+          "expectedTieGroupFromSource": 5,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/gerd-muller/profil/spieler/35604",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:60b9f1301d8ba69070e83af0",
+          "canonicalName": "Just Fontaine",
+          "sourceName": "Just Fontaine",
+          "sourceProfileUrl": "https://www.transfermarkt.com/just-fontaine/profil/spieler/151245",
+          "sourceValue": 13,
+          "rankingValue": 13,
+          "sourceRank": 7,
+          "rankingRank": 7,
+          "expectedRankFromSource": 7,
+          "rankingScore": 7,
+          "tieGroup": 6,
+          "expectedTieGroupFromSource": 6,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/just-fontaine/profil/spieler/151245",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:0f03fc0cf25d0c58202b8f98",
+          "canonicalName": "Pelé",
+          "sourceName": "Pelé",
+          "sourceProfileUrl": "https://www.transfermarkt.com/pele/profil/spieler/17121",
+          "sourceValue": 12,
+          "rankingValue": 12,
+          "sourceRank": 8,
+          "rankingRank": 8,
+          "expectedRankFromSource": 8,
+          "rankingScore": 8,
+          "tieGroup": 7,
+          "expectedTieGroupFromSource": 7,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/pele/profil/spieler/17121",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "error de identidad",
+              "code": "short_or_ambiguous_source_name",
+              "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+              "evidenceUrls": [
+                "https://www.transfermarkt.com/pele/profil/spieler/17121"
+              ]
+            },
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:08acf787022849299b30ba6a",
+          "canonicalName": "Cristiano Ronaldo",
+          "sourceName": "Cristiano Ronaldo",
+          "sourceProfileUrl": "https://www.transfermarkt.com/cristiano-ronaldo/profil/spieler/8198",
+          "sourceValue": 11,
+          "rankingValue": 11,
+          "sourceRank": 11,
+          "rankingRank": 9,
+          "expectedRankFromSource": 9,
+          "rankingScore": 9,
+          "tieGroup": 8,
+          "expectedTieGroupFromSource": 8,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/cristiano-ronaldo/profil/spieler/8198",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:4e1e0ec1c733d4220521a4a4",
+          "canonicalName": "Sándor Kocsis",
+          "sourceName": "Sándor Kocsis",
+          "sourceProfileUrl": "https://www.transfermarkt.com/sandor-kocsis/profil/spieler/136482",
+          "sourceValue": 11,
+          "rankingValue": 11,
+          "sourceRank": 10,
+          "rankingRank": 9,
+          "expectedRankFromSource": 9,
+          "rankingScore": 9,
+          "tieGroup": 8,
+          "expectedTieGroupFromSource": 8,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/sandor-kocsis/profil/spieler/136482",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:63cd8563affc600e6865662c",
+          "canonicalName": "Jürgen Klinsmann",
+          "sourceName": "Jürgen Klinsmann",
+          "sourceProfileUrl": "https://www.transfermarkt.com/jurgen-klinsmann/profil/spieler/16980",
+          "sourceValue": 11,
+          "rankingValue": 11,
+          "sourceRank": 9,
+          "rankingRank": 9,
+          "expectedRankFromSource": 9,
+          "rankingScore": 9,
+          "tieGroup": 8,
+          "expectedTieGroupFromSource": 8,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/jurgen-klinsmann/profil/spieler/16980",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:419d307c944eb26c6b9a7167",
+          "canonicalName": "Gabriel Batistuta",
+          "sourceName": "Gabriel Batistuta",
+          "sourceProfileUrl": "https://www.transfermarkt.com/gabriel-batistuta/profil/spieler/5959",
+          "sourceValue": 10,
+          "rankingValue": 10,
+          "sourceRank": 16,
+          "rankingRank": 12,
+          "expectedRankFromSource": 12,
+          "rankingScore": 12,
+          "tieGroup": 9,
+          "expectedTieGroupFromSource": 9,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": true,
+          "imageStatus": "licensed",
+          "imageRightsStatus": "confirmado",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/gabriel-batistuta/profil/spieler/5959",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": []
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:70cc893c99cf8f0529a17150",
+          "canonicalName": "Thomas Müller",
+          "sourceName": "Thomas Müller",
+          "sourceProfileUrl": "https://www.transfermarkt.com/thomas-muller/profil/spieler/58358",
+          "sourceValue": 10,
+          "rankingValue": 10,
+          "sourceRank": 13,
+          "rankingRank": 12,
+          "expectedRankFromSource": 12,
+          "rankingScore": 12,
+          "tieGroup": 9,
+          "expectedTieGroupFromSource": 9,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/thomas-muller/profil/spieler/58358",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:82e85a04938cf6b187c8456d",
+          "canonicalName": "Teófilo Cubillas",
+          "sourceName": "Teófilo Cubillas",
+          "sourceProfileUrl": "https://www.transfermarkt.com/teofilo-cubillas/profil/spieler/133753",
+          "sourceValue": 10,
+          "rankingValue": 10,
+          "sourceRank": 14,
+          "rankingRank": 12,
+          "expectedRankFromSource": 12,
+          "rankingScore": 12,
+          "tieGroup": 9,
+          "expectedTieGroupFromSource": 9,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/teofilo-cubillas/profil/spieler/133753",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:a32bb03e7a3742893dd3f7a3",
+          "canonicalName": "Grzegorz Lato",
+          "sourceName": "Grzegorz Lato",
+          "sourceProfileUrl": "https://www.transfermarkt.com/grzegorz-lato/profil/spieler/132457",
+          "sourceValue": 10,
+          "rankingValue": 10,
+          "sourceRank": 12,
+          "rankingRank": 12,
+          "expectedRankFromSource": 12,
+          "rankingScore": 12,
+          "tieGroup": 9,
+          "expectedTieGroupFromSource": 9,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/grzegorz-lato/profil/spieler/132457",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:c3d6c2623b247e42120cbd68",
+          "canonicalName": "Helmut Rahn",
+          "sourceName": "Helmut Rahn",
+          "sourceProfileUrl": "https://www.transfermarkt.com/helmut-rahn/profil/spieler/89228",
+          "sourceValue": 10,
+          "rankingValue": 10,
+          "sourceRank": 15,
+          "rankingRank": 12,
+          "expectedRankFromSource": 12,
+          "rankingScore": 12,
+          "tieGroup": 9,
+          "expectedTieGroupFromSource": 9,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/helmut-rahn/profil/spieler/89228",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:e8ffdf6a1c959832f75eac0a",
+          "canonicalName": "Gary Lineker",
+          "sourceName": "Gary Lineker",
+          "sourceProfileUrl": "https://www.transfermarkt.com/gary-lineker/profil/spieler/22256",
+          "sourceValue": 10,
+          "rankingValue": 10,
+          "sourceRank": 17,
+          "rankingRank": 12,
+          "expectedRankFromSource": 12,
+          "rankingScore": 12,
+          "tieGroup": 9,
+          "expectedTieGroupFromSource": 9,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/gary-lineker/profil/spieler/22256",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:07764ef34483a7bdc0e228ba",
+          "canonicalName": "Uwe Seeler",
+          "sourceName": "Uwe Seeler",
+          "sourceProfileUrl": "https://www.transfermarkt.com/uwe-seeler/profil/spieler/38191",
+          "sourceValue": 9,
+          "rankingValue": 9,
+          "sourceRank": 18,
+          "rankingRank": 18,
+          "expectedRankFromSource": 18,
+          "rankingScore": 18,
+          "tieGroup": 10,
+          "expectedTieGroupFromSource": 10,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/uwe-seeler/profil/spieler/38191",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:37b048dc34b525d71f181e89",
+          "canonicalName": "Paolo Rossi",
+          "sourceName": "Paolo Rossi",
+          "sourceProfileUrl": "https://www.transfermarkt.com/paolo-rossi/profil/spieler/116757",
+          "sourceValue": 9,
+          "rankingValue": 9,
+          "sourceRank": 21,
+          "rankingRank": 18,
+          "expectedRankFromSource": 18,
+          "rankingScore": 18,
+          "tieGroup": 10,
+          "expectedTieGroupFromSource": 10,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": null,
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/paolo-rossi/profil/spieler/116757",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        },
+        {
+          "entityId": "transfermarkt:world-cup:player:3885ec2e25136d206ab6b3f2",
+          "canonicalName": "Neymar",
+          "sourceName": "Neymar",
+          "sourceProfileUrl": "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+          "sourceValue": 9,
+          "rankingValue": 9,
+          "sourceRank": 19,
+          "rankingRank": 18,
+          "expectedRankFromSource": 18,
+          "rankingScore": 18,
+          "tieGroup": 10,
+          "expectedTieGroupFromSource": 10,
+          "identityStatus": "confirmado",
+          "valueStatus": "confirmado",
+          "rankStatus": "confirmado",
+          "tieStatus": "confirmado",
+          "ambiguityNote": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "imageAvailable": false,
+          "imageStatus": "fallback",
+          "imageRightsStatus": "no verificable",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/neymar/profil/spieler/68290",
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ],
+          "issues": [
+            {
+              "type": "error de identidad",
+              "code": "short_or_ambiguous_source_name",
+              "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+              "evidenceUrls": [
+                "https://www.transfermarkt.com/neymar/profil/spieler/68290"
+              ]
+            },
+            {
+              "type": "problema de imagen",
+              "code": "image_unavailable",
+              "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+              "evidenceUrls": []
+            }
+          ]
+        }
+      ],
+      "discrepancies": [
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:e0cbd48e4220c983d0bc20e3"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:142f3bb04550dc5e2f02bdd8"
+        },
+        {
+          "type": "error de identidad",
+          "code": "short_or_ambiguous_source_name",
+          "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/ronaldo/profil/spieler/3140"
+          ],
+          "entityId": "transfermarkt:world-cup:player:ee353ea3ec0b143f6f5fb032"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:ee353ea3ec0b143f6f5fb032"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:4a3c94c4023852ebc490ff8f"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:ba9459195f1c91f27eac05dc"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:60b9f1301d8ba69070e83af0"
+        },
+        {
+          "type": "error de identidad",
+          "code": "short_or_ambiguous_source_name",
+          "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/pele/profil/spieler/17121"
+          ],
+          "entityId": "transfermarkt:world-cup:player:0f03fc0cf25d0c58202b8f98"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:0f03fc0cf25d0c58202b8f98"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:08acf787022849299b30ba6a"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:4e1e0ec1c733d4220521a4a4"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:70cc893c99cf8f0529a17150"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:82e85a04938cf6b187c8456d"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:a32bb03e7a3742893dd3f7a3"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:c3d6c2623b247e42120cbd68"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:e8ffdf6a1c959832f75eac0a"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:07764ef34483a7bdc0e228ba"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:37b048dc34b525d71f181e89"
+        },
+        {
+          "type": "error de identidad",
+          "code": "short_or_ambiguous_source_name",
+          "message": "La etiqueta de fuente es abreviada; el perfil URL se usa como desambiguación.",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/neymar/profil/spieler/68290"
+          ],
+          "entityId": "transfermarkt:world-cup:player:3885ec2e25136d206ab6b3f2"
+        },
+        {
+          "type": "problema de imagen",
+          "code": "image_unavailable",
+          "message": "No hay imagen disponible para el jugador en el catálogo actual.",
+          "evidenceUrls": [],
+          "entityId": "transfermarkt:world-cup:player:3885ec2e25136d206ab6b3f2"
+        },
+        {
+          "type": "problema de derechos",
+          "code": "source_rights_not_approved",
+          "message": "La fuente mantiene rightsStatus=review_required; no puede publicarse como dato aprobado.",
+          "evidenceUrls": [
+            "https://www.transfermarkt.com/weltmeisterschaft/ewigetorschuetzenliste/pokalwettbewerb/FIWC/plus//land_id/0"
+          ]
+        }
+      ],
+      "recommendation": "No aprobar ni publicar automáticamente. Resolver discrepancias de identidad, confirmar los valores contra la fuente primaria, documentar el alcance y cerrar derechos/imágenes antes de promover el snapshot.",
+      "hashes": {
+        "validationSha256": "06c2e43d3f2629f1237c308c7d292d79fe8487bd0269f7aec4d26500de6ae698"
+      }
+    }
+  ],
+  "recommendation": "Informe de discrepancias para revisión técnica y editorial. No constituye una fuente de producción ni una aprobación."
+}

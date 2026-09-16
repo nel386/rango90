@@ -1,5 +1,6 @@
 export type Locale = "es" | "en";
 export type EntityType = "player" | "club" | "national_team";
+export type RuntimeMode = "lab" | "official";
 
 export type MockCategory = {
   slug: string;
@@ -40,4 +41,6 @@ export type MockChallenge = {
   engineVersion?: string;
   scoreCap?: number;
   difficulty: "balanced";
+  runtimeMode?: RuntimeMode;
+  provisionalData?: boolean;
 };

@@ -12,6 +12,7 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.RANGO90_DATABASE_URL }}
       DATABASE_SSL: 'true'
+      RANGO90_RUNTIME_MODE: official
     steps:
       - name: Checkout
         uses: actions/checkout@v4

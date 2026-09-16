@@ -26,8 +26,9 @@ jobs:
         run: |
           git init --quiet render-target
           git -C render-target remote add origin "https://github.com/${{ github.repository }}.git"
-          git -C render-target fetch --quiet --no-tags --depth=1 origin "$COMMIT_SHA"
+          git -C render-target fetch --quiet --no-tags origin master
           git -C render-target cat-file -e "$COMMIT_SHA^{commit}"
+          git -C render-target merge-base --is-ancestor "$COMMIT_SHA" origin/master
 
       - name: Trigger Render deploy for exact commit
         id: trigger

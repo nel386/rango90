@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { buildChampionsRightsReview, stableJson } from '../championsRightsReview.js';
+
+const inputContent = await readFile(resolve(process.cwd(), 'audits/block7b/champions-approval-dossier.json'), 'utf8');
+const input = JSON.parse(inputContent);
+const first = buildChampionsRightsReview({ audit: input, auditSha256: 'b'.repeat(64) });
+const second = buildChampionsRightsReview({ audit: input, auditSha256: 'b'.repeat(64) });
+assert.equal(first.currentDraftSource.rightsStatus, 'review_required');
+assert.equal(first.conflictAssessment.total, 12);
+assert.equal(first.conflictAssessment.unresolvedCases.length, 11);
+assert.equal(first.identityAndMetadata.totalPending, 6);
+assert.equal(first.identityAndMetadata.identityDiscrepanciesDocumented, 3);
+assert.equal(first.sourceAssessments.find((source) => source.provider === 'Transfermarkt')?.status, 'blocked');
+assert.equal(first.sourceAssessments.find((source) => source.provider === 'API-Football / API-Sports')?.status, 'conditional_not_approved');
+assert.equal(first.readyForApproval, false);
+assert.equal(first.approvalsGranted, false);
+assert.equal(first.mutationCount, 0);
+assert.equal(first.isolatedValidation.status, 'integration_pending');
+assert.equal(stableJson(first), stableJson(second));
+console.log('champions rights review tests passed');

@@ -1,0 +1,25 @@
+{
+  "artifactKind": "versioned_scope_decision",
+  "version": "uefa-champions-league-goals-v2",
+  "categorySlug": "uefa-champions-league-goals",
+  "status": "proposed_not_approved",
+  "approved": false,
+  "definition": {
+    "entityType": "player",
+    "metric": "goals",
+    "competition": "Copa de Europa / UEFA Champions League",
+    "temporalWindow": "1955/56–2025/26; corte del dato al 2026-09-12",
+    "snapshotCutoff": "2026-09-12 (snapshot recuperado; no se presume inclusión de partidos posteriores)",
+    "tournamentPhase": "torneo principal/fase final; sin rondas de clasificación ni fases previas",
+    "gender": "masculino",
+    "countingRule": "un gol por anotación oficial registrada por la fuente adoptada; empates por valor exacto y ranking de competición"
+  },
+  "label": "Goles históricos — Copa de Europa / UEFA Champions League (sin rondas de clasificación)",
+  "authority": "UEFA para semántica de competición y rondas; Transfermarkt solo como fuente numérica provisional mientras rights_status no sea approved.",
+  "rationale": "La definición Copa de Europa + Champions masculina desde 1955/56, solo torneo principal y sin clasificación evita mezclar alcances. Debe ser aprobada explícitamente.",
+  "inputAuditRunId": "block7a-champions-d1a11f1a22641e50",
+  "inputAuditSha256": "340a8c57d9c54f4be4bc003615baf44b259bcd77ee0a749bae2b8c99c7d6e7e2",
+  "readOnly": true,
+  "productionData": false,
+  "mutationCount": 0
+}

@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { buildChampionsApprovalDossier, stableJson } from '../championsApprovalDossier.js';
+
+const auditPath = resolve(process.cwd(), 'audits/block7a/champions-conflict-audit.json');
+const auditContent = await readFile(auditPath, 'utf8');
+const audit = JSON.parse(auditContent);
+const input = { audit, auditSha256: 'a'.repeat(64) };
+const first = buildChampionsApprovalDossier(input);
+const second = buildChampionsApprovalDossier(input);
+assert.equal(first.categorySlug, 'uefa-champions-league-goals');
+assert.equal(first.scopeDecision.version, 'uefa-champions-league-goals-v2');
+assert.equal(first.scopeDecision.status, 'proposed_not_approved');
+assert.equal(first.conflictMatrix.total, 12);
+assert.equal(first.conflictMatrix.blocked, 12);
+assert.equal(first.pendingResolutions.total, 6);
+assert.equal(first.pendingResolutions.editoriallyResolved, 3);
+assert.equal(first.pendingResolutions.blocked, 3);
+assert.equal(first.sourceDecision.numericSourceStatus, 'provisional_pending_rights');
+assert.equal(first.sourceDecision.rightsDecision, 'blocked_pending_documented_review');
+assert.equal(first.readyForApproval, false);
+assert.equal(first.readOnly, true);
+assert.equal(first.productionData, false);
+assert.equal(first.mutationCount, 0);
+assert.equal(first.isolatedValidation.status, 'integration_pending');
+assert.equal(stableJson(first), stableJson(second));
+console.log('champions approval dossier tests passed');

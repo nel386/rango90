@@ -1,0 +1,360 @@
+{
+  "artifactKind": "champions_conflict_resolution_matrix",
+  "categorySlug": "uefa-champions-league-goals",
+  "sourceDossierRunId": "block7b-champions-340a8c57d9c54f4b",
+  "total": 12,
+  "blocked": 12,
+  "rows": [
+    {
+      "player": "Claudio Pizarro",
+      "currentValue": 21,
+      "currentPosition": 71,
+      "primaryValue": 21,
+      "primaryPosition": 71,
+      "officialValue": 24,
+      "officialPosition": 61,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 3,
+        "officialMinusPrimary": 3
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": -10,
+        "officialMinusPrimary": -10
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    },
+    {
+      "player": "Cristiano Ronaldo",
+      "currentValue": 140,
+      "currentPosition": 1,
+      "primaryValue": 140,
+      "primaryPosition": 1,
+      "officialValue": 141,
+      "officialPosition": 1,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 1,
+        "officialMinusPrimary": 1
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 0,
+        "officialMinusPrimary": 0
+      },
+      "classification": "diferencia de alcance",
+      "possibleCause": "scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "La referencia UEFA separa explícitamente una lista sin clasificación (140) de otra con clasificación (141); el snapshot archivado no documenta qué corte explica este caso.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda que confirme el tratamiento de clasificación; solo después generar, si procede, una nueva versión draft append-only."
+    },
+    {
+      "player": "Eusébio",
+      "currentValue": 46,
+      "currentPosition": 16,
+      "primaryValue": 46,
+      "primaryPosition": 16,
+      "officialValue": 47,
+      "officialPosition": 17,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 1,
+        "officialMinusPrimary": 1
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 1,
+        "officialMinusPrimary": 1
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    },
+    {
+      "player": "Ferenc Puskás",
+      "currentValue": 36,
+      "currentPosition": 23,
+      "primaryValue": 36,
+      "primaryPosition": 23,
+      "officialValue": 35,
+      "officialPosition": 24,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": -1,
+        "officialMinusPrimary": -1
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 1,
+        "officialMinusPrimary": 1
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    },
+    {
+      "player": "Gonzalo Higuaín",
+      "currentValue": 24,
+      "currentPosition": 57,
+      "primaryValue": 24,
+      "primaryPosition": 57,
+      "officialValue": 25,
+      "officialPosition": 55,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 1,
+        "officialMinusPrimary": 1
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": -2,
+        "officialMinusPrimary": -2
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    },
+    {
+      "player": "Heung-min Son",
+      "currentValue": 19,
+      "currentPosition": 93,
+      "primaryValue": 19,
+      "primaryPosition": 93,
+      "officialValue": 21,
+      "officialPosition": 81,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 2,
+        "officialMinusPrimary": 2
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": -12,
+        "officialMinusPrimary": -12
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    },
+    {
+      "player": "Jardel",
+      "currentValue": 25,
+      "currentPosition": 52,
+      "primaryValue": 25,
+      "primaryPosition": 52,
+      "officialValue": 28,
+      "officialPosition": 44,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 3,
+        "officialMinusPrimary": 3
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": -8,
+        "officialMinusPrimary": -8
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    },
+    {
+      "player": "Luis Enrique",
+      "currentValue": 19,
+      "currentPosition": 91,
+      "primaryValue": 19,
+      "primaryPosition": 91,
+      "officialValue": 20,
+      "officialPosition": 91,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 1,
+        "officialMinusPrimary": 1
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 0,
+        "officialMinusPrimary": 0
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    },
+    {
+      "player": "Luis Suárez",
+      "currentValue": 27,
+      "currentPosition": 41,
+      "primaryValue": 27,
+      "primaryPosition": 41,
+      "officialValue": 31,
+      "officialPosition": 34,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 4,
+        "officialMinusPrimary": 4
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": -7,
+        "officialMinusPrimary": -7
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    },
+    {
+      "player": "Luiz Adriano",
+      "currentValue": 21,
+      "currentPosition": 77,
+      "primaryValue": 21,
+      "primaryPosition": 77,
+      "officialValue": 22,
+      "officialPosition": 73,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 1,
+        "officialMinusPrimary": 1
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": -4,
+        "officialMinusPrimary": -4
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    },
+    {
+      "player": "Marco Simone",
+      "currentValue": 24,
+      "currentPosition": 59,
+      "primaryValue": 24,
+      "primaryPosition": 59,
+      "officialValue": 25,
+      "officialPosition": 55,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 1,
+        "officialMinusPrimary": 1
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": -4,
+        "officialMinusPrimary": -4
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    },
+    {
+      "player": "Rivaldo",
+      "currentValue": 27,
+      "currentPosition": 43,
+      "primaryValue": 27,
+      "primaryPosition": 43,
+      "officialValue": 31,
+      "officialPosition": 34,
+      "valueDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": 4,
+        "officialMinusPrimary": 4
+      },
+      "positionDifference": {
+        "primaryMinusCurrent": 0,
+        "officialMinusCurrent": -9,
+        "officialMinusPrimary": -9
+      },
+      "classification": "discrepancia no resoluble",
+      "possibleCause": "definition_or_scope",
+      "status": "blocked",
+      "proposedDecision": "No escoger Transfermarkt ni UEFA de forma automática; conservar el valor actual en draft hasta obtener evidencia por partido/ronda o una reconciliación autorizada.",
+      "evidence": [
+        "Los snapshots documentan valores distintos, pero no conservan el desglose de partidos, rondas ni criterio de contabilización necesario para atribuir la diferencia sin inventar una explicación.",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0",
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/"
+      ],
+      "requiredCorrection": "Obtener un desglose autorizado por partido/ronda o una reconciliación documental del titular. No sustituir el valor almacenado por una de las fuentes sin esa evidencia."
+    }
+  ],
+  "readOnly": true,
+  "productionData": false,
+  "mutationCount": 0
+}

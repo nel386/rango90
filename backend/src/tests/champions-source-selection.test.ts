@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { buildChampionsSourceSelection, buildPendingApiFootballProbe, stableJson } from '../championsSourceSelection.js';
+
+const root = resolve(process.cwd());
+const rightsContent = await readFile(resolve(root, 'audits/block7c/champions-source-scope-rights-review.json'), 'utf8');
+const licenseContent = await readFile(resolve(root, '../DATA_PROVIDER_LICENSE_REVIEW.md'), 'utf8');
+const rights = JSON.parse(rightsContent);
+const rightsSha256 = createHash('sha256').update(rightsContent).digest('hex');
+const licenseSha256 = createHash('sha256').update(licenseContent).digest('hex');
+const probe = buildPendingApiFootballProbe({ baselineSnapshotId: 'rs_test_champions', baselineContentSha256: 'c'.repeat(64) });
+const first = buildChampionsSourceSelection({ rightsReview: rights, rightsReviewSha256: rightsSha256, probe, probeSha256: probe.sha256, providerBaseUrl: 'https://v3.football.api-sports.io', licenseReviewSha256: licenseSha256 });
+const second = buildChampionsSourceSelection({ rightsReview: rights, rightsReviewSha256: rightsSha256, probe, probeSha256: probe.sha256, providerBaseUrl: 'https://v3.football.api-sports.io', licenseReviewSha256: licenseSha256 });
+
+assert.equal(probe.status, 'integration_pending');
+assert.equal(probe.networkRequests, 0);
+assert.equal(probe.competition.leagueId, 2);
+assert.equal(probe.competition.queriedOnly, true);
+assert.equal(probe.imagesQueried, false);
+assert.equal(probe.rawDataStored, false);
+assert.equal(first.contractedProvider.plan, 'not_verified');
+assert.equal(first.baseline.status, 'draft');
+assert.equal(first.baseline.differencesOnly, true);
+assert.equal(first.sourceMatrix.length, 5);
+assert.equal(first.sourceMatrix.find((source) => source.provider === 'Transfermarkt')?.recommendation, 'retain_draft_only');
+assert.equal(first.sourceMatrix.find((source) => source.provider === 'API-Football / API-Sports')?.rightsStatus, 'conditional_not_approved');
+assert.equal(first.sourceMatrix.find((source) => source.provider === 'UEFA')?.recommendation, 'request_license');
+assert.equal(first.imageRights.queried, false);
+assert.equal(first.snapshotCreated, false);
+assert.equal(first.mutationCount, 0);
+assert.equal(first.readyForApproval, false);
+assert.equal(stableJson(first), stableJson(second));
+console.log('champions source selection tests passed');

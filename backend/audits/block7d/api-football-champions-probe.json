@@ -1,0 +1,33 @@
+{
+  "artifactKind": "api_football_champions_probe",
+  "reportVersion": "1",
+  "provider": "API-Football / API-Sports",
+  "competition": {
+    "leagueId": 2,
+    "slug": "uefa-champions-league",
+    "queriedOnly": true
+  },
+  "status": "integration_pending",
+  "reason": "API_FOOTBALL_KEY_missing; no se realizó ninguna llamada de red ni consulta de base de datos.",
+  "networkRequests": 0,
+  "databaseAccess": "none",
+  "mutationCount": 0,
+  "imagesQueried": false,
+  "rawDataStored": false,
+  "planStatus": "not_verified",
+  "coverageAssessment": "not_run",
+  "requestedEndpoints": [
+    "/leagues?id=2",
+    "/players/topscorers?league=2&season={season}"
+  ],
+  "sample": [],
+  "comparison": {
+    "baselineSnapshotId": "rs_870f1dff967bb160f2d132cc",
+    "baselineContentSha256": "870f1dff967bb160f2d132cc7d9ca1f2483b26d32681e6a55985efc744cc718b",
+    "status": "not_run",
+    "differences": []
+  },
+  "responseEvidence": [],
+  "readyForApproval": false,
+  "sha256": "fad272f6d4384227124cd8b5a3596de69b5b4a5d353e4909c0678d3e55924b80"
+}

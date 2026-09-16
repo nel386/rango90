@@ -1,0 +1,133 @@
+{
+  "artifactKind": "champions_source_comparison_matrix",
+  "reportRunId": "block7d-champions-c327f2bfe8e93650-2ac6680f",
+  "readOnly": true,
+  "productionData": false,
+  "mutationCount": 0,
+  "sources": [
+    {
+      "provider": "Transfermarkt",
+      "role": "current_snapshot",
+      "rightsStatus": "blocked",
+      "coverageStatus": "unverified",
+      "planStatus": "not_applicable",
+      "recommendation": "retain_draft_only",
+      "storage": "El snapshot ya archivado se conserva; no se autoriza nueva extracción ni redistribución con la evidencia actual.",
+      "derivedRankings": "No demostrado y no publicable con la evidencia archivada.",
+      "attribution": "No existe una autorización archivada que defina atribución suficiente.",
+      "commercialRestrictions": "Los términos públicos restringen la copia automatizada y reservan los derechos de bases de datos/material.",
+      "images": "No se consideran publicables por defecto; cada retrato requiere licencia independiente.",
+      "evidenceUrls": [
+        "https://www.transfermarkt.com/intern/anb",
+        "https://www.transfermarkt.com/champions-league/ewigetorschuetzenliste/pokalwettbewerb/CL/land_id/0/plus/0/galerie/0"
+      ],
+      "evidenceFacts": [
+        "La auditoría 7C identifica la fuente actual como draft y rights_status=review_required.",
+        "La revisión pública no acredita permiso de redistribución del ranking histórico."
+      ],
+      "missingEvidence": [
+        "Permiso escrito que cubra extracción, almacenamiento, ranking derivado y redistribución pública/comercial."
+      ]
+    },
+    {
+      "provider": "API-Football / API-Sports",
+      "role": "candidate_numeric",
+      "rightsStatus": "conditional_not_approved",
+      "coverageStatus": "unverified",
+      "planStatus": "not_verified",
+      "recommendation": "conditional_candidate",
+      "storage": "Los términos públicos mencionan distribución, transferencia y almacenamiento de datos, sujetos a sus límites; no hay contrato de Rango90 archivado.",
+      "derivedRankings": "No se debe asumir autorización para el ranking histórico derivado sin confirmación escrita del plan y del uso previsto.",
+      "attribution": "No se ha localizado en el repositorio una obligación contractual concreta; debe confirmarse con el plan.",
+      "commercialRestrictions": "Los términos prohíben revender el producto sin permiso previo; el modelo de Rango90 debe ser revisado contra esa cláusula.",
+      "images": "Las imágenes, logos y vídeos tienen tratamiento separado; el proveedor no demuestra derechos de publicación para Rango90.",
+      "evidenceUrls": [
+        "https://apifootball.com/terms_of_use/",
+        "https://www.api-football.com/pricing"
+      ],
+      "evidenceFacts": [
+        "El repositorio configura API_FOOTBALL_BASE_URL, pero no contiene API_FOOTBALL_KEY, factura, plan o contrato verificable.",
+        "La prueba técnica quedó integration_pending con cero peticiones; no hay muestra ni cobertura histórica observada."
+      ],
+      "missingEvidence": [
+        "Plan/cuenta contratados.",
+        "Permiso para almacenar snapshots, generar/publicar rankings derivados y operar con uso comercial.",
+        "Cobertura comprobada de 1955/56 hasta el corte v2.",
+        "Derechos de imágenes, logos y marcas."
+      ]
+    },
+    {
+      "provider": "UEFA",
+      "role": "semantic_authority",
+      "rightsStatus": "blocked",
+      "coverageStatus": "unknown",
+      "planStatus": "not_contracted",
+      "recommendation": "request_license",
+      "storage": "No se ha encontrado una licencia de redistribución para conservar y servir un snapshot de terceros.",
+      "derivedRankings": "UEFA define y controla los derechos de datos de la competición; la página pública de estadísticas no es una licencia.",
+      "attribution": "Debe pactarse en la licencia o términos de uso autorizados.",
+      "commercialRestrictions": "Las regulaciones reservan derechos comerciales y de datos de la competición a UEFA/socios autorizados.",
+      "images": "No se consultaron ni incorporaron imágenes UEFA.",
+      "evidenceUrls": [
+        "https://www.uefa.com/uefachampionsleague/history/rankings/players/goals_scored/",
+        "https://documents.uefa.com/r/Regulations-of-the-UEFA-Champions-League-2026/27/Article-2-Definitions-Online",
+        "https://documents.uefa.com/r/Regulations-of-the-UEFA-Champions-League-2026/27/Article-72-Commercial-rights-for-the-play-offs-and-UEFA-Champions-League-Online"
+      ],
+      "evidenceFacts": [
+        "UEFA es la referencia semántica más fuerte para competición y fases.",
+        "La existencia de estadísticas públicas no demuestra permiso para redistribuirlas en una aplicación de terceros."
+      ],
+      "missingEvidence": [
+        "Licencia o permiso para el ranking derivado, almacenamiento, nombres, estadísticas y uso web/PWA/Android.",
+        "Exportación o desglose autorizado para reconciliar los 12 conflictos."
+      ]
+    },
+    {
+      "provider": "Wikidata",
+      "role": "metadata_only",
+      "rightsStatus": "open_metadata_only",
+      "coverageStatus": "unknown",
+      "planStatus": "not_applicable",
+      "recommendation": "metadata_only",
+      "storage": "CC0 según la documentación de Wikidata.",
+      "derivedRankings": "No se ha demostrado que sus datos permitan reconstruir este ranking de goles completo.",
+      "attribution": "CC0 no impone una atribución obligatoria, aunque se recomienda documentar procedencia.",
+      "commercialRestrictions": "No identificadas en la licencia CC0; la calidad/cobertura sigue sin estar probada.",
+      "images": "No se consultaron imágenes.",
+      "evidenceUrls": [
+        "https://www.wikidata.org/wiki/Wikidata:Licensing",
+        "https://www.wikidata.org/wiki/Wikidata:Reuse"
+      ],
+      "evidenceFacts": [
+        "Es una opción abierta para IDs y metadatos.",
+        "No es fuente numérica suficiente sin una reconstrucción independiente y auditada."
+      ],
+      "missingEvidence": [
+        "Dataset completo y reproducible de goles por partido/ronda bajo la definición v2."
+      ]
+    },
+    {
+      "provider": "OpenFootball / football-data",
+      "role": "not_suitable",
+      "rightsStatus": "open_metadata_only",
+      "coverageStatus": "not_suitable",
+      "planStatus": "not_contracted",
+      "recommendation": "reject_for_scope",
+      "storage": "Sus licencias deben respetarse por dataset; no se propone importar datos en este bloque.",
+      "derivedRankings": "La evidencia local no demuestra resultados completos de goleadores de Champions desde 1955/56.",
+      "attribution": "Depende del dataset concreto.",
+      "commercialRestrictions": "Dependen del dataset y licencia concreta.",
+      "images": "No se consultaron imágenes.",
+      "evidenceUrls": [
+        "https://github.com/openfootball",
+        "https://github.com/schochastics/football-data"
+      ],
+      "evidenceFacts": [
+        "Pueden servir como apoyo de resultados, no como fuente definitiva demostrada para este ranking histórico."
+      ],
+      "missingEvidence": [
+        "Cobertura completa y licencia que cubra el ranking derivado bajo v2."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+name: Deploy backend to Render (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: Git commit to deploy to Render
+        required: true
+        default: 84e08c5
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate target commit exists
+        env:
+          COMMIT_SHA: ${{ inputs.commit_sha }}
+        run: |
+          git init --quiet render-target
+          git -C render-target remote add origin "https://github.com/${{ github.repository }}.git"
+          git -C render-target fetch --quiet --no-tags --depth=1 origin "$COMMIT_SHA"
+          git -C render-target cat-file -e "$COMMIT_SHA^{commit}"
+
+      - name: Trigger Render deploy for exact commit
+        id: trigger
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          COMMIT_SHA: ${{ inputs.commit_sha }}
+        run: |
+          test -n "$RENDER_DEPLOY_HOOK_URL" || {
+            echo "Missing repository secret RENDER_DEPLOY_HOOK_URL" >&2
+            exit 1
+          }
+          if [[ "$RENDER_DEPLOY_HOOK_URL" == *\?* ]]; then
+            separator='&'
+          else
+            separator='?'
+          fi
+          response="$(curl --fail-with-body --silent --show-error --request POST \
+            "${RENDER_DEPLOY_HOOK_URL}${separator}ref=${COMMIT_SHA}")"
+          echo "$response" | jq .
+
+      - name: Wait for the new backend contract
+        env:
+          API_ORIGIN: https://rango90.onrender.com
+        run: |
+          for attempt in $(seq 1 30); do
+            config="$(curl --silent --show-error --max-time 15 "$API_ORIGIN/v1/config" || true)"
+            health="$(curl --silent --show-error --max-time 15 "$API_ORIGIN/health" || true)"
+            if echo "$config" | jq -e '.runtimeMode == "official"' >/dev/null 2>&1 \
+              && echo "$health" | jq -e '.runtimeMode == "official"' >/dev/null 2>&1; then
+              echo "Render is serving the official runtime contract."
+              echo "$config" | jq .
+              echo "$health" | jq .
+              exit 0
+            fi
+            echo "Attempt $attempt/30: backend contract not ready yet."
+            sleep 20
+          done
+          echo "Render did not expose the new official contract within the timeout." >&2
+          exit 1

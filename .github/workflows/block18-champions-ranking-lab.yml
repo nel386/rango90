@@ -60,10 +60,10 @@ jobs:
         run: npx tsx src/tools/block18-load-lab-candidate.ts
       - name: Verify endpoint against exact candidate snapshots
         working-directory: backend
-        run: npx tsx src/tests/block18-champions-ranking-candidate.integration.test.ts | tee "$GITHUB_WORKSPACE/.block18-report.json"
+        run: npx tsx src/tests/block18-champions-ranking-candidate.integration.test.ts | tee "$GITHUB_WORKSPACE/BLOCK18_REPORT.json"
       - name: Verify no production or official mutation
         run: |
-          ! rg -n 'DATABASE_URL|API_FOOTBALL_KEY|published.*true|officialModeOpened.*true' "$GITHUB_WORKSPACE/.block18-report.json"
+          ! rg -n 'DATABASE_URL|API_FOOTBALL_KEY|published.*true|officialModeOpened.*true' "$GITHUB_WORKSPACE/BLOCK18_REPORT.json"
       - name: Cleanup isolated database and fixtures
         if: always()
         run: docker rm -f rango90-block18-postgres >/dev/null 2>&1 || true
@@ -74,4 +74,4 @@ jobs:
           name: block18-champions-ranking-lab-${{ github.run_id }}
           retention-days: 14
           if-no-files-found: error
-          path: ${{ github.workspace }}/.block18-report.json
+          path: ${{ github.workspace }}/BLOCK18_REPORT.json

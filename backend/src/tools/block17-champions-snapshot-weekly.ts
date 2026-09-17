@@ -66,20 +66,23 @@ function parseApiReport(): Promise<ApiReport | null> {
 }
 function normalizeIncomingFacts(baseFacts: ChampionsGoalFact[], incomingFacts: ChampionsGoalFact[]): { facts: ChampionsGoalFact[]; unresolvedIdentity: string[] } {
   const sourceIdMap = new Map<string, { canonicalId: string; displayName: string }>();
+  const ambiguousSourceIds = new Set<string>();
   for (const fact of baseFacts) {
     const key = `${fact.sourceKey}:${fact.player.sourcePlayerId}`;
     const current = sourceIdMap.get(key);
     if (!current) sourceIdMap.set(key, { canonicalId: fact.player.canonicalId, displayName: fact.player.displayName });
-    else if (current.canonicalId !== fact.player.canonicalId) sourceIdMap.delete(key);
+    else if (current.canonicalId !== fact.player.canonicalId) { sourceIdMap.delete(key); ambiguousSourceIds.add(key); }
   }
   const unresolvedIdentity: string[] = [];
   const facts = incomingFacts.map((fact) => {
     if (fact.player.resolution !== 'normalized_name') return fact;
-    const resolved = sourceIdMap.get(`${fact.sourceKey}:${fact.player.sourcePlayerId}`);
-    if (!resolved) {
+    const sourceId = `${fact.sourceKey}:${fact.player.sourcePlayerId}`;
+    const resolved = sourceIdMap.get(sourceId);
+    if (ambiguousSourceIds.has(sourceId)) {
       unresolvedIdentity.push(fact.id);
       return fact;
     }
+    if (!resolved) return { ...fact, player: { ...fact.player, resolution: 'source_id' as const } };
     return { ...fact, player: { ...fact.player, canonicalId: resolved.canonicalId, displayName: resolved.displayName, resolution: 'source_id' as const } };
   });
   return { facts, unresolvedIdentity };

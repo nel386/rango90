@@ -118,13 +118,14 @@ jobs:
         run: |
           if [ -f "$QA_ARTIFACT_DIR/lab/backend.pid" ]; then kill "$(cat "$QA_ARTIFACT_DIR/lab/backend.pid")" >/dev/null 2>&1 || true; fi
           if [ -f "$QA_ARTIFACT_DIR/lab/frontend.pid" ]; then kill "$(cat "$QA_ARTIFACT_DIR/lab/frontend.pid")" >/dev/null 2>&1 || true; fi
+          sleep 2
           mkdir -p "$QA_ARTIFACT_DIR/official"
           nohup node backend/dist/server.js >"$QA_ARTIFACT_DIR/official/backend.log" 2>&1 &
           echo $! >"$QA_ARTIFACT_DIR/official/backend.pid"
           nohup python3 -m http.server 3000 --directory out >"$QA_ARTIFACT_DIR/official/frontend.log" 2>&1 &
           echo $! >"$QA_ARTIFACT_DIR/official/frontend.pid"
-          curl --fail --retry 20 --retry-delay 1 --retry-connrefused "$QA_BACKEND_URL/health" >"$QA_ARTIFACT_DIR/official/health.json"
-          code=$(curl --silent --show-error --retry 20 --retry-delay 1 --retry-connrefused -o "$QA_ARTIFACT_DIR/official/challenge.json" -w '%{http_code}' "$QA_BACKEND_URL/v1/challenges/daily")
+          curl --fail --retry 20 --retry-all-errors --retry-delay 1 --retry-connrefused "$QA_BACKEND_URL/health" >"$QA_ARTIFACT_DIR/official/health.json"
+          code=$(curl --silent --show-error --retry 20 --retry-all-errors --retry-delay 1 --retry-connrefused -o "$QA_ARTIFACT_DIR/official/challenge.json" -w '%{http_code}' "$QA_BACKEND_URL/v1/challenges/daily")
           echo "$code" >"$QA_ARTIFACT_DIR/official/challenge.status"
           test "$code" = 503
           grep -q 'official_not_ready' "$QA_ARTIFACT_DIR/official/challenge.json"

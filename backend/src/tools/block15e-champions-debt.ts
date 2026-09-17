@@ -36,6 +36,8 @@ const apiCaptureRoot = resolve(process.env.BLOCK15E_API_CAPTURE_ROOT?.trim() || 
 const outputRoot = resolve(process.env.BLOCK15E_OUTPUT_ROOT?.trim() || 'audits/block15e');
 const runId = process.env.BLOCK15E_RUN_ID?.trim() || process.env.GITHUB_RUN_ID?.trim() || new Date().toISOString().replace(/[^0-9]/gu, '').slice(0, 14);
 const now = new Date().toISOString();
+const official2025PlayoffUrl = 'https://www.uefa.com/uefachampionsleague/news/02a1-1fce2f47dac2-92ac3ef0e883-1000/';
+const official2025PlayoffDates = new Set(['2026-02-17', '2026-02-18', '2026-02-24', '2026-02-25']);
 
 function sha256(value: string): string { return createHash('sha256').update(value).digest('hex'); }
 function writeJson(path: string, value: unknown): Promise<void> { return mkdir(dirname(path), { recursive: true }).then(() => writeFile(path, stableJson(value), 'utf8')); }
@@ -83,6 +85,17 @@ async function loadApiPhaseIndex(): Promise<{ phaseByFixture: Map<string, { phas
   return { phaseByFixture: result, filesRead: names.length };
 }
 
+async function loadOfficialPlayoffEvidence(): Promise<{ sourceUrl: string; contentSha256: string } | null> {
+  try {
+    const response = await fetch(official2025PlayoffUrl, { headers: { accept: 'text/html' } });
+    const raw = await response.text();
+    if (!response.ok || raw.length < 1000) return null;
+    return { sourceUrl: official2025PlayoffUrl, contentSha256: sha256(raw) };
+  } catch {
+    return null;
+  }
+}
+
 async function persistDecisions(decisions: Decision[]): Promise<{ inserted: number }> {
   if (!databaseUrl) return { inserted: 0 };
   const pool = new pg.Pool({ connectionString: databaseUrl }); let inserted = 0;
@@ -114,6 +127,7 @@ async function main(): Promise<void> {
   const prior = JSON.parse(await readFile(priorSnapshotFile, 'utf8')) as { ranking?: unknown[] };
   const originalFacts = payload.facts ?? [];
   const phaseIndex = await loadApiPhaseIndex();
+  const officialPlayoffEvidence = await loadOfficialPlayoffEvidence();
   const phaseDecisions: Decision[] = [];
   const phaseFacts = originalFacts.map((fact) => {
     if (fact.phase === 'qualifying') {
@@ -123,12 +137,14 @@ async function main(): Promise<void> {
     if (fact.phase !== 'unknown') return fact;
     const fixtureId = /^api-football:fixture:(.+)$/u.exec(fact.match.id)?.[1];
     const mapped = fixtureId ? phaseIndex.phaseByFixture.get(fixtureId) : undefined;
-    if (!mapped) {
+    const officialPlayoff = fact.edition.seasonStart === 2025 && official2025PlayoffDates.has(fact.match.date ?? '') && officialPlayoffEvidence ? { phase: 'intermediate' as const, sourceUrl: officialPlayoffEvidence.sourceUrl, contentSha256: officialPlayoffEvidence.contentSha256, locator: `official-calendar:2025/26:knockout-phase-play-off:${fact.match.date}` } : undefined;
+    const resolved = mapped ?? officialPlayoff;
+    if (!resolved) {
       phaseDecisions.push(decisionFor(fact, 'phase_contrast_required', 'pending_phase_contrast', { phase: fact.phase, rankingImpact: true }, { sourceUrl: fact.evidence.sourceUrl, locator: fact.evidence.locator, contentSha256: fact.evidence.contentSha256 ?? '', rule: 'no_captured_round_for_fact' }));
       return fact;
     }
-    phaseDecisions.push(decisionFor(fact, 'unknown_phase', 'resolved_from_captured_fixture_round', { phase: mapped.phase, rankingImpact: true }, { sourceUrl: mapped.sourceUrl, locator: mapped.locator, contentSha256: mapped.contentSha256, sourceRecordId: fact.sourceRecordId }));
-    return cloneFact(fact, { phase: mapped.phase });
+    phaseDecisions.push(decisionFor(fact, 'unknown_phase', officialPlayoff ? 'resolved_from_official_uefa_calendar_contrast' : 'resolved_from_captured_fixture_round', { phase: resolved.phase, rankingImpact: true }, { sourceUrl: resolved.sourceUrl, locator: resolved.locator, contentSha256: resolved.contentSha256, sourceRecordId: fact.sourceRecordId }));
+    return cloneFact(fact, { phase: resolved.phase });
   });
 
   const providerGroups = new Map<string, ChampionsGoalFact[]>();

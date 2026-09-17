@@ -1,0 +1,132 @@
+name: BLOQUE 17 · snapshot candidato y actualización semanal Champions
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: block17-champions-weekly
+  cancel-in-progress: true
+
+jobs:
+  isolated-weekly-update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      BLOCK15A_RUN_ID: ${{ github.run_id }}
+      BLOCK17_RUN_ID: ${{ github.run_id }}
+      BLOCK17_ACTIVE_SEASON_START: '2026'
+      QA_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55441/rango90_qa_block17
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+      - name: Download latest accepted Block 15E facts and prior Block 17 state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          latest_15e=$(gh run list --workflow block15e-champions-debt.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          test -n "$latest_15e"
+          gh run download "$latest_15e" -n "block15e-champions-debt-$latest_15e" -D "${RUNNER_TEMP}/block15e-base"
+          base_facts="${RUNNER_TEMP}/block15e-base/BLOCK15E_EFFECTIVE_FACTS.json"
+          prior_snapshot="${RUNNER_TEMP}/block15e-base/BLOCK15E_CANDIDATE_SNAPSHOT_LAB.json"
+          prior_facts="$base_facts"
+          previous_17=$(gh run list --workflow block17-champions-weekly.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId' || true)
+          if test -n "$previous_17"; then
+            gh run download "$previous_17" -n "block17-champions-weekly-$previous_17" -D "${RUNNER_TEMP}/block17-prior" || true
+            if test -s "${RUNNER_TEMP}/block17-prior/BLOCK17_FACTS_AFTER.json"; then prior_facts="${RUNNER_TEMP}/block17-prior/BLOCK17_FACTS_AFTER.json"; fi
+            if test -s "${RUNNER_TEMP}/block17-prior/BLOCK17_WEEKLY_SNAPSHOT_CANDIDATE.json"; then prior_snapshot="${RUNNER_TEMP}/block17-prior/BLOCK17_WEEKLY_SNAPSHOT_CANDIDATE.json"; fi
+          fi
+          printf 'BLOCK17_BASE_FACTS_FILE=%s\n' "$prior_facts" >> "$GITHUB_ENV"
+          printf 'BLOCK17_PRIOR_SNAPSHOT_FILE=%s\n' "$prior_snapshot" >> "$GITHUB_ENV"
+      - name: Start temporary PostgreSQL
+        run: |
+          docker run -d --name rango90-block17-postgres -e POSTGRES_DB=rango90_qa_block17 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55441:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block17-postgres pg_isready -U rango90 -d rango90_qa_block17 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block17-postgres pg_isready -U rango90 -d rango90_qa_block17
+      - name: Apply migrations to isolated PostgreSQL
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+        run: npx tsx src/migrate.ts
+      - name: Seed isolated fixture
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+        run: npx tsx src/qa/block15-fixture.ts seed
+      - name: Plan active-season API-Football coverage
+        working-directory: backend
+        env:
+          BLOCK15A_MODE: plan
+          BLOCK15A_SEASONS: '2026'
+          BLOCK15A_OUTPUT_ROOT: ${{ runner.temp }}/block17-api/plan
+        run: npx tsx src/tools/block15a-api-football.ts
+      - name: Load active-season API-Football facts
+        working-directory: backend
+        env:
+          BLOCK15A_MODE: load
+          BLOCK15A_SEASONS: '2026'
+          BLOCK15A_PLAN_FILE: ${{ runner.temp }}/block17-api/plan/BLOCK15A_COVERAGE_PLAN.json
+          BLOCK15A_OUTPUT_ROOT: ${{ runner.temp }}/block17-api/load
+          BLOCK15A_CAPTURE_ROOT: ${{ runner.temp }}/block17-api/captures
+          BLOCK15A_FACTS_ROOT: ${{ runner.temp }}/block17-api/facts
+        run: npx tsx src/tools/block15a-api-football.ts
+      - name: Build isolated candidate and weekly snapshot
+        if: always()
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+          BLOCK17_OUTPUT_ROOT: ${{ runner.temp }}/block17-reports
+          BLOCK17_INCOMING_FACTS_FILE: ${{ runner.temp }}/block17-api/facts/champions-facts.json
+          BLOCK17_API_REPORT_FILE: ${{ runner.temp }}/block17-api/load/BLOCK15A_REAL_LOAD_REPORT.json
+        run: npx tsx src/tools/block17-champions-snapshot-weekly.ts
+      - name: Verify reports are redacted and official mode remains closed
+        if: always()
+        run: |
+          if rg -n 'x-apisports-key|authorization:|Bearer |API_FOOTBALL_KEY|"response"\s*:' '${{ runner.temp }}/block17-reports' 2>/dev/null; then exit 1; fi
+          if rg -n '"published"\s*:\s*true|"officialModeOpened"\s*:\s*true' '${{ runner.temp }}/block17-reports' 2>/dev/null; then exit 1; fi
+      - name: Cleanup isolated fixtures and PostgreSQL
+        if: always()
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+        run: |
+          npx tsx src/qa/block15-fixture.ts cleanup || true
+          docker rm -f rango90-block17-postgres >/dev/null 2>&1 || true
+      - name: Upload redacted Block 17 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block17-champions-weekly-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            ${{ runner.temp }}/block17-reports/BLOCK17_REPORT.json
+            ${{ runner.temp }}/block17-reports/BLOCK17_REPORT.md
+            ${{ runner.temp }}/block17-reports/BLOCK17_HISTORICAL_SNAPSHOT_CANDIDATE.json
+            ${{ runner.temp }}/block17-reports/BLOCK17_WEEKLY_SNAPSHOT_CANDIDATE.json
+            ${{ runner.temp }}/block17-reports/BLOCK17_TOP200.json
+            ${{ runner.temp }}/block17-reports/BLOCK17_RANKING_RECORDS.json
+            ${{ runner.temp }}/block17-reports/BLOCK17_WEEKLY_CHANGES.json
+            ${{ runner.temp }}/block17-reports/BLOCK17_ROLLBACK.json
+            ${{ runner.temp }}/block17-reports/BLOCK17_FACTS_AFTER.json

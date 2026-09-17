@@ -38,6 +38,13 @@ function numberValue(value: unknown): number | undefined { return typeof value =
 function stringValue(value: unknown): string | undefined { return typeof value === 'string' ? value : undefined; }
 function sha256(value: string): string { return createHash('sha256').update(value).digest('hex'); }
 function seasonsInRange(): number[] { return Array.from({ length: 2026 - CHAMPIONS_HISTORICAL_START + 1 }, (_, index) => CHAMPIONS_HISTORICAL_START + index); }
+function requestedSeasons(): number[] {
+  const raw = process.env.BLOCK15A_SEASONS?.trim();
+  if (!raw) return seasonsInRange();
+  const seasons = raw.split(',').map((value) => Number(value.trim())).filter((value) => Number.isInteger(value));
+  if (seasons.length === 0 || seasons.some((season) => season < CHAMPIONS_HISTORICAL_START || season > 2100)) throw new Error('BLOCK15A_SEASONS contiene una temporada inválida');
+  return [...new Set(seasons)].sort((left, right) => left - right);
+}
 function redact(value: string): string {
   return (apiKey ? value.replaceAll(apiKey, '[redacted]') : value)
     .replace(/x-apisports-key[^\s,]*/giu, '[redacted-header]')
@@ -95,7 +102,7 @@ async function writeJson(path: string, value: unknown): Promise<void> {
 }
 
 async function runPlan(): Promise<void> {
-  const requested = seasonsInRange();
+  const requested = requestedSeasons();
   const errors: string[] = [];
   const requests: RequestEvidence[] = [];
   const seasons: PlanSeason[] = [];

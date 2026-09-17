@@ -15,6 +15,7 @@
     "smoke:public": "node scripts/smoke-public.mjs",
     "verify:i18n": "node scripts/verify-messages.mjs",
     "audit:public-readonly": "node scripts/audit-public-readonly.mjs",
+    "qa:block12a:mobile": "node scripts/qa-block12a-mobile.mjs",
     "cap:sync": "npm run build:android && npx cap sync android",
     "cap:copy": "npx cap copy android",
     "cap:open:android": "npx cap open android",
@@ -40,6 +41,7 @@
     "@types/react-dom": "19.2.7",
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.4",
+    "playwright": "^1.55.0",
     "typescript": "6.0.3"
   }
 }

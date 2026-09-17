@@ -275,7 +275,11 @@ export class HttpGameRepository implements GameRepository {
     const response = await this.request<{ category: string; snapshotId: string; rankingScope?: "historical_snapshot"; mode?: RuntimeMode; status?: "official" | "provisional"; entries: Array<Record<string, unknown>> }>(`/v1/rankings/${encodeURIComponent(categorySlug)}?limit=200`);
     if (!response.snapshotId || !Array.isArray(response.entries)) throw new RepositoryError("The category ranking response is invalid", "invalid", 502, "ranking_invalid");
     const entries: CategoryRankingEntry[] = response.entries.map((entry) => {
-      const number = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? value : null;
+      const number = (value: unknown) => {
+        if (typeof value === "number" && Number.isFinite(value)) return value;
+        if (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value))) return Number(value);
+        return null;
+      };
       const rank = number(entry.rank);
       const rawValue = number(entry.raw_value);
       const scoreValue = number(entry.score_value);

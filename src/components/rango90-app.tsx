@@ -9,8 +9,8 @@ import { Link } from "@/i18n/navigation";
 
 import { createGameRepository, RepositoryError, type AuthUser, type CategoryRanking, type CategoryRankingDataset, type DecisionFeedback, type DuelState, type GameResult, type GameSession, type LeaderboardEntry, type RankingCategoryOption, type RuntimeConfig } from "@/data/game-repository";
 import type { Locale, MockCategory, MockChallenge, MockEntity } from "@/data/game-types";
-import { canStartGame, canSubmitDecision, feedbackAdvance, transitionGameFlow, type GameFlowEvent, type GameFlowState } from "@/data/game-flow";
-import { imageRequestIsCurrent, prefetchEntityIndexes, preloadImage } from "@/data/image-preload";
+import { canStartGame, canSubmitDecision, transitionGameFlow, type GameFlowEvent, type GameFlowState } from "@/data/game-flow";
+import { imageRequestIsCurrent, preloadImage } from "@/data/image-preload";
 import { nowRuntimeMetric, recordRuntimeMetric } from "@/data/runtime-metrics";
 import { secondsUntilDeadline } from "@/data/game-clock";
 
@@ -300,14 +300,17 @@ export function Rango90App({ locale }: { locale: Locale }) {
     const imageController = new AbortController();
     imageAbortRef.current = imageController;
     imageMetricStartedRef.current = nowRuntimeMetric();
-    const targets = prefetchEntityIndexes(mockDailyChallenge.entities.length, entityIndex)
-      .map((index) => mockDailyChallenge.entities[index])
-      .filter((entity): entity is MockEntity => Boolean(entity));
+    const nextEntity = mockDailyChallenge.entities[entityIndex + 1];
+    const targets = [currentEntity, nextEntity].filter((entity): entity is MockEntity => Boolean(entity));
     void Promise.all(targets.map(async (entity) => {
-      const imageStarted = nowRuntimeMetric();
-      const result = await preloadImage({ primary: entity.imageUrl, fallback: entity.imageFallbackUrl, signal: imageController.signal });
+      const primaryStarted = nowRuntimeMetric();
+      const primary = await preloadImage({ primary: entity.imageUrl, signal: imageController.signal });
       if (!mountedRef.current || !imageRequestIsCurrent(requestId, imageRequestIdRef.current)) return;
-      recordRuntimeMetric("image_primary_load", imageStarted, { entityId: entity.id, result, position: entity.id === currentEntity.id ? "current" : "next" });
+      recordRuntimeMetric("image_primary_load", primaryStarted, { entityId: entity.id, result: primary });
+      const fallbackStarted = nowRuntimeMetric();
+      const fallback = await preloadImage({ primary: entity.imageFallbackUrl, signal: imageController.signal });
+      if (!mountedRef.current || !imageRequestIsCurrent(requestId, imageRequestIdRef.current)) return;
+      recordRuntimeMetric("image_fallback_load", fallbackStarted, { entityId: entity.id, result: fallback });
     }));
   }, [currentEntity, entityIndex, mockDailyChallenge.entities, view]);
 
@@ -479,11 +482,6 @@ export function Rango90App({ locale }: { locale: Locale }) {
     if (startRequestStarted.current || (!canStartGame(flowState) && !intentionalRestart) || challengeLoadState !== "ready") return;
     startRequestStarted.current = true;
     const startedAt = nowRuntimeMetric();
-    gameGenerationRef.current += 1;
-    imageRequestIdRef.current += 1;
-    imageAbortRef.current?.abort();
-    if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
-    feedbackTimerRef.current = null;
     if (!canStartGame(flowState)) transitionFlow({ type: "CHALLENGE_READY" });
     transitionFlow({ type: "START_GAME" });
     setRepositoryError(null);
@@ -522,9 +520,8 @@ export function Rango90App({ locale }: { locale: Locale }) {
       if (mountedRef.current) {
         const normalized = error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline");
         setRepositoryError(normalized);
-        setChallengeLoadState(normalized.code === "official_not_ready" ? "error" : "ready");
+        setChallengeLoadState("ready");
         transitionFlow({ type: "ERROR", officialNotReady: normalized.code === "official_not_ready" });
-        setView("home");
         recordRuntimeMetric("request_error", startedAt, { operation: "start_game", code: normalized.code, kind: normalized.kind });
       }
     } finally {
@@ -548,7 +545,6 @@ export function Rango90App({ locale }: { locale: Locale }) {
     transitionFlow({ type: "ABANDON" });
     setDecisionPending(false);
     setSelectedCategory(null);
-    setLatestFeedback(null);
   }
 
   function resetGameToHome() {
@@ -560,9 +556,6 @@ export function Rango90App({ locale }: { locale: Locale }) {
     setAssignments([]);
     setEntityIndex(0);
     setSelectedCategory(null);
-    setLatestFeedback(null);
-    setDecisionPending(false);
-    setImageOverrides({});
     setSecondsLeft(mockDailyChallenge.timeLimitSeconds);
     setTimedOut(false);
     timeoutHandled.current = false;
@@ -883,13 +876,12 @@ export function Rango90App({ locale }: { locale: Locale }) {
     }
   }
 
-  const continueAfterFeedback = useCallback(() => {
+  function continueAfterFeedback() {
     if (phase !== "feedback") return;
     if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
     feedbackTimerRef.current = null;
     recordRuntimeMetric("decision_to_next_player", decisionStartedAtRef.current ?? nowRuntimeMetric(), { ordinal: entityIndex });
-    const advance = feedbackAdvance(phase, entityIndex, mockDailyChallenge.entities.length, latestFeedback?.complete === true);
-    if (advance === "finish") {
+    if (latestFeedback?.complete || entityIndex >= mockDailyChallenge.entities.length - 1) {
       setPhase("finished");
       transitionFlow({ type: "FINISH" });
       deadlineAtRef.current = null;
@@ -901,21 +893,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
     setLatestFeedback(null);
     setPhase("playing");
     transitionFlow({ type: "CONTINUE" });
-  }, [entityIndex, latestFeedback, mockDailyChallenge.entities.length, phase, transitionFlow]);
-
-  useEffect(() => {
-    if (phase !== "feedback") return;
-    const gameGeneration = gameGenerationRef.current;
-    const feedbackGeneration = ++feedbackGenerationRef.current;
-    feedbackTimerRef.current = window.setTimeout(() => {
-      if (!mountedRef.current || gameGeneration !== gameGenerationRef.current || feedbackGeneration !== feedbackGenerationRef.current) return;
-      continueAfterFeedback();
-    }, 700);
-    return () => {
-      if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
-      feedbackTimerRef.current = null;
-    };
-  }, [continueAfterFeedback, phase]);
+  }
 
   async function assignCategory(category: MockCategory) {
     if (!currentEntity || !canSubmitDecision(flowState) || phase !== "playing" || usedCategorySlugs.has(category.slug) || decisionPending) return;
@@ -1002,8 +980,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
 
   function renderGame() {
     const latestAssignment = assignments[assignments.length - 1];
-    const feedbackCategories = session?.challenge.categories ?? activeDuel?.challenge.categories ?? mockDailyChallenge.categories;
-    const bestCategory = latestFeedback ? feedbackCategories.find((category) => category.slug === latestFeedback.bestCategorySlug) : undefined;
+    const bestCategory = latestFeedback ? mockDailyChallenge.categories.find((category) => category.slug === latestFeedback.bestCategorySlug) : undefined;
     const selectedRank = latestFeedback?.selectedRank ?? null;
     const bestRank = latestFeedback?.bestRank ?? null;
     const rankDifference = selectedRank !== null && bestRank !== null ? selectedRank - bestRank : null;

@@ -218,6 +218,7 @@ export function normalizePlayerName(name: string): string {
 export function normalizeChampionsPhase(round: string | null | undefined): ChampionsPhase {
   const normalized = normalizePlayerName(round ?? '');
   if (!normalized) return 'unknown';
+  if (/knockout (phase|round) play off/u.test(normalized)) return 'intermediate';
   if (/(qualifying|preliminary|play off|playoff)/u.test(normalized)) return 'qualifying';
   if (/first round|^round 1$|^first$/u.test(normalized)) return 'first_round';
   if (/second round|^round 2$|^second$/u.test(normalized)) return 'second_round';

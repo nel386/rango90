@@ -5,7 +5,7 @@ const runId = process.env.BLOCK15A_RUN_ID?.trim() || 'local';
 const action = process.argv[2] ?? 'seed';
 if (!databaseUrl) throw new Error('DATABASE_URL es obligatoria para el fixture Block 15A');
 const parsed = new URL(databaseUrl);
-if (!['127.0.0.1', 'localhost', '::1'].includes(parsed.hostname) || !/rango90_qa_block15[ab]/u.test(parsed.pathname) || process.env.NODE_ENV === 'production') {
+if (!['127.0.0.1', 'localhost', '::1'].includes(parsed.hostname) || !/rango90_qa_block15[abcd]/u.test(parsed.pathname) || process.env.NODE_ENV === 'production') {
   throw new Error('El fixture Block 15 solo admite PostgreSQL efímero local');
 }
 

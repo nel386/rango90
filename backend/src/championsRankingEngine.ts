@@ -223,8 +223,8 @@ export function normalizeChampionsPhase(round: string | null | undefined): Champ
   if (/second round|^round 2$|^second$/u.test(normalized)) return 'second_round';
   if (/third round|^round 3$|^third$/u.test(normalized)) return 'third_round';
   if (/intermediate/u.test(normalized)) return 'intermediate';
-  if (/league phase/u.test(normalized)) return 'league_phase';
-  if (/group/u.test(normalized)) return 'group';
+  if (/(league phase|league stage|regular season|championship stage)/u.test(normalized)) return 'league_phase';
+  if (/(group|second stage|first stage)/u.test(normalized)) return 'group';
   if (/round of 16|round 16|last 16|1 8/u.test(normalized)) return 'round_of_16';
   if (/quarter|1 4/u.test(normalized)) return 'quarter_final';
   if (/semi|1 2/u.test(normalized)) return 'semi_final';

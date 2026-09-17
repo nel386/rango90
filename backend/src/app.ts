@@ -71,7 +71,8 @@ async function getLabChampionsRanking(appDb: ContractDatabase, dataset: Champion
      )
      SELECT latest.id, latest.category_slug, latest.dataset, latest.season_start, latest.season_end,
             latest.status, latest.scope_version, latest.content_sha256, latest.generated_at,
-            latest.coverage_complete, COALESCE(fact_summary.fact_count, 0)::int AS fact_count,
+            latest.coverage_complete,
+            COALESCE(NULLIF(latest.metadata->>'factCount', '')::int, fact_summary.fact_count, 0)::int AS fact_count,
             COALESCE(fact_summary.source_count, 0)::int AS source_count
        FROM latest CROSS JOIN fact_summary`,
     [CHAMPIONS_CATEGORY_SLUG, dataset]

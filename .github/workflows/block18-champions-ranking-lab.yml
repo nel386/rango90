@@ -14,7 +14,7 @@ jobs:
     env:
       RANGO90_RUNTIME_MODE: lab
       NODE_ENV: test
-      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55443/rango90_qa_block18
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55443/rango90_qa_block18_runtime
       RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55443/rango90_qa_block18
       BLOCK18_CANDIDATE_ROOT: ${{ github.workspace }}/.block18-candidate
     steps:
@@ -54,16 +54,20 @@ jobs:
           docker exec rango90-block18-postgres pg_isready -U rango90 -d rango90_qa_block18
       - name: Apply migrations
         working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
         run: npm run migrate
       - name: Load candidate into isolated lab database
         working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
         run: npx tsx src/tools/block18-load-lab-candidate.ts
       - name: Verify endpoint against exact candidate snapshots
         working-directory: backend
         run: npx tsx src/tests/block18-champions-ranking-candidate.integration.test.ts | tee "$GITHUB_WORKSPACE/BLOCK18_REPORT.json"
       - name: Verify no production or official mutation
         run: |
-          ! rg -n 'DATABASE_URL|API_FOOTBALL_KEY|published.*true|officialModeOpened.*true' "$GITHUB_WORKSPACE/BLOCK18_REPORT.json"
+          ! grep -En 'DATABASE_URL|API_FOOTBALL_KEY|published.*true|officialModeOpened.*true' "$GITHUB_WORKSPACE/BLOCK18_REPORT.json"
       - name: Cleanup isolated database and fixtures
         if: always()
         run: docker rm -f rango90-block18-postgres >/dev/null 2>&1 || true

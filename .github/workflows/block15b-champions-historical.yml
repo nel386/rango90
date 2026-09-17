@@ -1,0 +1,111 @@
+name: BLOQUE 15B · reconstrucción histórica Champions
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: block15b-champions-historical
+  cancel-in-progress: true
+
+jobs:
+  isolated-historical-rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      BLOCK15B_RUN_ID: ${{ github.run_id }}
+      BLOCK15B_EXPECTED_END: '2026'
+      QA_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55436/rango90_qa_block15b
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Start temporary PostgreSQL
+        run: |
+          docker run -d --name rango90-block15b-postgres -e POSTGRES_DB=rango90_qa_block15b -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55436:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block15b-postgres pg_isready -U rango90 -d rango90_qa_block15b >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block15b-postgres pg_isready -U rango90 -d rango90_qa_block15b
+
+      - name: Apply migrations to isolated PostgreSQL
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+        run: npx tsx src/migrate.ts
+
+      - name: Seed isolated Block 15B fixtures
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+        run: npx tsx src/qa/block15-fixture.ts seed
+
+      - name: Recreate API-Football facts for the modern tranche
+        working-directory: backend
+        env:
+          BLOCK15A_MODE: plan
+          BLOCK15A_OUTPUT_ROOT: ${{ runner.temp }}/block15a-modern/plan
+        run: npx tsx src/tools/block15a-api-football.ts
+
+      - name: Load API-Football modern facts in quota-safe batches
+        working-directory: backend
+        env:
+          BLOCK15A_MODE: load
+          BLOCK15A_PLAN_FILE: ${{ runner.temp }}/block15a-modern/plan/BLOCK15A_COVERAGE_PLAN.json
+          BLOCK15A_OUTPUT_ROOT: ${{ runner.temp }}/block15a-modern/load
+          BLOCK15A_CAPTURE_ROOT: ${{ runner.temp }}/block15a-modern/captures
+          BLOCK15A_FACTS_ROOT: ${{ runner.temp }}/block15a-modern/facts
+        run: npx tsx src/tools/block15a-api-football.ts
+
+      - name: Load historical facts and combine in isolated PostgreSQL
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+          BLOCK15B_OUTPUT_ROOT: ${{ runner.temp }}/block15b-reports
+          BLOCK15B_CAPTURE_ROOT: ${{ runner.temp }}/block15b-captures
+          BLOCK15B_API_FACTS_FILE: ${{ runner.temp }}/block15a-modern/facts/champions-facts.json
+        run: npx tsx src/tools/block15b-historical-rebuild.ts
+
+      - name: Verify published files are redacted and contain no raw payloads
+        if: always()
+        run: |
+          if rg -n 'x-apisports-key|authorization:|Bearer ' '${{ runner.temp }}/block15b-reports' '${{ runner.temp }}/block15b-reports/BLOCK15B_HISTORICAL_FACTS.json' 2>/dev/null; then exit 1; fi
+          test ! -e '${{ runner.temp }}/block15b-reports/not-uploaded-captures'
+
+      - name: Cleanup isolated fixtures and PostgreSQL
+        if: always()
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+        run: |
+          npx tsx src/qa/block15-fixture.ts cleanup || true
+          docker rm -f rango90-block15b-postgres >/dev/null 2>&1 || true
+
+      - name: Upload reports and structured facts only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block15b-historical-reports-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            ${{ runner.temp }}/block15b-reports/BLOCK15B_HISTORICAL_REPORT.json
+            ${{ runner.temp }}/block15b-reports/BLOCK15B_HISTORICAL_REPORT.md
+            ${{ runner.temp }}/block15b-reports/BLOCK15B_HISTORICAL_FACTS.json

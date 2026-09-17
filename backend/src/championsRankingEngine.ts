@@ -12,6 +12,10 @@ export type ChampionsSnapshotStatus = 'lab_provisional' | 'draft' | 'published' 
 export type ChampionsPhase =
   | 'qualifying'
   | 'preliminary'
+  | 'first_round'
+  | 'second_round'
+  | 'third_round'
+  | 'intermediate'
   | 'league_phase'
   | 'group'
   | 'round_of_16'
@@ -215,6 +219,10 @@ export function normalizeChampionsPhase(round: string | null | undefined): Champ
   const normalized = normalizePlayerName(round ?? '');
   if (!normalized) return 'unknown';
   if (/(qualifying|preliminary|play off|playoff)/u.test(normalized)) return 'qualifying';
+  if (/first round|^round 1$|^first$/u.test(normalized)) return 'first_round';
+  if (/second round|^round 2$|^second$/u.test(normalized)) return 'second_round';
+  if (/third round|^round 3$|^third$/u.test(normalized)) return 'third_round';
+  if (/intermediate/u.test(normalized)) return 'intermediate';
   if (/league phase/u.test(normalized)) return 'league_phase';
   if (/group/u.test(normalized)) return 'group';
   if (/round of 16|round 16|last 16|1 8/u.test(normalized)) return 'round_of_16';

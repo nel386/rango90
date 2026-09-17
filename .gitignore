@@ -9,6 +9,17 @@ __pycache__/
 .env
 .env.*
 !.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Credentials and local signing material
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+**/google-services.json
 
 # Salidas y cachés
 dist/

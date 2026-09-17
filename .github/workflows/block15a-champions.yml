@@ -1,0 +1,102 @@
+name: BLOQUE 15A · reconstrucción real Champions
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: block15a-champions
+  cancel-in-progress: true
+
+jobs:
+  isolated-champions-rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      BLOCK15A_RUN_ID: ${{ github.run_id }}
+      BLOCK15A_QUOTA_RESERVE: '5'
+      QA_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55434/rango90_qa_block15a
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Start temporary PostgreSQL
+        run: |
+          docker run -d --name rango90-block15a-postgres -e POSTGRES_DB=rango90_qa_block15a -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55434:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block15a-postgres pg_isready -U rango90 -d rango90_qa_block15a >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block15a-postgres pg_isready -U rango90 -d rango90_qa_block15a
+
+      - name: Apply migrations to isolated PostgreSQL
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+        run: npx tsx src/migrate.ts
+
+      - name: Seed isolated Block 15A fixtures
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+        run: npx tsx src/qa/block15-fixture.ts seed
+
+      - name: Plan coverage without downloading events
+        working-directory: backend
+        env:
+          BLOCK15A_MODE: plan
+          BLOCK15A_OUTPUT_ROOT: ${{ runner.temp }}/block15a-reports/plan
+        run: npx tsx src/tools/block15a-api-football.ts
+
+      - name: Load confirmed seasons in quota-safe batches
+        working-directory: backend
+        env:
+          BLOCK15A_MODE: load
+          BLOCK15A_PLAN_FILE: ${{ runner.temp }}/block15a-reports/plan/BLOCK15A_COVERAGE_PLAN.json
+          BLOCK15A_OUTPUT_ROOT: ${{ runner.temp }}/block15a-reports/load
+          BLOCK15A_CAPTURE_ROOT: ${{ runner.temp }}/block15a-captures
+          BLOCK15A_FACTS_ROOT: ${{ runner.temp }}/block15a-facts
+        run: npx tsx src/tools/block15a-api-football.ts
+
+      - name: Verify reports are redacted
+        if: always()
+        run: |
+          test ! -f '${{ runner.temp }}/block15a-reports/plan/BLOCK15A_COVERAGE_PLAN.json' || ! rg -n 'x-apisports-key|authorization:|Bearer ' '${{ runner.temp }}/block15a-reports/plan/BLOCK15A_COVERAGE_PLAN.json'
+          test ! -f '${{ runner.temp }}/block15a-reports/load/BLOCK15A_REAL_LOAD_REPORT.json' || ! rg -n 'x-apisports-key|authorization:|Bearer ' '${{ runner.temp }}/block15a-reports/load/BLOCK15A_REAL_LOAD_REPORT.json'
+
+      - name: Cleanup isolated fixtures and PostgreSQL
+        if: always()
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.QA_DATABASE_URL }}
+        run: |
+          npx tsx src/qa/block15-fixture.ts cleanup || true
+          docker rm -f rango90-block15a-postgres >/dev/null 2>&1 || true
+
+      - name: Upload redacted reports only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block15a-redacted-reports-${{ github.run_id }}
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/block15a-reports/plan/BLOCK15A_COVERAGE_PLAN.json
+            ${{ runner.temp }}/block15a-reports/plan/BLOCK15A_COVERAGE_PLAN.md
+            ${{ runner.temp }}/block15a-reports/load/BLOCK15A_REAL_LOAD_REPORT.json
+            ${{ runner.temp }}/block15a-reports/load/BLOCK15A_REAL_LOAD_REPORT.md

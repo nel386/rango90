@@ -7,10 +7,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
-import { createGameRepository, RepositoryError, type AuthUser, type CategoryRanking, type DecisionFeedback, type DuelState, type GameResult, type GameSession, type LeaderboardEntry, type RankingCategoryOption, type RuntimeConfig } from "@/data/game-repository";
+import { createGameRepository, RepositoryError, type AuthUser, type CategoryRanking, type CategoryRankingDataset, type DecisionFeedback, type DuelState, type GameResult, type GameSession, type LeaderboardEntry, type RankingCategoryOption, type RuntimeConfig } from "@/data/game-repository";
 import type { Locale, MockCategory, MockChallenge, MockEntity } from "@/data/game-types";
-import { canStartGame, canSubmitDecision, transitionGameFlow, type GameFlowEvent, type GameFlowState } from "@/data/game-flow";
-import { imageRequestIsCurrent, preloadImage } from "@/data/image-preload";
+import { canStartGame, canSubmitDecision, feedbackAdvance, transitionGameFlow, type GameFlowEvent, type GameFlowState } from "@/data/game-flow";
+import { imageRequestIsCurrent, prefetchEntityIndexes, preloadImage } from "@/data/image-preload";
 import { nowRuntimeMetric, recordRuntimeMetric } from "@/data/runtime-metrics";
 import { secondsUntilDeadline } from "@/data/game-clock";
 
@@ -125,6 +125,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
   const [rankingCategories, setRankingCategories] = useState<RankingCategoryOption[]>([]);
   const [categoryRankingState, setCategoryRankingState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [selectedRankingCategory, setSelectedRankingCategory] = useState("");
+  const [selectedRankingDataset, setSelectedRankingDataset] = useState<CategoryRankingDataset>("active_season_weekly");
   const [submissionState, setSubmissionState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [leaderboardEligible, setLeaderboardEligible] = useState<boolean | null>(null);
   const [duel, setDuel] = useState<DuelState | null>(null);
@@ -299,17 +300,14 @@ export function Rango90App({ locale }: { locale: Locale }) {
     const imageController = new AbortController();
     imageAbortRef.current = imageController;
     imageMetricStartedRef.current = nowRuntimeMetric();
-    const nextEntity = mockDailyChallenge.entities[entityIndex + 1];
-    const targets = [currentEntity, nextEntity].filter((entity): entity is MockEntity => Boolean(entity));
+    const targets = prefetchEntityIndexes(mockDailyChallenge.entities.length, entityIndex)
+      .map((index) => mockDailyChallenge.entities[index])
+      .filter((entity): entity is MockEntity => Boolean(entity));
     void Promise.all(targets.map(async (entity) => {
-      const primaryStarted = nowRuntimeMetric();
-      const primary = await preloadImage({ primary: entity.imageUrl, signal: imageController.signal });
+      const imageStarted = nowRuntimeMetric();
+      const result = await preloadImage({ primary: entity.imageUrl, fallback: entity.imageFallbackUrl, signal: imageController.signal });
       if (!mountedRef.current || !imageRequestIsCurrent(requestId, imageRequestIdRef.current)) return;
-      recordRuntimeMetric("image_primary_load", primaryStarted, { entityId: entity.id, result: primary });
-      const fallbackStarted = nowRuntimeMetric();
-      const fallback = await preloadImage({ primary: entity.imageFallbackUrl, signal: imageController.signal });
-      if (!mountedRef.current || !imageRequestIsCurrent(requestId, imageRequestIdRef.current)) return;
-      recordRuntimeMetric("image_fallback_load", fallbackStarted, { entityId: entity.id, result: fallback });
+      recordRuntimeMetric("image_primary_load", imageStarted, { entityId: entity.id, result, position: entity.id === currentEntity.id ? "current" : "next" });
     }));
   }, [currentEntity, entityIndex, mockDailyChallenge.entities, view]);
 
@@ -432,7 +430,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
   useEffect(() => {
     if (view !== "category-ranking" || !selectedRankingCategory) return;
     let active = true;
-    gameRepository.getCategoryRanking(selectedRankingCategory)
+    gameRepository.getCategoryRanking(selectedRankingCategory, selectedRankingCategory === "uefa-champions-league-goals" ? selectedRankingDataset : undefined)
       .then((ranking) => {
         if (!active) return;
         setCategoryRanking(ranking);
@@ -445,7 +443,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
         setCategoryRankingState("error");
       });
     return () => { active = false; };
-  }, [selectedRankingCategory, view]);
+  }, [selectedRankingCategory, selectedRankingDataset, view]);
 
   useEffect(() => {
     if (view !== "result" || assignments.length !== mockDailyChallenge.entities.length) return;
@@ -481,6 +479,11 @@ export function Rango90App({ locale }: { locale: Locale }) {
     if (startRequestStarted.current || (!canStartGame(flowState) && !intentionalRestart) || challengeLoadState !== "ready") return;
     startRequestStarted.current = true;
     const startedAt = nowRuntimeMetric();
+    gameGenerationRef.current += 1;
+    imageRequestIdRef.current += 1;
+    imageAbortRef.current?.abort();
+    if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
+    feedbackTimerRef.current = null;
     if (!canStartGame(flowState)) transitionFlow({ type: "CHALLENGE_READY" });
     transitionFlow({ type: "START_GAME" });
     setRepositoryError(null);
@@ -519,8 +522,9 @@ export function Rango90App({ locale }: { locale: Locale }) {
       if (mountedRef.current) {
         const normalized = error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline");
         setRepositoryError(normalized);
-        setChallengeLoadState("ready");
+        setChallengeLoadState(normalized.code === "official_not_ready" ? "error" : "ready");
         transitionFlow({ type: "ERROR", officialNotReady: normalized.code === "official_not_ready" });
+        setView("home");
         recordRuntimeMetric("request_error", startedAt, { operation: "start_game", code: normalized.code, kind: normalized.kind });
       }
     } finally {
@@ -544,6 +548,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
     transitionFlow({ type: "ABANDON" });
     setDecisionPending(false);
     setSelectedCategory(null);
+    setLatestFeedback(null);
   }
 
   function resetGameToHome() {
@@ -555,6 +560,9 @@ export function Rango90App({ locale }: { locale: Locale }) {
     setAssignments([]);
     setEntityIndex(0);
     setSelectedCategory(null);
+    setLatestFeedback(null);
+    setDecisionPending(false);
+    setImageOverrides({});
     setSecondsLeft(mockDailyChallenge.timeLimitSeconds);
     setTimedOut(false);
     timeoutHandled.current = false;
@@ -875,12 +883,13 @@ export function Rango90App({ locale }: { locale: Locale }) {
     }
   }
 
-  function continueAfterFeedback() {
+  const continueAfterFeedback = useCallback(() => {
     if (phase !== "feedback") return;
     if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
     feedbackTimerRef.current = null;
     recordRuntimeMetric("decision_to_next_player", decisionStartedAtRef.current ?? nowRuntimeMetric(), { ordinal: entityIndex });
-    if (latestFeedback?.complete || entityIndex >= mockDailyChallenge.entities.length - 1) {
+    const advance = feedbackAdvance(phase, entityIndex, mockDailyChallenge.entities.length, latestFeedback?.complete === true);
+    if (advance === "finish") {
       setPhase("finished");
       transitionFlow({ type: "FINISH" });
       deadlineAtRef.current = null;
@@ -892,7 +901,21 @@ export function Rango90App({ locale }: { locale: Locale }) {
     setLatestFeedback(null);
     setPhase("playing");
     transitionFlow({ type: "CONTINUE" });
-  }
+  }, [entityIndex, latestFeedback, mockDailyChallenge.entities.length, phase, transitionFlow]);
+
+  useEffect(() => {
+    if (phase !== "feedback") return;
+    const gameGeneration = gameGenerationRef.current;
+    const feedbackGeneration = ++feedbackGenerationRef.current;
+    feedbackTimerRef.current = window.setTimeout(() => {
+      if (!mountedRef.current || gameGeneration !== gameGenerationRef.current || feedbackGeneration !== feedbackGenerationRef.current) return;
+      continueAfterFeedback();
+    }, 700);
+    return () => {
+      if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
+      feedbackTimerRef.current = null;
+    };
+  }, [continueAfterFeedback, phase]);
 
   async function assignCategory(category: MockCategory) {
     if (!currentEntity || !canSubmitDecision(flowState) || phase !== "playing" || usedCategorySlugs.has(category.slug) || decisionPending) return;
@@ -915,10 +938,6 @@ export function Rango90App({ locale }: { locale: Locale }) {
       setLatestFeedback(feedback);
       setPhase("feedback");
       transitionFlow({ type: "FEEDBACK_SHOWN" });
-      const feedbackGeneration = ++feedbackGenerationRef.current;
-      feedbackTimerRef.current = window.setTimeout(() => {
-        if (mountedRef.current && feedbackGeneration === feedbackGenerationRef.current) continueAfterFeedback();
-      }, 700);
     } catch (error: unknown) {
       if (!mountedRef.current || gameGeneration !== gameGenerationRef.current) return;
       setSelectedCategory(null);
@@ -983,7 +1002,8 @@ export function Rango90App({ locale }: { locale: Locale }) {
 
   function renderGame() {
     const latestAssignment = assignments[assignments.length - 1];
-    const bestCategory = latestFeedback ? mockDailyChallenge.categories.find((category) => category.slug === latestFeedback.bestCategorySlug) : undefined;
+    const feedbackCategories = session?.challenge.categories ?? activeDuel?.challenge.categories ?? mockDailyChallenge.categories;
+    const bestCategory = latestFeedback ? feedbackCategories.find((category) => category.slug === latestFeedback.bestCategorySlug) : undefined;
     const selectedRank = latestFeedback?.selectedRank ?? null;
     const bestRank = latestFeedback?.bestRank ?? null;
     const rankDifference = selectedRank !== null && bestRank !== null ? selectedRank - bestRank : null;
@@ -1026,7 +1046,14 @@ return <section className="result-view" aria-labelledby="result-title"><div clas
     const entries = categoryRanking?.entries ?? [];
     const fallbackCategories = mockDailyChallenge.categories.map((category) => ({ slug: category.slug, labelEs: category.label.es, labelEn: category.label.en, availability: "provisional" as const }));
     const categories = rankingCategories.length > 0 ? rankingCategories : fallbackCategories;
-    return <section className="simple-view category-ranking-view" aria-labelledby="category-ranking-title"><p className="kicker">{t("categoryRanking.kicker")}</p><h1 id="category-ranking-title">{t("categoryRanking.title")}</h1><p className="simple-lead">{t("categoryRanking.subtitle")}</p><p className="micro-note">{t("categoryRanking.scopeNote")}</p><label className="ranking-selector" htmlFor="ranking-category-select">{t("categoryRanking.selector")}</label><select id="ranking-category-select" value={selectedRankingCategory} onChange={(event) => { setCategoryRankingState("loading"); setCategoryRanking(null); setSelectedRankingCategory(event.target.value); }}>{categories.map((category) => <option value={category.slug} key={category.slug}>{locale === "es" ? category.labelEs : category.labelEn}{category.availability === "provisional" ? ` · ${t("categoryRanking.provisionalShort")}` : ""}</option>)}</select>{categoryRankingState === "loading" ? <p className="micro-note" aria-live="polite">{t("categoryRanking.loading")}</p> : null}{categoryRankingState === "error" ? <div className="result-status" role="alert"><p className="micro-note">{repositoryErrorMessage(repositoryError)}</p><button className="button button-secondary" type="button" onClick={openCategoryRanking}>{t("categoryRanking.retry")}</button></div> : null}{categoryRankingState === "ready" && categoryRanking ? <><div className="ranking-status" role="status"><strong>{categoryRanking.status === "official" ? t("categoryRanking.official") : t("categoryRanking.provisional")}</strong><span>{t("categoryRanking.historical")}</span><span>{t("categoryRanking.snapshot", { snapshot: categoryRanking.snapshotId })}</span></div><div className="category-ranking-table" role="table" aria-label={categoryRanking.category.slug}><div className="category-ranking-head" role="row"><span>{t("categoryRanking.rank")}</span><span>{t("categoryRanking.player")}</span><span>{t("categoryRanking.value")}</span><span>{t("categoryRanking.score")}</span></div>{entries.map((entry) => <div className="category-ranking-row" role="row" key={`${entry.entityId}-${entry.rank}`}><span className="leaderboard-place">{String(entry.rank).padStart(2, "0")}{entry.tieGroup !== null ? <small>{t("categoryRanking.tie", { group: entry.tieGroup })}</small> : null}</span><span className="ranking-entity">{entry.imageUrl && entry.imageStatus !== "unavailable" ? <img src={entry.imageUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <span className="ranking-monogram" aria-hidden="true">{entry.canonicalName.slice(0, 2).toUpperCase()}</span>}<strong>{entry.canonicalName}</strong>{!entry.playable ? <small>{t("categoryRanking.notPlayable")}</small> : null}</span><span>{entry.rawValue}</span><span>{entry.scoreValue}</span><details><summary>{t("categoryRanking.details")}</summary><p>{t("categoryRanking.media", { status: t(`categoryRanking.mediaStatus.${entry.imageStatus}` as "categoryRanking.mediaStatus.licensed") })}</p><p>{t("categoryRanking.review", { status: t(`categoryRanking.reviewStatus.${entry.reviewStatus}` as "categoryRanking.reviewStatus.approved") })}</p><p>{t("categoryRanking.rights", { status: t(`categoryRanking.rightsStatus.${entry.rightsStatus}` as "categoryRanking.rightsStatus.approved") })}</p><p>{t("categoryRanking.publishable", { status: entry.isPublishable ? t("categoryRanking.yes") : t("categoryRanking.no") })}</p><p>{t("categoryRanking.source", { date: entry.generatedAt ?? "—" })}</p></details></div>)}</div></> : null}</section>;
+    const isChampionsRanking = selectedRankingCategory === "uefa-champions-league-goals";
+    const scopeSelector = locale === "es" ? "Alcance Champions" : "Champions scope";
+    const activeSeasonLabel = locale === "es" ? "Temporada activa + histórico" : "Active season + history";
+    const historicalBaseLabel = locale === "es" ? "Histórico completo" : "Complete history";
+    const factsLabel = locale === "es" ? "Hechos utilizados" : "Facts used";
+    const sourcesLabel = locale === "es" ? "Fuentes" : "Sources";
+    const updatedLabel = locale === "es" ? "Actualizado" : "Updated";
+    return <section className="simple-view category-ranking-view" aria-labelledby="category-ranking-title"><p className="kicker">{t("categoryRanking.kicker")}</p><h1 id="category-ranking-title">{t("categoryRanking.title")}</h1><p className="simple-lead">{t("categoryRanking.subtitle")}</p><p className="micro-note">{t("categoryRanking.scopeNote")}</p><label className="ranking-selector" htmlFor="ranking-category-select">{t("categoryRanking.selector")}</label><select id="ranking-category-select" value={selectedRankingCategory} onChange={(event) => { setCategoryRankingState("loading"); setCategoryRanking(null); setSelectedRankingCategory(event.target.value); }}>{categories.map((category) => <option value={category.slug} key={category.slug}>{locale === "es" ? category.labelEs : category.labelEn}{category.availability === "provisional" ? ` · ${t("categoryRanking.provisionalShort")}` : ""}</option>)}</select>{isChampionsRanking ? <><label className="ranking-selector" htmlFor="ranking-dataset-select">{scopeSelector}</label><select id="ranking-dataset-select" value={selectedRankingDataset} onChange={(event) => { setCategoryRankingState("loading"); setCategoryRanking(null); setSelectedRankingDataset(event.target.value as CategoryRankingDataset); }}><option value="active_season_weekly">{activeSeasonLabel}</option><option value="historical_base">{historicalBaseLabel}</option></select></> : null}{categoryRankingState === "loading" ? <p className="micro-note" aria-live="polite">{t("categoryRanking.loading")}</p> : null}{categoryRankingState === "error" ? <div className="result-status" role="alert"><p className="micro-note">{repositoryErrorMessage(repositoryError)}</p><button className="button button-secondary" type="button" onClick={openCategoryRanking}>{t("categoryRanking.retry")}</button></div> : null}{categoryRankingState === "ready" && categoryRanking ? <><div className="ranking-status" role="status"><strong>{categoryRanking.status === "official" ? t("categoryRanking.official") : t("categoryRanking.provisional")}</strong><span>{locale === "es" ? categoryRanking.scopeLabelEs ?? t("categoryRanking.historical") : categoryRanking.scopeLabelEn ?? t("categoryRanking.historical")}</span><span>{t("categoryRanking.snapshot", { snapshot: categoryRanking.snapshotId })}</span>{categoryRanking.factCount !== undefined ? <span>{factsLabel}: {categoryRanking.factCount}</span> : null}{categoryRanking.sourceCount !== undefined ? <span>{sourcesLabel}: {categoryRanking.sourceCount}</span> : null}<span>{updatedLabel}: {categoryRanking.generatedAt ?? "—"}</span></div><div className="category-ranking-table" role="table" aria-label={categoryRanking.category.slug}><div className="category-ranking-head" role="row"><span>{t("categoryRanking.rank")}</span><span>{t("categoryRanking.player")}</span><span>{t("categoryRanking.value")}</span><span>{t("categoryRanking.score")}</span></div>{entries.map((entry) => <div className="category-ranking-row" role="row" key={`${entry.entityId}-${entry.rank}`}><span className="leaderboard-place">{String(entry.rank).padStart(2, "0")}{entry.tieGroup !== null ? <small>{t("categoryRanking.tie", { group: entry.tieGroup })}</small> : null}</span><span className="ranking-entity">{entry.imageUrl && entry.imageStatus !== "unavailable" ? <img src={entry.imageUrl} alt="" loading="lazy" onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <span className="ranking-monogram" aria-hidden="true">{entry.canonicalName.slice(0, 2).toUpperCase()}</span>}<strong>{entry.canonicalName}</strong>{!entry.playable ? <small>{t("categoryRanking.notPlayable")}</small> : null}</span><span>{entry.rawValue}</span><span>{entry.scoreValue}</span><details><summary>{t("categoryRanking.details")}</summary><p>{t("categoryRanking.media", { status: t(`categoryRanking.mediaStatus.${entry.imageStatus}` as "categoryRanking.mediaStatus.licensed") })}</p><p>{t("categoryRanking.review", { status: t(`categoryRanking.reviewStatus.${entry.reviewStatus}` as "categoryRanking.reviewStatus.approved") })}</p><p>{t("categoryRanking.rights", { status: t(`categoryRanking.rightsStatus.${entry.rightsStatus}` as "categoryRanking.rightsStatus.approved") })}</p><p>{t("categoryRanking.publishable", { status: entry.isPublishable ? t("categoryRanking.yes") : t("categoryRanking.no") })}</p><p>{t("categoryRanking.source", { date: entry.generatedAt ?? "—" })}</p>{entry.sources?.slice(0, 3).map((source) => <p key={`${source.sourceKey}-${source.sourceRecordId}`}>{source.sourceKey} · {source.sourceRecordId} · {source.contentSha256 ?? "—"}</p>)}</details></div>)}</div></> : null}</section>;
   }
 
   function renderDuels() {

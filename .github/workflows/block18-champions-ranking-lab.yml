@@ -1,0 +1,77 @@
+name: BLOQUE 18 · integración Champions en lab
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  champions-ranking-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55443/rango90_qa_block18
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55443/rango90_qa_block18
+      BLOCK18_CANDIDATE_ROOT: ${{ runner.temp }}/block17-candidate
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+      - name: Build frontend and backend
+        run: |
+          npm run build
+          npm --prefix backend run build
+      - name: Download latest accepted Block 17 candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          latest=$(gh run list --workflow block17-champions-weekly.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          test -n "$latest"
+          gh run download "$latest" -n "block17-champions-weekly-$latest" -D "$BLOCK18_CANDIDATE_ROOT"
+          test -s "$BLOCK18_CANDIDATE_ROOT/BLOCK17_HISTORICAL_SNAPSHOT_CANDIDATE.json"
+          test -s "$BLOCK18_CANDIDATE_ROOT/BLOCK17_WEEKLY_SNAPSHOT_CANDIDATE.json"
+          test -s "$BLOCK18_CANDIDATE_ROOT/BLOCK17_FACTS_AFTER.json"
+      - name: Start temporary PostgreSQL
+        run: |
+          docker run -d --name rango90-block18-postgres -e POSTGRES_DB=rango90_qa_block18 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55443:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block18-postgres pg_isready -U rango90 -d rango90_qa_block18 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block18-postgres pg_isready -U rango90 -d rango90_qa_block18
+      - name: Apply migrations
+        working-directory: backend
+        run: npm run migrate
+      - name: Load candidate into isolated lab database
+        working-directory: backend
+        run: npx tsx src/tools/block18-load-lab-candidate.ts
+      - name: Verify endpoint against exact candidate snapshots
+        working-directory: backend
+        run: npx tsx src/tests/block18-champions-ranking-candidate.integration.test.ts | tee "$RUNNER_TEMP/BLOCK18_REPORT.json"
+      - name: Verify no production or official mutation
+        run: |
+          ! rg -n 'DATABASE_URL|API_FOOTBALL_KEY|published.*true|officialModeOpened.*true' "$RUNNER_TEMP/BLOCK18_REPORT.json"
+      - name: Cleanup isolated database and fixtures
+        if: always()
+        run: docker rm -f rango90-block18-postgres >/dev/null 2>&1 || true
+      - name: Upload redacted Block 18 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block18-champions-ranking-lab-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: ${{ runner.temp }}/BLOCK18_REPORT.json

@@ -38,14 +38,25 @@ export type CategoryRankingEntry = {
   snapshotId: string;
   dataVersion?: string;
   generatedAt?: string;
+  sources?: Array<{ sourceKey: string; sourceCaptureId: string; sourceRecordId: string; sourceUrl?: string; locator?: string; contentSha256?: string }>;
 };
+export type CategoryRankingDataset = "historical_base" | "active_season_weekly";
 export type CategoryRanking = {
   category: { slug: string; labelEs: string; labelEn: string };
-  rankingScope: "historical_snapshot";
+  rankingScope: "historical_snapshot" | "active_season_weekly";
   snapshotId: string;
   mode: RuntimeMode;
   status: "official" | "provisional";
   entries: CategoryRankingEntry[];
+  dataset?: CategoryRankingDataset;
+  scopeLabelEs?: string;
+  scopeLabelEn?: string;
+  coverageComplete?: boolean;
+  factCount?: number;
+  sourceCount?: number;
+  dataVersion?: string;
+  contentSha256?: string;
+  generatedAt?: string;
 };
 export type RankingCategoryOption = { slug: string; labelEs: string; labelEn: string; availability: "official" | "provisional" };
 export type DuelParticipant = { slot: number; status: string; joinedAt?: string; hasResult: boolean; totalScore: number | null; elapsedSeconds: number | null; timedOut: boolean | null };
@@ -62,6 +73,43 @@ export class RepositoryError extends Error {
   constructor(message: string, readonly kind: RepositoryErrorKind, readonly status?: number, readonly code?: string, readonly details?: unknown) {
     super(message); this.name = "RepositoryError";
   }
+}
+
+function isNullableFiniteNumber(value: unknown): value is number | null {
+  return value === null || (typeof value === "number" && Number.isFinite(value));
+}
+
+export function validateDecisionFeedbackResponse(raw: unknown, session: GameSession, decision: AssignmentClaim): DecisionFeedback {
+  if (!isRecord(raw) || !isRecord(raw.assignment)
+    || raw.assignment.ordinal !== decision.ordinal
+    || raw.assignment.entityId !== decision.entityId
+    || raw.assignment.categorySlug !== decision.categorySlug
+    || typeof raw.assignment.scoreValue !== "number"
+    || !Number.isFinite(raw.assignment.scoreValue)
+    || !isNullableFiniteNumber(raw.selectedRank)
+    || typeof raw.bestCategorySlug !== "string"
+    || !isNullableFiniteNumber(raw.bestRank)
+    || typeof raw.complete !== "boolean") {
+    throw new RepositoryError("The decision feedback response is invalid", "invalid", 502, "feedback_invalid");
+  }
+
+  const bestCategory = session.challenge.categories.find((category) => category.slug === raw.bestCategorySlug);
+  if (!bestCategory || (bestCategory.entityType && bestCategory.entityType !== session.challenge.entities[decision.ordinal]?.entityType)) {
+    throw new RepositoryError("The decision feedback category is not part of the active challenge", "invalid", 502, "feedback_category_invalid");
+  }
+
+  return {
+    assignment: {
+      ordinal: decision.ordinal,
+      entityId: decision.entityId,
+      categorySlug: decision.categorySlug,
+      scoreValue: raw.assignment.scoreValue
+    },
+    selectedRank: raw.selectedRank,
+    bestCategorySlug: bestCategory.slug,
+    bestRank: raw.bestRank,
+    complete: raw.complete
+  };
 }
 
 export type RuntimeConfig = {
@@ -84,7 +132,7 @@ export interface GameRepository {
   submitResult(session: GameSession, assignments: AssignmentClaim[]): Promise<ResultResponse>;
   expireGame(session: GameSession, knownAssignments?: AssignmentClaim[]): Promise<ResultResponse>;
   getLeaderboard(challengeId: string): Promise<LeaderboardEntry[]>;
-  getCategoryRanking(categorySlug: string): Promise<CategoryRanking>;
+  getCategoryRanking(categorySlug: string, dataset?: CategoryRankingDataset): Promise<CategoryRanking>;
   getRankingCategories(options?: RequestOptions): Promise<RankingCategoryOption[]>;
   createDuel(challengeId: string): Promise<DuelState>;
   getDuel(code: string): Promise<DuelState>;
@@ -228,8 +276,10 @@ export class HttpGameRepository implements GameRepository {
   }
 
   async getDailyChallenge(options?: RequestOptions) {
-    if (this.dailyChallengeRequest) return this.dailyChallengeRequest;
-    const request = (async () => {
+    // A caller-owned AbortSignal must never cancel or poison a request shared
+    // with a later retry. Only signal-less callers use the small in-flight
+    // deduplication window.
+    const load = async () => {
       const response = await this.request<{ challenge: ApiChallenge }>("/v1/challenges/daily", {}, options);
       const runtime = response.challenge.runtimeMode ? { runtimeMode: response.challenge.runtimeMode } as RuntimeConfig : await this.getRuntimeConfig(options);
       if (!clientAllowsChallenge(runtime.runtimeMode, response.challenge.testOnly === true)) {
@@ -242,7 +292,10 @@ export class HttpGameRepository implements GameRepository {
         throw new RepositoryError("The published challenge is incomplete", "invalid", 422, "challenge_invalid");
       }
       return challenge;
-    })();
+    };
+    if (options?.signal) return load();
+    if (this.dailyChallengeRequest) return this.dailyChallengeRequest;
+    const request = load();
     const sharedRequest = request.finally(() => { if (this.dailyChallengeRequest === sharedRequest) this.dailyChallengeRequest = null; });
     this.dailyChallengeRequest = sharedRequest;
     return sharedRequest;
@@ -254,7 +307,8 @@ export class HttpGameRepository implements GameRepository {
   }
 
   async submitDecision(session: GameSession, decision: AssignmentClaim, previousAssignments: AssignmentClaim[]) {
-    return this.request<DecisionFeedback>(`/v1/games/${encodeURIComponent(session.id)}/decision`, { method: "POST", headers: { "Idempotency-Key": `rango90-decision-${session.id}-${decision.ordinal}` }, body: JSON.stringify({ sessionToken: session.sessionToken, decision, previousAssignments }) });
+    const response = await this.request<unknown>(`/v1/games/${encodeURIComponent(session.id)}/decision`, { method: "POST", headers: { "Idempotency-Key": `rango90-decision-${session.id}-${decision.ordinal}` }, body: JSON.stringify({ sessionToken: session.sessionToken, decision, previousAssignments }) });
+    return validateDecisionFeedbackResponse(response, session, decision);
   }
 
   async submitResult(session: GameSession, assignments: AssignmentClaim[]) {
@@ -271,8 +325,10 @@ export class HttpGameRepository implements GameRepository {
     return response.entries;
   }
 
-  async getCategoryRanking(categorySlug: string) {
-    const response = await this.request<{ category: string; snapshotId: string; rankingScope?: "historical_snapshot"; mode?: RuntimeMode; status?: "official" | "provisional"; entries: Array<Record<string, unknown>> }>(`/v1/rankings/${encodeURIComponent(categorySlug)}?limit=200`);
+  async getCategoryRanking(categorySlug: string, dataset?: CategoryRankingDataset) {
+    const query = new URLSearchParams({ limit: "200" });
+    if (dataset) query.set("dataset", dataset);
+    const response = await this.request<{ category: string; categoryLabelEs?: string; categoryLabelEn?: string; snapshotId: string; rankingScope?: "historical_snapshot" | "active_season_weekly"; mode?: RuntimeMode; status?: "official" | "provisional"; entries: Array<Record<string, unknown>>; dataset?: CategoryRankingDataset; scopeLabelEs?: string; scopeLabelEn?: string; coverageComplete?: boolean; factCount?: number; sourceCount?: number; dataVersion?: string; contentSha256?: string; generatedAt?: string }>(`/v1/rankings/${encodeURIComponent(categorySlug)}?${query.toString()}`);
     if (!response.snapshotId || !Array.isArray(response.entries)) throw new RepositoryError("The category ranking response is invalid", "invalid", 502, "ranking_invalid");
     const entries: CategoryRankingEntry[] = response.entries.map((entry) => {
       const number = (value: unknown) => {
@@ -287,9 +343,9 @@ export class HttpGameRepository implements GameRepository {
       const status = (entry.imageStatus ?? entry.image_status) === "licensed" || (entry.imageStatus ?? entry.image_status) === "fallback" ? (entry.imageStatus ?? entry.image_status) as "licensed" | "fallback" : "unavailable";
       const reviewStatus = (entry.reviewStatus ?? entry.review_status) === "approved" || (entry.reviewStatus ?? entry.review_status) === "pending" || (entry.reviewStatus ?? entry.review_status) === "rejected" ? (entry.reviewStatus ?? entry.review_status) as "approved" | "pending" | "rejected" : "missing";
       const rightsStatus = (entry.rightsStatus ?? entry.rights_status) === "approved" || (entry.rightsStatus ?? entry.rights_status) === "review_required" || (entry.rightsStatus ?? entry.rights_status) === "rejected" ? (entry.rightsStatus ?? entry.rights_status) as "approved" | "review_required" | "rejected" : "missing";
-      return { rank, entityId: entry.entity_id, canonicalName: entry.canonical_name, rawValue, scoreValue, tieGroup: number(entry.tie_group), imageUrl: typeof entry.image_url === "string" ? resolveApiAssetUrl(this.baseUrl, entry.image_url) : undefined, imageStatus: status, reviewStatus, rightsStatus, isPublishable: (entry.isPublishable ?? entry.is_publishable) === true, playable: entry.playable === true, imageSourceUrl: typeof entry.image_source_url === "string" ? entry.image_source_url : undefined, imageLicenseName: typeof entry.image_license_name === "string" ? entry.image_license_name : undefined, snapshotId: response.snapshotId, dataVersion: typeof entry.data_version === "string" ? entry.data_version : undefined, generatedAt: typeof entry.generated_at === "string" ? entry.generated_at : undefined };
+      return { rank, entityId: entry.entity_id, canonicalName: entry.canonical_name, rawValue, scoreValue, tieGroup: number(entry.tie_group), imageUrl: typeof entry.image_url === "string" ? resolveApiAssetUrl(this.baseUrl, entry.image_url) : undefined, imageStatus: status, reviewStatus, rightsStatus, isPublishable: (entry.isPublishable ?? entry.is_publishable) === true, playable: entry.playable === true, imageSourceUrl: typeof entry.image_source_url === "string" ? entry.image_source_url : undefined, imageLicenseName: typeof entry.image_license_name === "string" ? entry.image_license_name : undefined, snapshotId: response.snapshotId, dataVersion: typeof entry.data_version === "string" ? entry.data_version : undefined, generatedAt: typeof entry.generated_at === "string" ? entry.generated_at : undefined, sources: Array.isArray(entry.sources) ? entry.sources as CategoryRankingEntry["sources"] : undefined };
     });
-    return { category: { slug: typeof response.category === "string" ? response.category : categorySlug, labelEs: typeof response.entries[0]?.label_es === "string" ? response.entries[0].label_es : categorySlug, labelEn: typeof response.entries[0]?.label_en === "string" ? response.entries[0].label_en : categorySlug }, rankingScope: response.rankingScope ?? "historical_snapshot", snapshotId: response.snapshotId, mode: response.mode ?? "official", status: response.status ?? "official", entries };
+    return { category: { slug: typeof response.category === "string" ? response.category : categorySlug, labelEs: typeof response.categoryLabelEs === "string" ? response.categoryLabelEs : (typeof response.entries[0]?.label_es === "string" ? response.entries[0].label_es : categorySlug), labelEn: typeof response.categoryLabelEn === "string" ? response.categoryLabelEn : (typeof response.entries[0]?.label_en === "string" ? response.entries[0].label_en : categorySlug) }, rankingScope: response.rankingScope ?? "historical_snapshot", snapshotId: response.snapshotId, mode: response.mode ?? "official", status: response.status ?? "official", entries, dataset: response.dataset, scopeLabelEs: response.scopeLabelEs, scopeLabelEn: response.scopeLabelEn, coverageComplete: response.coverageComplete, factCount: response.factCount, sourceCount: response.sourceCount, dataVersion: response.dataVersion, contentSha256: response.contentSha256, generatedAt: response.generatedAt };
   }
 
   async getRankingCategories(options?: RequestOptions) {

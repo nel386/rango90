@@ -131,6 +131,9 @@ assert.equal(rollback.snapshot.rollbackOf, weeklySnapshot.id);
 assert.equal(rollback.snapshot.ranking.length, weeklySnapshot.ranking.length);
 const divergentImport = importFactsIdempotently([facts[0]!], [{ ...facts[0]!, goals: 9 }]);
 assert.equal(divergentImport.conflicts[0]?.reason, 'duplicate_source_record_with_different_value');
+const recaptured = importFactsIdempotently([facts[0]!], [{ ...facts[0]!, id: 'recaptured-fact', sourceCaptureId: 'capture-week-2', capturedAt: '2026-09-17T02:00:00.000Z' }]);
+assert.equal(recaptured.skipped.length, 1);
+assert.equal(recaptured.added.length, 0);
 assert.throws(() => publishChampionsSnapshot({ snapshot: historicalSnapshot, authorization: { written: false } }), /autorización escrita/iu);
 assert.throws(() => publishChampionsSnapshot({ snapshot: historicalSnapshot, authorization: { written: true, reviewedBy: 'qa' } }), /identidades resueltas/iu);
 

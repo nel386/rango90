@@ -346,6 +346,7 @@ export function importFactsIdempotently(existing: ChampionsGoalFact[], incoming:
   conflicts: ChampionsConflict[];
 } {
   const byId = new Map(existing.map((fact) => [fact.id, fact]));
+  const bySourceRecord = new Map(existing.map((fact) => [sourceRecordKey(fact), fact]));
   const added: ChampionsGoalFact[] = [];
   const skipped: ChampionsGoalFact[] = [];
   const conflicts: ChampionsConflict[] = [];
@@ -360,10 +361,37 @@ export function importFactsIdempotently(existing: ChampionsGoalFact[], incoming:
       }
       continue;
     }
+    const priorCapture = bySourceRecord.get(sourceRecordKey(fact));
+    if (priorCapture) {
+      if (sameFactValue(priorCapture, fact)) skipped.push(fact);
+      else conflicts.push(conflictForFacts([priorCapture, fact], 'duplicate_source_record_with_different_value'));
+      continue;
+    }
     byId.set(fact.id, fact);
+    bySourceRecord.set(sourceRecordKey(fact), fact);
     added.push(fact);
   }
   return { facts: [...byId.values()], added, skipped, conflicts: [...conflicts, ...detectChampionsConflicts([...byId.values()])] };
+}
+
+function sourceRecordKey(fact: ChampionsGoalFact): string {
+  return [fact.sourceKey, fact.sourceRecordId].join('|');
+}
+
+function sameFactValue(left: ChampionsGoalFact, right: ChampionsGoalFact): boolean {
+  return stableJson({
+    edition: left.edition.id,
+    player: left.player.canonicalId,
+    match: left.match,
+    phase: left.phase,
+    goals: left.goals
+  }) === stableJson({
+    edition: right.edition.id,
+    player: right.player.canonicalId,
+    match: right.match,
+    phase: right.phase,
+    goals: right.goals
+  });
 }
 
 export function detectChampionsConflicts(facts: ChampionsGoalFact[]): ChampionsConflict[] {

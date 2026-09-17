@@ -165,6 +165,7 @@ try {
     });
 
     await capture("04-respuesta-incorrecta-categoria.png", async () => {
+      await page.getByRole("button", { name: "Siguiente elemento" }).click();
       await waitForEntityPosition(2);
       const playerIndex = await currentPlayerIndex();
       const bestIndex = (7 - (playerIndex % 7)) % 7;
@@ -183,6 +184,7 @@ try {
     });
 
     await capture("05-precarga-siguiente-jugador.png", async () => {
+      await page.getByRole("button", { name: "Siguiente elemento" }).click();
       await waitForEntityPosition(3);
       await page.waitForTimeout(300);
       const mediaRequests = responseBodies.filter((entry) => entry.url.includes("/v1/media/")).map((entry) => entry.url);

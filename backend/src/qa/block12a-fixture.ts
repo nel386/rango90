@@ -110,7 +110,7 @@ async function seed(): Promise<void> {
         challengeDate: '2099-12-31',
         sourceVersion: 'block12a-fixture-v1',
         engineVersion: GAME_ENGINE_VERSION,
-        timeLimitSeconds: 20,
+        timeLimitSeconds: 60,
         scoreCap: 100,
         categories: data.categories,
         decisions: data.decisions,
@@ -120,7 +120,7 @@ async function seed(): Promise<void> {
         `INSERT INTO game_challenges
            (id, challenge_kind, challenge_date, status, source_version, engine_version,
             time_limit_seconds, score_cap, challenge_sha256, metadata)
-         VALUES ($1, 'daily', '2099-12-31', 'draft', 'block12a-fixture-v1', $2, 20, 100, $3, $4::jsonb)`,
+         VALUES ($1, 'daily', '2099-12-31', 'draft', 'block12a-fixture-v1', $2, 60, 100, $3, $4::jsonb)`,
         [challengeId, GAME_ENGINE_VERSION, challengeSha256, JSON.stringify({ fixture: true, block: '12A', testOnly: true, noOfficialPublication: true })]
       );
       for (const category of data.categories) {

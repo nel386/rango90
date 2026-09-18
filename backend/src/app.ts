@@ -141,15 +141,16 @@ async function getLabChampionsRanking(appDb: ContractDatabase, dataset: Champion
   };
 }
 
-async function getLabChampionsAssistsRanking(appDb: ContractDatabase, dataset: ChampionsLabDataset, limit: number, runtimeMode: RuntimeMode) {
+async function getLabChampionsAssistsRanking(appDb: ContractDatabase, dataset: ChampionsLabDataset, limit: number, runtimeMode: RuntimeMode, season?: number) {
   const snapshotResult = await appDb.query<{
     id: string; category_slug: string; dataset: ChampionsLabDataset; season_start: number; season_end: number; status: string;
-    scope_version: string; content_sha256: string; generated_at: string; coverage_complete: boolean; fact_count: number; source_count: number;
+    scope_version: string; content_sha256: string; generated_at: string; coverage_complete: boolean; fact_count: number; source_count: number; metadata: Record<string, unknown>;
   }>(
     `WITH latest AS (
        SELECT rs.* FROM champions_ranking_snapshots rs
         WHERE rs.category_slug = $1 AND rs.dataset = $2
-          AND rs.status IN ('lab_provisional', 'draft') AND rs.coverage_complete = TRUE
+          AND rs.status IN ('lab_provisional', 'draft')
+          AND ($3::int IS NULL OR rs.season_start = $3)
         ORDER BY rs.generated_at DESC LIMIT 1
      ), fact_summary AS (
        SELECT COUNT(DISTINCT f.id)::int AS fact_count, COUNT(DISTINCT f.source_key)::int AS source_count
@@ -160,10 +161,11 @@ async function getLabChampionsAssistsRanking(appDb: ContractDatabase, dataset: C
      SELECT latest.id, latest.category_slug, latest.dataset, latest.season_start, latest.season_end,
             latest.status, latest.scope_version, latest.content_sha256, latest.generated_at,
             latest.coverage_complete,
+            latest.metadata,
             COALESCE(NULLIF(latest.metadata->>'factCount', '')::int, fact_summary.fact_count, 0)::int AS fact_count,
             COALESCE(NULLIF(latest.metadata->>'sourceCount', '')::int, fact_summary.source_count, 0)::int AS source_count
        FROM latest CROSS JOIN fact_summary`,
-    [CHAMPIONS_ASSISTS_CATEGORY_SLUG, dataset]
+    [CHAMPIONS_ASSISTS_CATEGORY_SLUG, dataset, season ?? null]
   );
   const snapshot = snapshotResult.rows[0];
   if (!snapshot) return null;
@@ -192,9 +194,17 @@ async function getLabChampionsAssistsRanking(appDb: ContractDatabase, dataset: C
     rankingScope: isHistorical ? 'historical_snapshot' : 'active_season_weekly',
     snapshotId: snapshot.id, mode: runtimeMode, status: 'provisional', dataset: snapshot.dataset,
     seasonStart: snapshot.season_start, seasonEnd: snapshot.season_end,
-    scopeLabelEs: isHistorical ? 'Histórico: Copa de Europa y Champions 1955/56–2025/26' : 'Temporada activa: asistencias de Champions',
-    scopeLabelEn: isHistorical ? 'History: European Cup and Champions League 1955/56–2025/26' : 'Active season: Champions League assists',
+    scope: isHistorical ? 'historical' : 'active_season',
+    season: snapshot.season_start,
+    scopeLabelEs: isHistorical ? 'Champions — histórico no disponible: cobertura insuficiente' : 'Champions — temporada activa. Ranking provisional; el histórico completo todavía no tiene cobertura suficiente.',
+    scopeLabelEn: isHistorical ? 'Champions — historical unavailable: insufficient coverage' : 'Champions — active season. Provisional ranking; the complete history does not yet have sufficient coverage.',
     coverageComplete: snapshot.coverage_complete, factCount: snapshot.fact_count, sourceCount: snapshot.source_count,
+    coverageEstimated: typeof snapshot.metadata.coverageEstimated === 'number' ? snapshot.metadata.coverageEstimated : null,
+    provisionalWarningEs: 'Ranking provisional de la temporada activa. El histórico completo todavía no tiene cobertura suficiente.',
+    provisionalWarningEn: 'Provisional active-season ranking. The complete historical ranking does not yet have sufficient coverage.',
+    source: 'api-football',
+    degraded: snapshot.metadata.degraded === true,
+    updateDate: snapshot.metadata.updatedAt ?? snapshot.generated_at,
     dataVersion: snapshot.scope_version, contentSha256: snapshot.content_sha256, generatedAt: snapshot.generated_at,
     entries: entries.rows.map((row) => ({ ...row, score_value: Math.min(Number(row.rank), 100), image_url: null, image_status: 'unavailable', review_status: 'missing', rights_status: 'missing', is_publishable: false, image_source_url: null, image_license_name: null, sources: row.sources ?? [] }))
   };
@@ -382,8 +392,8 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
       );
       if (candidate.rows[0]) categories.push({ ...candidate.rows[0], availability: 'provisional' });
       const assistsCandidate = await appDb.query(
-        `SELECT id, category_slug AS slug, 'Asistencias históricas — UEFA Champions League' AS label_es,
-                'All-time assists — UEFA Champions League' AS label_en,
+        `SELECT id, category_slug AS slug, 'Champions — temporada activa' AS label_es,
+                'Champions — active season' AS label_en,
                 'player' AS entity_type, 'assists' AS metric_key, 'competition_all_time' AS scope_kind,
                 '{}'::jsonb AS scope, 'desc' AS ranking_direction, 'competition' AS tie_policy,
                 100 AS score_cap, 1 AS definition_version,
@@ -415,21 +425,26 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
 
   app.get('/v1/rankings/:categorySlug', async (request, reply) => {
     const params = z.object({ categorySlug: z.string().min(1) }).parse(request.params);
-    const query = z.object({ limit: z.coerce.number().int().min(1).max(200).default(200), dataset: z.enum(['historical_base', 'active_season_weekly', 'active_edition_weekly']).optional() }).parse(request.query);
+    const query = z.object({ limit: z.coerce.number().int().min(1).max(200).default(200), dataset: z.enum(['historical_base', 'active_season_weekly', 'active_edition_weekly']).optional(), scope: z.enum(['active_season', 'historical']).optional(), season: z.coerce.number().int().min(1955).max(2100).optional() }).parse(request.query);
     if (runtimeMode === 'lab' && params.categorySlug === CHAMPIONS_CATEGORY_SLUG) {
       const candidate = await getLabChampionsRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_season_weekly'), query.limit, runtimeMode);
       if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
       return candidate;
     }
     if (runtimeMode === 'lab' && params.categorySlug === CHAMPIONS_ASSISTS_CATEGORY_SLUG) {
-      const candidate = await getLabChampionsAssistsRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_season_weekly'), query.limit, runtimeMode);
-      if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
+      const requestedHistorical = query.scope === 'historical' || query.dataset === 'historical_base';
+      if (requestedHistorical) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, scope: 'historical', reason: 'historical_candidate_not_sufficient', message: 'El histórico completo de asistencias todavía no tiene cobertura suficiente.' });
+      const candidate = await getLabChampionsAssistsRanking(appDb, 'active_season_weekly', query.limit, runtimeMode, query.season);
+      if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, scope: 'active_season', season: query.season ?? null, reason: query.season ? 'season_not_available' : 'no_available_snapshot' });
       return candidate;
     }
     if (runtimeMode === 'lab' && params.categorySlug === WORLD_CUP_CATEGORY_SLUG) {
       const candidate = await getLabWorldCupRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_edition_weekly'), query.limit, runtimeMode);
       if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
       return candidate;
+    }
+    if (runtimeMode === 'official' && params.categorySlug === CHAMPIONS_ASSISTS_CATEGORY_SLUG) {
+      return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_published_snapshot' });
     }
     const result = await appDb.query(
       `WITH latest_snapshot AS (

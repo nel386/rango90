@@ -48,7 +48,7 @@ async function main(): Promise<void> {
     console.log(JSON.stringify({ status: 'not_run', requestsPerformed: 0, factsImported: 0 }, null, 2)); return;
   }
   const requests: RequestEvidence[] = []; const facts: ChampionsAssistFact[] = []; const anomalies: Array<RecordValue> = [];
-  let uncreditedGoalEvents = 0; let stoppedForQuota = false;
+  let uncreditedGoalEvents = 0; let goalEvents = 0; let stoppedForQuota = false;
   try {
     const league = await request('/leagues?id=2'); requests.push(league.evidence);
     const seasonRows = array(object(array(league.body.response)[0]).seasons).map(object);
@@ -70,13 +70,16 @@ async function main(): Promise<void> {
       if (remaining !== null && remaining !== undefined && remaining <= quotaReserve) { stoppedForQuota = true; break; }
       const batch = ids.slice(offset, offset + 20); const detail = await request(`/fixtures?ids=${batch.join('-')}`); requests.push(detail.evidence);
       if (!detail.evidence.ok) { anomalies.push({ reason: 'fixture_detail_failed', batchStart: offset, httpStatus: detail.evidence.httpStatus }); continue; }
-      const adapted = adaptApiFootballChampionsAssists({ sourceCaptureId: `${artifactPrefix.toLocaleLowerCase()}-api-${activeSeason}-${offset}`, capturedAt: new Date().toISOString(), sourceUrl: `${baseUrl}/fixtures?ids=${batch.join('-')}`, matches: matches(detail.body), activeSeasonStart: activeSeason });
+      const detailMatches = matches(detail.body);
+      goalEvents += detailMatches.flatMap((match) => (match.events ?? []).filter((event) => event.type?.toLocaleLowerCase('en-US') === 'goal' && !String(event.detail ?? '').toLocaleLowerCase('en-US').includes('own goal'))).length;
+      const adapted = adaptApiFootballChampionsAssists({ sourceCaptureId: `${artifactPrefix.toLocaleLowerCase()}-api-${activeSeason}-${offset}`, capturedAt: new Date().toISOString(), sourceUrl: `${baseUrl}/fixtures?ids=${batch.join('-')}`, matches: detailMatches, activeSeasonStart: activeSeason });
       facts.push(...adapted.facts.map((fact) => ({ ...fact, evidence: { ...fact.evidence, contentSha256: detail.rawHash } }))); anomalies.push(...adapted.anomalies.map((item) => ({ fixtureId: item.fixtureId, reason: item.reason }))); uncreditedGoalEvents += adapted.uncreditedGoalEvents;
     }
     const complete = !stoppedForQuota && ids.length > 0 && requests.filter((item) => item.endpoint.startsWith('/fixtures?ids=')).every((item) => item.ok);
     const activeSeasonRecord = seasons.find((row) => row.season === activeSeason);
     if (activeSeasonRecord) activeSeasonRecord.status = complete ? 'active_events_loaded' : 'active_events_partial';
-    const report = reportFile(complete ? 'ready_for_lab_load' : 'partial', complete ? 'Fixture list and event details completed; assist credit is only recorded when API-Football provides an assister.' : 'Carga parcial; no se presenta como cobertura completa.', requests, facts, { seasons, seasonsConsulted: requestedSeasons, uncreditedGoalEvents, anomalies, stoppedForQuota, fixtureCount: ids.length, detailRequests: requests.filter((item) => item.endpoint.startsWith('/fixtures?ids=')).length, coverageComplete: complete });
+    const coverageEstimated = goalEvents > 0 ? Number((facts.length / goalEvents).toFixed(6)) : null;
+    const report = reportFile(complete ? 'ready_for_lab_load' : 'partial', complete ? 'Fixture list and event details completed; assist credit is only recorded when API-Football provides an assister.' : 'Carga parcial; no se presenta como cobertura completa.', requests, facts, { seasons, seasonsConsulted: requestedSeasons, goalEvents, uncreditedGoalEvents, coverageEstimated, anomalies, stoppedForQuota, fixtureCount: ids.length, detailRequests: requests.filter((item) => item.endpoint.startsWith('/fixtures?ids=')).length, coverageComplete: complete });
     await writeJson(resolve(outputRoot, artifact('API_ASSISTS_FACTS.json')), { source: 'api-football', activeSeason, activeCoverageComplete: complete, facts });
     await writeJson(resolve(outputRoot, artifact('API_ASSISTS_REPORT.json')), report);
     await writeFile(resolve(outputRoot, artifact('API_ASSISTS_REPORT.md')), `# ${blockLabel} — API-Football asistencias\n\n- estado: **${report.status}**\n- temporada: **${activeSeason}**\n- hechos: **${facts.length}**\n- eventos de gol sin asistente explícito: **${uncreditedGoalEvents}**\n- peticiones: **${requests.length}**\n- cuota restante: **${report.quotaRemaining ?? 'no observada'}**\n- payloads guardados: **no**\n\nLas asistencias no proporcionadas por la fuente quedan sin asignar; no se infieren.\n`, 'utf8');

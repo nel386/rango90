@@ -52,6 +52,14 @@ export type CategoryRanking = {
   scopeLabelEs?: string;
   scopeLabelEn?: string;
   coverageComplete?: boolean;
+  scope?: "active_season" | "historical";
+  season?: number;
+  coverageEstimated?: number | null;
+  provisionalWarningEs?: string;
+  provisionalWarningEn?: string;
+  source?: string;
+  degraded?: boolean;
+  updateDate?: string;
   factCount?: number;
   sourceCount?: number;
   dataVersion?: string;
@@ -329,7 +337,8 @@ export class HttpGameRepository implements GameRepository {
   async getCategoryRanking(categorySlug: string, dataset?: CategoryRankingDataset) {
     const query = new URLSearchParams({ limit: "200" });
     if (dataset) query.set("dataset", dataset);
-    const response = await this.request<{ category: string; categoryLabelEs?: string; categoryLabelEn?: string; snapshotId: string; rankingScope?: "historical_snapshot" | "active_season_weekly"; mode?: RuntimeMode; status?: "official" | "provisional"; entries: Array<Record<string, unknown>>; dataset?: CategoryRankingDataset; scopeLabelEs?: string; scopeLabelEn?: string; coverageComplete?: boolean; factCount?: number; sourceCount?: number; dataVersion?: string; contentSha256?: string; generatedAt?: string; fixtureOnly?: boolean }>(`/v1/rankings/${encodeURIComponent(categorySlug)}?${query.toString()}`);
+    if (categorySlug === "uefa-champions-league-assists") query.set("scope", dataset === "historical_base" ? "historical" : "active_season");
+    const response = await this.request<{ category: string; categoryLabelEs?: string; categoryLabelEn?: string; snapshotId: string; rankingScope?: "historical_snapshot" | "active_season_weekly"; mode?: RuntimeMode; status?: "official" | "provisional"; entries: Array<Record<string, unknown>>; dataset?: CategoryRankingDataset; scope?: "active_season" | "historical"; season?: number; scopeLabelEs?: string; scopeLabelEn?: string; coverageComplete?: boolean; coverageEstimated?: number | null; provisionalWarningEs?: string; provisionalWarningEn?: string; source?: string; degraded?: boolean; updateDate?: string; factCount?: number; sourceCount?: number; dataVersion?: string; contentSha256?: string; generatedAt?: string; fixtureOnly?: boolean }>(`/v1/rankings/${encodeURIComponent(categorySlug)}?${query.toString()}`);
     if (!response.snapshotId || !Array.isArray(response.entries)) throw new RepositoryError("The category ranking response is invalid", "invalid", 502, "ranking_invalid");
     const entries: CategoryRankingEntry[] = response.entries.map((entry) => {
       const number = (value: unknown) => {
@@ -346,7 +355,7 @@ export class HttpGameRepository implements GameRepository {
       const rightsStatus = (entry.rightsStatus ?? entry.rights_status) === "approved" || (entry.rightsStatus ?? entry.rights_status) === "review_required" || (entry.rightsStatus ?? entry.rights_status) === "rejected" ? (entry.rightsStatus ?? entry.rights_status) as "approved" | "review_required" | "rejected" : "missing";
       return { rank, entityId: entry.entity_id, canonicalName: entry.canonical_name, rawValue, scoreValue, tieGroup: number(entry.tie_group), imageUrl: typeof entry.image_url === "string" ? resolveApiAssetUrl(this.baseUrl, entry.image_url) : undefined, imageStatus: status, reviewStatus, rightsStatus, isPublishable: (entry.isPublishable ?? entry.is_publishable) === true, playable: entry.playable === true, imageSourceUrl: typeof entry.image_source_url === "string" ? entry.image_source_url : undefined, imageLicenseName: typeof entry.image_license_name === "string" ? entry.image_license_name : undefined, snapshotId: response.snapshotId, dataVersion: typeof entry.data_version === "string" ? entry.data_version : undefined, generatedAt: typeof entry.generated_at === "string" ? entry.generated_at : undefined, sources: Array.isArray(entry.sources) ? entry.sources as CategoryRankingEntry["sources"] : undefined };
     });
-    return { category: { slug: typeof response.category === "string" ? response.category : categorySlug, labelEs: typeof response.categoryLabelEs === "string" ? response.categoryLabelEs : (typeof response.entries[0]?.label_es === "string" ? response.entries[0].label_es : categorySlug), labelEn: typeof response.categoryLabelEn === "string" ? response.categoryLabelEn : (typeof response.entries[0]?.label_en === "string" ? response.entries[0].label_en : categorySlug) }, rankingScope: response.rankingScope ?? "historical_snapshot", snapshotId: response.snapshotId, mode: response.mode ?? "official", status: response.status ?? "official", entries, dataset: response.dataset, scopeLabelEs: response.scopeLabelEs, scopeLabelEn: response.scopeLabelEn, coverageComplete: response.coverageComplete, factCount: response.factCount, sourceCount: response.sourceCount, dataVersion: response.dataVersion, contentSha256: response.contentSha256, generatedAt: response.generatedAt, fixtureOnly: response.fixtureOnly };
+    return { category: { slug: typeof response.category === "string" ? response.category : categorySlug, labelEs: typeof response.categoryLabelEs === "string" ? response.categoryLabelEs : (typeof response.entries[0]?.label_es === "string" ? response.entries[0].label_es : categorySlug), labelEn: typeof response.categoryLabelEn === "string" ? response.categoryLabelEn : (typeof response.entries[0]?.label_en === "string" ? response.entries[0].label_en : categorySlug) }, rankingScope: response.rankingScope ?? "historical_snapshot", snapshotId: response.snapshotId, mode: response.mode ?? "official", status: response.status ?? "official", entries, dataset: response.dataset, scopeLabelEs: response.scopeLabelEs, scopeLabelEn: response.scopeLabelEn, coverageComplete: response.coverageComplete, scope: response.scope, season: response.season, coverageEstimated: response.coverageEstimated, provisionalWarningEs: response.provisionalWarningEs, provisionalWarningEn: response.provisionalWarningEn, source: response.source, degraded: response.degraded, updateDate: response.updateDate, factCount: response.factCount, sourceCount: response.sourceCount, dataVersion: response.dataVersion, contentSha256: response.contentSha256, generatedAt: response.generatedAt, fixtureOnly: response.fixtureOnly };
   }
 
   async getRankingCategories(options?: RequestOptions) {

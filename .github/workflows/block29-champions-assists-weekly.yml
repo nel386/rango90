@@ -1,0 +1,163 @@
+name: BLOQUE 29 · asistencias Champions temporada activa
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * 1'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: block29-champions-assists-weekly
+  cancel-in-progress: true
+
+jobs:
+  champions-assists-weekly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55454/rango90_qa_block29
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55454/rango90_qa_block29
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      BLOCK26_ACTIVE_SEASON_START: '2026'
+      BLOCK26_ACTIVE_COVERAGE_COMPLETE: 'false'
+      BLOCK26_OUTPUT_ROOT: ${{ github.workspace }}/.block29
+      BLOCK29_OUTPUT_ROOT: ${{ github.workspace }}/.block29
+      BLOCK29_API_REPORT_FILE: ${{ github.workspace }}/.block29/fetch/BLOCK27_API_ASSISTS_REPORT.json
+      BLOCK29_ACTIVE_SEASON_START: '2026'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+      - name: Build backend
+        working-directory: backend
+        run: npm run build
+      - name: Start temporary PostgreSQL
+        run: |
+          set -euo pipefail
+          docker run -d --name rango90-block29-postgres -e POSTGRES_DB=rango90_qa_block29 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55454:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block29-postgres pg_isready -U rango90 -d rango90_qa_block29 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block29-postgres pg_isready -U rango90 -d rango90_qa_block29
+      - name: Apply migrations
+        working-directory: backend
+        run: npm run migrate
+      - name: Restore previous valid candidate when available
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$BLOCK29_OUTPUT_ROOT/previous"
+          previous_run="$(gh run list --workflow block29-champions-assists-weekly.yml --branch master --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+          if [ -n "$previous_run" ]; then
+            previous_artifact="$(gh run view "$previous_run" --json artifacts --jq '.artifacts[] | select(.name | startswith("block29-champions-assists-weekly-")) | .name' | head -n 1)"
+            if [ -n "$previous_artifact" ]; then
+              gh run download "$previous_run" -n "$previous_artifact" -D "$BLOCK29_OUTPUT_ROOT/previous"
+            fi
+          fi
+      - name: Query active season API-Football events
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK27_RUN: '1'
+          BLOCK26_OUTPUT_ROOT: ${{ github.workspace }}/.block29/fetch
+        run: |
+          mkdir -p "$BLOCK26_OUTPUT_ROOT"
+          npm run block27:fetch
+      - name: Load active candidate into lab
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK29_RUN: '1'
+          BLOCK26_ACTIVE_FACTS_FILE: ${{ github.workspace }}/.block29/fetch/BLOCK27_API_ASSISTS_FACTS.json
+          BLOCK29_API_REPORT_FILE: ${{ github.workspace }}/.block29/fetch/BLOCK27_API_ASSISTS_REPORT.json
+          BLOCK29_SEED_FACTS_FILE: ${{ github.workspace }}/.block29/previous/BLOCK29_FACTS_AFTER.json
+          BLOCK29_PREVIOUS_SNAPSHOT_FILE: ${{ github.workspace }}/.block29/previous/BLOCK29_ACTIVE_SNAPSHOT_CANDIDATE.json
+          BLOCK29_PREVIOUS_REPORT_FILE: ${{ github.workspace }}/.block29/previous/BLOCK29_REPORT.json
+        run: npm run block27:load
+      - name: Repeat active load for idempotency
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK29_RUN: '1'
+          BLOCK26_ACTIVE_FACTS_FILE: ${{ github.workspace }}/.block29/fetch/BLOCK27_API_ASSISTS_FACTS.json
+          BLOCK29_API_REPORT_FILE: ${{ github.workspace }}/.block29/fetch/BLOCK27_API_ASSISTS_REPORT.json
+          BLOCK29_SEED_FACTS_FILE: ${{ github.workspace }}/.block29/previous/BLOCK29_FACTS_AFTER.json
+          BLOCK29_PREVIOUS_SNAPSHOT_FILE: ${{ github.workspace }}/.block29/previous/BLOCK29_ACTIVE_SNAPSHOT_CANDIDATE.json
+          BLOCK29_PREVIOUS_REPORT_FILE: ${{ github.workspace }}/.block29/previous/BLOCK29_REPORT.json
+        run: npm run block27:load
+      - name: Prepare isolated integration database
+        if: always()
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55454/rango90_qa_block29_runtime
+        run: |
+          docker exec rango90-block29-postgres createdb -U rango90 rango90_qa_block29_runtime 2>/dev/null || true
+          npm run migrate
+      - name: Run backend tests and endpoint guards
+        if: always()
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55454/rango90_qa_block29_runtime
+        run: |
+          npm test
+          npm run test:champions-assists
+          npm run test:block26:integration
+      - name: Run active endpoint smoke test against loaded candidate
+        if: always()
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55454/rango90_qa_block29
+        run: npx tsx src/tests/block29-champions-assists-active.integration.test.ts
+      - name: Run frontend checks
+        if: always()
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run verify:i18n
+          npm run build
+          git diff --check
+      - name: Assert no secrets, raw payloads or official publication
+        if: always()
+        run: |
+          set -euo pipefail
+          if rg -n 'API_FOOTBALL_KEY|x-apisports-key|Authorization:|Bearer |"response"\s*:' "$BLOCK29_OUTPUT_ROOT" 2>/dev/null; then exit 1; fi
+          if rg -n '"published"\s*:\s*true|"officialModeOpened"\s*:\s*true|"officialSnapshotCreated"\s*:\s*true' "$BLOCK29_OUTPUT_ROOT" 2>/dev/null; then exit 1; fi
+      - name: Cleanup isolated PostgreSQL
+        if: always()
+        run: docker rm -f rango90-block29-postgres >/dev/null 2>&1 || true
+      - name: Upload redacted Block 29 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block29-champions-assists-weekly-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            ${{ github.workspace }}/.block29/BLOCK29_REPORT.json
+            ${{ github.workspace }}/.block29/BLOCK29_REPORT.md
+            ${{ github.workspace }}/.block29/BLOCK29_ACTIVE_SNAPSHOT_CANDIDATE.json
+            ${{ github.workspace }}/.block29/BLOCK29_ACTIVE_CHANGES.json
+            ${{ github.workspace }}/.block29/BLOCK29_ROLLBACK.json
+            ${{ github.workspace }}/.block29/BLOCK29_FACTS_AFTER.json
+            ${{ github.workspace }}/.block29/BLOCK29_COVERAGE_MATRIX.json
+            ${{ github.workspace }}/.block29/fetch/BLOCK27_API_ASSISTS_REPORT.json
+      - name: Remove temporary artifacts
+        if: always()
+        run: rm -rf "$BLOCK29_OUTPUT_ROOT"

@@ -1025,10 +1025,11 @@ return <section className="result-view" aria-labelledby="result-title"><div clas
     const categories = rankingCategories.length > 0 ? rankingCategories : fallbackCategories;
     const isChampionsRanking = selectedRankingCategory === "uefa-champions-league-goals" || selectedRankingCategory === "uefa-champions-league-assists";
     const isWorldCupRanking = selectedRankingCategory === "world-cup-goals";
+    const isChampionsAssistsRanking = selectedRankingCategory === "uefa-champions-league-assists";
     const isScopedRanking = isChampionsRanking || isWorldCupRanking;
     const scopeSelector = locale === "es" ? "Alcance del ranking" : "Ranking scope";
-    const activeSeasonLabel = locale === "es" ? "Temporada activa + histórico" : "Active season + history";
-    const historicalBaseLabel = locale === "es" ? "Histórico completo" : "Complete history";
+    const activeSeasonLabel = isChampionsAssistsRanking ? (locale === "es" ? "Champions — temporada activa" : "Champions — active season") : (locale === "es" ? "Temporada activa + histórico" : "Active season + history");
+    const historicalBaseLabel = isChampionsAssistsRanking ? (locale === "es" ? "Champions — histórico no disponible" : "Champions — historical unavailable") : (locale === "es" ? "Histórico completo" : "Complete history");
     const factsLabel = locale === "es" ? "Hechos utilizados" : "Facts used";
     const sourcesLabel = locale === "es" ? "Fuentes" : "Sources";
     const updatedLabel = locale === "es" ? "Actualizado" : "Updated";

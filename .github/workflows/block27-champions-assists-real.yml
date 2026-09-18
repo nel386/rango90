@@ -38,7 +38,9 @@ jobs:
           node-version: 24
           cache: npm
       - name: Install dependencies
-        run: npm --prefix backend ci
+        run: |
+          npm ci
+          npm --prefix backend ci
       - name: Typecheck and build backend
         working-directory: backend
         run: npm run build
@@ -68,10 +70,17 @@ jobs:
       - name: Run isolated endpoint and official guard tests
         if: always()
         working-directory: backend
-        run: npm run test:block26:integration
+        env:
+          DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55452/rango90_qa_block27_runtime
+        run: |
+          npm run test:champions-assists
+          npm run test:block26:integration
       - name: Run frontend build and repository checks
         if: always()
         run: |
+          npm run lint
+          npm run typecheck
+          npm run verify:i18n
           npm run build
           git diff --check
       - name: Assert no secret or raw API payload escaped

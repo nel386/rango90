@@ -1,0 +1,85 @@
+name: BLOQUE 22 · candidatos manuales de imágenes en lab
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch_file:
+        description: 'CSV editable dentro del repositorio'
+        required: false
+        default: 'backend/audits/block22/BLOCK22_IMAGE_REVIEW_TEMPLATE.csv'
+
+permissions:
+  contents: read
+
+jobs:
+  image-candidates-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      DATABASE_URL: postgresql://not-used:not-used@127.0.0.1:59999/rango90_runtime_only
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55447/rango90_qa_block22
+      BLOCK20_OUTPUT_ROOT: ${{ github.workspace }}/.block20-output
+      BLOCK20_INPUT_ROOT: ${{ github.workspace }}/.block20-output
+      BLOCK22_IMAGE_BATCH_FILE: ${{ github.workspace }}/${{ inputs.batch_file }}
+      BLOCK22_IMAGE_BATCH_REPORT: ${{ github.workspace }}/BLOCK22_IMAGE_BATCH_REPORT.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+      - name: Validate template contract
+        working-directory: backend
+        run: npx tsx src/tests/block22-image-candidates.test.ts
+      - name: Start temporary PostgreSQL
+        run: |
+          docker run -d --name rango90-block22-postgres -e POSTGRES_DB=rango90_qa_block22 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55447:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block22-postgres pg_isready -U rango90 -d rango90_qa_block22 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block22-postgres pg_isready -U rango90 -d rango90_qa_block22
+      - name: Apply isolated migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+        run: npm run migrate
+      - name: Build isolated World Cup identities for candidate matching
+        working-directory: backend
+        run: |
+          npx tsx src/tools/block20-rebuild-world-cup.ts
+          DATABASE_URL="${{ env.RANGO90_ISOLATED_DATABASE_URL }}" npx tsx src/tools/block20-load-lab-candidate.ts
+      - name: Validate and stage manual links as pending candidates
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+          BLOCK22_BATCH_ID: block22-${{ github.run_id }}
+        run: npx tsx src/tools/block22-stage-image-batch.ts | tee "$GITHUB_WORKSPACE/BLOCK22_STAGE_OUTPUT.json"
+      - name: Verify no download, approval, ranking or rights mutation
+        run: |
+          ! grep -REn 'downloaded[^\n]*true|imagesDownloaded[^\n]*true|approvals[^\n]*[1-9]|rightsChanged[^\n]*true|snapshotChanged[^\n]*true|published[^\n]*true' BLOCK22_IMAGE_BATCH_REPORT.json BLOCK22_STAGE_OUTPUT.json
+      - name: Upload candidate review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block22-image-candidates-lab-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ${{ github.workspace }}/backend/audits/block22/BLOCK22_IMAGE_REVIEW_TEMPLATE.csv
+            ${{ github.workspace }}/backend/audits/block22/BLOCK22_IMAGE_REVIEW_TEMPLATE_SCHEMA.md
+            ${{ github.workspace }}/BLOCK22_IMAGE_BATCH_REPORT.json
+            ${{ github.workspace }}/BLOCK22_STAGE_OUTPUT.json
+      - name: Cleanup PostgreSQL and temporary facts
+        if: always()
+        run: |
+          docker rm -f rango90-block22-postgres >/dev/null 2>&1 || true
+          rm -rf "$GITHUB_WORKSPACE/.block20-output"

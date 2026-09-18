@@ -433,7 +433,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
   useEffect(() => {
     if (view !== "category-ranking" || !selectedRankingCategory) return;
     let active = true;
-    gameRepository.getCategoryRanking(selectedRankingCategory, selectedRankingCategory === "uefa-champions-league-goals" || selectedRankingCategory === "uefa-champions-league-assists" || selectedRankingCategory === "world-cup-goals" ? selectedRankingDataset : undefined)
+    gameRepository.getCategoryRanking(selectedRankingCategory, selectedRankingCategory === "uefa-champions-league-goals" || selectedRankingCategory === "uefa-champions-league-assists" || selectedRankingCategory === "world-cup-goals" || selectedRankingCategory === "club-career-yellow-cards" || selectedRankingCategory === "club-career-red-cards" ? selectedRankingDataset : undefined)
       .then((ranking) => {
         if (!active) return;
         setCategoryRanking(ranking);
@@ -1025,11 +1025,12 @@ return <section className="result-view" aria-labelledby="result-title"><div clas
     const categories = rankingCategories.length > 0 ? rankingCategories : fallbackCategories;
     const isChampionsRanking = selectedRankingCategory === "uefa-champions-league-goals" || selectedRankingCategory === "uefa-champions-league-assists";
     const isWorldCupRanking = selectedRankingCategory === "world-cup-goals";
+    const isClubCardsRanking = selectedRankingCategory === "club-career-yellow-cards" || selectedRankingCategory === "club-career-red-cards";
     const isChampionsAssistsRanking = selectedRankingCategory === "uefa-champions-league-assists";
-    const isScopedRanking = isChampionsRanking || isWorldCupRanking;
+    const isScopedRanking = isChampionsRanking || isWorldCupRanking || isClubCardsRanking;
     const scopeSelector = locale === "es" ? "Alcance del ranking" : "Ranking scope";
-    const activeSeasonLabel = isChampionsAssistsRanking ? (locale === "es" ? "Champions — temporada activa" : "Champions — active season") : (locale === "es" ? "Temporada activa + histórico" : "Active season + history");
-    const historicalBaseLabel = isChampionsAssistsRanking ? (locale === "es" ? "Champions — histórico no disponible" : "Champions — historical unavailable") : (locale === "es" ? "Histórico completo" : "Complete history");
+    const activeSeasonLabel = isClubCardsRanking ? (locale === "es" ? "Clubes — temporada activa" : "Clubs — active season") : isChampionsAssistsRanking ? (locale === "es" ? "Champions — temporada activa" : "Champions — active season") : (locale === "es" ? "Temporada activa + histórico" : "Active season + history");
+    const historicalBaseLabel = isClubCardsRanking ? (locale === "es" ? "Clubes — histórico no disponible" : "Clubs — historical unavailable") : isChampionsAssistsRanking ? (locale === "es" ? "Champions — histórico no disponible" : "Champions — historical unavailable") : (locale === "es" ? "Histórico completo" : "Complete history");
     const factsLabel = locale === "es" ? "Hechos utilizados" : "Facts used";
     const sourcesLabel = locale === "es" ? "Fuentes" : "Sources";
     const updatedLabel = locale === "es" ? "Actualizado" : "Updated";

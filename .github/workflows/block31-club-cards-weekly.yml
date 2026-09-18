@@ -1,0 +1,183 @@
+name: BLOQUE 31 · tarjetas globales en clubes
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 11 * * 1'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: block31-club-cards-weekly
+  cancel-in-progress: true
+
+jobs:
+  club-cards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55458/rango90_qa_block31
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55458/rango90_qa_block31
+      BLOCK31_RUNTIME_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55458/rango90_qa_block31_runtime
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      BLOCK31_ACTIVE_SEASON_START: '2026'
+      BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block31
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+      - name: Build backend
+        working-directory: backend
+        run: npm run build
+      - name: Start temporary PostgreSQL
+        run: |
+          set -euo pipefail
+          docker run -d --name rango90-block31-postgres -e POSTGRES_DB=rango90_qa_block31 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55458:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block31-postgres pg_isready -U rango90 -d rango90_qa_block31 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block31-postgres pg_isready -U rango90 -d rango90_qa_block31
+          sleep 2
+      - name: Apply migrations
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 5); do
+            if npm run migrate; then exit 0; fi
+            sleep 3
+          done
+          exit 1
+      - name: Prepare separate runtime test database
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.BLOCK31_RUNTIME_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          docker exec rango90-block31-postgres createdb -U rango90 rango90_qa_block31_runtime 2>/dev/null || true
+          for attempt in $(seq 1 5); do
+            if npm run migrate; then exit 0; fi
+            sleep 3
+          done
+          exit 1
+      - name: Restore previous candidate when available
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$BLOCK31_OUTPUT_ROOT/previous"
+          previous_run="$(gh run list --workflow block31-club-cards-weekly.yml --branch master --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+          if [ -n "$previous_run" ]; then
+            previous_artifact="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${previous_run}/artifacts" --paginate --jq '.artifacts[] | select(.name | startswith("block31-club-cards-")) | .name' | head -n 1)"
+            if [ -n "$previous_artifact" ]; then gh run download "$previous_run" -n "$previous_artifact" -D "$BLOCK31_OUTPUT_ROOT/previous"; fi
+          fi
+          if [ -f "$BLOCK31_OUTPUT_ROOT/previous/BLOCK31_YELLOW_SNAPSHOT_CANDIDATE.json" ]; then
+            jq -n --slurpfile yellow "$BLOCK31_OUTPUT_ROOT/previous/BLOCK31_YELLOW_SNAPSHOT_CANDIDATE.json" --slurpfile red "$BLOCK31_OUTPUT_ROOT/previous/BLOCK31_RED_SNAPSHOT_CANDIDATE.json" '{yellow: $yellow[0], red: $red[0]}' > "$BLOCK31_OUTPUT_ROOT/previous/BLOCK31_PREVIOUS_SNAPSHOTS.json"
+          else
+            jq -n '{yellow: {}, red: {}}' > "$BLOCK31_OUTPUT_ROOT/previous/BLOCK31_PREVIOUS_SNAPSHOTS.json"
+          fi
+      - name: Measure API-Football card coverage first
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK31_PLAN_ONLY: '1'
+          BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block31/plan
+        run: npx tsx src/tools/block31-api-football-club-cards.ts
+      - name: Load active card facts
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block31/fetch
+          BLOCK31_COVERAGE_PLAN_FILE: ${{ github.workspace }}/.block31/plan/BLOCK31_COVERAGE_PLAN.json
+        run: npx tsx src/tools/block31-api-football-club-cards.ts
+      - name: Build yellow and red candidates in isolated PostgreSQL
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block31
+          BLOCK31_FACTS_FILE: ${{ github.workspace }}/.block31/fetch/BLOCK31_FACTS.json
+          BLOCK31_API_REPORT_FILE: ${{ github.workspace }}/.block31/fetch/BLOCK31_REPORT.json
+          BLOCK31_SEED_FACTS_FILE: ${{ github.workspace }}/.block31/previous/BLOCK31_FACTS_AFTER.json
+          BLOCK31_PREVIOUS_SNAPSHOT_FILE: ${{ github.workspace }}/.block31/previous/BLOCK31_PREVIOUS_SNAPSHOTS.json
+          BLOCK31_PREVIOUS_REPORT_FILE: ${{ github.workspace }}/.block31/previous/BLOCK31_REPORT.json
+        run: npx tsx src/tools/block31-club-cards.ts
+      - name: Repeat card load for idempotency
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block31
+          BLOCK31_FACTS_FILE: ${{ github.workspace }}/.block31/fetch/BLOCK31_FACTS.json
+          BLOCK31_API_REPORT_FILE: ${{ github.workspace }}/.block31/fetch/BLOCK31_REPORT.json
+          BLOCK31_SEED_FACTS_FILE: ${{ github.workspace }}/.block31/previous/BLOCK31_FACTS_AFTER.json
+          BLOCK31_PREVIOUS_SNAPSHOT_FILE: ${{ github.workspace }}/.block31/previous/BLOCK31_PREVIOUS_SNAPSHOTS.json
+          BLOCK31_PREVIOUS_REPORT_FILE: ${{ github.workspace }}/.block31/previous/BLOCK31_REPORT.json
+        run: npx tsx src/tools/block31-club-cards.ts
+      - name: Run engine and backend tests
+        if: always()
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: ${{ env.BLOCK31_RUNTIME_DATABASE_URL }}
+        run: |
+          npm test
+          npx tsx src/tests/club-cards-ranking-engine.test.ts
+      - name: Run endpoint guards against loaded candidates
+        if: always()
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55458/rango90_qa_block31
+        run: npx tsx src/tests/block31-club-cards-active.integration.test.ts
+      - name: Run frontend checks
+        if: always()
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run verify:i18n
+          npm run build
+          git diff --check
+      - name: Assert no secrets, raw payloads or official publication
+        if: always()
+        run: |
+          set -euo pipefail
+          if rg -n 'API_FOOTBALL_KEY|x-apisports-key|Authorization:|Bearer |"response"\s*:' "$BLOCK31_OUTPUT_ROOT" 2>/dev/null; then exit 1; fi
+          if rg -n '"published"\s*:\s*true|"officialSnapshotCreated"\s*:\s*true' "$BLOCK31_OUTPUT_ROOT" 2>/dev/null; then exit 1; fi
+      - name: Cleanup isolated PostgreSQL
+        if: always()
+        run: docker rm -f rango90-block31-postgres >/dev/null 2>&1 || true
+      - name: Upload redacted Block 31 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block31-club-cards-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            ${{ github.workspace }}/.block31/BLOCK31_REPORT.json
+            ${{ github.workspace }}/.block31/BLOCK31_REPORT.md
+            ${{ github.workspace }}/.block31/BLOCK31_FACTS_AFTER.json
+            ${{ github.workspace }}/.block31/BLOCK31_COVERAGE_MATRIX.json
+            ${{ github.workspace }}/.block31/BLOCK31_YELLOW_SNAPSHOT_CANDIDATE.json
+            ${{ github.workspace }}/.block31/BLOCK31_RED_SNAPSHOT_CANDIDATE.json
+            ${{ github.workspace }}/.block31/BLOCK31_YELLOW_CHANGES.json
+            ${{ github.workspace }}/.block31/BLOCK31_RED_CHANGES.json
+            ${{ github.workspace }}/.block31/BLOCK31_YELLOW_ROLLBACK.json
+            ${{ github.workspace }}/.block31/BLOCK31_RED_ROLLBACK.json
+            ${{ github.workspace }}/.block31/plan/BLOCK31_COVERAGE_PLAN.json
+            ${{ github.workspace }}/.block31/plan/BLOCK31_REPORT.json
+            ${{ github.workspace }}/.block31/fetch/BLOCK31_REPORT.json
+      - name: Remove temporary artifacts
+        if: always()
+        run: rm -rf "$BLOCK31_OUTPUT_ROOT"

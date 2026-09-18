@@ -51,15 +51,28 @@ jobs:
             sleep 1
           done
           docker exec rango90-block30-postgres pg_isready -U rango90 -d rango90_qa_block30
+          sleep 2
       - name: Apply migrations
-        working-directory: backend
-        run: npm run migrate
-      - name: Prepare separate runtime test database
         working-directory: backend
         run: |
           set -euo pipefail
-          PGPASSWORD='rango90-qa' createdb -h 127.0.0.1 -p 55455 -U rango90 rango90_qa_block30_runtime
-          DATABASE_URL="$BLOCK30_RUNTIME_DATABASE_URL" npm run migrate
+          for attempt in $(seq 1 5); do
+            if npm run migrate; then exit 0; fi
+            sleep 3
+          done
+          exit 1
+      - name: Prepare separate runtime test database
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.BLOCK30_RUNTIME_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          docker exec rango90-block30-postgres createdb -U rango90 rango90_qa_block30_runtime 2>/dev/null || true
+          for attempt in $(seq 1 5); do
+            if npm run migrate; then exit 0; fi
+            sleep 3
+          done
+          exit 1
       - name: Restore previous valid candidate when available
         if: always()
         env:
@@ -112,7 +125,6 @@ jobs:
         if: always()
         working-directory: backend
         env:
-          DATABASE_URL: ${{ env.BLOCK30_RUNTIME_DATABASE_URL }}
           RANGO90_ISOLATED_DATABASE_URL: ${{ env.BLOCK30_RUNTIME_DATABASE_URL }}
         run: |
           npm test

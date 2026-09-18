@@ -67,11 +67,19 @@ jobs:
         if: always()
         working-directory: backend
         run: npm run block27:load
-      - name: Run isolated endpoint and official guard tests
+      - name: Prepare isolated integration database
         if: always()
         working-directory: backend
         env:
           DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55452/rango90_qa_block27_runtime
+        run: |
+          docker exec rango90-block27-postgres createdb -U rango90 rango90_qa_block27_runtime 2>/dev/null || true
+          npm run migrate
+      - name: Run isolated endpoint and official guard tests
+        if: always()
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55452/rango90_qa_block27_runtime
         run: |
           npm run test:champions-assists
           npm run test:block26:integration

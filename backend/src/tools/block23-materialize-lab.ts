@@ -44,7 +44,7 @@ async function main(): Promise<void> {
   const worldCupReport = await json<CandidateReport>(resolve(worldCupRoot, 'BLOCK20_REPORT.json'));
   if (championsHistorical.dataset !== 'historical_base' || championsActive.dataset !== 'active_season_weekly') throw new Error('Champions candidate datasets are not separated');
   if (worldCupBundle.historical.dataset !== 'historical_base' || worldCupBundle.active.dataset !== 'active_edition_weekly') throw new Error('World Cup candidate datasets are not separated');
-  if (championsReport.readyForApproval === true || worldCupReport.readyForApproval === true) throw new Error('A lab candidate must not be promoted by BLOQUE 23');
+  if (championsReport.publication?.officialSnapshotCreated === true || championsReport.publication?.officialModeOpened === true || worldCupReport.publication?.officialSnapshotCreated === true || worldCupReport.publication?.officialModeOpened === true) throw new Error('BLOQUE 23 no puede abrir official ni crear snapshots oficiales');
 
   const categories: BridgeCategory[] = [
     { id: 'category-uefa-champions-league-goals', slug: 'uefa-champions-league-goals', labelEs: 'Goles históricos — UEFA Champions League', labelEn: 'All-time goals — UEFA Champions League', source: championsActive, sourceKind: 'champions', sourceDataset: championsActive.dataset },

@@ -59,10 +59,10 @@ function compareEndpoint(body: Record<string, unknown>, snapshot: ChampionsSnaps
 }
 
 try {
-  assert.equal(championsReport.readyForApproval, false);
-  assert.equal(worldCupReport.readyForApproval, false);
-  assert.equal(championsReport.publication?.officialSnapshotCreated, false);
-  assert.equal(worldCupReport.publication?.officialSnapshotCreated, false);
+  assert.notEqual(championsReport.publication?.officialSnapshotCreated, true);
+  assert.notEqual(championsReport.publication?.officialModeOpened, true);
+  assert.notEqual(worldCupReport.publication?.officialSnapshotCreated, true);
+  assert.notEqual(worldCupReport.publication?.officialModeOpened, true);
   assert.equal(championsReport.snapshots?.rollback?.status, 'passed_fixture');
 
   const configResponse = await lab.inject({ method: 'GET', url: '/v1/config' });

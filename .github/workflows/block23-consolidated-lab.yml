@@ -118,11 +118,17 @@ jobs:
 
       - name: Materialize only the ephemeral lab bridge and testOnly challenge
         working-directory: backend
-        run: npx tsx src/tools/block23-materialize-lab.ts | tee "$GITHUB_WORKSPACE/BLOCK23_MATERIALIZATION.json"
+        run: |
+          set -o pipefail
+          npx tsx src/tools/block23-materialize-lab.ts | tee "$GITHUB_WORKSPACE/BLOCK23_MATERIALIZATION.json"
 
       - name: Compare endpoints, frontend contract, challenge and official guard
         working-directory: backend
-        run: npx tsx src/tests/block23-consolidated-lab.integration.test.ts | tee "$GITHUB_WORKSPACE/BLOCK23_REPORT.json"
+        env:
+          DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55447/rango90_qa_block23_runtime
+        run: |
+          set -o pipefail
+          npx tsx src/tests/block23-consolidated-lab.integration.test.ts | tee "$GITHUB_WORKSPACE/BLOCK23_REPORT.json"
 
       - name: Assert artifacts are redacted and publication stayed closed
         run: |

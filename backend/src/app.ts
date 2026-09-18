@@ -15,6 +15,7 @@ import { SlidingWindowRateLimiter, rateLimitPolicy } from './rateLimit.js';
 const CHAMPIONS_CATEGORY_SLUG = 'uefa-champions-league-goals';
 const CHAMPIONS_ASSISTS_CATEGORY_SLUG = 'uefa-champions-league-assists';
 const WORLD_CUP_CATEGORY_SLUG = 'world-cup-goals';
+const CLUB_CAREER_GOALS_CATEGORY_SLUG = 'club-career-goals';
 type ChampionsLabDataset = 'historical_base' | 'active_season_weekly';
 type WorldCupLabDataset = 'historical_base' | 'active_edition_weekly';
 
@@ -261,6 +262,60 @@ async function getLabWorldCupRanking(appDb: ContractDatabase, dataset: WorldCupL
   };
 }
 
+async function getLabClubCareerGoalsRanking(appDb: ContractDatabase, limit: number, runtimeMode: RuntimeMode, season?: number, competition?: string) {
+  const snapshotResult = await appDb.query<{
+    id: string; category_slug: string; dataset: string; season_start: number; season_end: number; status: string; competition_filter: string | null;
+    scope_version: string; content_sha256: string; generated_at: string; coverage_complete: boolean; metadata: Record<string, unknown>;
+  }>(
+    `SELECT rs.*
+       FROM club_goal_ranking_snapshots rs
+      WHERE rs.category_slug = $1
+        AND rs.dataset = 'active_weekly'
+        AND rs.status IN ('lab_provisional', 'draft')
+        AND ($2::int IS NULL OR rs.season_start = $2)
+        AND ($3::text IS NULL OR rs.competition_filter = $3)
+      ORDER BY rs.generated_at DESC
+      LIMIT 1`,
+    [CLUB_CAREER_GOALS_CATEGORY_SLUG, season ?? null, competition ?? null]
+  );
+  const snapshot = snapshotResult.rows[0];
+  if (!snapshot) return null;
+  const entries = await appDb.query(
+    `SELECT re.canonical_player_id AS entity_id, e.canonical_name, e.short_name, e.entity_type,
+            re.raw_value, re.rank, re.tie_group,
+            (e.catalog_status = 'active' AND COALESCE(egp.playable_default, FALSE)) AS playable,
+            COALESCE((SELECT jsonb_agg(jsonb_build_object(
+              'sourceKey', f.source_key, 'sourceCaptureId', f.source_capture_id, 'sourceRecordId', f.source_record_id,
+              'sourceType', f.source_type, 'verificationStatus', f.verification_status,
+              'sourceUrl', f.evidence->>'sourceUrl', 'locator', f.evidence->>'locator', 'contentSha256', f.evidence->>'contentSha256'
+            ) ORDER BY f.source_key, f.source_capture_id, f.source_record_id)
+              FROM club_goal_facts f WHERE f.id = ANY(re.fact_ids)), '[]'::jsonb) AS sources
+       FROM club_goal_ranking_entries re
+       JOIN entities e ON e.id = re.canonical_player_id
+       LEFT JOIN entity_game_profiles egp ON egp.entity_id = e.id
+      WHERE re.snapshot_id = $1 AND re.rank <= $2
+      ORDER BY re.rank, e.canonical_name`,
+    [snapshot.id, limit]
+  );
+  const metadata = snapshot.metadata ?? {};
+  return {
+    category: snapshot.category_slug,
+    categoryLabelEs: 'Goles globales en clubes — alcance observado',
+    categoryLabelEn: 'Global club goals — observed scope',
+    rankingScope: 'active_season_weekly', snapshotId: snapshot.id, mode: runtimeMode, status: 'provisional', dataset: 'active_weekly',
+    scope: 'active', season: snapshot.season_start, competition: snapshot.competition_filter,
+    scopeLabelEs: 'Ranking provisional del alcance observado de competiciones de clubes. No representa todos los goles de carrera mundial.',
+    scopeLabelEn: 'Provisional ranking for the observed club-competition scope. It does not represent all career goals worldwide.',
+    coverageComplete: snapshot.coverage_complete, coverageEstimated: typeof metadata.coverageEstimated === 'number' ? metadata.coverageEstimated : null,
+    provisionalWarningEs: 'Cobertura limitada a las competiciones y temporadas indicadas; el histórico global de carrera no está disponible.',
+    provisionalWarningEn: 'Coverage is limited to the listed competitions and seasons; the global career history is not available.',
+    source: 'api-football', degraded: metadata.degraded === true, updateDate: metadata.updatedAt ?? snapshot.generated_at,
+    factCount: Number(metadata.factCount ?? 0), sourceCount: Number(metadata.sourceCount ?? 0), dataVersion: snapshot.scope_version,
+    contentSha256: snapshot.content_sha256, generatedAt: snapshot.generated_at,
+    entries: entries.rows.map((row) => ({ ...row, score_value: Math.min(Number(row.rank), 100), image_url: null, image_status: 'unavailable', review_status: 'missing', rights_status: 'missing', is_publishable: false, image_source_url: null, image_license_name: null, sources: row.sources ?? [] }))
+  };
+}
+
 export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Date; runtimeMode?: RuntimeMode } = {}) {
   const app = Fastify({ logger: true, trustProxy: config.trustProxy });
   const appDb = options.gameDb ?? pool;
@@ -359,6 +414,7 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
           LIMIT 1
        ) latest ON TRUE
        WHERE (c.status = 'published' OR ($1::text = 'lab' AND c.status = 'draft'))
+         AND c.slug <> $4
          AND NOT ($1::text = 'lab' AND c.slug = $2 AND EXISTS (
            SELECT 1 FROM champions_ranking_snapshots lab_champions
             WHERE lab_champions.category_slug = $2
@@ -372,7 +428,7 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
               AND lab_world_cup.coverage_complete = TRUE
          ))
          ORDER BY c.slug`,
-      [runtimeMode, CHAMPIONS_CATEGORY_SLUG, WORLD_CUP_CATEGORY_SLUG]
+      [runtimeMode, CHAMPIONS_CATEGORY_SLUG, WORLD_CUP_CATEGORY_SLUG, CLUB_CAREER_GOALS_CATEGORY_SLUG]
     );
     const categories = result.rows.map((row) => ({ ...row, availability: row.snapshot_status === 'draft' ? 'provisional' : 'official' }));
     if (runtimeMode === 'lab') {
@@ -419,13 +475,26 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
           ORDER BY generated_at DESC LIMIT 1`, [WORLD_CUP_CATEGORY_SLUG]
       );
       if (worldCupCandidate.rows[0]) categories.push({ ...worldCupCandidate.rows[0], availability: 'provisional' });
+      const clubGoalsCandidate = await appDb.query(
+        `SELECT id, category_slug AS slug, 'Goles globales en clubes — alcance observado' AS label_es,
+                'Global club goals — observed scope' AS label_en, 'player' AS entity_type, 'goals' AS metric_key,
+                'club_career_global' AS scope_kind, '{}'::jsonb AS scope, 'desc' AS ranking_direction,
+                'competition' AS tie_policy, 100 AS score_cap, 1 AS definition_version,
+                'Hechos estadísticos de competiciones de clubes observadas; selecciones, amistosos y juveniles excluidos.' AS definition_md,
+                'draft' AS status, 'lab_provisional' AS snapshot_status, id AS snapshot_id
+           FROM club_goal_ranking_snapshots
+          WHERE category_slug = $1 AND dataset = 'active_weekly'
+            AND status IN ('lab_provisional', 'draft')
+          ORDER BY generated_at DESC LIMIT 1`, [CLUB_CAREER_GOALS_CATEGORY_SLUG]
+      );
+      if (clubGoalsCandidate.rows[0]) categories.push({ ...clubGoalsCandidate.rows[0], availability: 'provisional' });
     }
     return { categories };
   });
 
   app.get('/v1/rankings/:categorySlug', async (request, reply) => {
     const params = z.object({ categorySlug: z.string().min(1) }).parse(request.params);
-    const query = z.object({ limit: z.coerce.number().int().min(1).max(200).default(200), dataset: z.enum(['historical_base', 'active_season_weekly', 'active_edition_weekly']).optional(), scope: z.enum(['active_season', 'historical']).optional(), season: z.coerce.number().int().min(1955).max(2100).optional() }).parse(request.query);
+    const query = z.object({ limit: z.coerce.number().int().min(1).max(200).default(200), dataset: z.enum(['historical_base', 'active_season_weekly', 'active_edition_weekly']).optional(), scope: z.enum(['active', 'active_season', 'historical']).optional(), season: z.coerce.number().int().min(1800).max(2100).optional(), competition: z.string().min(1).optional() }).parse(request.query);
     if (runtimeMode === 'lab' && params.categorySlug === CHAMPIONS_CATEGORY_SLUG) {
       const candidate = await getLabChampionsRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_season_weekly'), query.limit, runtimeMode);
       if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
@@ -441,6 +510,13 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
     if (runtimeMode === 'lab' && params.categorySlug === WORLD_CUP_CATEGORY_SLUG) {
       const candidate = await getLabWorldCupRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_edition_weekly'), query.limit, runtimeMode);
       if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
+      return candidate;
+    }
+    if (params.categorySlug === CLUB_CAREER_GOALS_CATEGORY_SLUG) {
+      if (query.scope === 'historical' || query.dataset === 'historical_base') return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, scope: 'historical', reason: 'historical_candidate_not_sufficient', message: 'El histórico global de goles de clubes no tiene cobertura suficiente.' });
+      if (runtimeMode === 'official') return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_published_snapshot' });
+      const candidate = await getLabClubCareerGoalsRanking(appDb, query.limit, runtimeMode, query.season, query.competition);
+      if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, scope: 'active', season: query.season ?? null, reason: 'no_available_snapshot' });
       return candidate;
     }
     if (runtimeMode === 'official' && params.categorySlug === CHAMPIONS_ASSISTS_CATEGORY_SLUG) {

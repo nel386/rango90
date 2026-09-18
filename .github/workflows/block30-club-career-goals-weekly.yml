@@ -1,0 +1,153 @@
+name: BLOQUE 30 · goles globales en clubes
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 10 * * 1'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: block30-club-career-goals-weekly
+  cancel-in-progress: true
+
+jobs:
+  club-career-goals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55455/rango90_qa_block30
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55455/rango90_qa_block30
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      BLOCK30_ACTIVE_SEASON_START: '2026'
+      BLOCK30_OUTPUT_ROOT: ${{ github.workspace }}/.block30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+      - name: Build backend
+        working-directory: backend
+        run: npm run build
+      - name: Start temporary PostgreSQL
+        run: |
+          set -euo pipefail
+          docker run -d --name rango90-block30-postgres -e POSTGRES_DB=rango90_qa_block30 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55455:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block30-postgres pg_isready -U rango90 -d rango90_qa_block30 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block30-postgres pg_isready -U rango90 -d rango90_qa_block30
+      - name: Apply migrations
+        working-directory: backend
+        run: npm run migrate
+      - name: Restore previous valid candidate when available
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$BLOCK30_OUTPUT_ROOT/previous"
+          previous_run="$(gh run list --workflow block30-club-career-goals-weekly.yml --branch master --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+          if [ -n "$previous_run" ]; then
+            previous_artifact="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${previous_run}/artifacts" --paginate --jq '.artifacts[] | select(.name | startswith("block30-club-career-goals-")) | .name' | head -n 1)"
+            if [ -n "$previous_artifact" ]; then gh run download "$previous_run" -n "$previous_artifact" -D "$BLOCK30_OUTPUT_ROOT/previous"; fi
+          fi
+      - name: Measure API-Football club coverage first
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK30_PLAN_ONLY: '1'
+          BLOCK30_OUTPUT_ROOT: ${{ github.workspace }}/.block30/plan
+        run: npx tsx src/tools/block30-api-football-club-goals.ts
+      - name: Load active club-goal facts
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK30_OUTPUT_ROOT: ${{ github.workspace }}/.block30/fetch
+          BLOCK30_COVERAGE_PLAN_FILE: ${{ github.workspace }}/.block30/plan/BLOCK30_COVERAGE_PLAN.json
+        run: npx tsx src/tools/block30-api-football-club-goals.ts
+      - name: Build active candidate in isolated PostgreSQL
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK30_OUTPUT_ROOT: ${{ github.workspace }}/.block30
+          BLOCK30_FACTS_FILE: ${{ github.workspace }}/.block30/fetch/BLOCK30_FACTS.json
+          BLOCK30_API_REPORT_FILE: ${{ github.workspace }}/.block30/fetch/BLOCK30_REPORT.json
+          BLOCK30_SEED_FACTS_FILE: ${{ github.workspace }}/.block30/previous/BLOCK30_FACTS_AFTER.json
+          BLOCK30_PREVIOUS_SNAPSHOT_FILE: ${{ github.workspace }}/.block30/previous/BLOCK30_ACTIVE_SNAPSHOT_CANDIDATE.json
+          BLOCK30_PREVIOUS_REPORT_FILE: ${{ github.workspace }}/.block30/previous/BLOCK30_REPORT.json
+        run: npx tsx src/tools/block30-club-goals.ts
+      - name: Repeat active load for idempotency
+        if: always()
+        working-directory: backend
+        env:
+          BLOCK30_OUTPUT_ROOT: ${{ github.workspace }}/.block30
+          BLOCK30_FACTS_FILE: ${{ github.workspace }}/.block30/fetch/BLOCK30_FACTS.json
+          BLOCK30_API_REPORT_FILE: ${{ github.workspace }}/.block30/fetch/BLOCK30_REPORT.json
+          BLOCK30_SEED_FACTS_FILE: ${{ github.workspace }}/.block30/previous/BLOCK30_FACTS_AFTER.json
+          BLOCK30_PREVIOUS_SNAPSHOT_FILE: ${{ github.workspace }}/.block30/previous/BLOCK30_ACTIVE_SNAPSHOT_CANDIDATE.json
+          BLOCK30_PREVIOUS_REPORT_FILE: ${{ github.workspace }}/.block30/previous/BLOCK30_REPORT.json
+        run: npx tsx src/tools/block30-club-goals.ts
+      - name: Run engine and full backend tests
+        if: always()
+        working-directory: backend
+        run: |
+          npm test
+          npx tsx src/tests/club-career-goals-ranking-engine.test.ts
+      - name: Run endpoint guards against loaded candidate
+        if: always()
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55455/rango90_qa_block30
+        run: npx tsx src/tests/block30-club-goals-active.integration.test.ts
+      - name: Run frontend checks
+        if: always()
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run verify:i18n
+          npm run build
+          git diff --check
+      - name: Assert no secrets, raw payloads or official publication
+        if: always()
+        run: |
+          set -euo pipefail
+          if rg -n 'API_FOOTBALL_KEY|x-apisports-key|Authorization:|Bearer |"response"\s*:' "$BLOCK30_OUTPUT_ROOT" 2>/dev/null; then exit 1; fi
+          if rg -n '"published"\s*:\s*true|"officialSnapshotCreated"\s*:\s*true' "$BLOCK30_OUTPUT_ROOT" 2>/dev/null; then exit 1; fi
+      - name: Cleanup isolated PostgreSQL
+        if: always()
+        run: docker rm -f rango90-block30-postgres >/dev/null 2>&1 || true
+      - name: Upload redacted Block 30 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block30-club-career-goals-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            ${{ github.workspace }}/.block30/BLOCK30_REPORT.json
+            ${{ github.workspace }}/.block30/BLOCK30_REPORT.md
+            ${{ github.workspace }}/.block30/BLOCK30_ACTIVE_SNAPSHOT_CANDIDATE.json
+            ${{ github.workspace }}/.block30/BLOCK30_ACTIVE_CHANGES.json
+            ${{ github.workspace }}/.block30/BLOCK30_FACTS_AFTER.json
+            ${{ github.workspace }}/.block30/BLOCK30_COVERAGE_MATRIX.json
+            ${{ github.workspace }}/.block30/BLOCK30_ROLLBACK.json
+            ${{ github.workspace }}/.block30/plan/BLOCK30_COVERAGE_PLAN.json
+            ${{ github.workspace }}/.block30/plan/BLOCK30_REPORT.json
+            ${{ github.workspace }}/.block30/fetch/BLOCK30_REPORT.json
+      - name: Remove temporary artifacts
+        if: always()
+        run: rm -rf "$BLOCK30_OUTPUT_ROOT"

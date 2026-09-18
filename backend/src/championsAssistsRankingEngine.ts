@@ -216,7 +216,7 @@ export function importChampionsAssistsIdempotently(existing: ChampionsAssistFact
     assertAssistFact(fact);
     const prior = byId.get(fact.id) ?? byRecord.get([fact.sourceKey, fact.sourceRecordId].join('|'));
     if (!prior) { byId.set(fact.id, fact); byRecord.set([fact.sourceKey, fact.sourceRecordId].join('|'), fact); added.push(fact); continue; }
-    if (stableJson({ edition: prior.edition.id, player: prior.player.canonicalId, match: prior.match, eventId: prior.eventId, phase: prior.phase, assists: prior.assists, sourceType: prior.sourceType, verificationStatus: prior.verificationStatus }) === stableJson({ edition: fact.edition.id, player: fact.player.canonicalId, match: fact.match, eventId: fact.eventId, phase: fact.phase, assists: fact.assists, sourceType: fact.sourceType, verificationStatus: fact.verificationStatus })) skipped.push(fact);
+    if (stableJson({ edition: prior.edition.id, player: prior.player.canonicalId, match: comparableAssistMatch(prior.match), eventId: prior.eventId, phase: prior.phase, assists: prior.assists, sourceType: prior.sourceType, verificationStatus: prior.verificationStatus }) === stableJson({ edition: fact.edition.id, player: fact.player.canonicalId, match: comparableAssistMatch(fact.match), eventId: fact.eventId, phase: fact.phase, assists: fact.assists, sourceType: fact.sourceType, verificationStatus: fact.verificationStatus })) skipped.push(fact);
     else conflicts.push(conflictForAssistFacts([prior, fact], 'duplicate_source_record_with_different_value'));
   }
   return { facts: [...byId.values()], added, skipped, conflicts: [...conflicts, ...detectChampionsAssistConflicts([...byId.values()])] };
@@ -279,6 +279,7 @@ export function stableAssistJson(value: unknown): string { return stableJson(val
 export function sha256(value: string): string { return createHash('sha256').update(value).digest('hex'); }
 
 function conflictForAssistFacts(facts: ChampionsAssistFact[], reason: ChampionsAssistConflict['reason'], valuesOverride?: number[]): ChampionsAssistConflict { return { key: logicalAssistFactKey(facts[0]!), factIds: facts.map((fact) => fact.id).sort(), sourceKeys: [...new Set(facts.map((fact) => fact.sourceKey))].sort(), values: (valuesOverride ?? [...new Set(facts.map((fact) => fact.assists))]).sort((a, b) => a - b), reason }; }
+function comparableAssistMatch(match: ChampionsAssistFact['match']): ChampionsAssistFact['match'] { return { ...match, date: match.date && /^\d{4}-\d{2}-\d{2}$/u.test(match.date) ? match.date : null }; }
 function assertAssistFact(fact: Omit<ChampionsAssistFact, 'id'> | ChampionsAssistFact): void {
   if (!fact.edition || fact.edition.seasonStart < 1955 || fact.edition.era !== (fact.edition.seasonStart < 1992 ? 'european_cup' : 'champions_league')) throw new Error('Era Champions incoherente en hecho de asistencia');
   if (!fact.match.id.trim() || !fact.eventId.trim() || !fact.sourceCaptureId.trim() || !fact.sourceRecordId.trim()) throw new Error('Un hecho de asistencia requiere partido, evento, captura y registro de fuente');

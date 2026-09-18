@@ -60,7 +60,7 @@ function rowFact(row: Record<string, unknown>): ChampionsAssistFact {
   };
   return {
     id: String(row.id), edition, player,
-    match: { id: String(row.match_id), date: row.match_date ? String(row.match_date).slice(0, 10) : null, homeTeam: String(row.home_team), awayTeam: String(row.away_team) }, eventId: String(row.event_id || row.source_record_id),
+    match: { id: String(row.match_id), date: row.match_date ? (row.match_date instanceof Date ? row.match_date.toISOString().slice(0, 10) : String(row.match_date).slice(0, 10)) : null, homeTeam: String(row.home_team), awayTeam: String(row.away_team) }, eventId: String(row.event_id || row.source_record_id),
     phase: String(row.phase) as ChampionsPhase, assists: Number(row.assists), sourceKey: String(row.source_key), sourceCaptureId: String(row.source_capture_id), sourceRecordId: String(row.source_record_id), sourceType: (String(row.source_type || 'primary') as ChampionsAssistFact['sourceType']), verificationStatus: (String(row.verification_status || 'confirmed') as ChampionsAssistFact['verificationStatus']),
     evidence: (row.evidence ?? {}) as ChampionsAssistFact['evidence'], capturedAt: new Date(String(row.captured_at)).toISOString()
   };
@@ -82,7 +82,8 @@ async function insertFacts(pool: pg.Pool, facts: ChampionsAssistFact[]): Promise
     await pool.query(`INSERT INTO entity_game_profiles (entity_id,playable_default,reason,metadata) VALUES ($1,FALSE,'BLOQUE 26 ranking fact', $2) ON CONFLICT (entity_id) DO NOTHING`, [fact.player.canonicalId, { source: 'block26', metric: 'assists' }]);
   }
   for (const fact of facts) {
-    const result = await pool.query(`INSERT INTO champions_assist_facts (id,edition_id,canonical_player_id,source_player_id,player_name_at_source,match_id,event_id,match_date,home_team,away_team,phase,assists,source_key,source_capture_id,source_record_id,source_type,verification_status,evidence,captured_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) ON CONFLICT DO NOTHING`, [fact.id, fact.edition.id, fact.player.canonicalId, fact.player.sourcePlayerId, fact.player.displayName, fact.match.id, fact.eventId, fact.match.date, fact.match.homeTeam, fact.match.awayTeam, fact.phase, fact.assists, fact.sourceKey, fact.sourceCaptureId, fact.sourceRecordId, fact.sourceType, fact.verificationStatus, fact.evidence, fact.capturedAt]);
+    const matchDate = fact.match.date && /^\d{4}-\d{2}-\d{2}$/u.test(fact.match.date) ? fact.match.date : null;
+    const result = await pool.query(`INSERT INTO champions_assist_facts (id,edition_id,canonical_player_id,source_player_id,player_name_at_source,match_id,event_id,match_date,home_team,away_team,phase,assists,source_key,source_capture_id,source_record_id,source_type,verification_status,evidence,captured_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) ON CONFLICT DO NOTHING`, [fact.id, fact.edition.id, fact.player.canonicalId, fact.player.sourcePlayerId, fact.player.displayName, fact.match.id, fact.eventId, matchDate, fact.match.homeTeam, fact.match.awayTeam, fact.phase, fact.assists, fact.sourceKey, fact.sourceCaptureId, fact.sourceRecordId, fact.sourceType, fact.verificationStatus, fact.evidence, fact.capturedAt]);
     if ((result.rowCount ?? 0) > 0) added += 1; else skipped += 1;
   }
   return { added, skipped };

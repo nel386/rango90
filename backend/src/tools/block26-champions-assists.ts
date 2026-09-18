@@ -119,7 +119,7 @@ async function main(): Promise<void> {
     const facts = await existingFacts(pool);
     const historicalFacts = facts.filter((fact) => fact.edition.seasonStart <= CHAMPIONS_ASSISTS_HISTORICAL_END);
     const activeFacts = facts.filter((fact) => fact.edition.seasonStart === activeSeasonStart);
-    const apiSeasonMatrix = Array.isArray(apiReport.seasonMatrix) ? apiReport.seasonMatrix.map((row) => row as JsonRecord) : [];
+    const apiSeasonMatrix = (Array.isArray(apiReport.seasonMatrix) ? apiReport.seasonMatrix : Array.isArray(apiReport.seasons) ? apiReport.seasons : []).map((row) => row as JsonRecord);
     const historicalSnapshot = buildChampionsAssistsSnapshot({ facts: historicalFacts, dataset: 'historical_base', seasonStart: CHAMPIONS_ASSISTS_HISTORICAL_START, seasonEnd: CHAMPIONS_ASSISTS_HISTORICAL_END, coverage: historicalCoverage(historicalFacts), generatedAt: now });
     const providerReady = apiReport.status === 'ready_for_lab_load';
     const activeCoverageWasConfirmed = active.activeCoverageComplete ?? (providerReady && activeCoverageComplete);
@@ -152,7 +152,10 @@ async function main(): Promise<void> {
     const historicalSeasons = new Set(historicalFacts.map((fact) => fact.edition.seasonStart));
     const coverageMatrix = [...Array.from({ length: CHAMPIONS_ASSISTS_HISTORICAL_END - CHAMPIONS_ASSISTS_HISTORICAL_START + 1 }, (_, index) => CHAMPIONS_ASSISTS_HISTORICAL_START + index), activeSeasonStart].map((season) => {
       const sourceRow = apiSeasonMatrix.find((row) => Number(row.season) === season);
-      return { season, dataset: season === activeSeasonStart ? 'active_season_weekly' : 'historical_base', status: season === activeSeasonStart ? (activeSnapshot.coverageComplete ? 'covered' : 'pending') : String(sourceRow?.status ?? (historicalSeasons.has(season) ? 'partial' : 'unavailable')), reason: String(sourceRow?.reason ?? (historicalSeasons.has(season) ? 'Hechos existentes sin matriz de cobertura detallada.' : 'No hay hechos trazables para esta temporada.')), facts: facts.filter((fact) => fact.edition.seasonStart === season).length };
+      const rawStatus = String(sourceRow?.status ?? '');
+      const status = season === activeSeasonStart ? (activeSnapshot.coverageComplete ? 'covered' : rawStatus.includes('partial') ? 'partial' : 'unavailable') : (rawStatus.includes('confirmed') ? 'partial' : historicalSeasons.has(season) ? 'partial' : 'unavailable');
+      const reason = season === activeSeasonStart ? (activeSnapshot.coverageComplete ? 'API confirmó eventos de la temporada activa; las asistencias sin crédito explícito permanecen desconocidas.' : 'La cobertura activa es parcial o no fue confirmada por el proveedor.') : (sourceRow ? `API-Football: ${rawStatus || 'estado no especificado'}; no se descargaron eventos históricos en este workflow.` : historicalSeasons.has(season) ? 'Hechos existentes sin matriz de cobertura detallada.' : 'No hay hechos trazables para esta temporada.');
+      return { season, dataset: season === activeSeasonStart ? 'active_season_weekly' : 'historical_base', status, reason, facts: facts.filter((fact) => fact.edition.seasonStart === season).length };
     });
     const primaryFacts = facts.filter((fact) => fact.sourceType === 'primary').length;
     const contrastFacts = facts.filter((fact) => fact.sourceType === 'contrast').length;

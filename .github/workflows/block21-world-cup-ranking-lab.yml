@@ -1,0 +1,104 @@
+name: BLOQUE 21 · ranking real Mundial conectado en lab
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  world-cup-ranking-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      DATABASE_URL: postgresql://not-used:not-used@127.0.0.1:59999/rango90_runtime_only
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55446/rango90_qa_block21
+      BLOCK20_OUTPUT_ROOT: ${{ github.workspace }}/.block20-output
+      BLOCK20_INPUT_ROOT: ${{ github.workspace }}/.block20-output
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+      - name: Build frontend and backend
+        run: |
+          npm run build
+          npm --prefix backend run build
+      - name: Start temporary PostgreSQL
+        run: |
+          docker run -d --name rango90-block21-postgres -e POSTGRES_DB=rango90_qa_block21 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55446:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block21-postgres pg_isready -U rango90 -d rango90_qa_block21 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block21-postgres pg_isready -U rango90 -d rango90_qa_block21
+      - name: Apply migrations to isolated PostgreSQL
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+        run: npm run migrate
+      - name: Verify absent real snapshot has no fallback
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: npx tsx src/tests/block21-world-cup-missing-snapshot.integration.test.ts | tee "$GITHUB_WORKSPACE/BLOCK21_MISSING_SNAPSHOT.json"
+      - name: Build real World Cup candidate from Block 20
+        working-directory: backend
+        run: npx tsx src/tools/block20-rebuild-world-cup.ts
+      - name: Load real snapshots into isolated lab database
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+        run: npx tsx src/tools/block20-load-lab-candidate.ts | tee "$GITHUB_WORKSPACE/BLOCK21_LOAD.json"
+      - name: Repeat load to prove idempotency
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+        run: npx tsx src/tools/block20-load-lab-candidate.ts | tee "$GITHUB_WORKSPACE/BLOCK21_LOAD_RERUN.json"
+      - name: Compare API endpoint with direct motor snapshots
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: npx tsx src/tests/block21-world-cup-ranking-candidate.integration.test.ts | tee "$GITHUB_WORKSPACE/BLOCK21_REPORT.json"
+      - name: Generate manual image-gap list
+        working-directory: backend
+        env:
+          BLOCK21_IMAGE_GAP_OUTPUT_ROOT: ${{ github.workspace }}/.block21-image-gaps
+        run: npx tsx src/tools/block21-build-world-cup-image-gap-list.ts | tee "$GITHUB_WORKSPACE/BLOCK21_IMAGE_GAPS.json"
+      - name: Verify no publication or sensitive artifact
+        run: |
+          ! grep -REn 'API_FOOTBALL_KEY|x-apisports-key|apiKey|published[^\n]*true|official[^\n]*opened' BLOCK21_*.json .block20-output/BLOCK20_REPORT.json .block20-output/BLOCK20_REPORT.md .block20-output/BLOCK20_SNAPSHOTS.json
+      - name: Upload redacted Block 21 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block21-world-cup-ranking-lab-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ${{ github.workspace }}/BLOCK21_MISSING_SNAPSHOT.json
+            ${{ github.workspace }}/BLOCK21_LOAD.json
+            ${{ github.workspace }}/BLOCK21_LOAD_RERUN.json
+            ${{ github.workspace }}/BLOCK21_REPORT.json
+            ${{ github.workspace }}/.block20-output/BLOCK20_REPORT.json
+            ${{ github.workspace }}/.block20-output/BLOCK20_REPORT.md
+            ${{ github.workspace }}/.block20-output/BLOCK20_SNAPSHOTS.json
+            ${{ github.workspace }}/.block21-image-gaps/BLOCK21_WORLD_CUP_IMAGE_GAPS.json
+            ${{ github.workspace }}/.block21-image-gaps/BLOCK21_WORLD_CUP_IMAGE_GAPS.md
+      - name: Cleanup PostgreSQL, fixtures and raw candidate facts
+        if: always()
+        run: |
+          docker rm -f rango90-block21-postgres >/dev/null 2>&1 || true
+          rm -rf "$GITHUB_WORKSPACE/.block20-output"
+          rm -rf "$GITHUB_WORKSPACE/.block21-image-gaps"

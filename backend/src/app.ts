@@ -159,7 +159,7 @@ async function getLabWorldCupRanking(appDb: ContractDatabase, dataset: WorldCupL
      SELECT latest.id, latest.category_slug, latest.dataset, latest.edition_start, latest.edition_end,
             latest.status, latest.scope_version, latest.content_sha256, latest.generated_at, latest.coverage_complete,
             COALESCE(NULLIF(latest.metadata->>'factCount', '')::int, fact_summary.fact_count, 0)::int AS fact_count,
-            COALESCE(fact_summary.source_count, 0)::int AS source_count,
+            COALESCE(NULLIF(latest.metadata->>'sourceCount', '')::int, fact_summary.source_count, 0)::int AS source_count,
             COALESCE((latest.metadata->>'fixtureOnly')::boolean, FALSE) AS fixture_only
        FROM latest CROSS JOIN fact_summary`, [WORLD_CUP_CATEGORY_SLUG, dataset]
   );
@@ -167,7 +167,7 @@ async function getLabWorldCupRanking(appDb: ContractDatabase, dataset: WorldCupL
   if (!snapshot) return null;
   const entries = await appDb.query(
     `SELECT re.canonical_player_id AS entity_id, e.canonical_name, e.short_name, e.entity_type,
-            re.raw_value, re.rank, re.tie_group,
+            re.raw_value, re.rank, re.score_value, re.tie_group, re.fact_ids,
             (e.catalog_status = 'active' AND COALESCE(egp.playable_default, FALSE)) AS playable,
             COALESCE((SELECT jsonb_agg(jsonb_build_object(
               'sourceKey', f.source_key, 'sourceCaptureId', f.source_capture_id, 'sourceRecordId', f.source_record_id,
@@ -176,7 +176,7 @@ async function getLabWorldCupRanking(appDb: ContractDatabase, dataset: WorldCupL
               FROM world_cup_goal_facts f WHERE f.id = ANY(re.fact_ids)), '[]'::jsonb) AS sources
        FROM world_cup_ranking_entries re JOIN entities e ON e.id = re.canonical_player_id
        LEFT JOIN entity_game_profiles egp ON egp.entity_id = e.id
-      WHERE re.snapshot_id = $1 AND re.rank <= $2 ORDER BY re.rank, e.canonical_name`, [snapshot.id, limit]
+      WHERE re.snapshot_id = $1 AND re.rank <= $2 ORDER BY re.rank, re.canonical_player_id`, [snapshot.id, limit]
   );
   const isHistorical = snapshot.dataset === 'historical_base';
   return {
@@ -186,8 +186,8 @@ async function getLabWorldCupRanking(appDb: ContractDatabase, dataset: WorldCupL
     scopeLabelEs: snapshot.fixture_only ? 'Fixture controlado de lab; no es cobertura histórica' : (isHistorical ? 'Histórico: fases finales masculinas' : 'Actualización semanal: histórico + edición activa'),
     scopeLabelEn: snapshot.fixture_only ? 'Controlled lab fixture; not historical coverage' : (isHistorical ? 'History: men\'s final tournaments' : 'Weekly update: history + active edition'),
     coverageComplete: snapshot.coverage_complete, factCount: snapshot.fact_count, sourceCount: snapshot.source_count, dataVersion: snapshot.scope_version,
-    contentSha256: snapshot.content_sha256, generatedAt: snapshot.generated_at,
-    entries: entries.rows.map((row) => ({ ...row, score_value: Math.min(Number(row.rank), 100), image_url: null, image_status: 'unavailable', review_status: 'missing', rights_status: 'missing', is_publishable: false, image_source_url: null, image_license_name: null, sources: row.sources ?? [] }))
+    contentSha256: snapshot.content_sha256, generatedAt: snapshot.generated_at, fixtureOnly: snapshot.fixture_only,
+    entries: entries.rows.map((row) => ({ ...row, image_url: null, image_status: 'unavailable', review_status: 'missing', rights_status: 'missing', is_publishable: false, image_source_url: null, image_license_name: null, sources: row.sources ?? [] }))
   };
 }
 

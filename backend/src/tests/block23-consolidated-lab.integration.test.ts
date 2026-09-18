@@ -45,17 +45,25 @@ function compareEndpoint(body: Record<string, unknown>, snapshot: ChampionsSnaps
   const actual = body.entries as Array<Record<string, unknown>>;
   const expected = topEntries(snapshot);
   assert.equal(actual.length, expected.length);
+  assert.equal(new Set(actual.map((row) => row.entity_id)).size, actual.length);
+  const groupKey = (row: { rawValue: number; rank: number; scoreValue: number; tieGroup: number }): string => `${row.rank}|${row.rawValue}|${row.scoreValue}|${row.tieGroup}`;
+  const expectedGroups = new Map<string, string[]>();
+  for (const entry of expected) expectedGroups.set(groupKey(entry), [...(expectedGroups.get(groupKey(entry)) ?? []), entry.entityId]);
+  const actualGroups = new Map<string, string[]>();
   const factById = new Map(factRows.map((fact) => [fact.id, fact]));
-  for (const [index, expectedEntry] of expected.entries()) {
-    const row = actual[index];
-    assert.ok(row, `missing endpoint row ${index}`);
-    assert.deepEqual({ entityId: row.entity_id, rawValue: row.raw_value, rank: row.rank, scoreValue: row.score_value, tieGroup: row.tie_group }, expectedEntry);
+  for (const row of actual) {
+    const actualEntry = { entityId: String(row.entity_id), rawValue: Number(row.raw_value), rank: Number(row.rank), scoreValue: Number(row.score_value), tieGroup: Number(row.tie_group) };
+    const key = groupKey(actualEntry);
+    actualGroups.set(key, [...(actualGroups.get(key) ?? []), actualEntry.entityId]);
+    assert.equal(expectedGroups.has(key), true, `unexpected ranking group ${key}`);
+    assert.equal(expectedGroups.get(key)?.includes(actualEntry.entityId), true, `unexpected player in ranking group ${key}`);
     assert.equal(typeof row.canonical_name, 'string');
     assert.equal(row.playable, true);
-    const expectedSources = new Set(expectedEntry.entityId === row.entity_id ? (snapshot.ranking.find((entry) => entry.canonicalPlayerId === expectedEntry.entityId)?.factIds ?? []).map((id) => `${factById.get(id)?.sourceKey}|${factById.get(id)?.sourceRecordId}`) : []);
+    const expectedSources = new Set((snapshot.ranking.find((entry) => entry.canonicalPlayerId === actualEntry.entityId)?.factIds ?? []).map((id) => `${factById.get(id)?.sourceKey}|${factById.get(id)?.sourceRecordId}`));
     const actualSources = new Set((row.sources as Array<{ sourceKey: string; sourceRecordId: string }>).map((source) => `${source.sourceKey}|${source.sourceRecordId}`));
     for (const source of expectedSources) assert.equal(actualSources.has(source), true, `missing provenance ${source}`);
   }
+  for (const [key, ids] of expectedGroups) assert.deepEqual([...new Set(actualGroups.get(key) ?? [])].sort(), [...new Set(ids)].sort(), `ranking group mismatch ${key}`);
 }
 
 try {

@@ -159,7 +159,8 @@ export function adaptApiFootballChampionsAssists(input: { sourceCaptureId: strin
         uncreditedGoalEvents += 1;
         continue;
       }
-      const player = resolvePlayerIdentity({ sourceKey: 'api-football', sourcePlayerId: String(event.assist.id), displayName: event.assist.name }, input.resolver);
+      const sourcePlayerId = String(event.assist.id);
+      const player = resolvePlayerIdentity({ sourceKey: 'api-football', sourcePlayerId, displayName: event.assist.name }, input.resolver ?? { sourceIds: { [`api-football:${sourcePlayerId}`]: `champions:api-football:${sourcePlayerId}` } });
       facts.push(createChampionsAssistFact({
         edition,
         player,

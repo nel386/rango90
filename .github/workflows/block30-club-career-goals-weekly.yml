@@ -22,6 +22,7 @@ jobs:
       NODE_ENV: test
       DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55455/rango90_qa_block30
       RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55455/rango90_qa_block30
+      BLOCK30_RUNTIME_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55455/rango90_qa_block30_runtime
       API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
       BLOCK30_ACTIVE_SEASON_START: '2026'
@@ -53,6 +54,12 @@ jobs:
       - name: Apply migrations
         working-directory: backend
         run: npm run migrate
+      - name: Prepare separate runtime test database
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          PGPASSWORD='rango90-qa' createdb -h 127.0.0.1 -p 55455 -U rango90 rango90_qa_block30_runtime
+          DATABASE_URL="$BLOCK30_RUNTIME_DATABASE_URL" npm run migrate
       - name: Restore previous valid candidate when available
         if: always()
         env:
@@ -104,6 +111,9 @@ jobs:
       - name: Run engine and full backend tests
         if: always()
         working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.BLOCK30_RUNTIME_DATABASE_URL }}
+          RANGO90_ISOLATED_DATABASE_URL: ${{ env.BLOCK30_RUNTIME_DATABASE_URL }}
         run: |
           npm test
           npx tsx src/tests/club-career-goals-ranking-engine.test.ts

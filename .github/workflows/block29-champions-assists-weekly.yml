@@ -66,7 +66,7 @@ jobs:
           mkdir -p "$BLOCK29_OUTPUT_ROOT/previous"
           previous_run="$(gh run list --workflow block29-champions-assists-weekly.yml --branch master --status success --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
           if [ -n "$previous_run" ]; then
-            previous_artifact="$(gh run view "$previous_run" --json artifacts --jq '.artifacts[] | select(.name | startswith("block29-champions-assists-weekly-")) | .name' | head -n 1)"
+            previous_artifact="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${previous_run}/artifacts" --paginate --jq '.artifacts[] | select(.name | startswith("block29-champions-assists-weekly-")) | .name' | head -n 1)"
             if [ -n "$previous_artifact" ]; then
               gh run download "$previous_run" -n "$previous_artifact" -D "$BLOCK29_OUTPUT_ROOT/previous"
             fi

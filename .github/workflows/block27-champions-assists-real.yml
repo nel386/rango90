@@ -1,0 +1,106 @@
+name: BLOQUE 27 · carga real asistencias Champions
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: block27-champions-assists-real
+  cancel-in-progress: true
+
+jobs:
+  real-assists-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55452/rango90_qa_block27
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55452/rango90_qa_block27
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      BLOCK27_RUN: '1'
+      BLOCK26_ACTIVE_SEASON_START: '2026'
+      BLOCK26_ACTIVE_COVERAGE_COMPLETE: 'false'
+      BLOCK26_OUTPUT_ROOT: ${{ runner.temp }}/block27
+      BLOCK26_ACTIVE_FACTS_FILE: ${{ runner.temp }}/block27/BLOCK27_API_ASSISTS_FACTS.json
+      BLOCK27_API_REPORT_FILE: ${{ runner.temp }}/block27/BLOCK27_API_ASSISTS_REPORT.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm --prefix backend ci
+      - name: Typecheck and build backend
+        working-directory: backend
+        run: npm run build
+      - name: Start temporary PostgreSQL
+        run: |
+          set -euo pipefail
+          docker run -d --name rango90-block27-postgres -e POSTGRES_DB=rango90_qa_block27 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55452:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block27-postgres pg_isready -U rango90 -d rango90_qa_block27 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block27-postgres pg_isready -U rango90 -d rango90_qa_block27
+      - name: Apply migrations to isolated PostgreSQL
+        working-directory: backend
+        run: npm run migrate
+      - name: Query real API-Football coverage and active events
+        working-directory: backend
+        run: npm run block27:fetch
+      - name: Load first real candidate into lab
+        if: always()
+        working-directory: backend
+        run: npm run block27:load
+      - name: Repeat the real load for idempotency
+        if: always()
+        working-directory: backend
+        run: npm run block27:load
+      - name: Run isolated endpoint and official guard tests
+        if: always()
+        working-directory: backend
+        run: npm run test:block26:integration
+      - name: Run frontend build and repository checks
+        if: always()
+        run: |
+          npm run build
+          git diff --check
+      - name: Assert no secret or raw API payload escaped
+        if: always()
+        run: |
+          set -euo pipefail
+          if rg -n 'API_FOOTBALL_KEY|x-apisports-key|Authorization:|Bearer |"response"\s*:' "$BLOCK26_OUTPUT_ROOT" 2>/dev/null; then exit 1; fi
+          if rg -n '"published"\s*:\s*true|"officialModeOpened"\s*:\s*true|"officialSnapshotCreated"\s*:\s*true' "$BLOCK26_OUTPUT_ROOT" 2>/dev/null; then exit 1; fi
+      - name: Cleanup isolated PostgreSQL
+        if: always()
+        run: docker rm -f rango90-block27-postgres >/dev/null 2>&1 || true
+      - name: Upload redacted Block 27 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block27-champions-assists-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/block27/BLOCK27_REPORT.json
+            ${{ runner.temp }}/block27/BLOCK27_REPORT.md
+            ${{ runner.temp }}/block27/BLOCK27_API_ASSISTS_REPORT.json
+            ${{ runner.temp }}/block27/BLOCK27_API_ASSISTS_REPORT.md
+            ${{ runner.temp }}/block27/BLOCK27_HISTORICAL_SNAPSHOT_CANDIDATE.json
+            ${{ runner.temp }}/block27/BLOCK27_ACTIVE_SNAPSHOT_CANDIDATE.json
+            ${{ runner.temp }}/block27/BLOCK27_ACTIVE_CHANGES.json
+            ${{ runner.temp }}/block27/BLOCK27_COVERAGE_MATRIX.json
+            ${{ runner.temp }}/block27/BLOCK27_ROLLBACK.json
+            ${{ runner.temp }}/block27/BLOCK27_FACTS_AFTER.json
+      - name: Remove temporary artifacts
+        if: always()
+        run: rm -rf "$BLOCK26_OUTPUT_ROOT"

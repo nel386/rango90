@@ -433,7 +433,7 @@ export function Rango90App({ locale }: { locale: Locale }) {
   useEffect(() => {
     if (view !== "category-ranking" || !selectedRankingCategory) return;
     let active = true;
-    gameRepository.getCategoryRanking(selectedRankingCategory, selectedRankingCategory === "uefa-champions-league-goals" || selectedRankingCategory === "world-cup-goals" ? selectedRankingDataset : undefined)
+    gameRepository.getCategoryRanking(selectedRankingCategory, selectedRankingCategory === "uefa-champions-league-goals" || selectedRankingCategory === "uefa-champions-league-assists" || selectedRankingCategory === "world-cup-goals" ? selectedRankingDataset : undefined)
       .then((ranking) => {
         if (!active) return;
         setCategoryRanking(ranking);
@@ -1023,7 +1023,7 @@ return <section className="result-view" aria-labelledby="result-title"><div clas
     const entries = categoryRanking?.entries ?? [];
     const fallbackCategories = mockDailyChallenge.categories.map((category) => ({ slug: category.slug, labelEs: category.label.es, labelEn: category.label.en, availability: "provisional" as const }));
     const categories = rankingCategories.length > 0 ? rankingCategories : fallbackCategories;
-    const isChampionsRanking = selectedRankingCategory === "uefa-champions-league-goals";
+    const isChampionsRanking = selectedRankingCategory === "uefa-champions-league-goals" || selectedRankingCategory === "uefa-champions-league-assists";
     const isWorldCupRanking = selectedRankingCategory === "world-cup-goals";
     const isScopedRanking = isChampionsRanking || isWorldCupRanking;
     const scopeSelector = locale === "es" ? "Alcance del ranking" : "Ranking scope";

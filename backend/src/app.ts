@@ -13,6 +13,7 @@ import { renderMediaFallback } from './mediaFallback.js';
 import { SlidingWindowRateLimiter, rateLimitPolicy } from './rateLimit.js';
 
 const CHAMPIONS_CATEGORY_SLUG = 'uefa-champions-league-goals';
+const CHAMPIONS_ASSISTS_CATEGORY_SLUG = 'uefa-champions-league-assists';
 const WORLD_CUP_CATEGORY_SLUG = 'world-cup-goals';
 type ChampionsLabDataset = 'historical_base' | 'active_season_weekly';
 type WorldCupLabDataset = 'historical_base' | 'active_edition_weekly';
@@ -137,6 +138,65 @@ async function getLabChampionsRanking(appDb: ContractDatabase, dataset: Champion
       image_license_name: null,
       sources: row.sources ?? []
     }))
+  };
+}
+
+async function getLabChampionsAssistsRanking(appDb: ContractDatabase, dataset: ChampionsLabDataset, limit: number, runtimeMode: RuntimeMode) {
+  const snapshotResult = await appDb.query<{
+    id: string; category_slug: string; dataset: ChampionsLabDataset; season_start: number; season_end: number; status: string;
+    scope_version: string; content_sha256: string; generated_at: string; coverage_complete: boolean; fact_count: number; source_count: number;
+  }>(
+    `WITH latest AS (
+       SELECT rs.* FROM champions_ranking_snapshots rs
+        WHERE rs.category_slug = $1 AND rs.dataset = $2
+          AND rs.status IN ('lab_provisional', 'draft') AND rs.coverage_complete = TRUE
+        ORDER BY rs.generated_at DESC LIMIT 1
+     ), fact_summary AS (
+       SELECT COUNT(DISTINCT f.id)::int AS fact_count, COUNT(DISTINCT f.source_key)::int AS source_count
+         FROM latest s
+         JOIN champions_ranking_entries re ON re.snapshot_id = s.id
+         JOIN champions_assist_facts f ON f.id = ANY(re.fact_ids)
+     )
+     SELECT latest.id, latest.category_slug, latest.dataset, latest.season_start, latest.season_end,
+            latest.status, latest.scope_version, latest.content_sha256, latest.generated_at,
+            latest.coverage_complete,
+            COALESCE(NULLIF(latest.metadata->>'factCount', '')::int, fact_summary.fact_count, 0)::int AS fact_count,
+            COALESCE(NULLIF(latest.metadata->>'sourceCount', '')::int, fact_summary.source_count, 0)::int AS source_count
+       FROM latest CROSS JOIN fact_summary`,
+    [CHAMPIONS_ASSISTS_CATEGORY_SLUG, dataset]
+  );
+  const snapshot = snapshotResult.rows[0];
+  if (!snapshot) return null;
+  const entries = await appDb.query(
+    `SELECT re.canonical_player_id AS entity_id, e.canonical_name, e.short_name, e.entity_type,
+            re.raw_value, re.rank, re.tie_group,
+            (e.catalog_status = 'active' AND COALESCE(egp.playable_default, FALSE)) AS playable,
+            COALESCE((SELECT jsonb_agg(jsonb_build_object(
+              'sourceKey', f.source_key, 'sourceCaptureId', f.source_capture_id, 'sourceRecordId', f.source_record_id, 'eventId', f.event_id,
+              'sourceType', f.source_type, 'verificationStatus', f.verification_status,
+              'sourceUrl', f.evidence->>'sourceUrl', 'locator', f.evidence->>'locator', 'contentSha256', f.evidence->>'contentSha256'
+            ) ORDER BY f.source_key, f.source_capture_id, f.source_record_id)
+              FROM champions_assist_facts f WHERE f.id = ANY(re.fact_ids)), '[]'::jsonb) AS sources
+       FROM champions_ranking_entries re
+       JOIN entities e ON e.id = re.canonical_player_id
+       LEFT JOIN entity_game_profiles egp ON egp.entity_id = e.id
+      WHERE re.snapshot_id = $1 AND re.rank <= $2
+      ORDER BY re.rank, e.canonical_name`,
+    [snapshot.id, limit]
+  );
+  const isHistorical = snapshot.dataset === 'historical_base';
+  return {
+    category: snapshot.category_slug,
+    categoryLabelEs: 'Asistencias históricas — UEFA Champions League',
+    categoryLabelEn: 'All-time assists — UEFA Champions League',
+    rankingScope: isHistorical ? 'historical_snapshot' : 'active_season_weekly',
+    snapshotId: snapshot.id, mode: runtimeMode, status: 'provisional', dataset: snapshot.dataset,
+    seasonStart: snapshot.season_start, seasonEnd: snapshot.season_end,
+    scopeLabelEs: isHistorical ? 'Histórico: Copa de Europa y Champions 1955/56–2025/26' : 'Temporada activa: asistencias de Champions',
+    scopeLabelEn: isHistorical ? 'History: European Cup and Champions League 1955/56–2025/26' : 'Active season: Champions League assists',
+    coverageComplete: snapshot.coverage_complete, factCount: snapshot.fact_count, sourceCount: snapshot.source_count,
+    dataVersion: snapshot.scope_version, contentSha256: snapshot.content_sha256, generatedAt: snapshot.generated_at,
+    entries: entries.rows.map((row) => ({ ...row, score_value: Math.min(Number(row.rank), 100), image_url: null, image_status: 'unavailable', review_status: 'missing', rights_status: 'missing', is_publishable: false, image_source_url: null, image_license_name: null, sources: row.sources ?? [] }))
   };
 }
 
@@ -321,6 +381,21 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
         [CHAMPIONS_CATEGORY_SLUG]
       );
       if (candidate.rows[0]) categories.push({ ...candidate.rows[0], availability: 'provisional' });
+      const assistsCandidate = await appDb.query(
+        `SELECT id, category_slug AS slug, 'Asistencias históricas — UEFA Champions League' AS label_es,
+                'All-time assists — UEFA Champions League' AS label_en,
+                'player' AS entity_type, 'assists' AS metric_key, 'competition_all_time' AS scope_kind,
+                '{}'::jsonb AS scope, 'desc' AS ranking_direction, 'competition' AS tie_policy,
+                100 AS score_cap, 1 AS definition_version,
+                'Hechos append-only por partido y jugador; Copa de Europa y Champions; clasificación excluida.' AS definition_md,
+                'draft' AS status, 'lab_provisional' AS snapshot_status, id AS snapshot_id
+           FROM champions_ranking_snapshots
+          WHERE category_slug = $1 AND dataset = 'active_season_weekly'
+            AND status IN ('lab_provisional', 'draft') AND coverage_complete = TRUE
+          ORDER BY generated_at DESC LIMIT 1`,
+        [CHAMPIONS_ASSISTS_CATEGORY_SLUG]
+      );
+      if (assistsCandidate.rows[0]) categories.push({ ...assistsCandidate.rows[0], availability: 'provisional' });
       const worldCupCandidate = await appDb.query(
         `SELECT id, category_slug AS slug, 'Goles históricos — Mundial masculino' AS label_es,
                 'All-time goals — Men''s World Cup' AS label_en, 'player' AS entity_type, 'goals' AS metric_key,
@@ -343,6 +418,11 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
     const query = z.object({ limit: z.coerce.number().int().min(1).max(200).default(200), dataset: z.enum(['historical_base', 'active_season_weekly', 'active_edition_weekly']).optional() }).parse(request.query);
     if (runtimeMode === 'lab' && params.categorySlug === CHAMPIONS_CATEGORY_SLUG) {
       const candidate = await getLabChampionsRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_season_weekly'), query.limit, runtimeMode);
+      if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
+      return candidate;
+    }
+    if (runtimeMode === 'lab' && params.categorySlug === CHAMPIONS_ASSISTS_CATEGORY_SLUG) {
+      const candidate = await getLabChampionsAssistsRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_season_weekly'), query.limit, runtimeMode);
       if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
       return candidate;
     }

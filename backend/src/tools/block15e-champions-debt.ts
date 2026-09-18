@@ -10,6 +10,7 @@ import {
   rollbackChampionsSnapshot,
   stableJson,
   type ChampionsGoalFact,
+  type ChampionsRankingEntry,
   type ChampionsPhase
 } from '../championsRankingEngine.js';
 
@@ -170,14 +171,14 @@ async function main(): Promise<void> {
     const canonicalId = canonicalByProvider.get(providerIdentityKey(fact));
     return canonicalId ? cloneFact(fact, { canonicalId, resolution: 'source_id' }) : fact;
   });
-  let decisions = [...phaseDecisions, ...identityDecisions];
+  const decisions = [...phaseDecisions, ...identityDecisions];
   const unresolved = revisedFacts.filter((fact) => isActive(fact) && fact.player.resolution === 'normalized_name');
   const unknownPhases = revisedFacts.filter((fact) => isActive(fact) && fact.phase === 'unknown');
   const coverage = [{ sourceKey: 'champions-reconciled-lab', coveredSeasons: Array.from({ length: 72 }, (_, index) => 1955 + index), missingSeasons: [], complete: true, reason: '72 temporadas validadas por Bloques 15C/15D; deuda revisada en 15E.' }];
   const beforeRanking = buildChampionsRanking({ facts: originalFacts, coverage });
   const ranking = buildChampionsRanking({ facts: revisedFacts, coverage });
   const candidate = buildChampionsSnapshot({ facts: revisedFacts, dataset: 'historical_base', seasonStart: 1955, seasonEnd: 2026, status: 'lab_provisional', coverage, generatedAt: now });
-  const priorRanking = Array.isArray(prior.ranking) ? prior.ranking as any[] : [];
+  const priorRanking = Array.isArray(prior.ranking) ? prior.ranking as ChampionsRankingEntry[] : [];
   const changes = compareChampionsRankings(priorRanking, ranking.entries);
   const seasonSumsBefore = new Map<number, number>(); const seasonSumsAfter = new Map<number, number>();
   for (const fact of originalFacts) seasonSumsBefore.set(fact.edition.seasonStart, (seasonSumsBefore.get(fact.edition.seasonStart) ?? 0) + fact.goals);

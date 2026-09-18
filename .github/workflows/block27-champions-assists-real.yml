@@ -26,9 +26,9 @@ jobs:
       BLOCK27_RUN: '1'
       BLOCK26_ACTIVE_SEASON_START: '2026'
       BLOCK26_ACTIVE_COVERAGE_COMPLETE: 'false'
-      BLOCK26_OUTPUT_ROOT: ${{ runner.temp }}/block27
-      BLOCK26_ACTIVE_FACTS_FILE: ${{ runner.temp }}/block27/BLOCK27_API_ASSISTS_FACTS.json
-      BLOCK27_API_REPORT_FILE: ${{ runner.temp }}/block27/BLOCK27_API_ASSISTS_REPORT.json
+      BLOCK26_OUTPUT_ROOT: ${{ github.workspace }}/.block27
+      BLOCK26_ACTIVE_FACTS_FILE: ${{ github.workspace }}/.block27/BLOCK27_API_ASSISTS_FACTS.json
+      BLOCK27_API_REPORT_FILE: ${{ github.workspace }}/.block27/BLOCK27_API_ASSISTS_REPORT.json
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -91,16 +91,16 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
           path: |
-            ${{ runner.temp }}/block27/BLOCK27_REPORT.json
-            ${{ runner.temp }}/block27/BLOCK27_REPORT.md
-            ${{ runner.temp }}/block27/BLOCK27_API_ASSISTS_REPORT.json
-            ${{ runner.temp }}/block27/BLOCK27_API_ASSISTS_REPORT.md
-            ${{ runner.temp }}/block27/BLOCK27_HISTORICAL_SNAPSHOT_CANDIDATE.json
-            ${{ runner.temp }}/block27/BLOCK27_ACTIVE_SNAPSHOT_CANDIDATE.json
-            ${{ runner.temp }}/block27/BLOCK27_ACTIVE_CHANGES.json
-            ${{ runner.temp }}/block27/BLOCK27_COVERAGE_MATRIX.json
-            ${{ runner.temp }}/block27/BLOCK27_ROLLBACK.json
-            ${{ runner.temp }}/block27/BLOCK27_FACTS_AFTER.json
+            ${{ github.workspace }}/.block27/BLOCK27_REPORT.json
+            ${{ github.workspace }}/.block27/BLOCK27_REPORT.md
+            ${{ github.workspace }}/.block27/BLOCK27_API_ASSISTS_REPORT.json
+            ${{ github.workspace }}/.block27/BLOCK27_API_ASSISTS_REPORT.md
+            ${{ github.workspace }}/.block27/BLOCK27_HISTORICAL_SNAPSHOT_CANDIDATE.json
+            ${{ github.workspace }}/.block27/BLOCK27_ACTIVE_SNAPSHOT_CANDIDATE.json
+            ${{ github.workspace }}/.block27/BLOCK27_ACTIVE_CHANGES.json
+            ${{ github.workspace }}/.block27/BLOCK27_COVERAGE_MATRIX.json
+            ${{ github.workspace }}/.block27/BLOCK27_ROLLBACK.json
+            ${{ github.workspace }}/.block27/BLOCK27_FACTS_AFTER.json
       - name: Remove temporary artifacts
         if: always()
         run: rm -rf "$BLOCK26_OUTPUT_ROOT"

@@ -78,7 +78,7 @@ async function main(): Promise<void> {
     }
     const playerIds = [...allPlayerIds];
     await pool.query(`UPDATE entities SET catalog_status = 'active', updated_at = NOW() WHERE id = ANY($1::text[])`, [playerIds]);
-    for (const entityId of playerIds) await pool.query(`INSERT INTO entity_game_profiles (entity_id,legacy_tier,playable_default,reason,metadata) VALUES ($1,'block23_lab',TRUE,'BLOQUE 23 isolated lab candidate player',$2) ON CONFLICT (entity_id) DO UPDATE SET playable_default = TRUE, reason = EXCLUDED.reason, metadata = entity_game_profiles.metadata || EXCLUDED.metadata, reviewed_at = NOW()`, [entityId, { block: '23', isolatedLab: true, noProductionMutation: true }]);
+    for (const entityId of playerIds) await pool.query(`INSERT INTO entity_game_profiles (entity_id,legacy_tier,playable_default,reason,metadata) VALUES ($1,'modern',TRUE,'BLOQUE 23 isolated lab candidate player',$2) ON CONFLICT (entity_id) DO UPDATE SET playable_default = TRUE, reason = EXCLUDED.reason, metadata = entity_game_profiles.metadata || EXCLUDED.metadata, reviewed_at = NOW()`, [entityId, { block: '23', isolatedLab: true, noProductionMutation: true }]);
 
     const challengeId = `block23-lab-daily-${sha({ runId, categories: categories.map((category) => category.slug), snapshots: [...bridgeSnapshots.values()].map((snapshot) => snapshot.id) }).slice(0, 16)}`;
     const decisionIds = [...new Map(categories.flatMap((category) => bridgeSnapshots.get(category.slug)?.rows ?? []).map((row) => [row.entityId, row])).values()].slice(0, 7).map((row) => row.entityId);

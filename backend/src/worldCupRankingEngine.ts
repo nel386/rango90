@@ -4,7 +4,7 @@ import { buildRanking } from './ranking.js';
 export const WORLD_CUP_CATEGORY_SLUG = 'world-cup-goals';
 export const WORLD_CUP_SCOPE_VERSION = 'world-cup-goals-final-tournaments-v1';
 export type WorldCupDataset = 'historical_base' | 'active_edition_weekly';
-export type WorldCupPhase = 'group' | 'round_of_16' | 'quarter_final' | 'semi_final' | 'third_place' | 'final' | 'unknown';
+export type WorldCupPhase = 'group' | 'round_of_32' | 'round_of_16' | 'quarter_final' | 'semi_final' | 'third_place' | 'final' | 'unknown';
 export type WorldCupSnapshotStatus = 'lab_provisional' | 'draft' | 'published' | 'superseded' | 'rolled_back';
 
 export type WorldCupPlayer = {
@@ -19,12 +19,15 @@ export type WorldCupFact = {
   id: string;
   edition: { id: string; year: number; label: string; isCurrentEdition: boolean };
   player: WorldCupPlayer | null;
+  sourcePlayerId?: string;
+  sourcePlayerName?: string;
   match: { id: string; date: string | null; homeTeam: string; awayTeam: string };
   phase: WorldCupPhase;
   goals: number;
   isOwnGoal: boolean;
   isShootout: boolean;
   scopeEligible?: boolean;
+  role?: 'primary' | 'contrast';
   sourceKey: string;
   sourceCaptureId: string;
   sourceRecordId: string;
@@ -51,12 +54,14 @@ export function editionForYear(year: number, currentYear?: number) {
 export function normalizeWorldCupPhase(round: string | null | undefined): WorldCupPhase {
   const value = normalizeWorldCupName(round ?? '');
   if (!value) return 'unknown';
-  if (/qualif|prelim|play off|playoff/u.test(value)) return 'unknown';
+  if (/third|third place/u.test(value)) return 'third_place';
+  if (/preliminary round|1st round|first round/u.test(value)) return 'round_of_16';
+  if (/qualif|play off|playoff/u.test(value)) return 'unknown';
   if (/group|first stage|second stage|league/u.test(value)) return 'group';
+  if (/round of 32|last 32|1 16/u.test(value)) return 'round_of_32';
   if (/round of 16|last 16|1 8/u.test(value)) return 'round_of_16';
   if (/quarter|1 4/u.test(value)) return 'quarter_final';
   if (/semi|1 2/u.test(value)) return 'semi_final';
-  if (/third|third place/u.test(value)) return 'third_place';
   if (/final/u.test(value)) return 'final';
   return 'unknown';
 }
@@ -103,12 +108,12 @@ export function detectWorldCupConflicts(facts: WorldCupFact[]): WorldCupConflict
 }
 export function buildWorldCupRanking(input: { facts: WorldCupFact[]; coverage?: WorldCupCoverage[]; editionStart?: number; editionEnd?: number }) {
   const start = input.editionStart ?? 1930; const end = input.editionEnd ?? 2026; const conflicts = detectWorldCupConflicts(input.facts); const conflictIds = new Set(conflicts.flatMap((conflict) => conflict.factIds)); const excludedOwnGoalFacts: string[] = []; const excludedUnknownPhaseFacts: string[] = []; const unresolvedIdentityFacts: string[] = []; const values = new Map<string, { name: string; rawValue: number; factIds: string[] }>();
-  for (const fact of input.facts) { if (fact.edition.year < start || fact.edition.year > end || fact.isShootout || fact.scopeEligible === false) continue; if (fact.isOwnGoal) { excludedOwnGoalFacts.push(fact.id); continue; } if (fact.phase === 'unknown') { excludedUnknownPhaseFacts.push(fact.id); continue; } if (!fact.player) continue; if (fact.player.resolution === 'normalized_name') unresolvedIdentityFacts.push(fact.id); if (conflictIds.has(fact.id)) continue; const current = values.get(fact.player.canonicalId) ?? { name: fact.player.displayName, rawValue: 0, factIds: [] }; current.rawValue += fact.goals; current.factIds.push(fact.id); values.set(fact.player.canonicalId, current); }
+  for (const fact of input.facts) { if (fact.role === 'contrast' || fact.edition.year < start || fact.edition.year > end || fact.isShootout || fact.scopeEligible === false) continue; if (fact.isOwnGoal) { excludedOwnGoalFacts.push(fact.id); continue; } if (fact.phase === 'unknown') { excludedUnknownPhaseFacts.push(fact.id); continue; } if (!fact.player) continue; if (fact.player.resolution === 'normalized_name') unresolvedIdentityFacts.push(fact.id); if (conflictIds.has(fact.id)) continue; const current = values.get(fact.player.canonicalId) ?? { name: fact.player.displayName, rawValue: 0, factIds: [] }; current.rawValue += fact.goals; current.factIds.push(fact.id); values.set(fact.player.canonicalId, current); }
   const ranking = buildRanking([...values.entries()].map(([entityId, value]) => ({ entityId, rawValue: value.rawValue })), { direction: 'desc', scoreCap: 100 }).map((entry) => { const value = values.get(entry.entityId)!; return { canonicalPlayerId: entry.entityId, playerName: value.name, rawValue: entry.rawValue, rank: entry.rank, tieGroup: entry.tieGroup, factIds: [...value.factIds].sort() }; });
   return { entries: ranking, conflicts, excludedOwnGoalFacts, excludedUnknownPhaseFacts, unresolvedIdentityFacts, coverage: input.coverage ?? [], coverageComplete: (input.coverage ?? []).length > 0 && input.coverage!.every((coverage) => coverage.complete) };
 }
 export function buildWorldCupSnapshot(input: { facts: WorldCupFact[]; dataset: WorldCupDataset; editionStart: number; editionEnd: number; parentSnapshotId?: string | null; coverage?: WorldCupCoverage[]; generatedAt?: string; status?: WorldCupSnapshotStatus; fixtureOnly?: boolean }): WorldCupSnapshot {
-  const result = buildWorldCupRanking(input); const generatedAt = input.generatedAt ?? new Date().toISOString(); const factIds = input.facts.map((fact) => fact.id).sort(); const contentSha256 = sha256(JSON.stringify({ dataset: input.dataset, factIds, ranking: result.entries, coverage: result.coverage }));
+  const result = buildWorldCupRanking(input); const generatedAt = input.generatedAt ?? new Date().toISOString(); const factIds = input.facts.filter((fact) => fact.role !== 'contrast').map((fact) => fact.id).sort(); const contentSha256 = sha256(JSON.stringify({ dataset: input.dataset, factIds, ranking: result.entries, coverage: result.coverage }));
   return { id: `world-cup-${input.dataset}-${generatedAt.replace(/[^0-9]/g, '').slice(0, 14)}-${contentSha256.slice(0, 12)}`, categorySlug: WORLD_CUP_CATEGORY_SLUG, scopeVersion: WORLD_CUP_SCOPE_VERSION, dataset: input.dataset, status: input.status ?? 'lab_provisional', editionStart: input.editionStart, editionEnd: input.editionEnd, parentSnapshotId: input.parentSnapshotId ?? null, rollbackOf: null, contentSha256, generatedAt, factIds, ranking: result.entries, conflicts: result.conflicts, coverage: result.coverage, coverageComplete: result.coverageComplete, unresolvedIdentityFacts: result.unresolvedIdentityFacts, excludedOwnGoalFacts: result.excludedOwnGoalFacts, excludedUnknownPhaseFacts: result.excludedUnknownPhaseFacts, metadata: { imagesUsed: false, published: false, sourceCount: new Set(input.facts.map((fact) => fact.sourceKey)).size, fixtureOnly: input.fixtureOnly } };
 }
 export function compareWorldCupRankings(previous: WorldCupEntry[], next: WorldCupEntry[]) { const oldById = new Map(previous.map((entry) => [entry.canonicalPlayerId, entry])); const newById = new Map(next.map((entry) => [entry.canonicalPlayerId, entry])); return [...new Set([...oldById.keys(), ...newById.keys()])].map((id) => ({ canonicalPlayerId: id, previousValue: oldById.get(id)?.rawValue ?? null, nextValue: newById.get(id)?.rawValue ?? null, previousRank: oldById.get(id)?.rank ?? null, nextRank: newById.get(id)?.rank ?? null })).filter((change) => change.previousValue !== change.nextValue || change.previousRank !== change.nextRank); }

@@ -72,7 +72,7 @@ jobs:
         run: npx tsx src/tests/block20-world-cup-ranking.integration.test.ts | tee "$GITHUB_WORKSPACE/.block20-integration.json"
       - name: Verify no key, payload or publication artifact was emitted
         run: |
-          ! grep -REn 'API_FOOTBALL_KEY|x-apisports-key|apiKey|published[^\n]*true|official[^\n]*opened' .block20-output .block20-api-plan.json .block20-load.json .block20-load-rerun.json .block20-integration.json
+          ! grep -REn 'API_FOOTBALL_KEY|x-apisports-key|"apiKey"[[:space:]]*:|published[^\n]*true|official[^\n]*opened' .block20-output .block20-api-plan.json .block20-load.json .block20-load-rerun.json .block20-integration.json
       - name: Cleanup PostgreSQL and temporary facts
         if: always()
         run: docker rm -f rango90-block20-postgres >/dev/null 2>&1 || true

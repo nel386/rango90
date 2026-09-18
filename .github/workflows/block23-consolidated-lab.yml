@@ -64,6 +64,13 @@ jobs:
           test -n "$run_id"
           mkdir -p "$BLOCK23_WORLD_CUP_ROOT"
           gh run download "$run_id" -n "block20-world-cup-rebuild-lab-$run_id" -D "$BLOCK23_WORLD_CUP_ROOT"
+          for name in BLOCK20_REPORT.json BLOCK20_SNAPSHOTS.json BLOCK20_FACTS.json; do
+            source_file=$(find "$BLOCK23_WORLD_CUP_ROOT" -type f -name "$name" -print -quit)
+            test -n "$source_file"
+            if [ "$source_file" != "$BLOCK23_WORLD_CUP_ROOT/$name" ]; then
+              cp "$source_file" "$BLOCK23_WORLD_CUP_ROOT/$name"
+            fi
+          done
           test -s "$BLOCK23_WORLD_CUP_ROOT/BLOCK20_REPORT.json"
           test -s "$BLOCK23_WORLD_CUP_ROOT/BLOCK20_SNAPSHOTS.json"
           test -s "$BLOCK23_WORLD_CUP_ROOT/BLOCK20_FACTS.json"

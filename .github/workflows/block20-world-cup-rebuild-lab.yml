@@ -88,6 +88,7 @@ jobs:
             ${{ github.workspace }}/.block20-load.json
             ${{ github.workspace }}/.block20-load-rerun.json
             ${{ github.workspace }}/.block20-integration.json
+            ${{ github.workspace }}/.block20-output/BLOCK20_FACTS.json
             ${{ github.workspace }}/.block20-output/BLOCK20_REPORT.json
             ${{ github.workspace }}/.block20-output/BLOCK20_REPORT.md
             ${{ github.workspace }}/.block20-output/BLOCK20_SNAPSHOTS.json

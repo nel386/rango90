@@ -13,7 +13,9 @@ import { renderMediaFallback } from './mediaFallback.js';
 import { SlidingWindowRateLimiter, rateLimitPolicy } from './rateLimit.js';
 
 const CHAMPIONS_CATEGORY_SLUG = 'uefa-champions-league-goals';
+const WORLD_CUP_CATEGORY_SLUG = 'world-cup-goals';
 type ChampionsLabDataset = 'historical_base' | 'active_season_weekly';
+type WorldCupLabDataset = 'historical_base' | 'active_edition_weekly';
 
 function playableTop200Predicate(entityAlias: string, profileAlias: string): string {
   return `(
@@ -138,6 +140,57 @@ async function getLabChampionsRanking(appDb: ContractDatabase, dataset: Champion
   };
 }
 
+async function getLabWorldCupRanking(appDb: ContractDatabase, dataset: WorldCupLabDataset, limit: number, runtimeMode: RuntimeMode) {
+  const snapshotResult = await appDb.query<{
+    id: string; category_slug: string; dataset: WorldCupLabDataset; edition_start: number; edition_end: number; status: string;
+    scope_version: string; content_sha256: string; generated_at: string; coverage_complete: boolean; fact_count: number; source_count: number; fixture_only: boolean;
+  }>(
+    `WITH latest AS (
+       SELECT rs.*
+         FROM world_cup_ranking_snapshots rs
+        WHERE rs.category_slug = $1 AND rs.dataset = $2
+          AND rs.status IN ('lab_provisional', 'draft') AND rs.coverage_complete = TRUE
+        ORDER BY rs.generated_at DESC LIMIT 1
+     ), fact_summary AS (
+       SELECT COUNT(DISTINCT f.id)::int AS fact_count, COUNT(DISTINCT f.source_key)::int AS source_count
+         FROM latest s JOIN world_cup_ranking_entries re ON re.snapshot_id = s.id
+         JOIN world_cup_goal_facts f ON f.id = ANY(re.fact_ids)
+     )
+     SELECT latest.id, latest.category_slug, latest.dataset, latest.edition_start, latest.edition_end,
+            latest.status, latest.scope_version, latest.content_sha256, latest.generated_at, latest.coverage_complete,
+            COALESCE(NULLIF(latest.metadata->>'factCount', '')::int, fact_summary.fact_count, 0)::int AS fact_count,
+            COALESCE(fact_summary.source_count, 0)::int AS source_count,
+            COALESCE((latest.metadata->>'fixtureOnly')::boolean, FALSE) AS fixture_only
+       FROM latest CROSS JOIN fact_summary`, [WORLD_CUP_CATEGORY_SLUG, dataset]
+  );
+  const snapshot = snapshotResult.rows[0];
+  if (!snapshot) return null;
+  const entries = await appDb.query(
+    `SELECT re.canonical_player_id AS entity_id, e.canonical_name, e.short_name, e.entity_type,
+            re.raw_value, re.rank, re.tie_group,
+            (e.catalog_status = 'active' AND COALESCE(egp.playable_default, FALSE)) AS playable,
+            COALESCE((SELECT jsonb_agg(jsonb_build_object(
+              'sourceKey', f.source_key, 'sourceCaptureId', f.source_capture_id, 'sourceRecordId', f.source_record_id,
+              'sourceUrl', f.evidence->>'sourceUrl', 'locator', f.evidence->>'locator', 'contentSha256', f.evidence->>'contentSha256'
+            ) ORDER BY f.source_key, f.source_capture_id, f.source_record_id)
+              FROM world_cup_goal_facts f WHERE f.id = ANY(re.fact_ids)), '[]'::jsonb) AS sources
+       FROM world_cup_ranking_entries re JOIN entities e ON e.id = re.canonical_player_id
+       LEFT JOIN entity_game_profiles egp ON egp.entity_id = e.id
+      WHERE re.snapshot_id = $1 AND re.rank <= $2 ORDER BY re.rank, e.canonical_name`, [snapshot.id, limit]
+  );
+  const isHistorical = snapshot.dataset === 'historical_base';
+  return {
+    category: snapshot.category_slug, categoryLabelEs: 'Goles históricos — Mundial masculino', categoryLabelEn: 'All-time goals — Men\'s World Cup',
+    rankingScope: isHistorical ? 'historical_snapshot' : 'active_season_weekly', snapshotId: snapshot.id, mode: runtimeMode, status: 'provisional',
+    dataset: snapshot.dataset, editionStart: snapshot.edition_start, editionEnd: snapshot.edition_end,
+    scopeLabelEs: snapshot.fixture_only ? 'Fixture controlado de lab; no es cobertura histórica' : (isHistorical ? 'Histórico: fases finales masculinas' : 'Actualización semanal: histórico + edición activa'),
+    scopeLabelEn: snapshot.fixture_only ? 'Controlled lab fixture; not historical coverage' : (isHistorical ? 'History: men\'s final tournaments' : 'Weekly update: history + active edition'),
+    coverageComplete: snapshot.coverage_complete, factCount: snapshot.fact_count, sourceCount: snapshot.source_count, dataVersion: snapshot.scope_version,
+    contentSha256: snapshot.content_sha256, generatedAt: snapshot.generated_at,
+    entries: entries.rows.map((row) => ({ ...row, score_value: Math.min(Number(row.rank), 100), image_url: null, image_status: 'unavailable', review_status: 'missing', rights_status: 'missing', is_publishable: false, image_source_url: null, image_license_name: null, sources: row.sources ?? [] }))
+  };
+}
+
 export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Date; runtimeMode?: RuntimeMode } = {}) {
   const app = Fastify({ logger: true, trustProxy: config.trustProxy });
   const appDb = options.gameDb ?? pool;
@@ -242,8 +295,14 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
               AND lab_champions.status IN ('lab_provisional', 'draft')
               AND lab_champions.coverage_complete = TRUE
          ))
-       ORDER BY c.slug`,
-      [runtimeMode, CHAMPIONS_CATEGORY_SLUG]
+         AND NOT ($1::text = 'lab' AND c.slug = $3 AND EXISTS (
+           SELECT 1 FROM world_cup_ranking_snapshots lab_world_cup
+            WHERE lab_world_cup.category_slug = $3
+              AND lab_world_cup.status IN ('lab_provisional', 'draft')
+              AND lab_world_cup.coverage_complete = TRUE
+         ))
+         ORDER BY c.slug`,
+      [runtimeMode, CHAMPIONS_CATEGORY_SLUG, WORLD_CUP_CATEGORY_SLUG]
     );
     const categories = result.rows.map((row) => ({ ...row, availability: row.snapshot_status === 'draft' ? 'provisional' : 'official' }));
     if (runtimeMode === 'lab') {
@@ -262,15 +321,33 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
         [CHAMPIONS_CATEGORY_SLUG]
       );
       if (candidate.rows[0]) categories.push({ ...candidate.rows[0], availability: 'provisional' });
+      const worldCupCandidate = await appDb.query(
+        `SELECT id, category_slug AS slug, 'Goles históricos — Mundial masculino' AS label_es,
+                'All-time goals — Men''s World Cup' AS label_en, 'player' AS entity_type, 'goals' AS metric_key,
+                'competition_all_time' AS scope_kind, '{}'::jsonb AS scope, 'desc' AS ranking_direction,
+                'competition' AS tie_policy, 100 AS score_cap, 1 AS definition_version,
+                'Hechos partido/jugador de fases finales masculinas; clasificatorias y tandas excluidas.' AS definition_md,
+                'draft' AS status, 'lab_provisional' AS snapshot_status, id AS snapshot_id
+           FROM world_cup_ranking_snapshots
+          WHERE category_slug = $1 AND dataset = 'active_edition_weekly'
+            AND status IN ('lab_provisional', 'draft') AND coverage_complete = TRUE
+          ORDER BY generated_at DESC LIMIT 1`, [WORLD_CUP_CATEGORY_SLUG]
+      );
+      if (worldCupCandidate.rows[0]) categories.push({ ...worldCupCandidate.rows[0], availability: 'provisional' });
     }
     return { categories };
   });
 
   app.get('/v1/rankings/:categorySlug', async (request, reply) => {
     const params = z.object({ categorySlug: z.string().min(1) }).parse(request.params);
-    const query = z.object({ limit: z.coerce.number().int().min(1).max(200).default(200), dataset: z.enum(['historical_base', 'active_season_weekly']).optional() }).parse(request.query);
+    const query = z.object({ limit: z.coerce.number().int().min(1).max(200).default(200), dataset: z.enum(['historical_base', 'active_season_weekly', 'active_edition_weekly']).optional() }).parse(request.query);
     if (runtimeMode === 'lab' && params.categorySlug === CHAMPIONS_CATEGORY_SLUG) {
-      const candidate = await getLabChampionsRanking(appDb, query.dataset ?? 'active_season_weekly', query.limit, runtimeMode);
+      const candidate = await getLabChampionsRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_season_weekly'), query.limit, runtimeMode);
+      if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
+      return candidate;
+    }
+    if (runtimeMode === 'lab' && params.categorySlug === WORLD_CUP_CATEGORY_SLUG) {
+      const candidate = await getLabWorldCupRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_edition_weekly'), query.limit, runtimeMode);
       if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
       return candidate;
     }

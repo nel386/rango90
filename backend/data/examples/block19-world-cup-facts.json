@@ -1,0 +1,37 @@
+{
+  "kind": "controlled_fixture_only",
+  "facts": [
+    {
+      "id": "block19-fact-2022-a",
+      "edition": { "id": "world-cup:2022", "year": 2022, "label": "2022", "isCurrentEdition": false },
+      "player": { "canonicalId": "world-cup:player:fixture-a", "displayName": "Fixture Player A", "normalizedName": "fixture player a", "sourceKey": "block19-fixture", "sourcePlayerId": "a", "resolution": "explicit" },
+      "match": { "id": "block19:2022:match-1", "date": "2022-12-18", "homeTeam": "Fixture Home", "awayTeam": "Fixture Away" },
+      "phase": "final", "goals": 2, "isOwnGoal": false, "isShootout": false,
+      "sourceKey": "block19-fixture", "sourceCaptureId": "block19-capture-v1", "sourceRecordId": "fixture:2022:match-1:player-a", "evidence": { "sourceUrl": "https://fixture.invalid/block19/world-cup", "locator": "fixture:2022:match-1:player-a", "contentSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }, "capturedAt": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "block19-fact-2022-b",
+      "edition": { "id": "world-cup:2022", "year": 2022, "label": "2022", "isCurrentEdition": false },
+      "player": { "canonicalId": "world-cup:player:fixture-b", "displayName": "Fixture Player B", "normalizedName": "fixture player b", "sourceKey": "block19-fixture", "sourcePlayerId": "b", "resolution": "explicit" },
+      "match": { "id": "block19:2022:match-2", "date": "2022-12-17", "homeTeam": "Fixture Home", "awayTeam": "Fixture Away" },
+      "phase": "semi_final", "goals": 2, "isOwnGoal": false, "isShootout": false,
+      "sourceKey": "block19-fixture", "sourceCaptureId": "block19-capture-v1", "sourceRecordId": "fixture:2022:match-2:player-b", "evidence": { "sourceUrl": "https://fixture.invalid/block19/world-cup", "locator": "fixture:2022:match-2:player-b", "contentSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }, "capturedAt": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "block19-fact-2022-own-goal",
+      "edition": { "id": "world-cup:2022", "year": 2022, "label": "2022", "isCurrentEdition": false },
+      "player": null,
+      "match": { "id": "block19:2022:match-2", "date": "2022-12-17", "homeTeam": "Fixture Home", "awayTeam": "Fixture Away" },
+      "phase": "semi_final", "goals": 1, "isOwnGoal": true, "isShootout": false,
+      "sourceKey": "block19-fixture", "sourceCaptureId": "block19-capture-v1", "sourceRecordId": "fixture:2022:match-2:own-goal", "evidence": { "sourceUrl": "https://fixture.invalid/block19/world-cup", "locator": "fixture:2022:match-2:own-goal", "contentSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }, "capturedAt": "2026-09-18T00:00:00.000Z"
+    },
+    {
+      "id": "block19-fact-2026-a",
+      "edition": { "id": "world-cup:2026", "year": 2026, "label": "2026", "isCurrentEdition": true },
+      "player": { "canonicalId": "world-cup:player:fixture-a", "displayName": "Fixture Player A", "normalizedName": "fixture player a", "sourceKey": "block19-fixture", "sourcePlayerId": "a", "resolution": "explicit" },
+      "match": { "id": "block19:2026:match-1", "date": "2026-06-20", "homeTeam": "Fixture Home", "awayTeam": "Fixture Away" },
+      "phase": "group", "goals": 1, "isOwnGoal": false, "isShootout": false,
+      "sourceKey": "block19-fixture", "sourceCaptureId": "block19-capture-v1", "sourceRecordId": "fixture:2026:match-1:player-a", "evidence": { "sourceUrl": "https://fixture.invalid/block19/world-cup", "locator": "fixture:2026:match-1:player-a", "contentSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }, "capturedAt": "2026-09-18T00:00:00.000Z"
+    }
+  ]
+}

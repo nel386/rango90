@@ -1,0 +1,87 @@
+name: BLOQUE 19 · ranking Mundial en lab
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  world-cup-ranking-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55444/rango90_qa_block19_runtime
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55444/rango90_qa_block19
+      BLOCK19_FACTS_FILE: ${{ github.workspace }}/backend/data/examples/block19-world-cup-facts.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+      - name: Build frontend and backend
+        run: |
+          npm run build
+          npm --prefix backend run build
+      - name: Plan API-Football coverage (redacted)
+        working-directory: backend
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: npx tsx src/tools/block19-api-football-plan.ts | tee "$GITHUB_WORKSPACE/BLOCK19_API_PLAN.json"
+      - name: Start temporary PostgreSQL
+        run: |
+          docker run -d --name rango90-block19-postgres -e POSTGRES_DB=rango90_qa_block19 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55444:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block19-postgres pg_isready -U rango90 -d rango90_qa_block19 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block19-postgres pg_isready -U rango90 -d rango90_qa_block19
+      - name: Apply migrations to isolated PostgreSQL
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+        run: npm run migrate
+      - name: Verify absent candidate has no fallback
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: npx tsx src/tests/block19-world-cup-missing-snapshot.integration.test.ts | tee "$GITHUB_WORKSPACE/BLOCK19_MISSING_SNAPSHOT.json"
+      - name: Load controlled lab candidate
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+        run: npx tsx src/tools/block19-load-lab-candidate.ts | tee "$GITHUB_WORKSPACE/BLOCK19_LOAD.json"
+      - name: Verify World Cup endpoint and official guard
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: ${{ env.RANGO90_ISOLATED_DATABASE_URL }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: npx tsx src/tests/block19-world-cup-ranking.integration.test.ts | tee "$GITHUB_WORKSPACE/BLOCK19_REPORT.json"
+      - name: Verify evidence is redacted and production is untouched
+        run: |
+          ! grep -En 'API_FOOTBALL_KEY|x-apisports-key|published[^\n]*true|official[^\n]*opened' BLOCK19_API_PLAN.json BLOCK19_LOAD.json BLOCK19_REPORT.json
+      - name: Cleanup PostgreSQL and fixtures
+        if: always()
+        run: docker rm -f rango90-block19-postgres >/dev/null 2>&1 || true
+      - name: Upload redacted Block 19 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block19-world-cup-ranking-lab-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ${{ github.workspace }}/BLOCK19_API_PLAN.json
+            ${{ github.workspace }}/BLOCK19_LOAD.json
+            ${{ github.workspace }}/BLOCK19_REPORT.json
+            ${{ github.workspace }}/BLOCK19_MISSING_SNAPSHOT.json

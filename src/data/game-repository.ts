@@ -40,7 +40,7 @@ export type CategoryRankingEntry = {
   generatedAt?: string;
   sources?: Array<{ sourceKey: string; sourceCaptureId: string; sourceRecordId: string; sourceUrl?: string; locator?: string; contentSha256?: string }>;
 };
-export type CategoryRankingDataset = "historical_base" | "active_season_weekly";
+export type CategoryRankingDataset = "historical_base" | "active_season_weekly" | "active_edition_weekly";
 export type CategoryRanking = {
   category: { slug: string; labelEs: string; labelEn: string };
   rankingScope: "historical_snapshot" | "active_season_weekly";

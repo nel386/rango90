@@ -1,0 +1,142 @@
+name: BLOQUE 23 · versión lab consolidada Champions + Mundial
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  consolidated-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55447/rango90_qa_block23
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55447/rango90_qa_block23
+      BLOCK23_CHAMPIONS_ROOT: ${{ github.workspace }}/.block23/champions
+      BLOCK23_WORLD_CUP_ROOT: ${{ github.workspace }}/.block23/world-cup
+      BLOCK23_OUTPUT_ROOT: ${{ github.workspace }}/.block23/output
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+
+      - name: Build frontend and backend
+        run: |
+          npm run build
+          npm --prefix backend run build
+          npm --prefix backend run test:frontend-runtime
+
+      - name: Download latest successful real Champions candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          run_id=$(gh run list --workflow block17-champions-weekly.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          test -n "$run_id"
+          mkdir -p "$BLOCK23_CHAMPIONS_ROOT"
+          gh run download "$run_id" -n "block17-champions-weekly-$run_id" -D "$BLOCK23_CHAMPIONS_ROOT"
+          test -s "$BLOCK23_CHAMPIONS_ROOT/BLOCK17_REPORT.json"
+          test -s "$BLOCK23_CHAMPIONS_ROOT/BLOCK17_HISTORICAL_SNAPSHOT_CANDIDATE.json"
+          test -s "$BLOCK23_CHAMPIONS_ROOT/BLOCK17_WEEKLY_SNAPSHOT_CANDIDATE.json"
+          test -s "$BLOCK23_CHAMPIONS_ROOT/BLOCK17_FACTS_AFTER.json"
+
+      - name: Download latest successful real World Cup candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          run_id=$(gh run list --workflow block20-world-cup-rebuild-lab.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          test -n "$run_id"
+          mkdir -p "$BLOCK23_WORLD_CUP_ROOT"
+          gh run download "$run_id" -n "block20-world-cup-rebuild-lab-$run_id" -D "$BLOCK23_WORLD_CUP_ROOT"
+          test -s "$BLOCK23_WORLD_CUP_ROOT/BLOCK20_REPORT.json"
+          test -s "$BLOCK23_WORLD_CUP_ROOT/BLOCK20_SNAPSHOTS.json"
+          test -s "$BLOCK23_WORLD_CUP_ROOT/BLOCK20_FACTS.json"
+
+      - name: Start temporary PostgreSQL
+        run: |
+          set -euo pipefail
+          docker run -d --name rango90-block23-postgres -e POSTGRES_DB=rango90_qa_block23 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55447:5432 postgres:16
+          for attempt in $(seq 1 40); do
+            docker exec rango90-block23-postgres pg_isready -U rango90 -d rango90_qa_block23 >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec rango90-block23-postgres pg_isready -U rango90 -d rango90_qa_block23
+
+      - name: Apply migrations and seed lab catalog
+        working-directory: backend
+        run: |
+          npm run migrate
+          npm run seed
+
+      - name: Load real Champions snapshots into isolated lab
+        working-directory: backend
+        env:
+          BLOCK18_CANDIDATE_ROOT: ${{ env.BLOCK23_CHAMPIONS_ROOT }}
+        run: npx tsx src/tools/block18-load-lab-candidate.ts
+
+      - name: Load real World Cup snapshots into isolated lab
+        working-directory: backend
+        env:
+          BLOCK20_INPUT_ROOT: ${{ env.BLOCK23_WORLD_CUP_ROOT }}
+          BLOCK20_OUTPUT_ROOT: ${{ env.BLOCK23_OUTPUT_ROOT }}
+        run: |
+          mkdir -p "$BLOCK20_OUTPUT_ROOT"
+          npx tsx src/tools/block20-load-lab-candidate.ts
+
+      - name: Repeat both loads to verify idempotency
+        working-directory: backend
+        env:
+          BLOCK18_CANDIDATE_ROOT: ${{ env.BLOCK23_CHAMPIONS_ROOT }}
+          BLOCK20_INPUT_ROOT: ${{ env.BLOCK23_WORLD_CUP_ROOT }}
+          BLOCK20_OUTPUT_ROOT: ${{ env.BLOCK23_OUTPUT_ROOT }}
+        run: |
+          npx tsx src/tools/block18-load-lab-candidate.ts
+          npx tsx src/tools/block20-load-lab-candidate.ts
+
+      - name: Materialize only the ephemeral lab bridge and testOnly challenge
+        working-directory: backend
+        run: npx tsx src/tools/block23-materialize-lab.ts | tee "$GITHUB_WORKSPACE/BLOCK23_MATERIALIZATION.json"
+
+      - name: Compare endpoints, frontend contract, challenge and official guard
+        working-directory: backend
+        run: npx tsx src/tests/block23-consolidated-lab.integration.test.ts | tee "$GITHUB_WORKSPACE/BLOCK23_REPORT.json"
+
+      - name: Assert artifacts are redacted and publication stayed closed
+        run: |
+          set -euo pipefail
+          if rg -n 'API_FOOTBALL_KEY|x-apisports-key|Authorization:|Bearer ' .block23 BLOCK23_*.json; then exit 1; fi
+          if rg -n '"status"\s*:\s*"published"|"officialModeOpened"\s*:\s*true|"officialSnapshotCreated"\s*:\s*true' .block23 BLOCK23_*.json; then exit 1; fi
+          test "$(docker ps -aq -f name=rango90-block23-postgres | wc -l)" -eq 1
+
+      - name: Cleanup PostgreSQL, fixtures and candidate files
+        if: always()
+        run: |
+          docker rm -f rango90-block23-postgres >/dev/null 2>&1 || true
+          rm -rf "$GITHUB_WORKSPACE/.block23"
+
+      - name: Upload redacted consolidated lab evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block23-consolidated-lab-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ${{ github.workspace }}/BLOCK23_REPORT.json
+            ${{ github.workspace }}/BLOCK23_MATERIALIZATION.json

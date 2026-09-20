@@ -1,0 +1,104 @@
+name: BLOQUE 32 · tarjetas por tandas con cuota segura
+
+on:
+  workflow_dispatch:
+    inputs:
+      known_quota_remaining:
+        description: 'Última cuota confirmada; usar 0 mientras esté agotada'
+        required: false
+        default: '0'
+      max_requests:
+        description: 'Presupuesto máximo de esta ejecución'
+        required: false
+        default: '0'
+      competition:
+        description: 'Tanda independiente; all solo para planificación segura'
+        required: false
+        type: choice
+        options:
+          - all
+          - bundesliga
+          - ligue-1
+          - primeira-liga
+        default: all
+  schedule:
+    - cron: '0 11 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: block32-club-cards-quota-safe
+  cancel-in-progress: false
+
+jobs:
+  quota-safe-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RANGO90_RUNTIME_MODE: lab
+      NODE_ENV: test
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55459/rango90_qa_block32
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55459/rango90_qa_block32
+      BLOCK32_KNOWN_QUOTA_REMAINING: ${{ inputs.known_quota_remaining || '0' }}
+      BLOCK32_MAX_REQUESTS: ${{ inputs.max_requests || '0' }}
+      BLOCK32_COMPETITION: ${{ inputs.competition || 'all' }}
+      BLOCK32_QUOTA_RESERVE: '0'
+      BLOCK32_OUTPUT_ROOT: ${{ github.workspace }}/.block32
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+      - name: Start ephemeral PostgreSQL
+        run: |
+          set -euo pipefail
+          docker run -d --name rango90-block32-postgres -e POSTGRES_DB=rango90_qa_block32 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55459:5432 postgres:16
+          for attempt in $(seq 1 40); do docker exec rango90-block32-postgres pg_isready -U rango90 -d rango90_qa_block32 >/dev/null 2>&1 && break; sleep 1; done
+          docker exec rango90-block32-postgres pg_isready -U rango90 -d rango90_qa_block32
+      - name: Apply migrations in isolated PostgreSQL
+        working-directory: backend
+        run: npm run migrate
+      - name: Verify quota-safe planner without external calls
+        working-directory: backend
+        env:
+          BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block32/provider-gate
+        run: |
+          npx tsx src/tools/block31-api-football-club-cards.ts
+          npx tsx src/tools/block32-club-cards.ts
+      - name: Run quota and batch fixtures
+        working-directory: backend
+        run: |
+          npx tsx src/tests/club-cards-batch-planner.test.ts
+          npx tsx src/tests/block32-club-cards.test.ts
+      - name: Run repository checks
+        run: |
+          npm run typecheck
+          npm run verify:i18n
+          npm run build
+          npm --prefix backend run build
+          git diff --check
+      - name: Redact and upload lab report
+        if: always()
+        run: |
+          set -euo pipefail
+          test -f .block32/BLOCK32_REPORT.json
+          if rg -n 'x-apisports-key|API_FOOTBALL_KEY|secretPrinted": true|rawPayloadsStored": true' .block32; then exit 1; fi
+      - name: Upload redacted artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block32-club-cards-${{ github.run_id }}
+          path: .block32/
+          if-no-files-found: error
+      - name: Cleanup ephemeral PostgreSQL
+        if: always()
+        run: docker rm -f rango90-block32-postgres >/dev/null 2>&1 || true

@@ -99,6 +99,7 @@ jobs:
           name: block32-club-cards-${{ github.run_id }}
           path: .block32/
           if-no-files-found: error
+          include-hidden-files: true
       - name: Cleanup ephemeral PostgreSQL
         if: always()
         run: docker rm -f rango90-block32-postgres >/dev/null 2>&1 || true

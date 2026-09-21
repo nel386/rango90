@@ -349,6 +349,9 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
   const servedCategories = row.test_only
     ? categories.filter((category) => !unavailableProvisionalSlugs.has(category.slug))
     : categories;
+  const servedDecisions = row.test_only
+    ? decisionsResult.rows.slice(0, servedCategories.length)
+    : decisionsResult.rows;
   const servedCategoryIds = new Set(servedCategories.map((category) => category.category_id));
   const servedAnswers = answersResult.rows.filter((answer) => servedCategoryIds.has(answer.category_id));
   const servedChallengeSha256 = calculateChallengeSha256({
@@ -360,7 +363,7 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
     timeLimitSeconds: toNumber(row.time_limit_seconds),
     scoreCap: toNumber(row.score_cap),
     categories: servedCategories.map((category) => ({ ordinal: category.category_ordinal, categoryId: category.category_id, rankingSnapshotId: category.ranking_snapshot_id, slug: category.slug, entityType: category.entity_type })),
-    decisions: decisionsResult.rows.map((decision) => ({ ordinal: decision.decision_ordinal, entityId: decision.entity_id, entityType: decision.entity_type })),
+    decisions: servedDecisions.map((decision, ordinal) => ({ ordinal, entityId: decision.entity_id, entityType: decision.entity_type })),
     answers: servedAnswers.map((answer) => ({ decisionOrdinal: answer.decision_ordinal, categoryId: answer.category_id, scoreValue: toNumber(answer.score_value) }))
   });
   const answersByDecision = new Map<number, Record<string, number>>();
@@ -376,8 +379,8 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
     timeLimitSeconds: toNumber(row.time_limit_seconds),
     scoreCap: toNumber(row.score_cap),
     categories: servedCategories.map((category) => ({ slug: category.slug, entityType: category.entity_type })),
-    decisions: decisionsResult.rows.map((decision) => ({
-      ordinal: decision.decision_ordinal,
+    decisions: servedDecisions.map((decision, ordinal) => ({
+      ordinal,
       entityId: decision.entity_id,
       entityType: decision.entity_type,
       scoreByCategory: answersByDecision.get(decision.decision_ordinal) ?? {}
@@ -405,7 +408,7 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
     runtimeMode,
     engine,
     categories: servedCategories,
-    decisions: decisionsResult.rows
+    decisions: servedDecisions.map((decision, ordinal) => ({ ...decision, decision_ordinal: ordinal }))
   };
 }
 

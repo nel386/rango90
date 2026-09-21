@@ -17,7 +17,7 @@ async function load(): Promise<void> {
   const facts = (await readJson<{ facts: ChampionsGoalFact[] }>('BLOCK17_FACTS_AFTER.json')).facts;
   const historical = await readJson<ChampionsSnapshot>('BLOCK17_HISTORICAL_SNAPSHOT_CANDIDATE.json');
   const weekly = await readJson<ChampionsSnapshot>('BLOCK17_WEEKLY_SNAPSHOT_CANDIDATE.json');
-  const pool = new pg.Pool({ connectionString: databaseUrl, max: 2 });
+  const pool = new pg.Pool({ connectionString: databaseUrl, max: 2, ssl: explicitTargetLoad ? { rejectUnauthorized: false } : undefined });
   try {
     await pool.query('BEGIN');
     const sources = new Map<string, ChampionsGoalFact>();

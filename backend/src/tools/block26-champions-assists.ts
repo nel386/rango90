@@ -22,6 +22,7 @@ type InputFile = { facts?: ChampionsAssistFact[]; activeCoverageComplete?: boole
 type JsonRecord = Record<string, unknown>;
 const databaseUrl = process.env.DATABASE_URL?.trim() ?? '';
 const runtimeMode = process.env.RANGO90_RUNTIME_MODE?.trim() ?? '';
+const explicitTargetLoad = process.env.RANGO90_ALLOW_TARGET_DATABASE_LOAD === 'true' && process.env.RANGO90_TARGET_DATABASE_CONFIRMATION === 'RANGO90_BETA_LAB_2026';
 const outputRoot = resolve(process.env.BLOCK26_OUTPUT_ROOT?.trim() || 'audits/block26');
 const artifactPrefix = process.env.BLOCK29_RUN === '1' ? 'BLOCK29' : process.env.BLOCK28_RUN === '1' ? 'BLOCK28' : process.env.BLOCK27_RUN === '1' ? 'BLOCK27' : 'BLOCK26';
 const blockLabel = process.env.BLOCK29_RUN === '1' ? 'BLOQUE 29' : process.env.BLOCK28_RUN === '1' ? 'BLOQUE 28' : process.env.BLOCK27_RUN === '1' ? 'BLOQUE 27' : 'BLOQUE 26';
@@ -51,7 +52,6 @@ async function readOptionalJson(path: string): Promise<JsonRecord> {
 }
 function assertIsolatedDatabase(): void {
   if (!databaseUrl) throw new Error('BLOQUE 26 requiere DATABASE_URL aislada');
-  const explicitTargetLoad = process.env.RANGO90_ALLOW_TARGET_DATABASE_LOAD === 'true' && process.env.RANGO90_TARGET_DATABASE_CONFIRMATION === 'RANGO90_BETA_LAB_2026';
   if (!['lab', 'test'].includes(runtimeMode) && !explicitTargetLoad) throw new Error('BLOQUE 26 solo admite RANGO90_RUNTIME_MODE=lab/test o confirmación explícita del destino beta');
   const parsed = new URL(databaseUrl);
   if (!['localhost', '127.0.0.1', '::1'].includes(parsed.hostname) && !explicitTargetLoad) throw new Error('BLOQUE 26 solo admite PostgreSQL localhost/efímero o confirmación explícita del destino beta');
@@ -110,7 +110,7 @@ function historicalCoverage(facts: ChampionsAssistFact[]) {
 async function main(): Promise<void> {
   assertIsolatedDatabase();
   const historical = await readInput(historicalFactsFile); const active = await readInput(activeFactsFile); const seed = await readInput(seedFactsFile); const apiReport = await readOptionalJson(apiReportFile); const localPreviousReport = await readOptionalJson(resolve(outputRoot, artifact('REPORT.json'))); const externalPreviousReport = await readOptionalJson(previousReportFile); const previousReport = Object.keys(externalPreviousReport).length ? externalPreviousReport : localPreviousReport; const previousSnapshotRecord = await readOptionalJson(previousSnapshotFile);
-  const pool = new pg.Pool({ connectionString: databaseUrl, max: 2, connectionTimeoutMillis: 5_000 });
+  const pool = new pg.Pool({ connectionString: databaseUrl, max: 2, connectionTimeoutMillis: 5_000, ssl: explicitTargetLoad ? { rejectUnauthorized: false } : undefined });
   try {
     await pool.query('BEGIN');
     const incoming = [...seed.facts, ...historical.facts, ...active.facts];

@@ -73,7 +73,7 @@ async function main(): Promise<void> {
       const persistedScopes: JsonRecord[] = [];
       for (const scope of scopes) {
         const scopedSnapshot = buildClubCardsSnapshot({ facts: scope.facts, cardKind, dataset: 'active_weekly', seasonStart: activeSeason, seasonEnd: activeSeason, coverage: scope.rows, coverageComplete: providerIsCompleteScope && scope.complete, activeSeasonStatus: providerStatus as ClubCardsSnapshot['metadata']['activeSeasonStatus'], seasonInProgress: apiReport.seasonInProgress === true, observedFacts, observedPages, generatedAt: new Date().toISOString(), competitionFilter: scope.filter, redTypesDifferentiated: apiReport.redTypesDifferentiated === true });
-        if (scope.filter !== 'observed_scope' && (scope.complete || providerStatus === 'provisional_active_season')) {
+        if (scope.filter !== 'observed_scope' && (scope.filter !== 'complete_scope' ? (scope.complete || providerStatus === 'provisional_active_season') : scope.complete)) {
           const scopedPersisted = await persistSnapshot(pool, scopedSnapshot, 'created', { providerStatus, activeSeasonStatus: providerStatus, seasonInProgress: apiReport.seasonInProgress === true, observedFacts, observedPages, scopeFilter: scope.filter, preservedOnQuotaInsufficient: false });
           persistedScopes.push({ filter: scope.filter, snapshotId: scopedSnapshot.id, status: scopedSnapshot.metadata.candidateStatus, persisted: scopedPersisted });
         }

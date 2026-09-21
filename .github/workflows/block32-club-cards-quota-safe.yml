@@ -113,7 +113,12 @@ jobs:
         run: |
           set -euo pipefail
           docker run -d --name rango90-block37-postgres -e POSTGRES_DB=rango90_qa_block37 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55459:5432 postgres:16
-          for attempt in $(seq 1 40); do docker exec rango90-block37-postgres pg_isready -U rango90 -d rango90_qa_block37 >/dev/null 2>&1 && break; sleep 1; done
+          ready=0
+          for attempt in $(seq 1 120); do
+            if docker exec rango90-block37-postgres pg_isready -U rango90 -d rango90_qa_block37 >/dev/null 2>&1; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then docker logs rango90-block37-postgres; exit 1; fi
           docker exec rango90-block37-postgres pg_isready -U rango90 -d rango90_qa_block37
       - name: Apply migrations in isolated PostgreSQL
         if: ${{ inputs.run_batches == true && inputs.quota_probe != true }}

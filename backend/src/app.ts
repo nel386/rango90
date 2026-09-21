@@ -377,7 +377,7 @@ async function getLabClubCardsRanking(appDb: ContractDatabase, cardKind: 'yellow
 
 async function getLabClubCardsScopeStatus(appDb: ContractDatabase, season = 2026) {
   const result = await appDb.query<{ card_kind: 'yellow' | 'red'; competition_filter: string | null; id: string; generated_at: string; content_sha256: string; metadata: Record<string, unknown> }>(
-    `SELECT DISTINCT ON (card_kind, competition_filter) card_kind, competition_filter, id, generated_at, content_sha256
+    `SELECT DISTINCT ON (card_kind, competition_filter) card_kind, competition_filter, id, generated_at, content_sha256, metadata
        FROM club_card_ranking_snapshots
       WHERE dataset = 'active_weekly' AND season_start = $1 AND status IN ('lab_provisional', 'draft')
       ORDER BY card_kind, competition_filter, generated_at DESC`, [season]

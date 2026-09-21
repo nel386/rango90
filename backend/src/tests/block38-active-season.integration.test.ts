@@ -26,6 +26,9 @@ try {
   assert.equal(aggregate.statusCode, 404); assert.equal(JSON.parse(aggregate.body).reason, 'no_available_snapshot');
   const catalog = await lab.inject({ method: 'GET', url: '/v1/rankings/catalog?season=2026' });
   assert.equal(catalog.statusCode, 200);
+  const catalogBody = JSON.parse(catalog.body) as { categories: Array<{ slug: string; scopeDetails?: { provisional?: Array<{ id: string; status: string }> } }> };
+  const yellowCards = catalogBody.categories.find((category) => category.slug === 'club-career-yellow-cards');
+  assert.equal(yellowCards?.scopeDetails?.provisional?.some((item) => item.id === competitionId && item.status === 'provisional_active_season'), true);
   const status = await lab.inject({ method: 'GET', url: '/v1/rankings/club-cards/status?season=2026' });
   assert.equal(status.statusCode, 200);
   await mkdir(dirname(reportPath), { recursive: true });

@@ -398,9 +398,12 @@ type VariantEntryRow = DailyChallengeRankingEntry & {
 
 async function buildDailyVariant(db: QueryExecutor, challenge: LoadedChallenge, selectionSeed: string): Promise<LoadedChallenge> {
   if (challenge.kind !== 'daily') return challenge;
-  // Keep older test-only/mixed boards playable while the next seven-player
-  // daily snapshot is being materialized. New official daily boards use the
-  // independent player draw below.
+  // A provisional/test-only board already contains its audited real-player
+  // decisions. Do not rebuild it from legacy ranking_entries: that table may
+  // not contain the append-only candidate snapshots, and rebuilding would
+  // incorrectly turn a valid challenge into daily_variant_unavailable.
+  if (challenge.testOnly) return challenge;
+  // Non-test daily boards use the independent player draw below.
   if (challenge.categories.length !== 7 || challenge.categories.some((category) => category.entity_type !== 'player')) return challenge;
   const snapshotIds = challenge.categories.map((category) => category.ranking_snapshot_id);
   const entries = await db.query<VariantEntryRow>(

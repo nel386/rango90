@@ -36,7 +36,12 @@ async function load(): Promise<void> {
     for (const fact of sources.values()) await pool.query(`INSERT INTO sources (key, name, source_type, base_url, usage_notes, rights_status) VALUES ($1, $2, 'reference', $3, 'BLOQUE 18 lab candidate; no official publication.', 'review_required') ON CONFLICT (key) DO NOTHING`, [fact.sourceKey, `Champions ${fact.sourceKey}`, fact.evidence.sourceUrl]);
     for (const fact of captures.values()) await pool.query(`INSERT INTO champions_source_captures (id, source_key, captured_at, source_url, content_sha256, data_version, metadata) VALUES ($1, $2, $3, $4, $5, 'block17-facts-v1', $6) ON CONFLICT (id) DO NOTHING`, [fact.sourceCaptureId, fact.sourceKey, fact.capturedAt, fact.evidence.sourceUrl, fact.evidence.contentSha256 ?? fact.sourceCaptureId, { importedFrom: 'block17-candidate', rawPayloadStored: false }]);
     for (const fact of editions.values()) await pool.query(`INSERT INTO champions_editions (id, season_start, season_end, season_label, era, competition_name, include_qualifying, is_current_season, scope_version) VALUES ($1, $2, $3, $4, $5, $6, FALSE, $7, $8) ON CONFLICT (id) DO NOTHING`, [fact.edition.id, fact.edition.seasonStart, fact.edition.seasonEnd, fact.edition.seasonLabel, fact.edition.era, fact.edition.competitionName, fact.edition.isCurrentSeason, 'uefa-champions-league-goals-facts-v1']);
-    for (const fact of entities.values()) await pool.query(`INSERT INTO entities (id, entity_type, canonical_name, catalog_status) VALUES ($1, 'player', $2, 'excluded_from_game') ON CONFLICT (id) DO NOTHING`, [fact.player.canonicalId, fact.player.displayName]);
+    await pool.query(`
+      INSERT INTO entities (id, entity_type, canonical_name, catalog_status)
+      SELECT id, 'player', canonical_name, 'excluded_from_game'
+      FROM jsonb_to_recordset($1::jsonb) AS rows(id text, canonical_name text)
+      ON CONFLICT (id) DO NOTHING
+    `, [JSON.stringify([...entities.values()].map((fact) => ({ id: fact.player.canonicalId, canonical_name: fact.player.displayName })))]);
     // The historical candidate contains ~21k facts. Send them as one typed
     // JSONB recordset so a remote beta database is not forced through one
     // network round-trip per fact.

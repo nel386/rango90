@@ -1,0 +1,131 @@
+name: Deploy Rango90 runtime mode
+
+on:
+  workflow_dispatch:
+    inputs:
+      runtime_mode:
+        description: Runtime mode for the existing Render service
+        required: true
+        type: choice
+        options:
+          - lab
+          - official
+        default: lab
+      commit_sha:
+        description: Commit to build and deploy
+        required: true
+        default: 3ba1555d6da89dec8977cb45b68c6a69ab42f113
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-runtime-mode
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+      RUNTIME_MODE: ${{ inputs.runtime_mode }}
+      COMMIT_SHA: ${{ inputs.commit_sha }}
+      API_ORIGIN: https://rango90.onrender.com
+    steps:
+      - name: Validate target commit exists on master
+        run: |
+          set -euo pipefail
+          git init --quiet render-target
+          git -C render-target remote add origin "https://github.com/${{ github.repository }}.git"
+          git -C render-target fetch --quiet --no-tags origin master
+          git -C render-target cat-file -e "$COMMIT_SHA^{commit}"
+          git -C render-target merge-base --is-ancestor "$COMMIT_SHA" origin/master
+
+      - name: Validate Render credentials without printing them
+        run: |
+          test -n "$RENDER_API_KEY"
+          test -n "$RENDER_SERVICE_ID"
+
+      - name: Set runtime mode on the existing service
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error \
+            --request PUT \
+            --url "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/env-vars/RANGO90_RUNTIME_MODE" \
+            --header "Authorization: Bearer ${RENDER_API_KEY}" \
+            --header 'Content-Type: application/json' \
+            --data "{\"value\":\"${RUNTIME_MODE}\"}" \
+            --output "$RUNNER_TEMP/runtime-mode-response.json"
+          test "$(jq -r '.value // empty' "$RUNNER_TEMP/runtime-mode-response.json")" = "$RUNTIME_MODE"
+
+      - name: Deploy the selected commit
+        id: deploy
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
+            --header "Authorization: Bearer ${RENDER_API_KEY}" \
+            --header 'Content-Type: application/json' \
+            --data "{\"commitId\":\"${COMMIT_SHA}\"}" \
+            --output "$RUNNER_TEMP/deploy-response.json"
+          deploy_id="$(jq -r '.id // empty' "$RUNNER_TEMP/deploy-response.json")"
+          test -n "$deploy_id"
+          echo "deploy_id=$deploy_id" >> "$GITHUB_OUTPUT"
+          echo "Render deploy queued: $deploy_id"
+
+      - name: Wait for Render deployment
+        run: |
+          set -euo pipefail
+          deploy_id="${{ steps.deploy.outputs.deploy_id }}"
+          for attempt in $(seq 1 60); do
+            status="$(curl --fail-with-body --silent --show-error \
+              --url "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys/${deploy_id}" \
+              --header "Authorization: Bearer ${RENDER_API_KEY}" | jq -r '.status // empty')"
+            echo "Render deployment status: $status"
+            case "$status" in
+              live) exit 0 ;;
+              build_failed|update_failed|pre_deploy_failed|canceled|deactivated) \
+                echo "Render deployment failed with status $status" >&2; exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo 'Render deployment did not become live within the timeout.' >&2
+          exit 1
+
+      - name: Verify runtime contract and beta boundary
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            health="$(curl --silent --show-error --max-time 15 "$API_ORIGIN/health" || true)"
+            config="$(curl --silent --show-error --max-time 15 "$API_ORIGIN/v1/config" || true)"
+            if echo "$health" | jq -e --arg mode "$RUNTIME_MODE" '.runtimeMode == $mode' >/dev/null 2>&1 \
+              && echo "$config" | jq -e --arg mode "$RUNTIME_MODE" '.runtimeMode == $mode' >/dev/null 2>&1; then
+              break
+            fi
+            echo "Runtime contract not ready: attempt $attempt/30"
+            sleep 10
+          done
+          echo "$health" | jq -e --arg mode "$RUNTIME_MODE" '.runtimeMode == $mode'
+          echo "$config" | jq -e --arg mode "$RUNTIME_MODE" '.runtimeMode == $mode'
+
+          if [ "$RUNTIME_MODE" = lab ]; then
+            daily_status="$(curl --silent --show-error --max-time 15 -o "$RUNNER_TEMP/daily.json" -w '%{http_code}' "$API_ORIGIN/v1/challenges/daily")"
+            test "$daily_status" = 200
+            jq -e '.challenge.runtimeMode == "lab" and .challenge.provisionalData == true' "$RUNNER_TEMP/daily.json"
+
+            for category in uefa-champions-league-goals world-cup-goals; do
+              ranking_status="$(curl --silent --show-error --max-time 15 -o "$RUNNER_TEMP/${category}.json" -w '%{http_code}' "$API_ORIGIN/v1/rankings/${category}")"
+              test "$ranking_status" = 200
+              jq -e '.mode == "lab" and (.entries | type == "array")' "$RUNNER_TEMP/${category}.json"
+            done
+          else
+            daily_status="$(curl --silent --show-error --max-time 15 -o "$RUNNER_TEMP/daily.json" -w '%{http_code}' "$API_ORIGIN/v1/challenges/daily")"
+            test "$daily_status" = 503
+            jq -e '.error == "official_not_ready"' "$RUNNER_TEMP/daily.json"
+          fi
+
+          echo "Runtime verification passed for mode=$RUNTIME_MODE; no seed/import step was executed."

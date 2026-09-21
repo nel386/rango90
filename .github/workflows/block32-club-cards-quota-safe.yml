@@ -88,6 +88,7 @@ jobs:
       BLOCK32_MAX_REQUESTS: ${{ inputs.max_requests || '0' }}
       BLOCK32_COMPETITION: ${{ inputs.competition || 'all' }}
       BLOCK32_QUOTA_RESERVE: '2'
+      BLOCK31_QUOTA_RESERVE: '2'
       BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block32/provider
       BLOCK32_OUTPUT_ROOT: ${{ github.workspace }}/.block32
       BLOCK37_OUTPUT_ROOT: ${{ github.workspace }}/.block37
@@ -133,6 +134,7 @@ jobs:
           planned=$(node -e "const fs=require('fs'); const report=JSON.parse(fs.readFileSync(process.env.BLOCK32_OUTPUT_ROOT + '/BLOCK32_REPORT.json','utf8')); const batch=report.batches.find((row)=>row.key===process.env.BLOCK32_COMPETITION); process.stdout.write(batch?.status || 'missing');")
           if [ "$planned" != "planned" ]; then echo "No se inicia la carga: tanda=$planned"; exit 0; fi
           npx tsx src/tools/block31-api-football-club-cards.ts
+          npx tsx src/tools/block32-club-cards.ts
       - name: Write safe no-batch report
         if: ${{ inputs.run_batches != true }}
         working-directory: backend

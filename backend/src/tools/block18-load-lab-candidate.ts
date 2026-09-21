@@ -45,23 +45,7 @@ async function load(): Promise<void> {
     // The historical candidate contains ~21k facts. Send them as one typed
     // JSONB recordset so a remote beta database is not forced through one
     // network round-trip per fact.
-    await pool.query(`
-      INSERT INTO champions_goal_facts
-        (id, edition_id, canonical_player_id, source_player_id, player_name_at_source,
-         match_id, match_date, home_team, away_team, phase, goals, source_key,
-         source_capture_id, source_record_id, evidence, captured_at)
-      SELECT id, edition_id, canonical_player_id, source_player_id, player_name_at_source,
-             match_id, match_date, home_team, away_team, phase, goals, source_key,
-             source_capture_id, source_record_id, evidence, captured_at
-      FROM jsonb_to_recordset($1::jsonb) AS rows(
-        id text, edition_id text, canonical_player_id text, source_player_id text,
-        player_name_at_source text, match_id text, match_date date, home_team text,
-        away_team text, phase text, goals integer, source_key text,
-        source_capture_id text, source_record_id text, evidence jsonb,
-        captured_at timestamptz
-      )
-      ON CONFLICT (id) DO NOTHING
-    `, [JSON.stringify(facts.map((fact) => ({
+    const factRows = facts.map((fact) => ({
       id: fact.id,
       edition_id: fact.edition.id,
       canonical_player_id: fact.player.canonicalId,
@@ -78,7 +62,27 @@ async function load(): Promise<void> {
       source_record_id: fact.sourceRecordId,
       evidence: fact.evidence,
       captured_at: fact.capturedAt,
-    }))) ]);
+    }));
+    const insertFacts = (batch: unknown[]) => pool.query(`
+      INSERT INTO champions_goal_facts
+        (id, edition_id, canonical_player_id, source_player_id, player_name_at_source,
+         match_id, match_date, home_team, away_team, phase, goals, source_key,
+         source_capture_id, source_record_id, evidence, captured_at)
+      SELECT id, edition_id, canonical_player_id, source_player_id, player_name_at_source,
+             match_id, match_date, home_team, away_team, phase, goals, source_key,
+             source_capture_id, source_record_id, evidence, captured_at
+      FROM jsonb_to_recordset($1::jsonb) AS rows(
+        id text, edition_id text, canonical_player_id text, source_player_id text,
+        player_name_at_source text, match_id text, match_date date, home_team text,
+        away_team text, phase text, goals integer, source_key text,
+        source_capture_id text, source_record_id text, evidence jsonb,
+        captured_at timestamptz
+      )
+      ON CONFLICT (id) DO NOTHING
+    `, [JSON.stringify(batch)]);
+    for (let offset = 0; offset < factRows.length; offset += 250) {
+      await insertFacts(factRows.slice(offset, offset + 250));
+    }
     for (const snapshot of [historical, weekly]) {
       let parentSnapshotId = snapshot.parentSnapshotId;
       if (parentSnapshotId && !(await pool.query('SELECT 1 FROM champions_ranking_snapshots WHERE id = $1', [parentSnapshotId])).rowCount) parentSnapshotId = null;

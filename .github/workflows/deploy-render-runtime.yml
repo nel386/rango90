@@ -112,20 +112,15 @@ jobs:
           echo "$health" | jq -e --arg mode "$RUNTIME_MODE" '.runtimeMode == $mode'
           echo "$config" | jq -e --arg mode "$RUNTIME_MODE" '.runtimeMode == $mode'
 
-          if [ "$RUNTIME_MODE" = lab ]; then
-            daily_status="$(curl --silent --show-error --max-time 15 -o "$RUNNER_TEMP/daily.json" -w '%{http_code}' "$API_ORIGIN/v1/challenges/daily")"
-            test "$daily_status" = 200
-            jq -e '.challenge.runtimeMode == "lab" and .challenge.provisionalData == true' "$RUNNER_TEMP/daily.json"
+          daily_status="$(curl --silent --show-error --max-time 15 -o "$RUNNER_TEMP/daily.json" -w '%{http_code}' "$API_ORIGIN/v1/challenges/daily")"
+          test "$daily_status" = 200
+          jq -e '.challenge.provisionalData == true and (.challenge.testOnly == true or .challenge.runtimeMode == "lab" or .challenge.runtimeMode == "official")' "$RUNNER_TEMP/daily.json"
+          ! jq -e '.error == "official_not_ready"' "$RUNNER_TEMP/daily.json"
 
-            for category in uefa-champions-league-goals world-cup-goals; do
-              ranking_status="$(curl --silent --show-error --max-time 15 -o "$RUNNER_TEMP/${category}.json" -w '%{http_code}' "$API_ORIGIN/v1/rankings/${category}")"
-              test "$ranking_status" = 200
-              jq -e '.mode == "lab" and (.entries | type == "array")' "$RUNNER_TEMP/${category}.json"
-            done
-          else
-            daily_status="$(curl --silent --show-error --max-time 15 -o "$RUNNER_TEMP/daily.json" -w '%{http_code}' "$API_ORIGIN/v1/challenges/daily")"
-            test "$daily_status" = 503
-            jq -e '.error == "official_not_ready"' "$RUNNER_TEMP/daily.json"
-          fi
+          for category in uefa-champions-league-goals world-cup-goals; do
+            ranking_status="$(curl --silent --show-error --max-time 15 -o "$RUNNER_TEMP/${category}.json" -w '%{http_code}' "$API_ORIGIN/v1/rankings/${category}")"
+            test "$ranking_status" = 200
+            jq -e '(.entries | type == "array") and (.status != "official_not_ready")' "$RUNNER_TEMP/${category}.json"
+          done
 
-          echo "Runtime verification passed for mode=$RUNTIME_MODE; no seed/import step was executed."
+          echo "Runtime verification passed for diagnostic mode=$RUNTIME_MODE; beta product is not blocked by runtime mode and no seed/import step was executed."

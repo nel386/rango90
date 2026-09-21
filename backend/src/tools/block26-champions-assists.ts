@@ -85,11 +85,50 @@ async function insertFacts(pool: pg.Pool, facts: ChampionsAssistFact[]): Promise
     await pool.query(`INSERT INTO entities (id,entity_type,canonical_name,catalog_status) VALUES ($1,'player',$2,'excluded_from_game') ON CONFLICT (id) DO NOTHING`, [fact.player.canonicalId, fact.player.displayName]);
     await pool.query(`INSERT INTO entity_game_profiles (entity_id,playable_default,reason,metadata) VALUES ($1,FALSE,'BLOQUE 26 ranking fact', $2) ON CONFLICT (entity_id) DO NOTHING`, [fact.player.canonicalId, { source: 'block26', metric: 'assists' }]);
   }
-  for (const fact of facts) {
-    const matchDate = fact.match.date && /^\d{4}-\d{2}-\d{2}$/u.test(fact.match.date) ? fact.match.date : null;
-    const result = await pool.query(`INSERT INTO champions_assist_facts (id,edition_id,canonical_player_id,source_player_id,player_name_at_source,match_id,event_id,match_date,home_team,away_team,phase,assists,source_key,source_capture_id,source_record_id,source_type,verification_status,evidence,captured_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) ON CONFLICT DO NOTHING`, [fact.id, fact.edition.id, fact.player.canonicalId, fact.player.sourcePlayerId, fact.player.displayName, fact.match.id, fact.eventId, matchDate, fact.match.homeTeam, fact.match.awayTeam, fact.phase, fact.assists, fact.sourceKey, fact.sourceCaptureId, fact.sourceRecordId, fact.sourceType, fact.verificationStatus, fact.evidence, fact.capturedAt]);
-    if ((result.rowCount ?? 0) > 0) added += 1; else skipped += 1;
+  const rows = facts.map((fact) => ({
+    id: fact.id,
+    edition_id: fact.edition.id,
+    canonical_player_id: fact.player.canonicalId,
+    source_player_id: fact.player.sourcePlayerId,
+    player_name_at_source: fact.player.displayName,
+    match_id: fact.match.id,
+    event_id: fact.eventId,
+    match_date: fact.match.date && /^\d{4}-\d{2}-\d{2}$/u.test(fact.match.date) ? fact.match.date : null,
+    home_team: fact.match.homeTeam,
+    away_team: fact.match.awayTeam,
+    phase: fact.phase,
+    assists: fact.assists,
+    source_key: fact.sourceKey,
+    source_capture_id: fact.sourceCaptureId,
+    source_record_id: fact.sourceRecordId,
+    source_type: fact.sourceType,
+    verification_status: fact.verificationStatus,
+    evidence: fact.evidence,
+    captured_at: fact.capturedAt,
+  }));
+  for (let offset = 0; offset < rows.length; offset += 250) {
+    await pool.query(`
+      INSERT INTO champions_assist_facts
+        (id,edition_id,canonical_player_id,source_player_id,player_name_at_source,
+         match_id,event_id,match_date,home_team,away_team,phase,assists,source_key,
+         source_capture_id,source_record_id,source_type,verification_status,evidence,captured_at)
+      SELECT id,edition_id,canonical_player_id,source_player_id,player_name_at_source,
+             match_id,event_id,match_date,home_team,away_team,phase,assists,source_key,
+             source_capture_id,source_record_id,source_type,verification_status,evidence,captured_at
+      FROM jsonb_to_recordset($1::jsonb) AS rows(
+        id text, edition_id text, canonical_player_id text, source_player_id text,
+        player_name_at_source text, match_id text, event_id text, match_date date,
+        home_team text, away_team text, phase text, assists integer, source_key text,
+        source_capture_id text, source_record_id text, source_type text,
+        verification_status text, evidence jsonb, captured_at timestamptz
+      )
+      ON CONFLICT DO NOTHING
+    `, [JSON.stringify(rows.slice(offset, offset + 250))]);
   }
+  // `facts` is already the idempotent `imported.added` subset. Existing rows
+  // are accounted for by the reconciliation performed before this function.
+  added = facts.length;
+  skipped = 0;
   return { added, skipped };
 }
 async function persistSnapshot(pool: pg.Pool, snapshot: ChampionsAssistSnapshot, action: 'created' | 'rollback_requested' = 'created', metadataExtra: JsonRecord = {}): Promise<{ inserted: boolean; entries: number }> {

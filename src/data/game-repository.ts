@@ -112,6 +112,18 @@ export class RepositoryError extends Error {
   }
 }
 
+export type RepositoryErrorView = "official_not_ready" | "official_test_only" | "ranking_not_available" | "timeout" | "offline" | "generic";
+
+export function classifyRepositoryError(error: Pick<RepositoryError, "code" | "kind" | "status"> | null): RepositoryErrorView {
+  if (!error) return "generic";
+  if (error.code === "official_not_ready") return "official_not_ready";
+  if (error.code === "official_test_challenge_rejected") return "official_test_only";
+  if (error.code === "ranking_not_available") return "ranking_not_available";
+  if (error.kind === "timeout" || error.code === "request_timeout" || error.status === 408) return "timeout";
+  if (error.kind === "offline" || error.code === "request_cancelled") return "offline";
+  return "generic";
+}
+
 function isNullableFiniteNumber(value: unknown): value is number | null {
   return value === null || (typeof value === "number" && Number.isFinite(value));
 }

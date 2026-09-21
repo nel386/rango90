@@ -15,6 +15,14 @@ En el despliegue actual, los valores son:
 - Pages: `https://nel386.github.io/rango90/es/`
 - API: `https://rango90.onrender.com`
 
+## Separación official/lab
+
+La publicación pública mantiene `NEXT_PUBLIC_API_BASE_URL` apuntando al backend `official`. No se cambia automáticamente a `lab` cuando faltan snapshots o retos publicables.
+
+Para pruebas personales se puede crear una compilación separada definiendo explícitamente `NEXT_PUBLIC_API_BASE_URL` con el origen HTTPS de un backend de laboratorio configurado con `RANGO90_RUNTIME_MODE=lab`. Ese backend debe usar su propia base aislada. No se debe cambiar la variable pública ni desplegar un backend lab sobre la URL oficial.
+
+El cliente muestra los estados `official_not_ready`, `ranking_not_available`, timeout y error de red por separado; ninguno activa un fallback silencioso entre `official` y `lab`.
+
 ## Pasos en GitHub
 
 1. Subir el proyecto a la rama `main` o `master`.

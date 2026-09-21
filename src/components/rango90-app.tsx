@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
-import { createGameRepository, RepositoryError, type AuthUser, type CategoryRanking, type CategoryRankingDataset, type DecisionFeedback, type DuelState, type GameResult, type GameSession, type LeaderboardEntry, type RankingCategoryOption, type RuntimeConfig } from "@/data/game-repository";
+import { classifyRepositoryError, createGameRepository, RepositoryError, type AuthUser, type CategoryRanking, type CategoryRankingDataset, type DecisionFeedback, type DuelState, type GameResult, type GameSession, type LeaderboardEntry, type RankingCategoryOption, type RuntimeConfig } from "@/data/game-repository";
 import type { Locale, MockCategory, MockChallenge, MockEntity } from "@/data/game-types";
 import { canStartGame, canSubmitDecision, feedbackAdvance, transitionGameFlow, type GameFlowEvent, type GameFlowState } from "@/data/game-flow";
 import { imageRequestIsCurrent, prefetchEntityIndexes, preloadImage } from "@/data/image-preload";
@@ -200,8 +200,9 @@ export function Rango90App({ locale }: { locale: Locale }) {
       if (!mountedRef.current || generation !== challengeLoadGenerationRef.current || (error instanceof RepositoryError && error.code === "request_cancelled")) return;
       const normalized = error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline");
       setRepositoryError(normalized);
+      const errorView = classifyRepositoryError(normalized);
       setChallengeLoadState("error");
-      transitionFlow({ type: "ERROR", officialNotReady: normalized.code === "official_not_ready" });
+      transitionFlow({ type: "ERROR", officialNotReady: errorView === "official_not_ready" || errorView === "official_test_only" });
       recordRuntimeMetric("request_error", startedAt, { operation: "daily_challenge", code: normalized.code, kind: normalized.kind });
     }
   }, [transitionFlow]);
@@ -527,8 +528,9 @@ export function Rango90App({ locale }: { locale: Locale }) {
       if (mountedRef.current) {
         const normalized = error instanceof RepositoryError ? error : new RepositoryError("Backend unavailable", "offline");
         setRepositoryError(normalized);
-        setChallengeLoadState(normalized.code === "official_not_ready" ? "error" : "ready");
-        transitionFlow({ type: "ERROR", officialNotReady: normalized.code === "official_not_ready" });
+        const errorView = classifyRepositoryError(normalized);
+        setChallengeLoadState(errorView === "official_not_ready" || errorView === "official_test_only" ? "error" : "ready");
+        transitionFlow({ type: "ERROR", officialNotReady: errorView === "official_not_ready" || errorView === "official_test_only" });
         setView("home");
         recordRuntimeMetric("request_error", startedAt, { operation: "start_game", code: normalized.code, kind: normalized.kind });
       }
@@ -728,11 +730,14 @@ export function Rango90App({ locale }: { locale: Locale }) {
   }
 
   function repositoryErrorMessage(error: RepositoryError | null) {
+    const errorView = classifyRepositoryError(error);
+    if (errorView === "official_not_ready") return t("states.officialNotReady.copy");
+    if (errorView === "official_test_only") return t("states.officialNotReady.testOnly");
+    if (errorView === "ranking_not_available") return t("categoryRanking.unavailable");
+    if (errorView === "timeout") return t("errors.timeout");
+    if (errorView === "offline") return t("errors.offline");
     if (!error) return t("errors.generic");
     if (error.code === "daily_challenge_not_found") return t("states.error.noChallenge");
-    if (error.code === "official_not_ready") return t("states.officialNotReady.copy");
-    if (error.code === "official_test_challenge_rejected") return t("states.officialNotReady.testOnly");
-    if (error.code === "ranking_not_available") return t("categoryRanking.unavailable");
     if (error.code === "quota_insufficient") return locale === "es" ? "No disponible: cuota agotada. Se conserva el último snapshot válido." : "Unavailable: quota exhausted. The last valid snapshot is preserved.";
     return t(`errors.${error.kind}` as "errors.generic");
   }
@@ -992,7 +997,9 @@ export function Rango90App({ locale }: { locale: Locale }) {
   }
 
   function renderChallengeError() {
-    if (repositoryError?.code === "official_not_ready") {
+    if (!repositoryError) return null;
+    const errorView = classifyRepositoryError(repositoryError);
+    if (errorView === "official_not_ready" || errorView === "official_test_only") {
       const details = repositoryError.details as { blockingCategories?: Array<{ slug: string; reasons: string[] }>; snapshotRequired?: string } | undefined;
       return <section className="state-view state-view-official" role="alert"><div className="state-index">OFF / 01</div><p className="kicker">{t("states.officialNotReady.kicker")}</p><h1>{t("states.officialNotReady.title")}</h1><p>{repositoryErrorMessage(repositoryError)}</p>{details?.blockingCategories?.length ? <div className="official-blockers"><strong>{t("states.officialNotReady.blockers")}</strong>{details.blockingCategories.map((blocker) => <div key={blocker.slug}><b>{blocker.slug}</b><span>{blocker.reasons.join(" ")}</span></div>)}</div> : null}<p className="micro-note">{details?.snapshotRequired ?? t("states.officialNotReady.snapshot")}</p><button className="button button-primary" type="button" onClick={retryChallenge}>{t("states.error.retry")}</button></section>;
     }

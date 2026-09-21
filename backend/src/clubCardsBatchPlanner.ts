@@ -7,7 +7,7 @@ export const CLUB_CARD_COMPETITIONS = [
   { key: 'primeira-liga', providerId: 94, name: 'Primeira Liga' }
 ] as const;
 
-export type ClubCardBatchStatus = 'planned' | 'skipped' | 'quota_insufficient' | 'complete' | 'partial' | 'failed' | 'provider_unavailable';
+export type ClubCardBatchStatus = 'planned' | 'skipped' | 'quota_insufficient' | 'complete' | 'provisional_active_season' | 'partial' | 'failed' | 'provider_unavailable';
 export type ClubCardBatch = {
   key: string;
   providerId: number;

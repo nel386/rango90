@@ -1,4 +1,4 @@
-name: BLOQUE 37 · probe y tandas de tarjetas con cuota segura
+name: BLOQUE 38 · temporadas activas de tarjetas con cuota segura
 
 on:
   workflow_dispatch:
@@ -55,11 +55,16 @@ on:
           - ligue-1
           - primeira-liga
         default: all
+      previous_run_id:
+        description: 'Run anterior cuyo artefacto contiene hechos preservados; solo se usa para Bundesliga'
+        required: false
+        default: '35566594309'
   schedule:
     - cron: '0 11 * * 1'
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: block37-club-cards-quota-safe
@@ -90,6 +95,7 @@ jobs:
       BLOCK32_QUOTA_RESERVE: '2'
       BLOCK31_QUOTA_RESERVE: '2'
       BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block32/provider
+      BLOCK31_LOADER_OUTPUT_ROOT: ${{ github.workspace }}/.block32/loader
       BLOCK32_OUTPUT_ROOT: ${{ github.workspace }}/.block32
       BLOCK37_OUTPUT_ROOT: ${{ github.workspace }}/.block37
     steps:
@@ -139,7 +145,31 @@ jobs:
           planned=$(node -e "const fs=require('fs'); const report=JSON.parse(fs.readFileSync(process.env.BLOCK32_OUTPUT_ROOT + '/BLOCK32_REPORT.json','utf8')); const batch=report.batches.find((row)=>row.key===process.env.BLOCK32_COMPETITION); process.stdout.write(batch?.status || 'missing');")
           if [ "$planned" != "planned" ]; then echo "No se inicia la carga: tanda=$planned"; exit 0; fi
           npx tsx src/tools/block31-api-football-club-cards.ts
-          npx tsx src/tools/block32-club-cards.ts
+      - name: Download preserved facts for Bundesliga
+        if: ${{ inputs.run_batches == true && inputs.quota_probe != true && inputs.competition == 'bundesliga' && inputs.previous_run_id != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: block37-club-cards-${{ inputs.previous_run_id }}
+          path: ${{ runner.temp }}/block38-previous
+          run-id: ${{ inputs.previous_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Load active-season candidate twice in isolated PostgreSQL
+        if: ${{ inputs.run_batches == true && inputs.quota_probe != true }}
+        working-directory: backend
+        env:
+          BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block32/loader
+          BLOCK31_FACTS_FILE: ${{ github.workspace }}/.block32/provider/BLOCK31_FACTS.json
+          BLOCK31_API_REPORT_FILE: ${{ github.workspace }}/.block32/provider/BLOCK31_REPORT.json
+          BLOCK31_SEED_FACTS_FILE: ${{ runner.temp }}/block38-previous/.block32/provider/BLOCK31_FACTS.json
+          BLOCK31_PREVIOUS_REPORT_FILE: ''
+          BLOCK31_PREVIOUS_SNAPSHOT_FILE: ''
+        run: |
+          npx tsx src/tools/block31-club-cards.ts
+          npx tsx src/tools/block31-club-cards.ts
+      - name: Write final quota batch report
+        if: ${{ inputs.run_batches == true && inputs.quota_probe != true }}
+        working-directory: backend
+        run: npx tsx src/tools/block32-club-cards.ts
       - name: Write safe no-batch report
         if: ${{ inputs.run_batches != true }}
         working-directory: backend
@@ -150,6 +180,10 @@ jobs:
           npx tsx src/tests/club-cards-batch-planner.test.ts
           npx tsx src/tests/block32-club-cards.test.ts
           npx tsx src/tests/block37-quota-probe.test.ts
+          npx tsx src/tests/block38-active-season.test.ts
+          if [ "$BLOCK37_RUN_BATCHES" = "true" ]; then
+            RANGO90_ISOLATED_DATABASE_URL="$DATABASE_URL" BLOCK38_COMPETITION="$BLOCK32_COMPETITION" BLOCK38_OUTPUT_ROOT="$GITHUB_WORKSPACE/.block32" npx tsx src/tests/block38-active-season.integration.test.ts
+          fi
       - name: Run repository checks
         run: |
           npm run typecheck

@@ -6,6 +6,10 @@ export type ImagePreloadTarget = {
   signal?: AbortSignal;
 };
 
+export function prefetchEntityIndexes(entityCount: number, currentIndex: number): number[] {
+  return [currentIndex, currentIndex + 1].filter((index, position, indexes) => index >= 0 && index < entityCount && indexes.indexOf(index) === position);
+}
+
 export function preloadImage(target: ImagePreloadTarget, ImageCtor: typeof Image = Image): Promise<ImagePreloadResult> {
   const primary = target.primary ?? target.fallback;
   if (!primary) return Promise.resolve('empty');

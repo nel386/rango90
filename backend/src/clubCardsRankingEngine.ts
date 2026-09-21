@@ -70,7 +70,7 @@ export type ClubCardsSnapshot = {
   coverageComplete: boolean;
   unresolvedIdentityFacts: string[];
   conflicts: string[];
-  metadata: { published: false; candidateStatus: 'candidate' | 'candidate_not_sufficient'; redTypesDifferentiated: boolean };
+  metadata: { published: false; candidateStatus: 'candidate' | 'candidate_not_sufficient'; activeSeasonStatus?: 'complete_scope' | 'provisional_active_season' | 'partial_missing_provider_data' | 'quota_insufficient' | 'provider_unavailable'; seasonInProgress?: boolean; observedFacts?: number; observedPages?: number; redTypesDifferentiated: boolean };
 };
 
 export function stableClubCardsJson(value: unknown): string {
@@ -112,6 +112,10 @@ export function buildClubCardsSnapshot(input: {
   competitionFilter?: string | null;
   conflicts?: string[];
   redTypesDifferentiated?: boolean;
+  activeSeasonStatus?: ClubCardsSnapshot['metadata']['activeSeasonStatus'];
+  seasonInProgress?: boolean;
+  observedFacts?: number;
+  observedPages?: number;
 }): ClubCardsSnapshot {
   const eligible = input.facts.filter((fact) => fact.scopeEligible && fact.matchType === 'official_competition' && fact.verificationStatus === 'confirmed' && fact.canonicalPlayerId && (cardValue(fact, input.cardKind) ?? 0) > 0);
   const unresolvedIdentityFacts = input.facts.filter((fact) => !fact.canonicalPlayerId || fact.verificationStatus === 'unresolved').map((fact) => fact.id);
@@ -128,7 +132,9 @@ export function buildClubCardsSnapshot(input: {
   const categorySlug: ClubCardsSnapshot['categorySlug'] = input.cardKind === 'yellow' ? CLUB_YELLOW_CARDS_CATEGORY_SLUG : CLUB_RED_CARDS_CATEGORY_SLUG;
   const payload = { categorySlug, cardKind: input.cardKind, scopeVersion: CLUB_CARDS_SCOPE_VERSION, dataset: input.dataset, seasonStart: input.seasonStart, seasonEnd: input.seasonEnd, competitionFilter: input.competitionFilter ?? null, factIds: input.facts.map((fact) => fact.id).sort(), ranking, coverage: input.coverage, coverageComplete: input.coverageComplete, unresolvedIdentityFacts, conflicts };
   const contentSha256 = sha256(stableClubCardsJson(payload)); const generatedAt = input.generatedAt ?? new Date().toISOString();
-  return { id: `club-cards-${input.cardKind}-snapshot-${contentSha256.slice(0, 32)}`, categorySlug: payload.categorySlug, cardKind: input.cardKind, scopeVersion: CLUB_CARDS_SCOPE_VERSION, dataset: input.dataset, status: 'lab_provisional', seasonStart: input.seasonStart, seasonEnd: input.seasonEnd, competitionFilter: input.competitionFilter ?? null, parentSnapshotId: null, rollbackOf: null, contentSha256, generatedAt, factIds: payload.factIds, ranking, coverage: input.coverage, coverageComplete: input.coverageComplete, unresolvedIdentityFacts, conflicts, metadata: { published: false, candidateStatus: input.coverageComplete && conflicts.length === 0 && unresolvedIdentityFacts.length === 0 ? 'candidate' : 'candidate_not_sufficient', redTypesDifferentiated: input.redTypesDifferentiated ?? false } };
+  const validFacts = conflicts.length === 0 && unresolvedIdentityFacts.length === 0;
+  const candidateStatus = validFacts && (input.coverageComplete || input.activeSeasonStatus === 'provisional_active_season' || input.activeSeasonStatus === 'complete_scope') ? 'candidate' : 'candidate_not_sufficient';
+  return { id: `club-cards-${input.cardKind}-snapshot-${contentSha256.slice(0, 32)}`, categorySlug: payload.categorySlug, cardKind: input.cardKind, scopeVersion: CLUB_CARDS_SCOPE_VERSION, dataset: input.dataset, status: 'lab_provisional', seasonStart: input.seasonStart, seasonEnd: input.seasonEnd, competitionFilter: input.competitionFilter ?? null, parentSnapshotId: null, rollbackOf: null, contentSha256, generatedAt, factIds: payload.factIds, ranking, coverage: input.coverage, coverageComplete: input.coverageComplete, unresolvedIdentityFacts, conflicts, metadata: { published: false, candidateStatus, activeSeasonStatus: input.activeSeasonStatus, seasonInProgress: input.seasonInProgress, observedFacts: input.observedFacts ?? input.facts.length, observedPages: input.observedPages, redTypesDifferentiated: input.redTypesDifferentiated ?? false } };
 }
 
 export function compareClubCardsRankings(previous: ClubCardsRankingEntry[], next: ClubCardsRankingEntry[]): ClubCardsChange[] {

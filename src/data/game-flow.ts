@@ -49,3 +49,12 @@ export function canSubmitDecision(state: GameFlowState): boolean {
 export function canStartGame(state: GameFlowState): boolean {
   return state === 'challenge_ready';
 }
+
+export type FeedbackAdvance = 'next' | 'finish' | 'noop';
+
+export function feedbackAdvance(phase: GamePhaseForAdvance, entityIndex: number, decisionCount: number, complete: boolean): FeedbackAdvance {
+  if (phase !== 'feedback') return 'noop';
+  return complete || entityIndex >= decisionCount - 1 ? 'finish' : 'next';
+}
+
+type GamePhaseForAdvance = 'playing' | 'feedback' | 'finished' | 'abandoned';

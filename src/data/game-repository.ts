@@ -66,9 +66,36 @@ export type CategoryRanking = {
   contentSha256?: string;
   generatedAt?: string;
   redTypesDifferentiated?: boolean;
+  scopeStatus?: "complete_scope" | "complete" | "provisional_active_season" | "partial" | "partial_missing_provider_data" | "quota_insufficient" | "snapshot_preserved" | "ranking_not_available";
+  activeSeasonStatus?: "complete_scope" | "provisional_active_season" | "partial_missing_provider_data" | "quota_insufficient" | "provider_unavailable";
+  seasonInProgress?: boolean;
+  observedFacts?: number;
+  observedPages?: number | null;
+  includedCompetitions?: string[];
+  excludedCompetitions?: string[];
+  blockReason?: string | null;
   fixtureOnly?: boolean;
 };
-export type RankingCategoryOption = { slug: string; labelEs: string; labelEn: string; availability: "official" | "provisional" };
+export type RankingCatalogStatus = "available_lab" | "provisional_lab" | "partial_scope" | "ranking_not_available" | "candidate_not_sufficient" | "official_not_ready" | "quota_insufficient" | "provider_unavailable";
+export type RankingCategoryOption = {
+  slug: string;
+  labelEs: string;
+  labelEn: string;
+  descriptionEs?: string;
+  descriptionEn?: string;
+  scope?: string;
+  availability: "official" | "provisional";
+  status: RankingCatalogStatus;
+  selectable: boolean;
+  reason?: string | null;
+  lastUpdated?: string | null;
+  factCount?: number | null;
+  players?: number | null;
+  provisional?: boolean;
+  allowsHistorical?: boolean;
+  allowsActiveSeason?: boolean;
+  allowsOfficial?: boolean;
+};
 export type DuelParticipant = { slot: number; status: string; joinedAt?: string; hasResult: boolean; totalScore: number | null; elapsedSeconds: number | null; timedOut: boolean | null };
 export type DuelState = {
   id: string; code: string; status: "open" | "active" | "completed" | "expired"; challengeId: string; expiresAt: string; joinable: boolean;
@@ -142,7 +169,7 @@ export interface GameRepository {
   submitResult(session: GameSession, assignments: AssignmentClaim[]): Promise<ResultResponse>;
   expireGame(session: GameSession, knownAssignments?: AssignmentClaim[]): Promise<ResultResponse>;
   getLeaderboard(challengeId: string): Promise<LeaderboardEntry[]>;
-  getCategoryRanking(categorySlug: string, dataset?: CategoryRankingDataset): Promise<CategoryRanking>;
+  getCategoryRanking(categorySlug: string, dataset?: CategoryRankingDataset, competition?: string): Promise<CategoryRanking>;
   getRankingCategories(options?: RequestOptions): Promise<RankingCategoryOption[]>;
   createDuel(challengeId: string): Promise<DuelState>;
   getDuel(code: string): Promise<DuelState>;
@@ -335,11 +362,12 @@ export class HttpGameRepository implements GameRepository {
     return response.entries;
   }
 
-  async getCategoryRanking(categorySlug: string, dataset?: CategoryRankingDataset) {
+  async getCategoryRanking(categorySlug: string, dataset?: CategoryRankingDataset, competition?: string) {
     const query = new URLSearchParams({ limit: "200" });
     if (dataset) query.set("dataset", dataset);
+    if (competition) query.set("competition", competition);
     if (categorySlug === "uefa-champions-league-assists") query.set("scope", dataset === "historical_base" ? "historical" : "active_season");
-    const response = await this.request<{ category: string; categoryLabelEs?: string; categoryLabelEn?: string; snapshotId: string; rankingScope?: "historical_snapshot" | "active_season_weekly"; mode?: RuntimeMode; status?: "official" | "provisional"; entries: Array<Record<string, unknown>>; dataset?: CategoryRankingDataset; scope?: "active_season" | "historical"; season?: number; scopeLabelEs?: string; scopeLabelEn?: string; coverageComplete?: boolean; coverageEstimated?: number | null; provisionalWarningEs?: string; provisionalWarningEn?: string; source?: string; degraded?: boolean; updateDate?: string; factCount?: number; sourceCount?: number; dataVersion?: string; contentSha256?: string; generatedAt?: string; fixtureOnly?: boolean; redTypesDifferentiated?: boolean }>(`/v1/rankings/${encodeURIComponent(categorySlug)}?${query.toString()}`);
+    const response = await this.request<{ category: string; categoryLabelEs?: string; categoryLabelEn?: string; snapshotId: string; rankingScope?: "historical_snapshot" | "active_season_weekly"; mode?: RuntimeMode; status?: "official" | "provisional"; entries: Array<Record<string, unknown>>; dataset?: CategoryRankingDataset; scope?: "active_season" | "historical"; season?: number; scopeLabelEs?: string; scopeLabelEn?: string; coverageComplete?: boolean; coverageEstimated?: number | null; provisionalWarningEs?: string; provisionalWarningEn?: string; source?: string; degraded?: boolean; updateDate?: string; factCount?: number; sourceCount?: number; dataVersion?: string; contentSha256?: string; generatedAt?: string; fixtureOnly?: boolean; redTypesDifferentiated?: boolean; scopeStatus?: CategoryRanking["scopeStatus"]; activeSeasonStatus?: CategoryRanking["activeSeasonStatus"]; seasonInProgress?: boolean; observedFacts?: number; observedPages?: number | null; includedCompetitions?: string[]; excludedCompetitions?: string[]; blockReason?: string | null }>(`/v1/rankings/${encodeURIComponent(categorySlug)}?${query.toString()}`);
     if (!response.snapshotId || !Array.isArray(response.entries)) throw new RepositoryError("The category ranking response is invalid", "invalid", 502, "ranking_invalid");
     const entries: CategoryRankingEntry[] = response.entries.map((entry) => {
       const number = (value: unknown) => {
@@ -356,16 +384,41 @@ export class HttpGameRepository implements GameRepository {
       const rightsStatus = (entry.rightsStatus ?? entry.rights_status) === "approved" || (entry.rightsStatus ?? entry.rights_status) === "review_required" || (entry.rightsStatus ?? entry.rights_status) === "rejected" ? (entry.rightsStatus ?? entry.rights_status) as "approved" | "review_required" | "rejected" : "missing";
       return { rank, entityId: entry.entity_id, canonicalName: entry.canonical_name, rawValue, scoreValue, tieGroup: number(entry.tie_group), imageUrl: typeof entry.image_url === "string" ? resolveApiAssetUrl(this.baseUrl, entry.image_url) : undefined, imageStatus: status, reviewStatus, rightsStatus, isPublishable: (entry.isPublishable ?? entry.is_publishable) === true, playable: entry.playable === true, imageSourceUrl: typeof entry.image_source_url === "string" ? entry.image_source_url : undefined, imageLicenseName: typeof entry.image_license_name === "string" ? entry.image_license_name : undefined, snapshotId: response.snapshotId, dataVersion: typeof entry.data_version === "string" ? entry.data_version : undefined, generatedAt: typeof entry.generated_at === "string" ? entry.generated_at : undefined, sources: Array.isArray(entry.sources) ? entry.sources as CategoryRankingEntry["sources"] : undefined };
     });
-    return { category: { slug: typeof response.category === "string" ? response.category : categorySlug, labelEs: typeof response.categoryLabelEs === "string" ? response.categoryLabelEs : (typeof response.entries[0]?.label_es === "string" ? response.entries[0].label_es : categorySlug), labelEn: typeof response.categoryLabelEn === "string" ? response.categoryLabelEn : (typeof response.entries[0]?.label_en === "string" ? response.entries[0].label_en : categorySlug) }, rankingScope: response.rankingScope ?? "historical_snapshot", snapshotId: response.snapshotId, mode: response.mode ?? "official", status: response.status ?? "official", entries, dataset: response.dataset, scopeLabelEs: response.scopeLabelEs, scopeLabelEn: response.scopeLabelEn, coverageComplete: response.coverageComplete, scope: response.scope, season: response.season, coverageEstimated: response.coverageEstimated, provisionalWarningEs: response.provisionalWarningEs, provisionalWarningEn: response.provisionalWarningEn, source: response.source, degraded: response.degraded, updateDate: response.updateDate, factCount: response.factCount, sourceCount: response.sourceCount, dataVersion: response.dataVersion, contentSha256: response.contentSha256, generatedAt: response.generatedAt, fixtureOnly: response.fixtureOnly, redTypesDifferentiated: response.redTypesDifferentiated };
+    return { category: { slug: typeof response.category === "string" ? response.category : categorySlug, labelEs: typeof response.categoryLabelEs === "string" ? response.categoryLabelEs : (typeof response.entries[0]?.label_es === "string" ? response.entries[0].label_es : categorySlug), labelEn: typeof response.categoryLabelEn === "string" ? response.categoryLabelEn : (typeof response.entries[0]?.label_en === "string" ? response.entries[0].label_en : categorySlug) }, rankingScope: response.rankingScope ?? "historical_snapshot", snapshotId: response.snapshotId, mode: response.mode ?? "official", status: response.status ?? "official", entries, dataset: response.dataset, scopeLabelEs: response.scopeLabelEs, scopeLabelEn: response.scopeLabelEn, coverageComplete: response.coverageComplete, scope: response.scope, season: response.season, coverageEstimated: response.coverageEstimated, provisionalWarningEs: response.provisionalWarningEs, provisionalWarningEn: response.provisionalWarningEn, source: response.source, degraded: response.degraded, updateDate: response.updateDate, factCount: response.factCount, sourceCount: response.sourceCount, dataVersion: response.dataVersion, contentSha256: response.contentSha256, generatedAt: response.generatedAt, fixtureOnly: response.fixtureOnly, redTypesDifferentiated: response.redTypesDifferentiated, scopeStatus: response.scopeStatus, activeSeasonStatus: response.activeSeasonStatus, seasonInProgress: response.seasonInProgress, observedFacts: response.observedFacts, observedPages: response.observedPages, includedCompetitions: Array.isArray(response.includedCompetitions) ? response.includedCompetitions.filter((value): value is string => typeof value === "string") : undefined, excludedCompetitions: Array.isArray(response.excludedCompetitions) ? response.excludedCompetitions.filter((value): value is string => typeof value === "string") : undefined, blockReason: typeof response.blockReason === "string" ? response.blockReason : null };
   }
 
   async getRankingCategories(options?: RequestOptions) {
-    const response = await this.request<{ categories: Array<Record<string, unknown>> }>("/v1/categories", {}, options);
+    const response = await this.request<{ categories: Array<Record<string, unknown>> }>("/v1/rankings/catalog", {}, options);
     if (!Array.isArray(response.categories)) throw new RepositoryError("The ranking categories response is invalid", "invalid", 502, "ranking_invalid");
-    return response.categories.flatMap((category) => {
-      if (typeof category.slug !== "string" || typeof category.label_es !== "string" || typeof category.label_en !== "string") return [];
-      return [{ slug: category.slug, labelEs: category.label_es, labelEn: category.label_en, availability: category.availability === "provisional" ? "provisional" as const : "official" as const }];
+    const validStatuses = new Set<RankingCatalogStatus>(["available_lab", "provisional_lab", "partial_scope", "ranking_not_available", "candidate_not_sufficient", "official_not_ready", "quota_insufficient", "provider_unavailable"]);
+    const baseCategories = response.categories.flatMap((category) => {
+      if (typeof category.slug !== "string" || typeof category.labelEs !== "string" || typeof category.labelEn !== "string" || typeof category.status !== "string" || !validStatuses.has(category.status as RankingCatalogStatus)) return [];
+      const status = category.status as RankingCatalogStatus;
+      const isSelectable = category.selectable !== false && ["available_lab", "provisional_lab", "partial_scope"].includes(status);
+      return [{
+        slug: category.slug,
+        labelEs: category.labelEs,
+        labelEn: category.labelEn,
+        descriptionEs: typeof category.descriptionEs === "string" ? category.descriptionEs : undefined,
+        descriptionEn: typeof category.descriptionEn === "string" ? category.descriptionEn : undefined,
+        scope: typeof category.scope === "string" ? category.scope : undefined,
+        availability: isSelectable ? "provisional" as const : "official" as const,
+        status,
+        selectable: isSelectable,
+        reason: typeof category.blockReason === "string" ? category.blockReason : null,
+        lastUpdated: typeof category.lastUpdated === "string" ? category.lastUpdated : null,
+        factCount: typeof category.factCount === "number" ? category.factCount : null,
+        players: typeof category.players === "number" ? category.players : null,
+        provisional: category.provisional === true,
+        allowsHistorical: category.allowsHistorical === true,
+        allowsActiveSeason: category.allowsActiveSeason === true,
+        allowsOfficial: category.allowsOfficial === true,
+      }];
     });
+    const cardScopes = [{ value: "39", es: "Premier League", en: "Premier League", status: "available_lab" as const }, { value: "140", es: "La Liga", en: "La Liga", status: "available_lab" as const }, { value: "135", es: "Serie A", en: "Serie A", status: "available_lab" as const }, { value: "78", es: "Bundesliga", en: "Bundesliga", status: "quota_insufficient" as const }, { value: "61", es: "Ligue 1", en: "Ligue 1", status: "quota_insufficient" as const }, { value: "94", es: "Primeira Liga", en: "Primeira Liga", status: "quota_insufficient" as const }];
+    return baseCategories.flatMap((category) => category.slug === "club-career-yellow-cards" || category.slug === "club-career-red-cards"
+      ? [category, ...cardScopes.map((scope) => ({ ...category, slug: `${category.slug}:${scope.value}`, labelEs: `${category.labelEs} — ${scope.es}`, labelEn: `${category.labelEn} — ${scope.en}`, status: scope.status, selectable: scope.status === "available_lab", reason: scope.status === "quota_insufficient" ? "quota_insufficient: cuota API-Football agotada; se conserva el último snapshot válido." : null }))]
+      : [category]);
   }
 
   async createDuel(challengeId: string) {

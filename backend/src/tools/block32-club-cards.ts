@@ -30,17 +30,28 @@ async function readProviderReport(): Promise<JsonRecord | null> {
   try { return JSON.parse(await readFile(resolve(providerRoot, 'BLOCK31_REPORT.json'), 'utf8')) as JsonRecord; } catch { return null; }
 }
 
+async function readLoaderReport(): Promise<JsonRecord | null> {
+  const loaderRoot = process.env.BLOCK31_LOADER_OUTPUT_ROOT?.trim();
+  if (!loaderRoot) return null;
+  try { return JSON.parse(await readFile(resolve(loaderRoot, 'BLOCK31_REPORT.json'), 'utf8')) as JsonRecord; } catch { return null; }
+}
+
 async function main(): Promise<void> {
   const candidates = await readPlan();
   const plan = planClubCardBatches({ quotaInitial: knownQuota, quotaReserve, maxRequests, batches: candidates });
   const providerReport = await readProviderReport();
   const providerStatus = typeof providerReport?.status === 'string' ? providerReport.status : null;
-  const providerIncomplete = providerStatus === 'partial' || providerStatus === 'failed' || providerStatus === 'provider_unavailable';
-  const effectiveBatches = providerIncomplete ? plan.batches.map((batch) => batch.status === 'planned' ? { ...batch, status: 'partial' as const, reason: `El proveedor terminó con estado ${providerStatus}; se conserva el snapshot anterior y no se crea uno incompleto.`, snapshotAction: 'preserve' as const } : batch) : plan.batches;
+  const providerIncomplete = providerStatus === 'partial' || providerStatus === 'partial_missing_provider_data' || providerStatus === 'failed' || providerStatus === 'provider_unavailable';
+  const loaderReport = await readLoaderReport();
+  const loaderStatus = typeof loaderReport?.status === 'string' ? loaderReport.status : null;
+  const snapshotCreated = Number(loaderReport?.snapshotsCreated ?? 0) > 0;
+  const effectiveBatches = providerStatus === 'provisional_active_season' && loaderStatus === 'provisional_active_season' && snapshotCreated
+    ? plan.batches.map((batch) => batch.status === 'planned' ? { ...batch, status: 'provisional_active_season' as const, reason: 'Temporada activa en curso; los datos observados son válidos y se conserva un snapshot provisional.', snapshotAction: 'create' as const } : batch)
+    : providerIncomplete ? plan.batches.map((batch) => batch.status === 'planned' ? { ...batch, status: 'partial' as const, reason: `El proveedor terminó con estado ${providerStatus}; se conserva el snapshot anterior y no se crea uno incompleto.`, snapshotAction: 'preserve' as const } : batch) : plan.batches;
   const statuses = effectiveBatches.reduce<Record<string, number>>((result, batch) => { result[batch.status] = (result[batch.status] ?? 0) + 1; return result; }, {});
   const report = {
     artifactKind: 'block32_club_cards_quota_safe_batches', reportVersion: '1', generatedAt: new Date().toISOString(),
-    status: !authorization.allowed ? authorization.status : providerIncomplete ? providerStatus : knownQuota === 0 ? 'quota_insufficient' : effectiveBatches.some((batch) => batch.status === 'quota_insufficient') ? 'partial_scope' : 'planned',
+    status: !authorization.allowed ? authorization.status : providerIncomplete ? providerStatus : loaderStatus ?? (providerStatus === 'provisional_active_season' ? providerStatus : knownQuota === 0 ? 'quota_insufficient' : effectiveBatches.some((batch) => batch.status === 'quota_insufficient') ? 'partial_scope' : 'planned'),
     providerStatus,
     quotaState: authorization.status,
     batchAuthorization: authorization,
@@ -50,12 +61,13 @@ async function main(): Promise<void> {
     batches: effectiveBatches.map((batch) => ({ ...batch, status: batch.status as ClubCardBatchStatus })),
     statusCounts: statuses,
     completeCompetitions: effectiveBatches.filter((batch) => batch.status === 'complete' || batch.status === 'skipped').map((batch) => batch.key),
-    pendingCompetitions: effectiveBatches.filter((batch) => ['quota_insufficient', 'planned', 'partial', 'failed'].includes(batch.status)).map((batch) => batch.key),
+    provisionalCompetitions: effectiveBatches.filter((batch) => batch.status === 'provisional_active_season').map((batch) => batch.key),
+    pendingCompetitions: effectiveBatches.filter((batch) => ['quota_insufficient', 'planned', 'partial', 'failed', 'provider_unavailable'].includes(batch.status)).map((batch) => batch.key),
     preservedSnapshots: effectiveBatches.filter((batch) => batch.snapshotAction === 'preserve').map((batch) => batch.key),
-    factsObserved: Number(providerReport?.factsImported ?? 0), externalRequestsMade: Number(providerReport?.requestsPerformed ?? 0) > 0,
-    newSnapshotCreated: false, errors429: 0, idempotency: 'not_run_external', rollback: 'fixture_verified_in_tests',
+    factsObserved: Number((loaderReport?.facts as JsonRecord | undefined)?.observed ?? providerReport?.factsImported ?? 0), externalRequestsMade: Number(providerReport?.requestsPerformed ?? 0) > 0,
+    activeSeasonStatus: providerStatus, seasonInProgress: providerReport?.seasonInProgress === true, newSnapshotCreated: snapshotCreated, snapshotsCreated: Number(loaderReport?.snapshotsCreated ?? 0), errors429: 0, idempotency: loaderReport?.idempotency ?? 'not_run_external', rollback: loaderReport?.rankings ? 'verified_in_isolated_loader' : 'fixture_verified_in_tests',
     official: { status: 'blocked', snapshotCreated: false }, rawPayloadsStored: false, secretPrinted: false,
-    note: providerIncomplete ? `La carga externa terminó ${providerStatus}; no se crea snapshot incompleto y se conserva el anterior.` : !authorization.allowed ? `${authorization.reason} No se hicieron peticiones y se conserva el último snapshot candidato válido.` : knownQuota === 0 ? 'No se hicieron peticiones: la cuota conocida es 0. Se conserva el último snapshot candidato válido.' : 'Plan preparado con probe válido; la tanda real permanece limitada al presupuesto reservado.'
+    note: providerIncomplete ? `La carga externa terminó ${providerStatus}; no se crea snapshot incompleto y se conserva el anterior.` : providerStatus === 'provisional_active_season' ? 'La temporada sigue en curso: se crea un snapshot provisional con los hechos observados y no entra en complete_scope.' : !authorization.allowed ? `${authorization.reason} No se hicieron peticiones y se conserva el último snapshot candidato válido.` : knownQuota === 0 ? 'No se hicieron peticiones: la cuota conocida es 0. Se conserva el último snapshot candidato válido.' : 'Plan preparado con probe válido; la tanda real permanece limitada al presupuesto reservado.'
   };
   await writeJson(resolve(outputRoot, 'BLOCK32_REPORT.json'), report);
   await writeJson(resolve(outputRoot, 'BLOCK32_BATCH_PLAN.json'), plan);

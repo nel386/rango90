@@ -1,10 +1,44 @@
-name: BLOQUE 32 · tarjetas por tandas con cuota segura
+name: BLOQUE 37 · probe y tandas de tarjetas con cuota segura
 
 on:
   workflow_dispatch:
     inputs:
+      quota_probe:
+        description: 'Ejecutar únicamente el probe mínimo de cuota; no carga hechos'
+        required: true
+        type: boolean
+        default: false
+      run_batches:
+        description: 'Ejecutar tandas; requiere un probe previo positivo y reciente'
+        required: true
+        type: boolean
+        default: false
+      probe_status:
+        description: 'Estado del probe previo copiado de QUOTA_PROBE_REPORT.json'
+        required: false
+        default: ''
+      probe_quota_remaining:
+        description: 'Cuota observada por el probe previo'
+        required: false
+        default: ''
+      probe_observed_at:
+        description: 'observedAt del probe previo en ISO-8601'
+        required: false
+        default: ''
+      last_probe_at:
+        description: 'Último probe conocido; activa cooldown si aún no ha vencido'
+        required: false
+        default: ''
+      quota_probe_cooldown_seconds:
+        description: 'Cooldown mínimo entre probes'
+        required: false
+        default: '3600'
+      quota_stale_after_seconds:
+        description: 'Antigüedad máxima aceptada para autorizar tandas'
+        required: false
+        default: '86400'
       known_quota_remaining:
-        description: 'Última cuota confirmada; usar 0 mientras esté agotada'
+        description: 'Compatibilidad histórica; no autoriza tandas sin probe_status positivo'
         required: false
         default: '0'
       max_requests:
@@ -28,7 +62,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: block32-club-cards-quota-safe
+  group: block37-club-cards-quota-safe
   cancel-in-progress: false
 
 jobs:
@@ -38,14 +72,25 @@ jobs:
     env:
       RANGO90_RUNTIME_MODE: lab
       NODE_ENV: test
-      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55459/rango90_qa_block32
-      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55459/rango90_qa_block32
-      BLOCK32_KNOWN_QUOTA_REMAINING: ${{ inputs.known_quota_remaining || '0' }}
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55459/rango90_qa_block37
+      RANGO90_ISOLATED_DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55459/rango90_qa_block37
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      BLOCK37_QUOTA_PROBE: ${{ inputs.quota_probe || false }}
+      BLOCK37_RUN_BATCHES: ${{ inputs.run_batches || false }}
+      BLOCK37_PROBE_STATUS: ${{ inputs.probe_status || '' }}
+      BLOCK37_PROBE_QUOTA_REMAINING: ${{ inputs.probe_quota_remaining || '' }}
+      BLOCK37_PROBE_OBSERVED_AT: ${{ inputs.probe_observed_at || '' }}
+      BLOCK37_LAST_PROBE_AT: ${{ inputs.last_probe_at || '' }}
+      BLOCK37_QUOTA_PROBE_COOLDOWN_SECONDS: ${{ inputs.quota_probe_cooldown_seconds || '3600' }}
+      BLOCK37_QUOTA_STALE_AFTER_SECONDS: ${{ inputs.quota_stale_after_seconds || '86400' }}
+      BLOCK32_KNOWN_QUOTA_REMAINING: ${{ inputs.probe_quota_remaining || inputs.known_quota_remaining || '0' }}
       BLOCK32_MAX_REQUESTS: ${{ inputs.max_requests || '0' }}
       BLOCK32_COMPETITION: ${{ inputs.competition || 'all' }}
-      BLOCK32_QUOTA_RESERVE: '0'
+      BLOCK32_QUOTA_RESERVE: '2'
+      BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block32/provider
       BLOCK32_OUTPUT_ROOT: ${{ github.workspace }}/.block32
-      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      BLOCK37_OUTPUT_ROOT: ${{ github.workspace }}/.block37
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,27 +103,37 @@ jobs:
         run: |
           npm ci
           npm --prefix backend ci
-      - name: Start ephemeral PostgreSQL
+      - name: Quota probe (máximo una petición y sin base de datos)
+        if: ${{ inputs.quota_probe == true }}
+        working-directory: backend
+        run: npx tsx src/tools/block37-api-football-quota-probe.ts
+      - name: Start ephemeral PostgreSQL for explicitly authorized batches
+        if: ${{ inputs.run_batches == true && inputs.quota_probe != true }}
         run: |
           set -euo pipefail
-          docker run -d --name rango90-block32-postgres -e POSTGRES_DB=rango90_qa_block32 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55459:5432 postgres:16
-          for attempt in $(seq 1 40); do docker exec rango90-block32-postgres pg_isready -U rango90 -d rango90_qa_block32 >/dev/null 2>&1 && break; sleep 1; done
-          docker exec rango90-block32-postgres pg_isready -U rango90 -d rango90_qa_block32
+          docker run -d --name rango90-block37-postgres -e POSTGRES_DB=rango90_qa_block37 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55459:5432 postgres:16
+          for attempt in $(seq 1 40); do docker exec rango90-block37-postgres pg_isready -U rango90 -d rango90_qa_block37 >/dev/null 2>&1 && break; sleep 1; done
+          docker exec rango90-block37-postgres pg_isready -U rango90 -d rango90_qa_block37
       - name: Apply migrations in isolated PostgreSQL
+        if: ${{ inputs.run_batches == true && inputs.quota_probe != true }}
         working-directory: backend
         run: npm run migrate
-      - name: Verify quota-safe planner without external calls
+      - name: Execute one explicitly authorized competition batch
+        if: ${{ inputs.run_batches == true && inputs.quota_probe != true }}
         working-directory: backend
-        env:
-          BLOCK31_OUTPUT_ROOT: ${{ github.workspace }}/.block32/provider-gate
         run: |
           npx tsx src/tools/block31-api-football-club-cards.ts
           npx tsx src/tools/block32-club-cards.ts
+      - name: Write safe no-batch report
+        if: ${{ inputs.run_batches != true }}
+        working-directory: backend
+        run: npx tsx src/tools/block32-club-cards.ts
       - name: Run quota and batch fixtures
         working-directory: backend
         run: |
           npx tsx src/tests/club-cards-batch-planner.test.ts
           npx tsx src/tests/block32-club-cards.test.ts
+          npx tsx src/tests/block37-quota-probe.test.ts
       - name: Run repository checks
         run: |
           npm run typecheck
@@ -90,16 +145,18 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          test -f .block32/BLOCK32_REPORT.json
-          if rg -n 'x-apisports-key|API_FOOTBALL_KEY|secretPrinted": true|rawPayloadsStored": true' .block32; then exit 1; fi
+          test -f .block37/QUOTA_PROBE_REPORT.json || test -f .block32/BLOCK32_REPORT.json
+          if rg -n 'x-apisports-key|API_FOOTBALL_KEY|secretPrinted": true|rawPayloadsStored": true|apiKey' .block37 .block32; then exit 1; fi
       - name: Upload redacted artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: block32-club-cards-${{ github.run_id }}
-          path: .block32/
+          name: block37-club-cards-${{ github.run_id }}
+          path: |
+            .block37/
+            .block32/
           if-no-files-found: error
           include-hidden-files: true
       - name: Cleanup ephemeral PostgreSQL
         if: always()
-        run: docker rm -f rango90-block32-postgres >/dev/null 2>&1 || true
+        run: docker rm -f rango90-block37-postgres >/dev/null 2>&1 || true

@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { stableClubCardsJson, type ClubCardFact } from '../clubCardsRankingEngine.js';
 import { backoffDelayMs, classifyClubCardProviderFailure } from '../clubCardsBatchPlanner.js';
+import { authorizeBatches } from '../quotaProbe.js';
 
 type JsonRecord = Record<string, unknown>;
 type Envelope = { response?: unknown[]; errors?: unknown; paging?: JsonRecord };
@@ -72,6 +73,14 @@ function factFromStats(competition: Competition, season: number, page: number, r
 
 async function main(): Promise<void> {
   await mkdir(outputRoot, { recursive: true }); const requests: RequestEvidence[] = [];
+  if (process.env.BLOCK37_RUN_BATCHES !== undefined) {
+    const probeQuota = process.env.BLOCK37_PROBE_QUOTA_REMAINING?.trim();
+    const authorization = authorizeBatches({ runBatches: process.env.BLOCK37_RUN_BATCHES === 'true', probeRequested: process.env.BLOCK37_QUOTA_PROBE === 'true', probeStatus: process.env.BLOCK37_PROBE_STATUS?.trim() || null, probeQuotaRemaining: probeQuota ? Number(probeQuota) : null, probeObservedAt: process.env.BLOCK37_PROBE_OBSERVED_AT?.trim() || null, staleAfterSeconds: Number(process.env.BLOCK37_QUOTA_STALE_AFTER_SECONDS ?? 86400) });
+    if (!authorization.allowed) {
+      await writeJson(resolve(outputRoot, artifact('REPORT.json')), { artifactKind: 'block32_api_football_club_cards', status: authorization.status, reason: authorization.reason, requestsPerformed: 0, factsImported: 0, snapshotsPreserved: true, newSnapshotCreated: false, rawPayloadsStored: false, secretPrinted: false, officialSnapshotCreated: false });
+      return;
+    }
+  }
   if (!apiKey) { await writeJson(resolve(outputRoot, artifact('REPORT.json')), { artifactKind: 'block31_api_football_club_cards', status: 'not_run', reason: 'API key ausente; no se realizaron peticiones.', requestsPerformed: 0, rawPayloadsStored: false, secretPrinted: false }); return; }
   if (knownQuotaRemaining !== undefined && Number(knownQuotaRemaining) === 0) {
     const coverageMatrix = scopedCompetitions.map((competition) => ({ competitionId: `api-football:club-competition:${competition.id}`, providerId: competition.id, competition: competition.name, country: competition.country, seasonStart: activeSeason, status: 'unavailable', playerPages: 0, playerRecords: 0, yellowCards: 0, redCards: 0, reason: 'quota_insufficient: presupuesto conocido agotado; no se inició la tanda ni se consultó API-Football.' }));

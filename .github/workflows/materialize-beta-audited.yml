@@ -108,8 +108,8 @@ jobs:
       - name: Verify source gates and prepare redacted card scope manifest
         run: |
           set -euo pipefail
-          jq -e '.status == "passed" and .readyForApproval == true and .officialSnapshotCreated == false and .officialModeOpened == false' "$CHAMPIONS_ROOT/BLOCK17_REPORT.json" >/dev/null
-          jq -e '.conflicts == [] and .unresolvedPlayerFacts == 0 and .official.status == "blocked"' "$WORLD_CUP_ROOT/BLOCK20_REPORT.json" >/dev/null
+          jq -e '.status == "passed" and .readyForApproval == true and .publication.officialSnapshotCreated != true and .publication.officialModeOpened != true and .source.conflicts == 0 and .validation.unresolvedIdentity == 0' "$CHAMPIONS_ROOT/BLOCK17_REPORT.json" >/dev/null
+          jq -e '.conflicts == [] and .facts.unresolvedPlayerFacts == 0 and .productionDatabaseAccess == "none" and .officialModeOpened != true' "$WORLD_CUP_ROOT/BLOCK20_REPORT.json" >/dev/null
           jq -e '.facts.conflicts == 0 and .facts.unresolvedIdentities == 0 and .idempotency.conflictsOnRerun == 0 and .official.status == "blocked"' "$ASSISTS_ROOT/BLOCK27_REPORT.json" >/dev/null
           jq -e '.facts.conflicts == 0 and .facts.unresolvedIdentities == 0 and .official.status == "blocked"' "$CARDS_ROOT/BLOCK31_REPORT.json" >/dev/null
           jq '{status:"complete_scope", snapshotEligibility:true, unresolvedFacts:0, conflicts:0, factsImported:.facts.after, activeSeasonStatus:"complete_scope", seasonInProgress:true, coverageMatrix:.coverageMatrix, observedPages:0, redTypesDifferentiated:true}' "$CARDS_ROOT/BLOCK31_REPORT.json" > "$ROOT/BLOCK31_TARGET_LOAD_REPORT.json"

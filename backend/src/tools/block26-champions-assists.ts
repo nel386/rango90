@@ -110,7 +110,8 @@ function historicalCoverage(facts: ChampionsAssistFact[]) {
 async function main(): Promise<void> {
   assertIsolatedDatabase();
   const historical = await readInput(historicalFactsFile); const active = await readInput(activeFactsFile); const seed = await readInput(seedFactsFile); const apiReport = await readOptionalJson(apiReportFile); const localPreviousReport = await readOptionalJson(resolve(outputRoot, artifact('REPORT.json'))); const externalPreviousReport = await readOptionalJson(previousReportFile); const previousReport = Object.keys(externalPreviousReport).length ? externalPreviousReport : localPreviousReport; const previousSnapshotRecord = await readOptionalJson(previousSnapshotFile);
-  const pool = new pg.Pool({ connectionString: databaseUrl, max: 2, connectionTimeoutMillis: 5_000, ssl: explicitTargetLoad ? { rejectUnauthorized: false } : undefined });
+  // Keep BEGIN, writes and rollback on one connection.
+  const pool = new pg.Pool({ connectionString: databaseUrl, max: 1, connectionTimeoutMillis: 5_000, ssl: explicitTargetLoad ? { rejectUnauthorized: false } : undefined });
   try {
     await pool.query('BEGIN');
     const incoming = [...seed.facts, ...historical.facts, ...active.facts];

@@ -17,7 +17,10 @@ async function load(): Promise<void> {
   const facts = (await readJson<{ facts: ChampionsGoalFact[] }>('BLOCK17_FACTS_AFTER.json')).facts;
   const historical = await readJson<ChampionsSnapshot>('BLOCK17_HISTORICAL_SNAPSHOT_CANDIDATE.json');
   const weekly = await readJson<ChampionsSnapshot>('BLOCK17_WEEKLY_SNAPSHOT_CANDIDATE.json');
-  const pool = new pg.Pool({ connectionString: databaseUrl, max: 2, ssl: explicitTargetLoad ? { rejectUnauthorized: false } : undefined });
+  // Keep the transaction on one pooled connection. This loader is intentionally
+  // sequential: a pool with multiple connections could run BEGIN and INSERTs on
+  // different sessions and make rollback non-atomic.
+  const pool = new pg.Pool({ connectionString: databaseUrl, max: 1, ssl: explicitTargetLoad ? { rejectUnauthorized: false } : undefined });
   try {
     await pool.query('BEGIN');
     const sources = new Map<string, ChampionsGoalFact>();

@@ -50,7 +50,8 @@ async function persistSnapshot(pool: pg.Pool, snapshot: ClubCardsSnapshot, actio
 }
 
 async function main(): Promise<void> {
-  assertIsolatedDatabase(); const active = await readInput(activeFactsFile); const seed = await readInput(seedFactsFile); const apiReport = await optionalJson(apiReportFile); const previousReport = await optionalJson(previousReportFile); const previousSnapshots = await optionalJson(previousSnapshotFile); const pool = new pg.Pool({ connectionString: databaseUrl, max: 2, connectionTimeoutMillis: 5000, ssl: explicitTargetLoad ? { rejectUnauthorized: false } : undefined });
+  assertIsolatedDatabase(); const active = await readInput(activeFactsFile); const seed = await readInput(seedFactsFile); const apiReport = await optionalJson(apiReportFile); const previousReport = await optionalJson(previousReportFile); const previousSnapshots = await optionalJson(previousSnapshotFile); // One connection keeps this append-only transaction atomic.
+  const pool = new pg.Pool({ connectionString: databaseUrl, max: 1, connectionTimeoutMillis: 5000, ssl: explicitTargetLoad ? { rejectUnauthorized: false } : undefined });
   try {
     await pool.query('BEGIN'); const incoming = [...seed, ...active]; const before = await existingFacts(pool); const imported = importClubCardFactsIdempotently(before, incoming); const providerStatus = String(apiReport.activeSeasonStatus ?? apiReport.status ?? 'unknown'); const snapshotEligible = apiReport.snapshotEligibility === true && Number(apiReport.unresolvedFacts ?? 0) === 0 && Number(apiReport.conflicts ?? 0) === 0;
     if (!snapshotEligible) {

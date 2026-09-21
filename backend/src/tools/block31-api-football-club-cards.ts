@@ -28,6 +28,7 @@ const planFile = process.env.BLOCK31_COVERAGE_PLAN_FILE?.trim() ?? '';
 // es una barrera dura: no se hace ni siquiera la petición de planificación.
 const knownQuotaRemaining = process.env.BLOCK32_KNOWN_QUOTA_REMAINING?.trim();
 const maxRetries = Math.max(0, Math.min(3, Number(process.env.BLOCK32_MAX_RETRIES ?? 2) || 0));
+const maxRequests = Math.max(0, Math.floor(Number(process.env.BLOCK32_MAX_REQUESTS ?? 0) || 0));
 const selectedCompetition = process.env.BLOCK32_COMPETITION?.trim() || 'all';
 const scopedCompetitions = selectedCompetition === 'all' ? COMPETITIONS : COMPETITIONS.filter((competition) => String(competition.id) === selectedCompetition || competition.name.toLowerCase().replaceAll(' ', '-') === selectedCompetition);
 function artifact(name: string): string { return `BLOCK31_${name}`; }
@@ -91,7 +92,10 @@ async function main(): Promise<void> {
   try {
     let plans: Array<{ competition: Competition; seasons: Array<{ year: number; start: string | null; end: string | null; events: boolean }> }> = [];
     if (planFile) { try { plans = JSON.parse(await readFile(planFile, 'utf8')).plans ?? []; } catch { plans = []; } }
-    if (plans.length === 0) for (const competition of scopedCompetitions) { const result = await request(`/leagues?id=${competition.id}`); requests.push(result.evidence); plans.push(coverageFromLeague(competition, result.body)); }
+    if (plans.length === 0) for (const competition of scopedCompetitions) {
+      if (maxRequests === 0 || requests.length >= maxRequests) break;
+      const result = await request(`/leagues?id=${competition.id}`); requests.push(result.evidence); plans.push(coverageFromLeague(competition, result.body));
+    }
     const coverageMatrix = plans.flatMap((plan) => plan.seasons.map((season) => ({ competitionId: `api-football:club-competition:${plan.competition.id}`, providerId: plan.competition.id, competition: plan.competition.name, country: plan.competition.country, seasonStart: season.year, status: season.year === activeSeason ? (season.events ? 'partial' : 'unavailable') : 'unavailable', playerPages: 0, playerRecords: 0, yellowCards: 0, redCards: 0, reason: season.year === activeSeason ? (season.events ? 'Se ha confirmado la cobertura de eventos; se consultarán estadísticas de jugadores.' : 'API no confirma cobertura de eventos para la temporada activa.') : 'Plan de cobertura solamente; no se descargan temporadas históricas en este workflow.' })));
     await writeJson(resolve(outputRoot, artifact('COVERAGE_PLAN.json')), { source: 'api-football', competitions: scopedCompetitions, activeSeason, plans, coverageMatrix, requestsPerformed: requests.length, quotaRemaining: requests.at(-1)?.quotaRemaining ?? null, rawPayloadsStored: false, secretPrinted: false });
     if (planOnly) { await writeJson(resolve(outputRoot, artifact('REPORT.json')), { artifactKind: 'block31_api_football_club_cards', status: 'plan_ready', activeSeason, requestsPerformed: requests.length, quotaRemaining: requests.at(-1)?.quotaRemaining ?? null, competitions: scopedCompetitions, coverageMatrix, factsImported: 0, rawPayloadsStored: false, secretPrinted: false }); return; }
@@ -99,6 +103,7 @@ async function main(): Promise<void> {
     for (const plan of plans) {
       const season = plan.seasons.find((row) => row.year === activeSeason); if (!season?.events) continue;
       for (let page = 1; ; page += 1) {
+        if (maxRequests === 0 || requests.length >= maxRequests) { stoppedForQuota = true; break; }
         const remaining = requests.at(-1)?.quotaRemaining;
         if (remaining !== null && remaining !== undefined && remaining <= quotaReserve) { stoppedForQuota = true; break; }
         const result = await request(`/players?league=${plan.competition.id}&season=${activeSeason}&page=${page}`); requests.push(result.evidence);
@@ -111,7 +116,7 @@ async function main(): Promise<void> {
       if (matrix) { matrix.yellowCards = facts.filter((fact) => fact.competition.providerId === plan.competition.id).reduce((sum, fact) => sum + (fact.yellowCards ?? 0), 0); matrix.redCards = facts.filter((fact) => fact.competition.providerId === plan.competition.id).reduce((sum, fact) => sum + (fact.redCards ?? 0), 0); matrix.status = matrix.playerPages > 0 && !stoppedForQuota ? 'complete' : 'partial'; matrix.reason = matrix.status === 'complete' ? 'Todas las páginas de estadísticas de jugadores de la temporada activa fueron consultadas.' : 'La respuesta fue parcial o la cuota impidió completar las páginas.'; }
       if (stoppedForQuota) break;
     }
-    const report = { artifactKind: 'block31_api_football_club_cards', status: stoppedForQuota ? 'partial' : facts.length > 0 ? 'ready_for_lab_load' : 'not_sufficient', activeSeason, requestsPerformed: requests.length, quotaRemaining: requests.at(-1)?.quotaRemaining ?? null, quotaReserve, competitions: scopedCompetitions, coverageMatrix, factsImported: facts.length, playersWithFacts: new Set(facts.map((fact) => fact.canonicalPlayerId)).size, unresolvedFacts: facts.filter((fact) => !fact.canonicalPlayerId).length, sourceType: 'primary', rawPayloadsStored: false, secretPrinted: false, officialSnapshotCreated: false, redTypesDifferentiated: facts.some((fact) => fact.redSecondYellow !== null || fact.redDirect !== null) };
+    const report = { artifactKind: 'block31_api_football_club_cards', status: stoppedForQuota ? 'partial' : facts.length > 0 ? 'ready_for_lab_load' : 'not_sufficient', activeSeason, requestsPerformed: requests.length, maxRequests, quotaRemaining: requests.at(-1)?.quotaRemaining ?? null, quotaReserve, competitions: scopedCompetitions, coverageMatrix, factsImported: facts.length, playersWithFacts: new Set(facts.map((fact) => fact.canonicalPlayerId)).size, unresolvedFacts: facts.filter((fact) => !fact.canonicalPlayerId).length, sourceType: 'primary', rawPayloadsStored: false, secretPrinted: false, officialSnapshotCreated: false, redTypesDifferentiated: facts.some((fact) => fact.redSecondYellow !== null || fact.redDirect !== null) };
     await writeJson(resolve(outputRoot, artifact('FACTS.json')), { source: 'api-football', activeSeason, facts }); await writeJson(resolve(outputRoot, artifact('REPORT.json')), report);
   } catch (error) { await writeJson(resolve(outputRoot, artifact('REPORT.json')), { artifactKind: 'block31_api_football_club_cards', status: 'failed', requestsPerformed: requests.length, quotaRemaining: requests.at(-1)?.quotaRemaining ?? null, error: error instanceof Error ? error.message.slice(0, 300) : 'unknown_error', rawPayloadsStored: false, secretPrinted: false }); process.exitCode = 1; }
 }

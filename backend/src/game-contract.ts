@@ -342,8 +342,29 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
   if (row.challenge_sha256 !== expectedChallengeSha256) {
     throw new ContractError(503, 'challenge_hash_mismatch', 'Published challenge content hash does not match persisted content');
   }
+  // The legacy provisional board can contain category rows from older
+  // fixtures. Keep only categories with a currently served audited snapshot
+  // for the public beta; unavailable categories must not look selectable.
+  const unavailableProvisionalSlugs = new Set(['player-career-goals', 'club-career-goals', 'club-career-titles']);
+  const servedCategories = row.test_only
+    ? categories.filter((category) => !unavailableProvisionalSlugs.has(category.slug))
+    : categories;
+  const servedCategoryIds = new Set(servedCategories.map((category) => category.category_id));
+  const servedAnswers = answersResult.rows.filter((answer) => servedCategoryIds.has(answer.category_id));
+  const servedChallengeSha256 = calculateChallengeSha256({
+    id: row.id,
+    kind: row.challenge_kind,
+    challengeDate,
+    sourceVersion: row.source_version,
+    engineVersion: row.engine_version,
+    timeLimitSeconds: toNumber(row.time_limit_seconds),
+    scoreCap: toNumber(row.score_cap),
+    categories: servedCategories.map((category) => ({ ordinal: category.category_ordinal, categoryId: category.category_id, rankingSnapshotId: category.ranking_snapshot_id, slug: category.slug, entityType: category.entity_type })),
+    decisions: decisionsResult.rows.map((decision) => ({ ordinal: decision.decision_ordinal, entityId: decision.entity_id, entityType: decision.entity_type })),
+    answers: servedAnswers.map((answer) => ({ decisionOrdinal: answer.decision_ordinal, categoryId: answer.category_id, scoreValue: toNumber(answer.score_value) }))
+  });
   const answersByDecision = new Map<number, Record<string, number>>();
-  for (const answer of answersResult.rows) {
+  for (const answer of servedAnswers) {
     const scores = answersByDecision.get(answer.decision_ordinal) ?? {};
     scores[answer.slug] = toNumber(answer.score_value);
     answersByDecision.set(answer.decision_ordinal, scores);
@@ -351,10 +372,10 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
   const engine: PublishedGameChallenge = {
     id: row.id,
     sourceVersion: row.source_version,
-    challengeSha256: row.challenge_sha256,
+    challengeSha256: servedChallengeSha256,
     timeLimitSeconds: toNumber(row.time_limit_seconds),
     scoreCap: toNumber(row.score_cap),
-    categories: categories.map((category) => ({ slug: category.slug, entityType: category.entity_type })),
+    categories: servedCategories.map((category) => ({ slug: category.slug, entityType: category.entity_type })),
     decisions: decisionsResult.rows.map((decision) => ({
       ordinal: decision.decision_ordinal,
       entityId: decision.entity_id,
@@ -379,11 +400,11 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
     engineVersion: row.engine_version,
     timeLimitSeconds: engine.timeLimitSeconds,
     scoreCap: engine.scoreCap,
-    challengeSha256: row.challenge_sha256,
+    challengeSha256: servedChallengeSha256,
     testOnly: row.test_only,
     runtimeMode,
     engine,
-    categories,
+    categories: servedCategories,
     decisions: decisionsResult.rows
   };
 }

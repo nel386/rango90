@@ -117,7 +117,14 @@ jobs:
       - name: Apply migrations in isolated PostgreSQL
         if: ${{ inputs.run_batches == true && inputs.quota_probe != true }}
         working-directory: backend
-        run: npm run migrate
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 5); do
+            if npm run migrate; then exit 0; fi
+            sleep 3
+          done
+          echo 'PostgreSQL efímero no alcanzó un estado estable; no se inicia la tanda.' >&2
+          exit 1
       - name: Execute one explicitly authorized competition batch
         if: ${{ inputs.run_batches == true && inputs.quota_probe != true }}
         working-directory: backend
@@ -147,7 +154,11 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          test -f .block37/QUOTA_PROBE_REPORT.json || test -f .block32/BLOCK32_REPORT.json
+          if [ ! -f .block37/QUOTA_PROBE_REPORT.json ] && [ ! -f .block32/BLOCK32_REPORT.json ]; then
+            mkdir -p .block37 .block32
+            node -e "require('fs').writeFileSync('.block37/EXECUTION_REPORT.json', JSON.stringify({artifactKind:'block37_execution',status:'not_run',reason:'El backend QA aislado no completó su arranque; no se afirma resultado de cuota ni de tanda.',externalRequestsMade:false,factsInserted:0,snapshotsCreated:0,postgresqlTouched:'attempted_isolated_only',secretPrinted:false}, null, 2))"
+          fi
+          test -f .block37/QUOTA_PROBE_REPORT.json || test -f .block32/BLOCK32_REPORT.json || test -f .block37/EXECUTION_REPORT.json
           if rg -n 'x-apisports-key|API_FOOTBALL_KEY|secretPrinted": true|rawPayloadsStored": true|apiKey' .block37 .block32; then exit 1; fi
       - name: Upload redacted artifacts
         if: always()

@@ -37,7 +37,43 @@ async function load(): Promise<void> {
     for (const fact of captures.values()) await pool.query(`INSERT INTO champions_source_captures (id, source_key, captured_at, source_url, content_sha256, data_version, metadata) VALUES ($1, $2, $3, $4, $5, 'block17-facts-v1', $6) ON CONFLICT (id) DO NOTHING`, [fact.sourceCaptureId, fact.sourceKey, fact.capturedAt, fact.evidence.sourceUrl, fact.evidence.contentSha256 ?? fact.sourceCaptureId, { importedFrom: 'block17-candidate', rawPayloadStored: false }]);
     for (const fact of editions.values()) await pool.query(`INSERT INTO champions_editions (id, season_start, season_end, season_label, era, competition_name, include_qualifying, is_current_season, scope_version) VALUES ($1, $2, $3, $4, $5, $6, FALSE, $7, $8) ON CONFLICT (id) DO NOTHING`, [fact.edition.id, fact.edition.seasonStart, fact.edition.seasonEnd, fact.edition.seasonLabel, fact.edition.era, fact.edition.competitionName, fact.edition.isCurrentSeason, 'uefa-champions-league-goals-facts-v1']);
     for (const fact of entities.values()) await pool.query(`INSERT INTO entities (id, entity_type, canonical_name, catalog_status) VALUES ($1, 'player', $2, 'excluded_from_game') ON CONFLICT (id) DO NOTHING`, [fact.player.canonicalId, fact.player.displayName]);
-    for (const fact of facts) await pool.query(`INSERT INTO champions_goal_facts (id, edition_id, canonical_player_id, source_player_id, player_name_at_source, match_id, match_date, home_team, away_team, phase, goals, source_key, source_capture_id, source_record_id, evidence, captured_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) ON CONFLICT (id) DO NOTHING`, [fact.id, fact.edition.id, fact.player.canonicalId, fact.player.sourcePlayerId, fact.player.displayName, fact.match.id, fact.match.date, fact.match.homeTeam, fact.match.awayTeam, fact.phase, fact.goals, fact.sourceKey, fact.sourceCaptureId, fact.sourceRecordId, fact.evidence, fact.capturedAt]);
+    // The historical candidate contains ~21k facts. Send them as one typed
+    // JSONB recordset so a remote beta database is not forced through one
+    // network round-trip per fact.
+    await pool.query(`
+      INSERT INTO champions_goal_facts
+        (id, edition_id, canonical_player_id, source_player_id, player_name_at_source,
+         match_id, match_date, home_team, away_team, phase, goals, source_key,
+         source_capture_id, source_record_id, evidence, captured_at)
+      SELECT id, edition_id, canonical_player_id, source_player_id, player_name_at_source,
+             match_id, match_date, home_team, away_team, phase, goals, source_key,
+             source_capture_id, source_record_id, evidence, captured_at
+      FROM jsonb_to_recordset($1::jsonb) AS rows(
+        id text, edition_id text, canonical_player_id text, source_player_id text,
+        player_name_at_source text, match_id text, match_date date, home_team text,
+        away_team text, phase text, goals integer, source_key text,
+        source_capture_id text, source_record_id text, evidence jsonb,
+        captured_at timestamptz
+      )
+      ON CONFLICT (id) DO NOTHING
+    `, [JSON.stringify(facts.map((fact) => ({
+      id: fact.id,
+      edition_id: fact.edition.id,
+      canonical_player_id: fact.player.canonicalId,
+      source_player_id: fact.player.sourcePlayerId,
+      player_name_at_source: fact.player.displayName,
+      match_id: fact.match.id,
+      match_date: fact.match.date,
+      home_team: fact.match.homeTeam,
+      away_team: fact.match.awayTeam,
+      phase: fact.phase,
+      goals: fact.goals,
+      source_key: fact.sourceKey,
+      source_capture_id: fact.sourceCaptureId,
+      source_record_id: fact.sourceRecordId,
+      evidence: fact.evidence,
+      captured_at: fact.capturedAt,
+    }))) ]);
     for (const snapshot of [historical, weekly]) {
       let parentSnapshotId = snapshot.parentSnapshotId;
       if (parentSnapshotId && !(await pool.query('SELECT 1 FROM champions_ranking_snapshots WHERE id = $1', [parentSnapshotId])).rowCount) parentSnapshotId = null;

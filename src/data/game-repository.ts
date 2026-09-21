@@ -259,7 +259,7 @@ export function validateGameSessionResponse(raw: unknown, baseUrl = ""): GameSes
     throw new RepositoryError("The game session cannot be started", "invalid", 502, "session_invalid");
   }
   const normalizedChallenge = normalizeChallenge(challenge, baseUrl);
-  if (normalizedChallenge.categories.length !== 7 || normalizedChallenge.entities.length !== 7 || normalizedChallenge.runtimeMode === undefined) {
+  if (normalizedChallenge.categories.length < 1 || normalizedChallenge.categories.length > 7 || normalizedChallenge.entities.length !== normalizedChallenge.categories.length || normalizedChallenge.runtimeMode === undefined) {
     throw new RepositoryError("The game session challenge is incomplete", "invalid", 502, "session_invalid");
   }
   return { id, challengeId, status: "active", startedAt, deadlineAt, currentOrdinal: typeof game.currentOrdinal === "number" ? game.currentOrdinal : 0, sessionToken, challenge: normalizedChallenge };
@@ -333,7 +333,7 @@ export class HttpGameRepository implements GameRepository {
       const challenge = normalizeChallenge(response.challenge, this.baseUrl);
       challenge.runtimeMode = runtime.runtimeMode;
       challenge.provisionalData = response.challenge.provisionalData === true || response.challenge.testOnly === true || runtime.runtimeMode === "lab";
-      if (challenge.categories.length !== 7 || challenge.entities.length !== 7) {
+      if (challenge.categories.length < 1 || challenge.categories.length > 7 || challenge.entities.length !== challenge.categories.length) {
         throw new RepositoryError("The published challenge is incomplete", "invalid", 422, "challenge_invalid");
       }
       return challenge;

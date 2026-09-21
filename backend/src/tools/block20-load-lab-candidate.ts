@@ -22,6 +22,18 @@ async function persistSnapshot(snapshot: WorldCupSnapshot, statusOverride?: 'rol
   return { inserted: client.rowCount === 1, entries };
 }
 try {
+  const existing = await pool.query<{ snapshots: number; facts: number }>(
+    `SELECT
+       (SELECT COUNT(*)::int FROM world_cup_ranking_snapshots WHERE id = ANY($1::text[])) AS snapshots,
+       (SELECT COUNT(*)::int FROM world_cup_goal_facts WHERE id = ANY($2::text[])) AS facts`,
+    [[snapshots.historical.id, snapshots.active.id], facts.map((fact) => fact.id)],
+  );
+  if (existing.rows[0]?.snapshots === 2 && existing.rows[0]?.facts === facts.length) {
+    await writeFile(resolve(outputRoot, 'BLOCK20_LOAD_REPORT.json'), JSON.stringify({ status: 'reused_existing', facts: facts.length, snapshots: [snapshots.historical.id, snapshots.active.id], idempotency: { rerunSafe: true }, officialPublication: 'blocked' }, null, 2), 'utf8');
+    console.log(JSON.stringify({ status: 'reused_existing', facts: facts.length, snapshots: [snapshots.historical.id, snapshots.active.id], idempotent: true }, null, 2));
+    await pool.end();
+    process.exit(0);
+  }
   await pool.query('BEGIN');
   const captureFacts = new Map<string, WorldCupFact>(); const sources = new Map<string, WorldCupFact>(); const editions = new Map<string, WorldCupFact>(); const entities = new Map<string, WorldCupFact>();
   for (const fact of facts) { captureFacts.set(fact.sourceCaptureId, fact); sources.set(fact.sourceKey, fact); editions.set(fact.edition.id, fact); if (fact.player) entities.set(fact.player.canonicalId, fact); }

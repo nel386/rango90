@@ -22,6 +22,16 @@ async function load(): Promise<void> {
   // different sessions and make rollback non-atomic.
   const pool = new pg.Pool({ connectionString: databaseUrl, max: 1, ssl: explicitTargetLoad ? { rejectUnauthorized: false } : undefined });
   try {
+    const existing = await pool.query<{ snapshots: number; facts: number }>(
+      `SELECT
+         (SELECT COUNT(*)::int FROM champions_ranking_snapshots WHERE id = ANY($1::text[])) AS snapshots,
+         (SELECT COUNT(*)::int FROM champions_goal_facts WHERE id = ANY($2::text[])) AS facts`,
+      [[historical.id, weekly.id], facts.map((fact) => fact.id)],
+    );
+    if (existing.rows[0]?.snapshots === 2 && existing.rows[0]?.facts === facts.length) {
+      console.log(JSON.stringify({ status: 'reused_existing', facts: facts.length, snapshots: [historical.id, weekly.id], idempotent: true }, null, 2));
+      return;
+    }
     await pool.query('BEGIN');
     const sources = new Map<string, ChampionsGoalFact>();
     const captures = new Map<string, ChampionsGoalFact>();

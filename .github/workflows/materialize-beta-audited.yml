@@ -78,7 +78,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p "$CHAMPIONS_ROOT" "$WORLD_CUP_ROOT" "$ASSISTS_ROOT" "$CARDS_ROOT" "$OUTPUT_ROOT"
+          mkdir -p "$CHAMPIONS_ROOT" "$WORLD_CUP_ROOT" "$ASSISTS_ROOT" "$CARDS_ROOT" "$OUTPUT_ROOT" \
+            "$OUTPUT_ROOT/world-cup" "$OUTPUT_ROOT/world-cup-rerun" \
+            "$OUTPUT_ROOT/assists" "$OUTPUT_ROOT/assists-rerun" \
+            "$OUTPUT_ROOT/cards" "$OUTPUT_ROOT/cards-rerun"
           gh run download '${{ inputs.champions_run_id }}' -D "$CHAMPIONS_ROOT"
           gh run download '${{ inputs.world_cup_run_id }}' -D "$WORLD_CUP_ROOT"
           gh run download '${{ inputs.assists_run_id }}' -D "$ASSISTS_ROOT"

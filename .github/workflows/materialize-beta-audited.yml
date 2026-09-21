@@ -45,12 +45,12 @@ jobs:
       RANGO90_RUNTIME_MODE: official
       RANGO90_ALLOW_TARGET_DATABASE_LOAD: 'true'
       RANGO90_TARGET_DATABASE_CONFIRMATION: ${{ inputs.confirmation }}
-      ROOT: ${{ runner.temp }}/rango90-beta-materialization
-      CHAMPIONS_ROOT: ${{ runner.temp }}/rango90-beta-materialization/champions
-      WORLD_CUP_ROOT: ${{ runner.temp }}/rango90-beta-materialization/world-cup
-      ASSISTS_ROOT: ${{ runner.temp }}/rango90-beta-materialization/assists
-      CARDS_ROOT: ${{ runner.temp }}/rango90-beta-materialization/cards
-      OUTPUT_ROOT: ${{ runner.temp }}/rango90-beta-materialization/output
+      ROOT: ${{ github.workspace }}/.rango90-beta-materialization
+      CHAMPIONS_ROOT: ${{ github.workspace }}/.rango90-beta-materialization/champions
+      WORLD_CUP_ROOT: ${{ github.workspace }}/.rango90-beta-materialization/world-cup
+      ASSISTS_ROOT: ${{ github.workspace }}/.rango90-beta-materialization/assists
+      CARDS_ROOT: ${{ github.workspace }}/.rango90-beta-materialization/cards
+      OUTPUT_ROOT: ${{ github.workspace }}/.rango90-beta-materialization/output
 
     steps:
       - name: Validate explicit authorization
@@ -227,3 +227,7 @@ jobs:
             ${{ env.OUTPUT_ROOT }}/world-cup/BLOCK20_LOAD_REPORT.json
             ${{ env.OUTPUT_ROOT }}/assists/BLOCK27_REPORT.json
             ${{ env.OUTPUT_ROOT }}/cards/BLOCK31_REPORT.json
+
+      - name: Cleanup downloaded artifacts and temporary materialization files
+        if: always()
+        run: rm -rf "$ROOT"

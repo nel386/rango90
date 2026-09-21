@@ -2,7 +2,7 @@ export type RuntimeMode = 'lab' | 'official';
 
 export type RuntimeConfigPayload = {
   runtimeMode: RuntimeMode;
-  modeLabel: 'Modo laboratorio' | 'Producto oficial';
+  modeLabel: 'Modo beta / laboratorio';
   provisionalDataAllowed: boolean;
   officialPublicationOnly: boolean;
 };
@@ -16,9 +16,7 @@ export function parseRuntimeMode(value: string | undefined): RuntimeMode {
 }
 
 export function runtimeConfigPayload(runtimeMode: RuntimeMode): RuntimeConfigPayload {
-  return runtimeMode === 'lab'
-    ? { runtimeMode, modeLabel: 'Modo laboratorio', provisionalDataAllowed: true, officialPublicationOnly: false }
-    : { runtimeMode, modeLabel: 'Producto oficial', provisionalDataAllowed: false, officialPublicationOnly: true };
+  return { runtimeMode, modeLabel: 'Modo beta / laboratorio', provisionalDataAllowed: true, officialPublicationOnly: false };
 }
 
 export function getConfiguredRuntimeMode(env: NodeJS.ProcessEnv = process.env): RuntimeMode {

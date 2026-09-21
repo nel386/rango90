@@ -472,7 +472,7 @@ async function getRankingCatalog(appDb: ContractDatabase, runtimeMode: RuntimeMo
     readCatalogSnapshot(appDb, { snapshotTable: 'club_goal_ranking_snapshots', entryTable: 'club_goal_ranking_entries', categorySlug: CLUB_CAREER_GOALS_CATEGORY_SLUG, dataset: 'active_weekly', requireComplete: false }),
     readCatalogSnapshot(appDb, { snapshotTable: 'club_card_ranking_snapshots', entryTable: 'club_card_ranking_entries', categorySlug: CLUB_CAREER_YELLOW_CARDS_CATEGORY_SLUG, dataset: 'active_weekly', competitionFilter: 'complete_scope', requireComplete: true }),
     readCatalogSnapshot(appDb, { snapshotTable: 'club_card_ranking_snapshots', entryTable: 'club_card_ranking_entries', categorySlug: CLUB_CAREER_RED_CARDS_CATEGORY_SLUG, dataset: 'active_weekly', competitionFilter: 'complete_scope', requireComplete: true }),
-    runtimeMode === 'lab' ? getLabClubCardsScopeStatus(appDb, season) : Promise.resolve(null),
+    getLabClubCardsScopeStatus(appDb, season),
   ]);
   const definition = (slug: string) => RANKING_CATALOG_DEFINITIONS.find((candidate) => candidate.slug === slug)!;
   const unavailableHistory = (scope: string, status: RankingCatalogStatus, reason: string) => unavailableCatalogScope(scope, status, reason);
@@ -485,9 +485,6 @@ async function getRankingCatalog(appDb: ContractDatabase, runtimeMode: RuntimeMo
     buildCatalogCategory(definition(CLUB_CAREER_RED_CARDS_CATEGORY_SLUG), unavailableHistory('Histórico de clubes', 'candidate_not_sufficient', 'La cobertura histórica no es suficiente.'), redCardsActive ? availableCatalogScope('3 de 6 competiciones completas', redCardsActive, 'partial_scope', clubCardsStatus?.provisional?.length ? `${clubCardsStatus.provisional.map((item) => item.name).join(', ')} tienen temporada activa provisional y no entran en complete_scope.` : 'Bundesliga, Ligue 1 y Primeira Liga están pendientes por cuota.') : unavailableHistory('3 de 6 competiciones completas', 'ranking_not_available', 'No hay snapshot complete_scope válido en lab.'), officialReason, clubCardsStatus ? { included: clubCardsStatus.included, excluded: clubCardsStatus.excluded, provisional: clubCardsStatus.provisional } : undefined),
     buildCatalogCategory(definition('club-global-titles'), unavailableHistory('Títulos globales en clubes', 'ranking_not_available', 'Esta categoría todavía no tiene datos trazables disponibles.'), unavailableHistory('Títulos globales en clubes', 'ranking_not_available', 'Esta categoría todavía no tiene datos trazables disponibles.'), officialReason),
   ];
-  if (runtimeMode === 'official') {
-    return { runtimeMode, season, categories: categories.map((category) => ({ ...category, status: 'official_not_ready' as const, availableScopes: [], blockReason: officialReason, allowsHistorical: false, allowsActiveSeason: false, historical: unavailableCatalogScope(category.historical.scope, 'official_not_ready', officialReason), active: unavailableCatalogScope(category.active.scope, 'official_not_ready', officialReason) })) };
-  }
   return { runtimeMode, season, categories };
 }
 
@@ -584,29 +581,29 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
          SELECT rs.id, rs.status
            FROM ranking_snapshots rs
           WHERE rs.category_id = c.id
-            AND (rs.status = 'published' OR ($1::text = 'lab' AND rs.status = 'draft'))
+            AND rs.status IN ('published', 'draft')
           ORDER BY rs.generated_at DESC
           LIMIT 1
        ) latest ON TRUE
-       WHERE (c.status = 'published' OR ($1::text = 'lab' AND c.status = 'draft'))
-         AND c.slug <> $4
-         AND NOT ($1::text = 'lab' AND c.slug = $2 AND EXISTS (
+       WHERE c.status IN ('published', 'draft')
+         AND c.slug <> $3
+         AND NOT (c.slug = $1 AND EXISTS (
            SELECT 1 FROM champions_ranking_snapshots lab_champions
-            WHERE lab_champions.category_slug = $2
+            WHERE lab_champions.category_slug = $1
               AND lab_champions.status IN ('lab_provisional', 'draft')
               AND lab_champions.coverage_complete = TRUE
          ))
-         AND NOT ($1::text = 'lab' AND c.slug = $3 AND EXISTS (
+         AND NOT (c.slug = $2 AND EXISTS (
            SELECT 1 FROM world_cup_ranking_snapshots lab_world_cup
-            WHERE lab_world_cup.category_slug = $3
+            WHERE lab_world_cup.category_slug = $2
               AND lab_world_cup.status IN ('lab_provisional', 'draft')
               AND lab_world_cup.coverage_complete = TRUE
          ))
          ORDER BY c.slug`,
-      [runtimeMode, CHAMPIONS_CATEGORY_SLUG, WORLD_CUP_CATEGORY_SLUG, CLUB_CAREER_GOALS_CATEGORY_SLUG]
+      [CHAMPIONS_CATEGORY_SLUG, WORLD_CUP_CATEGORY_SLUG, CLUB_CAREER_GOALS_CATEGORY_SLUG]
     );
     const categories = result.rows.map((row) => ({ ...row, availability: row.snapshot_status === 'draft' ? 'provisional' : 'official' }));
-    if (runtimeMode === 'lab') {
+    {
       const candidate = await appDb.query(
         `SELECT id, category_slug AS slug, 'Goles históricos — UEFA Champions League' AS label_es,
                 'All-time goals — UEFA Champions League' AS label_en,
@@ -689,9 +686,8 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
     return getRankingCatalog(appDb, runtimeMode, query.season);
   });
 
-  app.get('/v1/rankings/club-cards/status', async (request, reply) => {
+  app.get('/v1/rankings/club-cards/status', async (request) => {
     const query = z.object({ season: z.coerce.number().int().min(1800).max(2100).default(2026) }).parse(request.query);
-    if (runtimeMode === 'official') return reply.code(404).send({ error: 'ranking_not_available', reason: 'no_published_snapshot' });
     return getLabClubCardsScopeStatus(appDb, query.season);
   });
 
@@ -701,19 +697,19 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
     const scopedCard = params.categorySlug.match(/^(club-career-(?:yellow|red)-cards):([0-9]+)$/u);
     const categorySlug = scopedCard?.[1] ?? params.categorySlug;
     const competition = query.competition ?? scopedCard?.[2];
-    if (runtimeMode === 'lab' && params.categorySlug === CHAMPIONS_CATEGORY_SLUG) {
+    if (params.categorySlug === CHAMPIONS_CATEGORY_SLUG) {
       const candidate = await getLabChampionsRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_season_weekly'), query.limit, runtimeMode);
       if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
       return candidate;
     }
-    if (runtimeMode === 'lab' && params.categorySlug === CHAMPIONS_ASSISTS_CATEGORY_SLUG) {
+    if (params.categorySlug === CHAMPIONS_ASSISTS_CATEGORY_SLUG) {
       const requestedHistorical = query.scope === 'historical' || query.dataset === 'historical_base';
       if (requestedHistorical) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, scope: 'historical', reason: 'historical_candidate_not_sufficient', message: 'El histórico completo de asistencias todavía no tiene cobertura suficiente.' });
       const candidate = await getLabChampionsAssistsRanking(appDb, 'active_season_weekly', query.limit, runtimeMode, query.season);
       if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, scope: 'active_season', season: query.season ?? null, reason: query.season ? 'season_not_available' : 'no_available_snapshot' });
       return candidate;
     }
-    if (runtimeMode === 'lab' && params.categorySlug === WORLD_CUP_CATEGORY_SLUG) {
+    if (params.categorySlug === WORLD_CUP_CATEGORY_SLUG) {
       const candidate = await getLabWorldCupRanking(appDb, (query.dataset === 'historical_base' ? 'historical_base' : 'active_edition_weekly'), query.limit, runtimeMode);
       if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
       return candidate;
@@ -722,7 +718,6 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
       const cardKind = categorySlug === CLUB_CAREER_YELLOW_CARDS_CATEGORY_SLUG ? 'yellow' : categorySlug === CLUB_CAREER_RED_CARDS_CATEGORY_SLUG ? 'red' : query.card;
       if (!cardKind) return reply.code(400).send({ error: 'invalid_card', category: categorySlug, message: 'card debe ser yellow o red.' });
       if (query.scope === 'historical' || query.dataset === 'historical_base') return reply.code(404).send({ error: 'ranking_not_available', category: categorySlug, mode: runtimeMode, scope: 'historical', reason: 'historical_candidate_not_sufficient', message: 'El histórico completo de tarjetas de clubes todavía no tiene cobertura suficiente.' });
-      if (runtimeMode === 'official') return reply.code(404).send({ error: 'ranking_not_available', category: categorySlug, mode: runtimeMode, reason: 'no_published_snapshot' });
       const candidate = await getLabClubCardsRanking(appDb, cardKind, 'active_weekly', query.limit, runtimeMode, query.season, competition);
       if (!candidate) {
         const knownStatus = competition && /^\d+$/u.test(competition) ? getKnownClubCardsCompetitionStatus(competition) : null;
@@ -733,7 +728,6 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
     }
     if (params.categorySlug === CLUB_CAREER_GOALS_CATEGORY_SLUG) {
       if (query.scope === 'historical' || query.dataset === 'historical_base') return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, scope: 'historical', reason: 'historical_candidate_not_sufficient', message: 'El histórico global de goles de clubes no tiene cobertura suficiente.' });
-      if (runtimeMode === 'official') return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_published_snapshot' });
       const candidate = await getLabClubCareerGoalsRanking(appDb, query.limit, runtimeMode, query.season, query.competition);
       if (!candidate) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, scope: 'active', season: query.season ?? null, reason: 'no_available_snapshot' });
       return candidate;
@@ -741,15 +735,12 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
     if (params.categorySlug === 'club-global-titles') {
       return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_traceable_facts', message: 'Esta categoría todavía no tiene datos trazables disponibles.' });
     }
-    if (runtimeMode === 'official' && params.categorySlug === CHAMPIONS_ASSISTS_CATEGORY_SLUG) {
-      return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_published_snapshot' });
-    }
     const result = await appDb.query(
       `WITH latest_snapshot AS (
          SELECT rs.* FROM ranking_snapshots rs
          JOIN category_definitions c0 ON c0.id = rs.category_id
          WHERE c0.slug = $1 AND c0.status <> 'retired'
-           AND (rs.status = 'published' OR ($3::text = 'lab' AND rs.status = 'draft'))
+           AND rs.status IN ('published', 'draft')
          ORDER BY rs.generated_at DESC LIMIT 1
        )
        SELECT c.slug, c.label_es, c.label_en, c.status AS category_status,
@@ -804,11 +795,11 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
        WHERE c.slug = $1
        ORDER BY rs.generated_at DESC, re.rank, e.canonical_name
        LIMIT $2`,
-      [params.categorySlug, query.limit, runtimeMode]
+      [params.categorySlug, query.limit]
     );
-    if (result.rows.length === 0) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: runtimeMode === 'official' ? 'no_published_snapshot' : 'no_available_snapshot' });
+    if (result.rows.length === 0) return reply.code(404).send({ error: 'ranking_not_available', category: params.categorySlug, mode: runtimeMode, reason: 'no_available_snapshot' });
     const snapshotId = result.rows[0]?.snapshot_id;
-    const provisional = runtimeMode === 'lab' && result.rows[0]?.snapshot_status !== 'published';
+    const provisional = result.rows[0]?.snapshot_status !== 'published';
     return { category: result.rows[0]?.slug, rankingScope: 'historical_snapshot', snapshotId, mode: runtimeMode, status: provisional ? 'provisional' : 'official', entries: result.rows.map((row) => ({ ...row, imageStatus: row.image_status, reviewStatus: row.review_status, rightsStatus: row.rights_status, isPublishable: Boolean(row.is_publishable), playable: Boolean(row.playable), media: { status: row.image_status, imageStatus: row.image_status, reviewStatus: row.review_status, rightsStatus: row.rights_status, isPublishable: Boolean(row.is_publishable), url: row.image_url, sourceUrl: row.image_source_url, licenseName: row.image_license_name } })) };
   });
 

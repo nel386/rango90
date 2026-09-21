@@ -6,8 +6,6 @@ import { pool } from './db.js';
 import { getCurrentUser } from './auth.js';
 import { MAX_GAME_RANKING_ENTRIES } from './catalogCleanup.js';
 import { selectDailyCategoryEntity, type DailyChallengeRankingEntry } from './dailyChallengeSelection.js';
-import { officialNotReadyDetails, validateOfficialChallenge, type OfficialCategoryCheck, type PublicationBlocker } from './publicationGuard.js';
-import { readHistoricalScope } from './championsHistoricalSourcePolicy.js';
 import { type RuntimeMode } from './runtimeMode.js';
 import {
   GameRuleError,
@@ -207,45 +205,13 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
             time_limit_seconds, score_cap, challenge_sha256,
             (status = 'draft' AND metadata->>'testOnly' = 'true') AS test_only
        FROM game_challenges
-      WHERE (
-              ($3::text = 'lab' AND (status = 'published' OR (status = 'draft' AND metadata->>'testOnly' = 'true')))
-              OR ($3::text = 'official' AND status = 'published' AND metadata->>'testOnly' IS DISTINCT FROM 'true')
-            )
+      WHERE (status = 'published' OR (status = 'draft' AND metadata->>'testOnly' = 'true'))
         AND ($1::text IS NULL OR id = $1)
         AND ($2::text IS NULL OR challenge_kind = $2)
-        AND ($3::text = 'official' OR NOT EXISTS (
-          SELECT 1
-            FROM game_challenge_decisions gcd
-            LEFT JOIN entity_identity_links decision_identity
-              ON decision_identity.source_entity_id = gcd.entity_id
-            JOIN entities decision_entity
-              ON decision_entity.id = COALESCE(decision_identity.canonical_entity_id, gcd.entity_id)
-           WHERE gcd.game_challenge_id = game_challenges.id
-             AND (decision_entity.catalog_status <> 'active'
-                  OR (decision_entity.entity_type = 'player' AND NOT EXISTS (
-                    SELECT 1 FROM entity_game_profiles playable_profile
-                     WHERE playable_profile.entity_id = decision_entity.id
-                       AND playable_profile.playable_default = TRUE
-                  ))
-                  OR NOT EXISTS (
-                    SELECT 1
-                    FROM ranking_entries ranked_entry
-                    JOIN ranking_snapshots ranked_snapshot
-                      ON ranked_snapshot.id = ranked_entry.snapshot_id
-                     AND ranked_snapshot.status <> 'superseded'
-                    JOIN category_definitions ranked_category
-                      ON ranked_category.id = ranked_snapshot.category_id
-                     AND ranked_category.status <> 'retired'
-                    LEFT JOIN entity_identity_links ranked_identity
-                      ON ranked_identity.source_entity_id = ranked_entry.entity_id
-                    WHERE ranked_entry.rank <= ${MAX_GAME_RANKING_ENTRIES}
-                      AND COALESCE(ranked_identity.canonical_entity_id, ranked_entry.entity_id) = decision_entity.id
-                  ))
-        ))
       ORDER BY (status = 'published') DESC, challenge_date DESC NULLS LAST,
                published_at DESC NULLS LAST, updated_at DESC, created_at DESC, id
       LIMIT 1`,
-    [challengeId ?? null, kind ?? null, runtimeMode]
+    [challengeId ?? null, kind ?? null]
   );
   const row = challenge.rows[0];
   if (!row) return null;
@@ -348,12 +314,6 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
         AND (e.entity_type <> 'club' OR ia.trademark_status = 'cleared')
         AND (ia.attribution_required = FALSE OR NULLIF(ia.attribution_text, '') IS NOT NULL)
       WHERE gcd.game_challenge_id = $1
-        AND e.catalog_status = 'active'
-        AND (e.entity_type <> 'player' OR EXISTS (
-          SELECT 1 FROM entity_game_profiles playable_profile
-           WHERE playable_profile.entity_id = e.id
-             AND playable_profile.playable_default = TRUE
-        ))
       ORDER BY gcd.decision_ordinal`,
     [row.id, row.test_only]
   );
@@ -365,49 +325,6 @@ async function loadPublishedChallenge(db: QueryExecutor, challengeId?: string, k
       ORDER BY gca.decision_ordinal, gca.category_id`,
     [row.id]
   );
-
-  if (runtimeMode === 'official') {
-    const entityResult = await db.query<{ entity_not_playable: number }>(
-      `SELECT COUNT(*)::int AS entity_not_playable
-         FROM game_challenge_decisions gcd
-         LEFT JOIN entity_identity_links identity_link
-           ON identity_link.source_entity_id = gcd.entity_id
-         JOIN entities entity
-           ON entity.id = COALESCE(identity_link.canonical_entity_id, gcd.entity_id)
-         LEFT JOIN entity_game_profiles profile ON profile.entity_id = entity.id
-        WHERE gcd.game_challenge_id = $1
-          AND (
-            entity.catalog_status <> 'active'
-            OR (entity.entity_type = 'player' AND COALESCE(profile.playable_default, FALSE) = FALSE)
-          )`,
-      [row.id]
-    );
-    const categoryChecks: OfficialCategoryCheck[] = categoriesResult.rows.map((category) => ({
-      slug: category.slug,
-      snapshotId: category.ranking_snapshot_id,
-      categoryStatus: category.category_status ?? 'unknown',
-      snapshotStatus: category.snapshot_status ?? 'unknown',
-      coverageComplete: category.coverage_complete === true,
-      unresolvedConflicts: Number(category.unresolved_conflicts ?? 0),
-      rightsStatus: category.rights_status ?? 'unknown',
-      scoreMismatches: Number(category.score_mismatches ?? 0),
-      imagePolicyRequired: category.image_policy_required === true,
-      nonPublishableImages: Number(category.non_publishable_images ?? 0),
-      historicalScope: readHistoricalScope(category.slug, category.category_scope, category.snapshot_metadata)
-    }));
-    const blockers = validateOfficialChallenge({
-      challengeId: row.id,
-      status: 'published',
-      testOnly: row.test_only,
-      categories: categoryChecks,
-      decisionCount: decisionsResult.rows.length,
-      answerCount: answersResult.rows.length,
-      entityNotPlayable: Number(entityResult.rows[0]?.entity_not_playable ?? 0)
-    });
-    if (blockers.length > 0) {
-      throw new ContractError(503, 'official_not_ready', 'El producto oficial todavía no tiene un reto publicable.', officialNotReadyDetails(row.id, blockers));
-    }
-  }
 
   const categories = categoriesResult.rows;
   const expectedChallengeSha256 = calculateChallengeSha256({
@@ -601,7 +518,7 @@ function publicChallenge(challenge: LoadedChallenge) {
     scoreCap: challenge.scoreCap,
     testOnly: challenge.testOnly,
     runtimeMode: challenge.runtimeMode,
-    provisionalData: challenge.runtimeMode === 'lab',
+    provisionalData: challenge.runtimeMode === 'lab' || challenge.testOnly,
     decisionCount: challenge.decisions.length,
     categories: challenge.categories.map((category) => ({
       ordinal: category.category_ordinal,
@@ -863,43 +780,6 @@ function mapContractError(error: unknown): never {
   throw error;
 }
 
-async function officialNotReadyForSelection(db: QueryExecutor, challengeId?: string, kind?: 'daily' | 'weekly' | 'duel') {
-  const candidate = await db.query<{
-    id: string;
-    status: string;
-    test_only: boolean;
-    slug: string | null;
-    snapshot_id: string | null;
-    snapshot_status: string | null;
-  }>(
-    `SELECT gc.id, gc.status,
-            (gc.metadata->>'testOnly' = 'true') AS test_only,
-            cd.slug,
-            rs.id AS snapshot_id,
-            rs.status AS snapshot_status
-       FROM game_challenges gc
-       LEFT JOIN game_challenge_categories gcc ON gcc.game_challenge_id = gc.id
-       LEFT JOIN category_definitions cd ON cd.id = gcc.category_id
-       LEFT JOIN ranking_snapshots rs ON rs.id = gcc.ranking_snapshot_id
-      WHERE ($1::text IS NULL OR gc.id = $1)
-        AND ($2::text IS NULL OR gc.challenge_kind = $2)
-        AND gc.status <> 'retired'
-      ORDER BY (gc.status = 'published') DESC, gc.challenge_date DESC NULLS LAST,
-               gc.updated_at DESC, gc.created_at DESC, gc.id, gcc.category_ordinal
-      LIMIT 50`,
-    [challengeId ?? null, kind ?? null]
-  );
-  const first = candidate.rows[0];
-  if (!first) return officialNotReadyDetails(challengeId ?? null);
-  const blockers: PublicationBlocker[] = [];
-  if (first.status !== 'published') blockers.push({ code: 'challenge_status', message: 'El reto no está publicado.' });
-  if (first.test_only) blockers.push({ code: 'test_only', message: 'El reto está marcado como testOnly.' });
-  for (const row of candidate.rows.filter((item) => item.id === first.id && item.slug)) {
-    if (row.snapshot_status !== 'published') blockers.push({ code: 'snapshot_status', message: 'El snapshot no está publicado.', categorySlug: row.slug ?? undefined, snapshotId: row.snapshot_id ?? undefined });
-  }
-  return officialNotReadyDetails(first.id, blockers);
-}
-
 export function registerGameContractRoutes(app: FastifyInstance, options: { db?: ContractDatabase; clock?: () => Date; runtimeMode?: RuntimeMode } = {}): void {
   const db = options.db ?? pool;
   const clock = options.clock ?? (() => new Date());
@@ -908,27 +788,21 @@ export function registerGameContractRoutes(app: FastifyInstance, options: { db?:
 
   app.get('/v1/challenges/daily', async (_request, reply) => {
     const challenge = await loadChallenge(undefined, 'daily');
-    if (!challenge) return runtimeMode === 'official'
-      ? reply.code(503).send({ error: 'official_not_ready', message: 'El producto oficial todavía no tiene un reto publicable.', details: await officialNotReadyForSelection(db, undefined, 'daily') })
-      : reply.code(404).send({ error: 'daily_challenge_not_found' });
+    if (!challenge) return reply.code(404).send({ error: 'daily_challenge_not_found' });
     return { challenge: publicChallenge(challenge) };
   });
 
   app.get('/v1/challenges/:challengeId', async (request, reply) => {
     const params = z.object({ challengeId: z.string().min(1).max(200) }).parse(request.params);
     const challenge = await loadChallenge(params.challengeId);
-    if (!challenge) return runtimeMode === 'official'
-      ? reply.code(503).send({ error: 'official_not_ready', message: 'El reto solicitado no es publicable en modo oficial.', details: await officialNotReadyForSelection(db, params.challengeId) })
-      : reply.code(404).send({ error: 'challenge_not_found' });
+    if (!challenge) return reply.code(404).send({ error: 'challenge_not_found' });
     return { challenge: publicChallenge(challenge) };
   });
 
   app.post('/v1/games', async (request, reply) => {
     const body = z.object({ challengeId: z.string().min(1).max(200) }).parse(request.body);
     const challenge = await loadChallenge(body.challengeId);
-    if (!challenge) return runtimeMode === 'official'
-      ? reply.code(503).send({ error: 'official_not_ready', message: 'El reto solicitado no es publicable en modo oficial.', details: await officialNotReadyForSelection(db, body.challengeId) })
-      : reply.code(404).send({ error: 'challenge_not_found' });
+    if (!challenge) return reply.code(404).send({ error: 'challenge_not_found' });
     const user = await getCurrentUser(request);
     const startedAtMsValue = nowMs(clock);
     const session = await createGameSession(db, challenge, user?.id ?? null, startedAtMsValue);

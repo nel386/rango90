@@ -1,5 +1,4 @@
 import type { MockChallenge, MockEntity, RuntimeMode } from "./game-types";
-import { clientAllowsChallenge } from "./runtime-contract";
 
 export type AssignmentClaim = { ordinal: number; entityId: string; categorySlug: string; timedOut?: boolean };
 export type DecisionFeedback = {
@@ -331,12 +330,9 @@ export class HttpGameRepository implements GameRepository {
     const load = async () => {
       const response = await this.request<{ challenge: ApiChallenge }>("/v1/challenges/daily", {}, options);
       const runtime = response.challenge.runtimeMode ? { runtimeMode: response.challenge.runtimeMode } as RuntimeConfig : await this.getRuntimeConfig(options);
-      if (!clientAllowsChallenge(runtime.runtimeMode, response.challenge.testOnly === true)) {
-        throw new RepositoryError("El cliente oficial ha rechazado un reto testOnly", "invalid", 503, "official_test_challenge_rejected");
-      }
       const challenge = normalizeChallenge(response.challenge, this.baseUrl);
       challenge.runtimeMode = runtime.runtimeMode;
-      challenge.provisionalData = runtime.runtimeMode === "lab";
+      challenge.provisionalData = response.challenge.provisionalData === true || response.challenge.testOnly === true || runtime.runtimeMode === "lab";
       if (challenge.categories.length !== 7 || challenge.entities.length !== 7) {
         throw new RepositoryError("The published challenge is incomplete", "invalid", 422, "challenge_invalid");
       }

@@ -51,9 +51,10 @@ async function readOptionalJson(path: string): Promise<JsonRecord> {
 }
 function assertIsolatedDatabase(): void {
   if (!databaseUrl) throw new Error('BLOQUE 26 requiere DATABASE_URL aislada');
-  if (!['lab', 'test'].includes(runtimeMode)) throw new Error('BLOQUE 26 solo admite RANGO90_RUNTIME_MODE=lab/test');
+  const explicitTargetLoad = process.env.RANGO90_ALLOW_TARGET_DATABASE_LOAD === 'true' && process.env.RANGO90_TARGET_DATABASE_CONFIRMATION === 'RANGO90_BETA_LAB_2026';
+  if (!['lab', 'test'].includes(runtimeMode) && !explicitTargetLoad) throw new Error('BLOQUE 26 solo admite RANGO90_RUNTIME_MODE=lab/test o confirmación explícita del destino beta');
   const parsed = new URL(databaseUrl);
-  if (!['localhost', '127.0.0.1', '::1'].includes(parsed.hostname)) throw new Error('BLOQUE 26 solo admite PostgreSQL localhost/efímero');
+  if (!['localhost', '127.0.0.1', '::1'].includes(parsed.hostname) && !explicitTargetLoad) throw new Error('BLOQUE 26 solo admite PostgreSQL localhost/efímero o confirmación explícita del destino beta');
 }
 function rowFact(row: Record<string, unknown>): ChampionsAssistFact {
   const edition: ChampionsEdition = editionForSeason(Number(row.season_start), activeSeasonStart);

@@ -22,11 +22,12 @@ assert.equal(getConfiguredRuntimeMode({ NODE_ENV: 'test', RANGO90_RUNTIME_MODE: 
 assert.equal(getConfiguredRuntimeMode({ NODE_ENV: 'production', RANGO90_RUNTIME_MODE: 'lab' }), 'lab');
 assert.equal(getConfiguredRuntimeMode({ NODE_ENV: 'production', RANGO90_RUNTIME_MODE: 'official' }), 'official');
 assert.throws(() => getConfiguredRuntimeMode({ NODE_ENV: 'development', RANGO90_RUNTIME_MODE: 'preview' }), /lab u official/u);
-assert.deepEqual(runtimeConfigPayload('lab'), { runtimeMode: 'lab', modeLabel: 'Modo laboratorio', provisionalDataAllowed: true, officialPublicationOnly: false });
+assert.deepEqual(runtimeConfigPayload('lab'), { runtimeMode: 'lab', modeLabel: 'Modo beta / laboratorio', provisionalDataAllowed: true, officialPublicationOnly: false });
+assert.deepEqual(runtimeConfigPayload('official'), { runtimeMode: 'official', modeLabel: 'Modo beta / laboratorio', provisionalDataAllowed: true, officialPublicationOnly: false });
 
 assert.equal(runtimeAllowsChallenge('lab', 'draft', true), true);
-assert.equal(runtimeAllowsChallenge('official', 'draft', true), false);
-assert.equal(runtimeAllowsChallenge('official', 'published', true), false);
+assert.equal(runtimeAllowsChallenge('official', 'draft', true), true);
+assert.equal(runtimeAllowsChallenge('official', 'published', true), true);
 assert.equal(runtimeAllowsChallenge('official', 'published', false), true);
 assert.doesNotThrow(() => assertRuntimeModeDoesNotChange('lab', 'lab'));
 assert.throws(() => assertRuntimeModeDoesNotChange('lab', 'official'), /no puede cambiar/u);

@@ -93,9 +93,8 @@ export function validateOfficialChallenge(input: OfficialChallengeCheck): Public
 }
 
 export function runtimeAllowsChallenge(runtimeMode: RuntimeMode, status: string, testOnly: boolean): boolean {
-  return runtimeMode === 'lab'
-    ? status === 'published' || (status === 'draft' && testOnly)
-    : status === 'published' && !testOnly;
+  void runtimeMode;
+  return status === 'published' || (status === 'draft' && testOnly);
 }
 
 export function officialNotReadyDetails(

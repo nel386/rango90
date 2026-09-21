@@ -1,0 +1,229 @@
+name: Materialize audited beta artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type RANGO90_BETA_LAB_2026 to authorize the current beta database load
+        required: true
+        type: string
+      champions_run_id:
+        description: Verified Block 17 GitHub Actions run
+        required: true
+        default: '35566654977'
+        type: string
+      world_cup_run_id:
+        description: Verified Block 20 GitHub Actions run
+        required: true
+        default: '35344844277'
+        type: string
+      assists_run_id:
+        description: Verified Block 27 GitHub Actions run
+        required: true
+        default: '35576902645'
+        type: string
+      cards_run_id:
+        description: Verified Block 31 GitHub Actions run
+        required: true
+        default: '35402737751'
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: materialize-beta-audited
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DATABASE_URL: ${{ secrets.RANGO90_DATABASE_URL }}
+      RANGO90_RUNTIME_MODE: official
+      RANGO90_ALLOW_TARGET_DATABASE_LOAD: 'true'
+      RANGO90_TARGET_DATABASE_CONFIRMATION: ${{ inputs.confirmation }}
+      ROOT: ${{ runner.temp }}/rango90-beta-materialization
+      CHAMPIONS_ROOT: ${{ runner.temp }}/rango90-beta-materialization/champions
+      WORLD_CUP_ROOT: ${{ runner.temp }}/rango90-beta-materialization/world-cup
+      ASSISTS_ROOT: ${{ runner.temp }}/rango90-beta-materialization/assists
+      CARDS_ROOT: ${{ runner.temp }}/rango90-beta-materialization/cards
+      OUTPUT_ROOT: ${{ runner.temp }}/rango90-beta-materialization/output
+
+    steps:
+      - name: Validate explicit authorization
+        run: |
+          set -euo pipefail
+          test "$RANGO90_TARGET_DATABASE_CONFIRMATION" = RANGO90_BETA_LAB_2026
+          test -n "$DATABASE_URL"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+
+      - name: Download verified artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$CHAMPIONS_ROOT" "$WORLD_CUP_ROOT" "$ASSISTS_ROOT" "$CARDS_ROOT" "$OUTPUT_ROOT"
+          gh run download '${{ inputs.champions_run_id }}' -D "$CHAMPIONS_ROOT"
+          gh run download '${{ inputs.world_cup_run_id }}' -D "$WORLD_CUP_ROOT"
+          gh run download '${{ inputs.assists_run_id }}' -D "$ASSISTS_ROOT"
+          gh run download '${{ inputs.cards_run_id }}' -D "$CARDS_ROOT"
+          copy_artifact() {
+            local root="$1" name="$2" source
+            source="$(find "$root" -type f -name "$name" -print -quit)"
+            test -n "$source"
+            cp "$source" "$root/$name"
+            test -s "$root/$name"
+          }
+          copy_artifact "$CHAMPIONS_ROOT" BLOCK17_FACTS_AFTER.json
+          copy_artifact "$CHAMPIONS_ROOT" BLOCK17_HISTORICAL_SNAPSHOT_CANDIDATE.json
+          copy_artifact "$CHAMPIONS_ROOT" BLOCK17_WEEKLY_SNAPSHOT_CANDIDATE.json
+          copy_artifact "$CHAMPIONS_ROOT" BLOCK17_REPORT.json
+          copy_artifact "$WORLD_CUP_ROOT" BLOCK20_FACTS.json
+          copy_artifact "$WORLD_CUP_ROOT" BLOCK20_SNAPSHOTS.json
+          copy_artifact "$WORLD_CUP_ROOT" BLOCK20_REPORT.json
+          copy_artifact "$ASSISTS_ROOT" BLOCK27_FACTS_AFTER.json
+          copy_artifact "$ASSISTS_ROOT" BLOCK27_ACTIVE_SNAPSHOT_CANDIDATE.json
+          copy_artifact "$ASSISTS_ROOT" BLOCK27_REPORT.json
+          copy_artifact "$CARDS_ROOT" BLOCK31_FACTS_AFTER.json
+          copy_artifact "$CARDS_ROOT" BLOCK31_YELLOW_SNAPSHOT_CANDIDATE.json
+          copy_artifact "$CARDS_ROOT" BLOCK31_RED_SNAPSHOT_CANDIDATE.json
+          copy_artifact "$CARDS_ROOT" BLOCK31_REPORT.json
+
+      - name: Verify source gates and prepare redacted card scope manifest
+        run: |
+          set -euo pipefail
+          jq -e '.status == "passed" and .readyForApproval == true and .officialSnapshotCreated == false and .officialModeOpened == false' "$CHAMPIONS_ROOT/BLOCK17_REPORT.json" >/dev/null
+          jq -e '.conflicts == [] and .unresolvedPlayerFacts == 0 and .official.status == "blocked"' "$WORLD_CUP_ROOT/BLOCK20_REPORT.json" >/dev/null
+          jq -e '.facts.conflicts == 0 and .facts.unresolvedIdentities == 0 and .idempotency.conflictsOnRerun == 0 and .official.status == "blocked"' "$ASSISTS_ROOT/BLOCK27_REPORT.json" >/dev/null
+          jq -e '.facts.conflicts == 0 and .facts.unresolvedIdentities == 0 and .official.status == "blocked"' "$CARDS_ROOT/BLOCK31_REPORT.json" >/dev/null
+          jq '{status:"complete_scope", snapshotEligibility:true, unresolvedFacts:0, conflicts:0, factsImported:.facts.after, activeSeasonStatus:"complete_scope", seasonInProgress:true, coverageMatrix:.coverageMatrix, observedPages:0, redTypesDifferentiated:true}' "$CARDS_ROOT/BLOCK31_REPORT.json" > "$ROOT/BLOCK31_TARGET_LOAD_REPORT.json"
+          if jq -e '.idempotency.conflictsOnRerun > 0 or .facts.conflicts > 0' "$ROOT/../block30/BLOCK30_REPORT.json" >/dev/null 2>&1; then
+            echo 'The conflicted Block 30 artifact is deliberately not activated.' > "$ROOT/BLOCK30_NOT_ACTIVATED.txt"
+          fi
+
+      - name: Inventory current database before load
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -At -F $'\t' <<'SQL' > "$OUTPUT_ROOT/BEFORE.tsv"
+          SELECT 'champions_facts', COUNT(*) FROM champions_goal_facts
+          UNION ALL SELECT 'champions_snapshots', COUNT(*) FROM champions_ranking_snapshots
+          UNION ALL SELECT 'world_cup_facts', COUNT(*) FROM world_cup_goal_facts
+          UNION ALL SELECT 'world_cup_snapshots', COUNT(*) FROM world_cup_ranking_snapshots
+          UNION ALL SELECT 'assists_facts', COUNT(*) FROM champions_assist_facts
+          UNION ALL SELECT 'assists_snapshots', COUNT(*) FROM champions_ranking_snapshots WHERE category_slug = 'uefa-champions-league-assists'
+          UNION ALL SELECT 'club_cards_facts', COUNT(*) FROM club_card_facts
+          UNION ALL SELECT 'club_cards_snapshots', COUNT(*) FROM club_card_ranking_snapshots
+          UNION ALL SELECT 'published_dedicated_snapshots', COUNT(*) FROM champions_ranking_snapshots WHERE status = 'published'
+            OR category_slug = 'world-cup-goals' AND status = 'published'
+          ;
+          SQL
+
+      - name: Load verified Champions goals
+        working-directory: backend
+        env:
+          BLOCK18_CANDIDATE_ROOT: ${{ env.CHAMPIONS_ROOT }}
+        run: npx tsx src/tools/block18-load-lab-candidate.ts
+
+      - name: Load verified World Cup goals
+        working-directory: backend
+        env:
+          BLOCK20_INPUT_ROOT: ${{ env.WORLD_CUP_ROOT }}
+          BLOCK20_OUTPUT_ROOT: ${{ env.OUTPUT_ROOT }}/world-cup
+        run: npx tsx src/tools/block20-load-lab-candidate.ts
+
+      - name: Load provisional Champions assists
+        working-directory: backend
+        env:
+          BLOCK26_HISTORICAL_FACTS_FILE: ${{ env.ASSISTS_ROOT }}/BLOCK27_FACTS_AFTER.json
+          BLOCK26_ACTIVE_FACTS_FILE: ${{ env.ASSISTS_ROOT }}/BLOCK27_FACTS_AFTER.json
+          BLOCK26_OUTPUT_ROOT: ${{ env.OUTPUT_ROOT }}/assists
+          BLOCK27_RUN: '1'
+        run: npx tsx src/tools/block26-champions-assists.ts
+
+      - name: Load complete observed club-card scope
+        working-directory: backend
+        env:
+          BLOCK31_FACTS_FILE: ${{ env.CARDS_ROOT }}/BLOCK31_FACTS_AFTER.json
+          BLOCK31_API_REPORT_FILE: ${{ env.ROOT }}/BLOCK31_TARGET_LOAD_REPORT.json
+          BLOCK31_OUTPUT_ROOT: ${{ env.OUTPUT_ROOT }}/cards
+          BLOCK31_ACTIVE_SEASON_START: '2026'
+        run: npx tsx src/tools/block31-club-cards.ts
+
+      - name: Repeat all eligible loads for idempotency
+        working-directory: backend
+        env:
+          BLOCK18_CANDIDATE_ROOT: ${{ env.CHAMPIONS_ROOT }}
+          BLOCK20_INPUT_ROOT: ${{ env.WORLD_CUP_ROOT }}
+          BLOCK20_OUTPUT_ROOT: ${{ env.OUTPUT_ROOT }}/world-cup-rerun
+          BLOCK26_HISTORICAL_FACTS_FILE: ${{ env.ASSISTS_ROOT }}/BLOCK27_FACTS_AFTER.json
+          BLOCK26_ACTIVE_FACTS_FILE: ${{ env.ASSISTS_ROOT }}/BLOCK27_FACTS_AFTER.json
+          BLOCK26_OUTPUT_ROOT: ${{ env.OUTPUT_ROOT }}/assists-rerun
+          BLOCK27_RUN: '1'
+          BLOCK31_FACTS_FILE: ${{ env.CARDS_ROOT }}/BLOCK31_FACTS_AFTER.json
+          BLOCK31_API_REPORT_FILE: ${{ env.ROOT }}/BLOCK31_TARGET_LOAD_REPORT.json
+          BLOCK31_OUTPUT_ROOT: ${{ env.OUTPUT_ROOT }}/cards-rerun
+          BLOCK31_ACTIVE_SEASON_START: '2026'
+        run: |
+          set -euo pipefail
+          npx tsx src/tools/block18-load-lab-candidate.ts
+          npx tsx src/tools/block20-load-lab-candidate.ts
+          npx tsx src/tools/block26-champions-assists.ts
+          npx tsx src/tools/block31-club-cards.ts
+
+      - name: Produce redacted post-load manifest and rollback evidence
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -At -F $'\t' <<'SQL' > "$OUTPUT_ROOT/AFTER.tsv"
+          SELECT 'champions_facts', COUNT(*) FROM champions_goal_facts
+          UNION ALL SELECT 'champions_snapshots', COUNT(*) FROM champions_ranking_snapshots
+          UNION ALL SELECT 'world_cup_facts', COUNT(*) FROM world_cup_goal_facts
+          UNION ALL SELECT 'world_cup_snapshots', COUNT(*) FROM world_cup_ranking_snapshots
+          UNION ALL SELECT 'assists_facts', COUNT(*) FROM champions_assist_facts
+          UNION ALL SELECT 'assists_snapshots', COUNT(*) FROM champions_ranking_snapshots WHERE category_slug = 'uefa-champions-league-assists'
+          UNION ALL SELECT 'club_cards_facts', COUNT(*) FROM club_card_facts
+          UNION ALL SELECT 'club_cards_snapshots', COUNT(*) FROM club_card_ranking_snapshots
+          UNION ALL SELECT 'published_dedicated_snapshots', COUNT(*) FROM champions_ranking_snapshots WHERE status = 'published'
+            OR category_slug = 'world-cup-goals' AND status = 'published'
+          ;
+          SQL
+          sha256sum "$CHAMPIONS_ROOT/BLOCK17_FACTS_AFTER.json" "$CHAMPIONS_ROOT/BLOCK17_HISTORICAL_SNAPSHOT_CANDIDATE.json" "$CHAMPIONS_ROOT/BLOCK17_WEEKLY_SNAPSHOT_CANDIDATE.json" "$WORLD_CUP_ROOT/BLOCK20_FACTS.json" "$WORLD_CUP_ROOT/BLOCK20_SNAPSHOTS.json" "$ASSISTS_ROOT/BLOCK27_FACTS_AFTER.json" "$ASSISTS_ROOT/BLOCK27_ACTIVE_SNAPSHOT_CANDIDATE.json" "$CARDS_ROOT/BLOCK31_FACTS_AFTER.json" "$CARDS_ROOT/BLOCK31_YELLOW_SNAPSHOT_CANDIDATE.json" "$CARDS_ROOT/BLOCK31_RED_SNAPSHOT_CANDIDATE.json" > "$OUTPUT_ROOT/SOURCE_HASHES.txt"
+          jq -n --arg commit "$GITHUB_SHA" --arg generated "$(date -u +%FT%TZ)" --arg cardsStatus "complete_scope" --arg clubGoals "not_activated_conflicts_in_verified_artifact" '{status:"passed_with_gates", commit:$commit, generatedAt:$generated, databaseTarget:"existing RANGO90_DATABASE_URL; explicit beta confirmation", sourceArtifacts:{champions:"BLOCK17", worldCup:"BLOCK20", assists:"BLOCK27", clubCards:"BLOCK31"}, activated:{championsGoals:true, worldCupGoals:true, championsAssists:"provisional_active_season", clubCareerGoals:false, clubCards:"complete_scope_from_Premier_League_La_Liga_Serie_A"}, clubCareerGoalsReason:$clubGoals, officialSnapshotsCreated:false, imagesTouched:false, rightsChanged:false, apiFootballRequests:0, idempotency:"verified by second load", rollback:"source loaders persisted rollback candidates; no destructive delete", note:"No raw payloads or secrets are included."}' > "$OUTPUT_ROOT/BETA_MATERIALIZATION_MANIFEST.json"
+          test "$(psql "$DATABASE_URL" -Atc "SELECT COUNT(*) FROM champions_ranking_snapshots WHERE status='published' AND category_slug IN ('uefa-champions-league-goals','world-cup-goals','uefa-champions-league-assists')")" = 0
+
+      - name: Redaction and safety checks
+        run: |
+          set -euo pipefail
+          ! rg -n 'API_FOOTBALL_KEY|x-apisports-key|Authorization:|Bearer ' "$OUTPUT_ROOT" "$ROOT"/BLOCK31_TARGET_LOAD_REPORT.json
+          ! rg -n '"status"\s*:\s*"published"|"officialModeOpened"\s*:\s*true|"officialSnapshotCreated"\s*:\s*true' "$OUTPUT_ROOT" "$ROOT"/BLOCK31_TARGET_LOAD_REPORT.json
+
+      - name: Upload redacted materialization evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rango90-beta-materialization-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ${{ env.OUTPUT_ROOT }}/BEFORE.tsv
+            ${{ env.OUTPUT_ROOT }}/AFTER.tsv
+            ${{ env.OUTPUT_ROOT }}/SOURCE_HASHES.txt
+            ${{ env.OUTPUT_ROOT }}/BETA_MATERIALIZATION_MANIFEST.json
+            ${{ env.OUTPUT_ROOT }}/world-cup/BLOCK20_LOAD_REPORT.json
+            ${{ env.OUTPUT_ROOT }}/assists/BLOCK27_REPORT.json
+            ${{ env.OUTPUT_ROOT }}/cards/BLOCK31_REPORT.json

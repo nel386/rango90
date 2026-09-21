@@ -26,14 +26,18 @@ const sourceRightsKey = `it-source-rights-${suffix}`;
 const thresholdSession249 = `it-session-249-${suffix}`;
 const thresholdSession250 = `it-session-250-${suffix}`;
 const authToken = `integration-auth-${suffix}-token`;
-const startedAt = new Date('2026-09-09T12:00:00.000Z');
+const integrationChallengeYear = 2200 + Number.parseInt(suffix.slice(0, 2), 16);
+const integrationChallengeDate = `${integrationChallengeYear}-12-31`;
+const validationChallengeDate = `${integrationChallengeYear}-12-29`;
+const partialValidationChallengeDate = `${integrationChallengeYear}-12-28`;
+const startedAt = new Date(`${integrationChallengeDate}T12:00:00.000Z`);
 let clockTime = new Date(startedAt);
 
 const cookie = `rango90_session=${authToken}`;
 const resultClaims = {
   assignments: [
-    { ordinal: 0, entityId: entityA, categorySlug: 'it-goals' },
-    { ordinal: 1, entityId: entityB, categorySlug: 'it-assists' }
+    { ordinal: 0, entityId: entityA, categorySlug: `it-goals-${suffix}` },
+    { ordinal: 1, entityId: entityB, categorySlug: `it-assists-${suffix}` }
   ]
 };
 
@@ -47,9 +51,9 @@ async function setup(): Promise<void> {
     await client.query('BEGIN');
     await client.query(
       `INSERT INTO category_definitions (id, slug, label_es, label_en, entity_type, metric_key, scope_kind, ranking_direction, tie_policy, score_cap, definition_md, status)
-       VALUES ($1, 'it-goals', 'Goles IT', 'IT goals', 'player', 'goals', 'test', 'desc', 'competition', 100, 'integration fixture', 'published'),
-              ($2, 'it-assists', 'Asistencias IT', 'IT assists', 'player', 'assists', 'test', 'desc', 'competition', 100, 'integration fixture', 'published')`,
-      [categoryA, categoryB]
+       VALUES ($1, $3, 'Goles IT', 'IT goals', 'player', 'goals', 'test', 'desc', 'competition', 100, 'integration fixture', 'published'),
+              ($2, $4, 'Asistencias IT', 'IT assists', 'player', 'assists', 'test', 'desc', 'competition', 100, 'integration fixture', 'published')`,
+      [categoryA, categoryB, `it-goals-${suffix}`, `it-assists-${suffix}`]
     );
     await client.query(
       `INSERT INTO entities (id, entity_type, canonical_name, short_name) VALUES
@@ -79,8 +83,8 @@ async function setup(): Promise<void> {
     );
     await client.query(
       `INSERT INTO game_challenges (id, challenge_kind, challenge_date, status, source_version, engine_version, time_limit_seconds, score_cap, challenge_sha256)
-       VALUES ($1, 'daily', '2026-09-09', 'draft', 'it-v1', $3, 10, 100, $2)`,
-      [challengeId, 'c'.repeat(64), GAME_ENGINE_VERSION]
+       VALUES ($1, 'daily', $3, 'draft', 'it-v1', $4, 10, 100, $2)`,
+      [challengeId, 'c'.repeat(64), integrationChallengeDate, GAME_ENGINE_VERSION]
     );
     await client.query(
       `INSERT INTO game_challenge_categories (game_challenge_id, category_id, category_ordinal, ranking_snapshot_id)
@@ -100,14 +104,14 @@ async function setup(): Promise<void> {
     const challengeSha256 = calculateChallengeSha256({
       id: challengeId,
       kind: 'daily',
-      challengeDate: '2026-09-09',
+      challengeDate: integrationChallengeDate,
       sourceVersion: 'it-v1',
       engineVersion: GAME_ENGINE_VERSION,
       timeLimitSeconds: 10,
       scoreCap: 100,
       categories: [
-        { ordinal: 0, categoryId: categoryA, rankingSnapshotId: snapshotA, slug: 'it-goals', entityType: 'player' },
-        { ordinal: 1, categoryId: categoryB, rankingSnapshotId: snapshotB, slug: 'it-assists', entityType: 'player' }
+        { ordinal: 0, categoryId: categoryA, rankingSnapshotId: snapshotA, slug: `it-goals-${suffix}`, entityType: 'player' },
+        { ordinal: 1, categoryId: categoryB, rankingSnapshotId: snapshotB, slug: `it-assists-${suffix}`, entityType: 'player' }
       ],
       decisions: [
         { ordinal: 0, entityId: entityA, entityType: 'player' },
@@ -166,7 +170,7 @@ async function cleanup(): Promise<void> {
   await query('DELETE FROM entities WHERE id IN ($1, $2)', [entityA, entityB]);
 }
 
-async function assertPublishedChallengeRejectsUnbackedEntity(): Promise<void> {
+async function assertPublishedChallengeAllowsUnbackedEntityForProvisionalPlay(): Promise<void> {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -178,8 +182,8 @@ async function assertPublishedChallengeRejectsUnbackedEntity(): Promise<void> {
     await client.query(
       `INSERT INTO game_challenges
          (id, challenge_kind, challenge_date, status, source_version, engine_version, time_limit_seconds, score_cap, challenge_sha256)
-       VALUES ($1, 'daily', '2026-09-10', 'draft', 'it-v1', 'game-engine-v1', 10, 100, $2)`,
-      [validationChallengeId, 'e'.repeat(64)]
+       VALUES ($1, 'daily', $3, 'draft', 'it-v1', 'game-engine-v1', 10, 100, $2)`,
+      [validationChallengeId, 'e'.repeat(64), validationChallengeDate]
     );
     await client.query(
       `INSERT INTO game_challenge_categories (game_challenge_id, category_id, category_ordinal, ranking_snapshot_id)
@@ -196,16 +200,13 @@ async function assertPublishedChallengeRejectsUnbackedEntity(): Promise<void> {
        VALUES ($1, 0, $2, 1), ($1, 0, $3, 1), ($1, 1, $2, 1), ($1, 1, $3, 1)`,
       [validationChallengeId, categoryA, categoryB]
     );
-    await assert.rejects(
-      async () => {
-        await client.query(
-          `UPDATE game_challenges SET status = 'published', published_at = $2 WHERE id = $1`,
-          [validationChallengeId, startedAt]
-        );
-        await client.query('COMMIT');
-      },
-    /published game challenge requires every decision entity in at least one compatible ranking snapshot/u
+    await client.query(
+      `UPDATE game_challenges SET status = 'published', published_at = $2 WHERE id = $1`,
+      [validationChallengeId, startedAt]
     );
+    // Keep this fixture inside the transaction; the finally block rolls it
+    // back after proving that provisional play does not require a ranking
+    // link for every decision entity.
   } finally {
     await client.query('ROLLBACK').catch(() => undefined);
     client.release();
@@ -240,8 +241,8 @@ async function assertPublishedChallengeAllowsAbsentCompatibleEntityWithScoreCap(
     await client.query(
       `INSERT INTO game_challenges
          (id, challenge_kind, challenge_date, status, source_version, engine_version, time_limit_seconds, score_cap, challenge_sha256)
-       VALUES ($1, 'daily', '2026-09-11', 'draft', 'it-v1', 'game-engine-v1', 10, 100, $2)`,
-      [partialValidationChallengeId, 'f'.repeat(64)]
+       VALUES ($1, 'daily', $3, 'draft', 'it-v1', 'game-engine-v1', 10, 100, $2)`,
+      [partialValidationChallengeId, 'f'.repeat(64), partialValidationChallengeDate]
     );
     await client.query(
       `INSERT INTO game_challenge_categories (game_challenge_id, category_id, category_ordinal, ranking_snapshot_id)
@@ -293,7 +294,7 @@ async function assertSourceApprovalRequiresEvidence(): Promise<void> {
 async function run(): Promise<void> {
   await setup();
   await assertSourceApprovalRequiresEvidence();
-  await assertPublishedChallengeRejectsUnbackedEntity();
+  await assertPublishedChallengeAllowsUnbackedEntityForProvisionalPlay();
   await assertPublishedChallengeAllowsAbsentCompatibleEntityWithScoreCap();
   let app: FastifyInstance | undefined;
   try {
@@ -311,7 +312,7 @@ async function run(): Promise<void> {
     assert.equal('scoreValue' in (dailyBody.challenge.decisions[0] ?? {}), false);
     assert.equal(dailyBody.challenge.decisions[0]?.imageStatus, 'fallback');
     assert.match(String(dailyBody.challenge.decisions[0]?.imageUrl), /\/v1\/media\/it-entity-[^/]+\/fallback$/u);
-    const ranking = await app.inject({ method: 'GET', url: '/v1/rankings/it-goals' });
+    const ranking = await app.inject({ method: 'GET', url: `/v1/rankings/it-goals-${suffix}` });
     assert.equal(ranking.statusCode, 200);
     const rankingBody = JSON.parse(ranking.body) as { entries: Array<Record<string, unknown>> };
     assert.equal(rankingBody.entries.length, 2);
@@ -326,7 +327,7 @@ async function run(): Promise<void> {
     try {
       const missingOfficialRanking = await officialApp.inject({ method: 'GET', url: '/v1/rankings/category-that-does-not-exist' });
       assert.equal(missingOfficialRanking.statusCode, 404);
-      assert.deepEqual(JSON.parse(missingOfficialRanking.body), { error: 'ranking_not_available', category: 'category-that-does-not-exist', mode: 'official', reason: 'no_published_snapshot' });
+      assert.deepEqual(JSON.parse(missingOfficialRanking.body), { error: 'ranking_not_available', category: 'category-that-does-not-exist', mode: 'official', reason: 'no_available_snapshot' });
     } finally {
       await officialApp.close();
     }
@@ -365,8 +366,8 @@ async function run(): Promise<void> {
       url: `/v1/games/${gameBody.game.id}/result`,
       headers: { 'idempotency-key': 'integration-result-conflict', cookie },
       payload: { sessionToken: gameBody.sessionToken, result: { assignments: [
-        { ordinal: 0, entityId: entityA, categorySlug: 'it-assists' },
-        { ordinal: 1, entityId: entityB, categorySlug: 'it-goals' }
+        { ordinal: 0, entityId: entityA, categorySlug: `it-assists-${suffix}` },
+        { ordinal: 1, entityId: entityB, categorySlug: `it-goals-${suffix}` }
       ] } }
     });
     assert.equal(resultConflict.statusCode, 409);
@@ -379,8 +380,8 @@ async function run(): Promise<void> {
       url: `/v1/games/${invalidGameBody.game.id}/result`,
       headers: { 'idempotency-key': 'integration-invalid-result' },
       payload: { sessionToken: invalidGameBody.sessionToken, result: { assignments: [
-        { ordinal: 0, entityId: 'forged-entity', categorySlug: 'it-goals' },
-        { ordinal: 1, entityId: entityB, categorySlug: 'it-assists' }
+        { ordinal: 0, entityId: 'forged-entity', categorySlug: `it-goals-${suffix}` },
+        { ordinal: 1, entityId: entityB, categorySlug: `it-assists-${suffix}` }
       ] } }
     });
     assert.equal(invalidResult.statusCode, 422);
@@ -453,7 +454,7 @@ async function run(): Promise<void> {
     assert.equal(earlyExpired.statusCode, 409, earlyExpired.body);
     assert.equal(JSON.parse(earlyExpired.body).error, 'time_not_expired');
     clockTime = new Date(clockTime.getTime() + 10_000);
-    const expired = await app.inject({ method: 'POST', url: `/v1/games/${expiringBody.game.id}/expire`, headers: { cookie }, payload: { sessionToken: expiringBody.sessionToken, result: { assignments: [{ ordinal: 0, entityId: entityA, categorySlug: 'it-goals' }] } } });
+    const expired = await app.inject({ method: 'POST', url: `/v1/games/${expiringBody.game.id}/expire`, headers: { cookie }, payload: { sessionToken: expiringBody.sessionToken, result: { assignments: [{ ordinal: 0, entityId: entityA, categorySlug: `it-goals-${suffix}` }] } } });
     assert.equal(expired.statusCode, 200);
     assert.equal(JSON.parse(expired.body).result.timedOut, true);
     assert.equal(JSON.parse(expired.body).result.totalScore, 101);

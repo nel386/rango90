@@ -6,7 +6,8 @@ const databaseUrl = process.env.DATABASE_URL?.trim() ?? '';
 const inputRoot = process.env.BLOCK18_CANDIDATE_ROOT?.trim() ?? '';
 const runtimeMode = process.env.RANGO90_RUNTIME_MODE?.trim();
 if (!databaseUrl || !inputRoot) throw new Error('BLOQUE 18 requiere DATABASE_URL y BLOCK18_CANDIDATE_ROOT');
-if (!['lab', 'test'].includes(runtimeMode ?? '')) throw new Error('BLOQUE 18 solo permite cargar candidatos en lab/test');
+const explicitTargetLoad = process.env.RANGO90_ALLOW_TARGET_DATABASE_LOAD === 'true' && process.env.RANGO90_TARGET_DATABASE_CONFIRMATION === 'RANGO90_BETA_LAB_2026';
+if (!['lab', 'test'].includes(runtimeMode ?? '') && !explicitTargetLoad) throw new Error('BLOQUE 18 solo permite cargar candidatos en lab/test o con confirmación explícita del destino beta');
 
 async function readJson<T>(name: string): Promise<T> {
   return JSON.parse(await readFile(`${inputRoot}/${name}`, 'utf8')) as T;

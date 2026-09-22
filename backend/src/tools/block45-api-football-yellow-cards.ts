@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { buildYellowCardSnapshots, FIVE_MAJOR_LEAGUE_IDS, stableYellowJson, type YellowCardFact } from '../clubYellowCardsCareerRankingEngine.js';
+import { buildYellowCardSnapshots, CONTROL_NAMES, FIVE_MAJOR_LEAGUE_IDS, normalizePlayerName, stableYellowJson, type YellowCardFact } from '../clubYellowCardsCareerRankingEngine.js';
 
 type JsonRecord = Record<string, unknown>;
 type Envelope = { response?: unknown[]; errors?: unknown; paging?: JsonRecord };
@@ -95,14 +95,15 @@ async function main(): Promise<void> {
   const activeSeason = activeSeasonInput ? Number(activeSeasonInput) : selectedSeasons.at(-1) ?? discoveredSeasons.at(-1) ?? 0;
   const coverage = leagues.flatMap((league) => selectedSeasons.map((season) => ({ leagueId: league.id, league: league.name, season, status: 'unavailable' as 'complete' | 'partial' | 'unavailable' | 'no_data', pagesExpected: null as number | null, pagesRead: 0, playersReturned: 0, facts: 0, reason: 'not_queried' })));
 
-  for (const league of leagues) for (const season of selectedSeasons) {
+  const querySeasons = [activeSeason, ...selectedSeasons.filter((season) => season !== activeSeason)];
+  for (const league of leagues) for (const season of querySeasons) {
     const rowCoverage = coverage.find((row) => row.leagueId === league.id && row.season === season)!;
     let page = 1; let totalPages: number | null = null;
     for (;;) {
       if (requests.length >= maxRequests) { stoppedForBudget = true; rowCoverage.status = 'partial'; rowCoverage.reason = 'request_budget_reached'; break; }
       const endpoint = `/players?league=${league.id}&season=${season}&page=${page}`;
       try {
-        const result = await request(endpoint, 'league_page'); requests.push(result.evidence); totalPages = result.evidence.pagingTotal; rowCoverage.pagesExpected = totalPages; rowCoverage.pagesRead = page;
+        const result = await request(endpoint, 'league_page'); requests.push(result.evidence); if (totalPages === null) totalPages = result.evidence.pagingTotal; rowCoverage.pagesExpected = totalPages; rowCoverage.pagesRead = page;
         const rows = array(result.body.response).map(object); rowCoverage.playersReturned += rows.length;
         if (result.evidence.status !== 200 || !Array.isArray(result.body.response)) { providerErrors += 1; rowCoverage.status = 'partial'; rowCoverage.reason = result.evidence.status === 429 ? 'quota_or_rate_limit' : 'provider_response_incomplete'; break; }
         for (const row of rows) { const player = object(row.player); const playerId = Number(player.id); if (Number.isInteger(playerId) && playerId > 0) playerIds.add(String(playerId)); for (const statistic of array(row.statistics).map(object)) { const fact = factFromStats(player, statistic, season, `${baseUrl}${endpoint}`, page, result.evidence.responseSha256, league.id); if (fact) { facts.push(fact); rowCoverage.facts += 1; } } }
@@ -117,8 +118,10 @@ async function main(): Promise<void> {
   const playerCompetitionMap = new Map<string, Set<string>>();
   const playerSeasonCoverage: Record<string, { playerId: string; season: number; status: 'player_did_not_participate' | 'data_available' | 'provider_returned_no_eligible_club_stats' | 'provider_error'; competitions: string[] }> = {};
   for (const fact of facts) { const values = playerCompetitionMap.get(fact.sourcePlayerId) ?? new Set<string>(); values.add(`${fact.competitionProviderId}:${fact.competitionName}`); playerCompetitionMap.set(fact.sourcePlayerId, values); }
+  const controlPlayerIds = new Set(facts.filter((fact) => CONTROL_NAMES.some((name) => normalizePlayerName(name) === normalizePlayerName(fact.canonicalName))).map((fact) => fact.sourcePlayerId));
+  const expansionPlayerIds = [...controlPlayerIds, ...[...playerIds].filter((playerId) => !controlPlayerIds.has(playerId))];
   if (!stoppedForBudget) {
-    for (const playerId of playerIds) for (const season of selectedSeasons) {
+    for (const playerId of expansionPlayerIds) for (const season of selectedSeasons) {
       if (requests.length >= maxRequests) { stoppedForBudget = true; break; }
       const endpoint = `/players?id=${playerId}&season=${season}`;
       try {

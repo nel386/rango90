@@ -1,0 +1,118 @@
+name: BLOQUE 45 · tarjetas amarillas carrera y temporada
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'plan consulta el alcance; load recorre todas las páginas y carga PostgreSQL efímero'
+        required: true
+        type: choice
+        options: [plan, load]
+        default: plan
+      from_season:
+        description: 'Primera temporada; vacío = primera temporada que API-Football devuelva'
+        required: false
+        default: ''
+      to_season:
+        description: 'Última temporada; vacío = última temporada que API-Football devuelva'
+        required: false
+        default: ''
+      max_requests:
+        description: 'Presupuesto máximo de peticiones; 0 usa el límite seguro del workflow'
+        required: true
+        default: '500'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: block45-club-yellow-cards
+  cancel-in-progress: false
+
+jobs:
+  isolated-rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NODE_ENV: test
+      RANGO90_RUNTIME_MODE: lab
+      DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55460/rango90_block45
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      BLOCK45_MODE: ${{ inputs.mode }}
+      BLOCK45_FROM_SEASON: ${{ inputs.from_season }}
+      BLOCK45_TO_SEASON: ${{ inputs.to_season }}
+      BLOCK45_ACTIVE_SEASON: ${{ inputs.to_season }}
+      BLOCK45_MAX_REQUESTS: ${{ inputs.max_requests }}
+      BLOCK45_OUTPUT_ROOT: ${{ github.workspace }}/.block45/provider
+      BLOCK45_LOADER_OUTPUT_ROOT: ${{ github.workspace }}/.block45/loader
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm --prefix backend ci
+      - name: Query API-Football without storing payloads
+        working-directory: backend
+        run: |
+          if [ "$BLOCK45_MODE" = "plan" ]; then export BLOCK45_PLAN_ONLY=1; fi
+          npx tsx src/tools/block45-api-football-yellow-cards.ts
+      - name: Start isolated PostgreSQL
+        if: ${{ inputs.mode == 'load' }}
+        run: |
+          set -euo pipefail
+          docker run -d --name rango90-block45-postgres -e POSTGRES_DB=rango90_block45 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55460:5432 postgres:16
+          for attempt in $(seq 1 90); do
+            if docker exec rango90-block45-postgres pg_isready -U rango90 -d rango90_block45 >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          docker logs rango90-block45-postgres
+          exit 1
+      - name: Apply migrations in isolated PostgreSQL
+        if: ${{ inputs.mode == 'load' }}
+        working-directory: backend
+        run: npm run migrate
+      - name: Build three candidate snapshots twice in isolated PostgreSQL
+        if: ${{ inputs.mode == 'load' }}
+        working-directory: backend
+        env:
+          BLOCK45_FACTS_FILE: ${{ github.workspace }}/.block45/provider/BLOCK45_FACTS.json
+          BLOCK45_OUTPUT_ROOT: ${{ github.workspace }}/.block45/loader
+        run: npx tsx src/tools/block45-club-yellow-cards.ts
+      - name: Run BLOQUE 45 fixtures and checks
+        working-directory: backend
+        run: |
+          npx tsx src/tests/club-yellow-cards-career-ranking-engine.test.ts
+          npm run build
+      - name: Run frontend and repository checks
+        run: |
+          npm run typecheck
+          npm run verify:i18n
+          npm run build
+          git diff --check
+      - name: Redacted artifact guard
+        if: always()
+        run: |
+          set -euo pipefail
+          if rg -n 'x-apisports-key|API_FOOTBALL_KEY|secretPrinted": true|rawPayloadsStored": true|"response"\s*:' .block45; then
+            echo 'Se detectó secreto o payload crudo en artefactos.' >&2
+            exit 1
+          fi
+          test -f .block45/provider/BLOCK45_REPORT.json
+      - name: Upload BLOQUE 45 report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block45-club-yellow-cards-${{ github.run_id }}
+          path: .block45/
+          if-no-files-found: error
+          include-hidden-files: true
+      - name: Cleanup isolated PostgreSQL
+        if: always()
+        run: docker rm -f rango90-block45-postgres >/dev/null 2>&1 || true

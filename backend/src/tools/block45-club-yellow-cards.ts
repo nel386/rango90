@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 import pg from 'pg';
 import { buildYellowCardSnapshots, stableYellowJson, type YellowCardFact, type YellowRankingSnapshot } from '../clubYellowCardsCareerRankingEngine.js';
 
-type InputFile = { facts?: YellowCardFact[] } | YellowCardFact[];
+type InputFile = { facts?: YellowCardFact[]; requestedSeasons?: number[]; activeSeason?: number } | YellowCardFact[];
 const databaseUrl = process.env.DATABASE_URL?.trim() ?? '';
 const runtimeMode = process.env.RANGO90_RUNTIME_MODE?.trim() ?? '';
 const inputFile = process.env.BLOCK45_FACTS_FILE?.trim() ?? '';
@@ -23,10 +23,10 @@ function assertIsolatedDatabase(): void {
   if (!['localhost', '127.0.0.1', '::1'].includes(parsed.hostname)) throw new Error('BLOQUE 45 solo admite PostgreSQL localhost/efímero');
 }
 
-async function readFacts(): Promise<YellowCardFact[]> {
-  if (!inputFile) return [];
+async function readFacts(): Promise<{ facts: YellowCardFact[]; requestedSeasons?: number[]; activeSeason?: number }> {
+  if (!inputFile) return { facts: [] };
   const parsed = JSON.parse(await readFile(inputFile, 'utf8')) as InputFile;
-  return Array.isArray(parsed) ? parsed : parsed.facts ?? [];
+  return Array.isArray(parsed) ? { facts: parsed } : { facts: parsed.facts ?? [], requestedSeasons: parsed.requestedSeasons, activeSeason: parsed.activeSeason };
 }
 
 function rowFact(row: Record<string, unknown>): YellowCardFact {
@@ -75,13 +75,16 @@ async function persistRollback(pool: pg.Pool, snapshot: YellowRankingSnapshot): 
 
 async function main(): Promise<void> {
   assertIsolatedDatabase();
-  const incoming = await readFacts();
+  const incomingFile = await readFacts();
+  const incoming = incomingFile.facts;
   const pool = new pg.Pool({ connectionString: databaseUrl, max: 1, connectionTimeoutMillis: 5000 });
   try {
     await pool.query('BEGIN');
     const first = await insertFacts(pool, incoming);
     const facts = await existingFacts(pool);
-    const built = buildYellowCardSnapshots({ facts, activeSeason, requestedSeasons, coverageScope: `API-Football; ligas 39,140,135,78,61; temporadas ${fromSeason}-${toSeason}; solo estadísticas de clubes`, generatedAt: new Date().toISOString() });
+    const effectiveRequestedSeasons = incomingFile.requestedSeasons?.length ? incomingFile.requestedSeasons : requestedSeasons;
+    const effectiveActiveSeason = incomingFile.activeSeason ?? activeSeason;
+    const built = buildYellowCardSnapshots({ facts, activeSeason: effectiveActiveSeason, requestedSeasons: effectiveRequestedSeasons, coverageScope: `API-Football; ligas 39,140,135,78,61; temporadas ${effectiveRequestedSeasons[0] ?? fromSeason}-${effectiveRequestedSeasons.at(-1) ?? toSeason}; solo estadísticas de clubes`, generatedAt: new Date().toISOString() });
     const snapshots = built.snapshots;
     const persisted = {
       career: await persistSnapshot(pool, snapshots.career, 200),
@@ -89,12 +92,12 @@ async function main(): Promise<void> {
       active_players_career: await persistSnapshot(pool, snapshots.active_players_career, 100)
     };
     const second = await insertFacts(pool, incoming);
-    const rerun = buildYellowCardSnapshots({ facts: await existingFacts(pool), activeSeason, requestedSeasons, coverageScope: snapshots.career.metadata.coverageScope, generatedAt: snapshots.career.generatedAt });
+    const rerun = buildYellowCardSnapshots({ facts: await existingFacts(pool), activeSeason: effectiveActiveSeason, requestedSeasons: effectiveRequestedSeasons, coverageScope: snapshots.career.metadata.coverageScope, generatedAt: snapshots.career.generatedAt });
     const rollbackIds = { career: await persistRollback(pool, snapshots.career), active_season: await persistRollback(pool, snapshots.active_season), active_players_career: await persistRollback(pool, snapshots.active_players_career) };
     const hashesIdentical = (Object.keys(snapshots) as Array<keyof typeof snapshots>).every((key) => snapshots[key].contentSha256 === rerun.snapshots[key].contentSha256);
     const report = {
       artifactKind: 'block45_club_yellow_cards', reportVersion: '1', status: hashesIdentical && second.added === 0 && built.conflicts.length === 0 ? 'candidate_not_sufficient' : 'failed_validation', generatedAt: new Date().toISOString(), commit: process.env.GITHUB_SHA ?? 'local', workflowRun: process.env.GITHUB_RUN_ID ?? null,
-      scope: { source: 'api-football', eligibilityLeagues: [39, 140, 135, 78, 61], seasons: requestedSeasons, activeSeason, careerIncludes: 'all official club competitions returned by /players?id={playerId}&season={season}', clubOnly: true, currentPlayerRule: 'is_current_player=true only when the player has an appearance in the active season; no roster inference is used', exclusions: ['national teams', 'friendlies', 'youth', 'reserve', 'top-yellow-cards endpoint', 'old Rango90 ranking'] },
+      scope: { source: 'api-football', eligibilityLeagues: [39, 140, 135, 78, 61], seasons: effectiveRequestedSeasons, activeSeason: effectiveActiveSeason, careerIncludes: 'all official club competitions returned by /players?id={playerId}&season={season}', clubOnly: true, currentPlayerRule: 'is_current_player=true only when the player has an appearance in the active season; no roster inference is used', exclusions: ['national teams', 'friendlies', 'youth', 'reserve', 'top-yellow-cards endpoint', 'old Rango90 ranking'] },
       facts: { incoming: incoming.length, firstAdded: first.added, firstSkipped: first.skipped, secondAdded: second.added, secondSkipped: second.skipped, total: facts.length, duplicates: built.duplicates, conflicts: built.conflicts.length, primary: facts.filter((fact) => fact.sourceType === 'primary').length, unresolved: facts.filter((fact) => fact.verificationStatus !== 'confirmed').length },
       players: { candidates: new Set(facts.map((fact) => fact.canonicalPlayerId)).size, eligibleCareer: snapshots.career.metadata.eligiblePlayers },
       rankings: Object.fromEntries((Object.keys(snapshots) as Array<keyof typeof snapshots>).map((key) => [key, { snapshotId: snapshots[key].id, top100: snapshots[key].ranking.slice(0, 100), top200: snapshots[key].ranking.slice(0, 200), contentSha256: snapshots[key].contentSha256, persisted: persisted[key], rollbackId: rollbackIds[key] }])),
@@ -103,7 +106,7 @@ async function main(): Promise<void> {
       hashes: { career: snapshots.career.contentSha256, activeSeason: snapshots.active_season.contentSha256, activePlayersCareer: snapshots.active_players_career.contentSha256 }
     };
     await writeJson(resolve(outputRoot, 'BLOCK45_REPORT.json'), report);
-    await writeFile(resolve(outputRoot, 'BLOCK45_REPORT.md'), `# BLOQUE 45 — tarjetas amarillas\n\n- estado: **${report.status}**\n- temporadas consultadas: **${requestedSeasons[0]}–${requestedSeasons.at(-1)}**\n- hechos: **${facts.length}**\n- jugadores elegibles: **${snapshots.career.metadata.eligiblePlayers}**\n- carrera: **${snapshots.career.contentSha256}**\n- temporada activa: **${snapshots.active_season.contentSha256}**\n- carrera de jugadores activos: **${snapshots.active_players_career.contentSha256}**\n- segunda carga: **${second.added === 0 ? 'idempotente' : 'fallida'}**\n- rollback: **probado en PostgreSQL aislado**\n- histórico mundial completo: **no afirmado; coverage_partial**\n- official: **bloqueado**\n\nLos totales fuera del rango consultado permanecen desconocidos; no se rellenan con ceros.`, 'utf8');
+    await writeFile(resolve(outputRoot, 'BLOCK45_REPORT.md'), `# BLOQUE 45 — tarjetas amarillas\n\n- estado: **${report.status}**\n- temporadas consultadas: **${effectiveRequestedSeasons[0]}–${effectiveRequestedSeasons.at(-1)}**\n- hechos: **${facts.length}**\n- jugadores elegibles: **${snapshots.career.metadata.eligiblePlayers}**\n- carrera: **${snapshots.career.contentSha256}**\n- temporada activa: **${snapshots.active_season.contentSha256}**\n- carrera de jugadores activos: **${snapshots.active_players_career.contentSha256}**\n- segunda carga: **${second.added === 0 ? 'idempotente' : 'fallida'}**\n- rollback: **probado en PostgreSQL aislado**\n- histórico mundial completo: **no afirmado; coverage_partial**\n- official: **bloqueado**\n\nLos totales fuera del rango consultado permanecen desconocidos; no se rellenan con ceros.`, 'utf8');
     await writeJson(resolve(outputRoot, 'BLOCK45_CAREER_SNAPSHOT.json'), snapshots.career);
     await writeJson(resolve(outputRoot, 'BLOCK45_ACTIVE_SEASON_SNAPSHOT.json'), snapshots.active_season);
     await writeJson(resolve(outputRoot, 'BLOCK45_ACTIVE_PLAYERS_CAREER_SNAPSHOT.json'), snapshots.active_players_career);

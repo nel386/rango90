@@ -18,12 +18,17 @@ on:
         required: false
         default: ''
       max_requests:
-        description: 'Presupuesto máximo de peticiones; 0 usa el límite seguro del workflow'
+        description: 'Plan: presupuesto de la fase base. Load: presupuesto de expansión usando el manifiesto base.'
         required: true
-        default: '500'
+        default: '800'
+      base_run_id:
+        description: 'Load: runId de una ejecución plan completada cuyo manifiesto base se reutilizará'
+        required: false
+        default: ''
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: block45-club-yellow-cards
@@ -44,6 +49,7 @@ jobs:
       BLOCK45_TO_SEASON: ${{ inputs.to_season }}
       BLOCK45_ACTIVE_SEASON: ${{ inputs.to_season }}
       BLOCK45_MAX_REQUESTS: ${{ inputs.max_requests }}
+      BLOCK45_BASE_MANIFEST_FILE: ${{ github.workspace }}/.block45/base/provider/BLOCK45_BASE_MANIFEST.json
       BLOCK45_OUTPUT_ROOT: ${{ github.workspace }}/.block45/provider
       BLOCK45_LOADER_OUTPUT_ROOT: ${{ github.workspace }}/.block45/loader
     steps:
@@ -58,11 +64,39 @@ jobs:
         run: |
           npm ci
           npm --prefix backend ci
+      - name: Validate phase budget and base manifest input
+        run: |
+          set -euo pipefail
+          if [ "$BLOCK45_MODE" = "plan" ] && [ "$BLOCK45_MAX_REQUESTS" -lt 800 ]; then
+            echo "Plan rechazado: $BLOCK45_MAX_REQUESTS es inferior al mínimo preventivo de 800 para completar la fase base." >&2
+            exit 1
+          fi
+          if [ "$BLOCK45_MODE" = "load" ] && [ -z "${{ inputs.base_run_id }}" ]; then
+            echo 'Load rechazado: base_run_id es obligatorio para reutilizar el manifiesto base.' >&2
+            exit 1
+          fi
+      - name: Download completed base manifest
+        if: ${{ inputs.mode == 'load' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: block45-club-yellow-cards-${{ inputs.base_run_id }}
+          path: .block45/base
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ inputs.base_run_id }}
       - name: Query API-Football without storing payloads
         working-directory: backend
         run: |
           if [ "$BLOCK45_MODE" = "plan" ]; then export BLOCK45_PLAN_ONLY=1; fi
           npx tsx src/tools/block45-api-football-yellow-cards.ts
+      - name: Stop before load when coverage or budget is insufficient
+        if: ${{ inputs.mode == 'load' }}
+        run: |
+          set -euo pipefail
+          status=$(node -e "const r=require('./.block45/provider/BLOCK45_REPORT.json'); process.stdout.write(String(r.status))")
+          case "$status" in
+            load_candidate_ready) ;;
+            *) echo "Load bloqueado por el informe del proveedor: $status" >&2; exit 1 ;;
+          esac
       - name: Start isolated PostgreSQL
         if: ${{ inputs.mode == 'load' }}
         run: |

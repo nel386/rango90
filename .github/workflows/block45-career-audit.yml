@@ -1,0 +1,64 @@
+name: BLOQUE 45 · auditoría de temporadas de carrera
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: 'Límite total de peticiones para el muestreo (máximo 80).'
+        required: true
+        default: '60'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: block45-club-yellow-cards
+  cancel-in-progress: false
+
+jobs:
+  career-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      BLOCK45_CAREER_AUDIT_MAX_REQUESTS: ${{ inputs.max_requests }}
+      BLOCK45_OUTPUT_ROOT: ${{ github.workspace }}/.block45-career
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend dependencies
+        run: npm --prefix backend ci
+      - name: Validate audit budget
+        run: |
+          set -euo pipefail
+          if ! [[ "$BLOCK45_CAREER_AUDIT_MAX_REQUESTS" =~ ^[0-9]+$ ]] || [ "$BLOCK45_CAREER_AUDIT_MAX_REQUESTS" -lt 1 ] || [ "$BLOCK45_CAREER_AUDIT_MAX_REQUESTS" -gt 80 ]; then
+            echo 'La auditoría acepta entre 1 y 80 peticiones.' >&2
+            exit 1
+          fi
+      - name: Query player career seasons and historical stats
+        working-directory: backend
+        run: npx tsx src/tools/block45-audit-player-careers.ts
+      - name: Redacted artifact guard
+        if: always()
+        run: |
+          set -euo pipefail
+          if rg -n 'x-apisports-key|API_FOOTBALL_KEY|secretPrinted":true|"response"\s*:' .block45-career; then
+            echo 'Se detectó un secreto o payload crudo en los artefactos de auditoría.' >&2
+            exit 1
+          fi
+          test -f .block45-career/BLOCK45_CAREER_AUDIT.json
+      - name: Upload career audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block45-career-audit-${{ github.run_id }}
+          path: .block45-career/BLOCK45_CAREER_AUDIT.json
+          if-no-files-found: error
+          retention-days: 14

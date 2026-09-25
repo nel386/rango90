@@ -76,7 +76,16 @@ function redactedProviderErrorCauses(errors: unknown): string[] {
   };
   if (errors === undefined || errors === null || errors === false || errors === '') return [];
   if (Array.isArray(errors)) return errors.map((value) => sanitize(value)).filter(Boolean).slice(0, 8);
-  if (typeof errors === 'object') return Object.entries(errors as JsonObject).slice(0, 8).map(([key, value]) => `${key.replace(/[^a-z0-9_.-]/giu, '_').slice(0, 60)}: ${sanitize(value)}`);
+  if (typeof errors === 'object') {
+    const grouped = new Map<string, string[]>();
+    for (const [key, value] of Object.entries(errors as JsonObject).slice(0, 8)) {
+      const cause = sanitize(value);
+      const keys = grouped.get(cause) ?? [];
+      keys.push(key.replace(/[^a-z0-9_.-]/giu, '_').slice(0, 60));
+      grouped.set(cause, keys);
+    }
+    return [...grouped.entries()].map(([cause, keys]) => `${keys.sort().join('/')} : ${cause}`);
+  }
   return [sanitize(errors)];
 }
 
@@ -114,7 +123,7 @@ async function main(): Promise<void> {
 
   for (const sample of samples) {
     if (stoppedForRateLimit) break;
-    const searchEndpoint = `/players?search=${encodeURIComponent(sample.player)}&season=${sample.season}`;
+    const searchEndpoint = `/players?league=${sample.leagueId}&search=${encodeURIComponent(sample.player)}&season=${sample.season}`;
     const searchBody = await get(searchEndpoint, 'player_search');
     const searchEvidence = requests.at(-1);
     if (!searchEvidence || searchEvidence.status !== 200 || searchEvidence.responseClass !== 'data') {

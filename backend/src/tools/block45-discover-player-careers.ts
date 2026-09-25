@@ -183,6 +183,8 @@ async function main(): Promise<void> {
   const completePlayerIds = eligiblePlayerIds.filter((id) => players[id]?.status === 'complete');
   const pendingPlayerIds = eligiblePlayerIds.filter((id) => players[id]?.status !== 'complete');
   const knownCareerSeasonPairs = completePlayerIds.reduce((sum, id) => sum + new Set(players[id]?.seasons ?? []).size, 0);
+  const observedMeanSeasonsPerPlayer = completePlayerIds.length > 0 ? knownCareerSeasonPairs / completePlayerIds.length : null;
+  const projectedStatsRequestsFromObservedSample = observedMeanSeasonsPerPlayer === null ? null : Math.ceil(observedMeanSeasonsPerPlayer * eligiblePlayerIds.length);
   const expectedStatsPairsWhenComplete = eligiblePlayerIds.length === completePlayerIds.length ? knownCareerSeasonPairs : null;
   const dailyValues = batch.map((entry) => entry.dailyRemaining).filter((value): value is number => value !== null);
   const minuteValues = batch.map((entry) => entry.minuteRemaining).filter((value): value is number => value !== null);
@@ -214,6 +216,11 @@ async function main(): Promise<void> {
     stoppedForBudget,
     stoppedForRateLimit,
     careerSeasonPairsDiscovered: knownCareerSeasonPairs,
+    sampledPlayerHistoryCount: completePlayerIds.length,
+    observedMeanCareerSeasonsPerPlayer: observedMeanSeasonsPerPlayer,
+    projectedStatsRequestsFromObservedSample,
+    projectedTotalRequestsIncludingCareerDiscovery: projectedStatsRequestsFromObservedSample === null ? null : eligiblePlayerIds.length + projectedStatsRequestsFromObservedSample,
+    projectionMethodNote: 'Proyección lineal del número de temporadas únicas devueltas por /players/teams. No equivale a una validación de estadísticas por competición ni autoriza expansión.',
     estimatedStatsRequests: expectedStatsPairsWhenComplete,
     totalStatsRequestsLowerBound: knownCareerSeasonPairs,
     totalCareerDiscoveryRequests: eligiblePlayerIds.length,

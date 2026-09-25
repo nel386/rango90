@@ -133,7 +133,7 @@ async function main(): Promise<void> {
     if (stoppedForRateLimit) break;
     const searchBase = `/players?league=${sample.leagueId}&search=${encodeURIComponent(sample.searchTerm)}&season=${sample.season}`;
     const candidateRows = new Map<string, { playerId: string; playerName: string }>();
-    const exactMatchesById = new Map<string, string>();
+    const identifiedMatchesById = new Map<string, { playerName: string; resolution: 'exact_full_name' | 'unique_initial_and_surname' }>();
     let searchEvidence: RequestEvidence | undefined;
     let searchResponseClass: RequestEvidence['responseClass'] | null = null;
     let searchPagesScanned = 0;
@@ -149,7 +149,7 @@ async function main(): Promise<void> {
       for (const row of array(searchBody.response).map(object)) {
         const player = object(row.player); const playerId = String(player.id ?? ''); const playerName = String(player.name ?? '').trim();
         if (playerId && playerName) candidateRows.set(playerId, { playerId, playerName });
-        if (playerId && normalize(playerName) === normalize(sample.player)) exactMatchesById.set(playerId, playerName);
+        if (playerId && normalize(playerName) === normalize(sample.player)) identifiedMatchesById.set(playerId, { playerName, resolution: 'exact_full_name' });
       }
       if (searchOnly || page >= Math.min(totalSearchPages ?? 1, 3)) break;
     }
@@ -157,7 +157,15 @@ async function main(): Promise<void> {
       results.push({ ...sample, status: 'player_search_unverified', searchStatus: searchEvidence?.status ?? null, searchResponseClass, searchPagesScanned, totalSearchPages });
       continue;
     }
-    const playerIds = [...exactMatchesById.keys()];
+    if (candidateRows.size === 1 && identifiedMatchesById.size === 0) {
+      const candidate = [...candidateRows.values()][0]!;
+      const expectedTokens = normalize(sample.player).split(' ');
+      const candidateTokens = normalize(candidate.playerName).split(' ');
+      const sameSurname = expectedTokens.at(-1) === candidateTokens.at(-1);
+      const abbreviatedFirstNameMatches = candidateTokens.length === 2 && expectedTokens.length >= 2 && candidateTokens[0]?.length === 1 && candidateTokens[0] === expectedTokens[0]?.[0];
+      if (sameSurname && abbreviatedFirstNameMatches) identifiedMatchesById.set(candidate.playerId, { playerName: candidate.playerName, resolution: 'unique_initial_and_surname' });
+    }
+    const playerIds = [...identifiedMatchesById.keys()];
     if (playerIds.length !== 1) {
       results.push({ ...sample, status: searchResponseClass === 'valid_empty' ? 'player_search_empty_for_known_control' : 'player_identity_unresolved', matchedPlayerIds: playerIds, searchStatus: searchEvidence.status, searchPagesScanned, totalSearchPages, searchCandidates: [...candidateRows.values()].slice(0, 12) });
       continue;
@@ -198,7 +206,7 @@ async function main(): Promise<void> {
     const selectedRows = expectedTeamRows.map((stat) => ({ leagueId: Number(object(stat.league).id), leagueName: String(object(stat.league).name ?? ''), country: String(object(stat.league).country ?? ''), teamId: Number(object(stat.team).id) || null, teamName: String(object(stat.team).name ?? ''), yellowCards: Number.isInteger(Number(object(stat.cards).yellow)) ? Number(object(stat.cards).yellow) : null }));
     const legacyRows = selectedRows.filter((row) => !Number.isInteger(row.leagueId) || row.leagueId <= 0);
     const independentMatch = observedYellowCards === sample.expectedYellowCards && expectedTeamRows.length > 0;
-    results.push({ ...sample, playerId, status: independentMatch ? (legacyRows.length > 0 ? 'legacy_control_match_unmapped' : 'control_match_positive_id') : 'control_mismatch_or_unresolved', searchStatus: searchEvidence.status, searchPagesScanned, totalSearchPages, statsStatus: statsEvidence.status, statsPagesScanned, totalStatsPages, exactCompetitionRows: exactLeagueRows.length, expectedTeamRows: selectedRows, observedYellowCards, independentMatch, legacyIdRows: legacyRows, nameBasedMappingApproved: false });
+    results.push({ ...sample, playerId, apiPlayerName: identifiedMatchesById.get(playerId)?.playerName ?? null, playerIdentityResolution: identifiedMatchesById.get(playerId)?.resolution ?? null, status: independentMatch ? (legacyRows.length > 0 ? 'legacy_control_match_unmapped' : 'control_match_positive_id') : 'control_mismatch_or_unresolved', searchStatus: searchEvidence.status, searchPagesScanned, totalSearchPages, statsStatus: statsEvidence.status, statsPagesScanned, totalStatsPages, exactCompetitionRows: exactLeagueRows.length, expectedTeamRows: selectedRows, observedYellowCards, independentMatch, legacyIdRows: legacyRows, nameBasedMappingApproved: false });
   }
 
   const daily = requests.map((request) => request.dailyRemaining).filter((value): value is number => value !== null);

@@ -8,9 +8,9 @@ on:
         required: true
         type: string
       max_requests:
-        description: 'Máximo 800 consultas /players/teams en esta tanda.'
+        description: 'Máximo 200 consultas /players/teams en esta tanda; checkpoints cada 10 respuestas.'
         required: true
-        default: '800'
+        default: '200'
 
 permissions:
   contents: read
@@ -45,8 +45,8 @@ jobs:
       - name: Validate discovery budget
         run: |
           set -euo pipefail
-          if ! [[ "$BLOCK45_MAX_REQUESTS" =~ ^[0-9]+$ ]] || [ "$BLOCK45_MAX_REQUESTS" -lt 1 ] || [ "$BLOCK45_MAX_REQUESTS" -gt 800 ]; then
-            echo 'La tanda de descubrimiento acepta entre 1 y 800 peticiones.' >&2
+          if ! [[ "$BLOCK45_MAX_REQUESTS" =~ ^[0-9]+$ ]] || [ "$BLOCK45_MAX_REQUESTS" -lt 1 ] || [ "$BLOCK45_MAX_REQUESTS" -gt 200 ]; then
+            echo 'La tanda de descubrimiento acepta entre 1 y 200 peticiones.' >&2
             exit 1
           fi
       - name: Validate source run provenance

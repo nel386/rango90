@@ -15,7 +15,7 @@ const sourceDir = resolve(process.env.BLOCK45_CAREER_SOURCE_DIR?.trim() || '.blo
 const outputRoot = resolve(process.env.BLOCK45_OUTPUT_ROOT?.trim() || '.block45-career/output');
 const apiKey = process.env.API_FOOTBALL_KEY?.trim() ?? '';
 const baseUrl = (process.env.API_FOOTBALL_BASE_URL?.trim() || 'https://v3.football.api-sports.io').replace(/\/$/u, '');
-const maxRequests = Math.min(800, Math.max(1, Number(process.env.BLOCK45_MAX_REQUESTS ?? 800)));
+const maxRequests = Math.min(200, Math.max(1, Number(process.env.BLOCK45_MAX_REQUESTS ?? 200)));
 const baseManifestCandidates = [resolve(sourceDir, 'provider/BLOCK45_BASE_MANIFEST.json'), resolve(sourceDir, 'BLOCK45_BASE_MANIFEST.json')];
 const previousProgressCandidates = [resolve(sourceDir, 'BLOCK45_CAREER_SEASONS.json'), resolve(sourceDir, 'career/BLOCK45_CAREER_SEASONS.json')];
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -26,8 +26,9 @@ const intHeader = (headers: Headers, name: string): number | null => { const val
 
 async function main(): Promise<void> {
   if (!apiKey) throw new Error('API_FOOTBALL_KEY ausente; no se realizaron peticiones.');
-  const baseManifestPath = baseManifestCandidates.find(existsSync);
-  if (!baseManifestPath) throw new Error('No se encontró BLOCK45_BASE_MANIFEST.json en el artefacto fuente.');
+  const baseManifestCandidate = baseManifestCandidates.find(existsSync);
+  if (!baseManifestCandidate) throw new Error('No se encontró BLOCK45_BASE_MANIFEST.json en el artefacto fuente.');
+  const baseManifestPath: string = baseManifestCandidate;
   const sourceManifest = JSON.parse(await readFile(baseManifestPath, 'utf8')) as JsonObject;
   const { manifestHash: sourceManifestHash } = sourceManifest;
   const { manifestHash: _ignored, ...unsignedSource } = sourceManifest;
@@ -63,10 +64,57 @@ async function main(): Promise<void> {
   let stoppedForBudget = false;
   let perMinuteLimit = 10;
   let lastStartedAt = 0;
+  const deadlineAt = Date.now() + 38 * 60_000;
   const inFlight = new Set<AbortController>();
   let nextPlayerIndex = 0;
   let scheduledRequests = 0;
   let scheduleLock = Promise.resolve();
+  let checkpointLock: Promise<void> = Promise.resolve();
+  let checkpointCount = 0;
+  const sourceRun = process.env.BLOCK45_SOURCE_RUN_ID?.trim() || '';
+  const runId = process.env.GITHUB_RUN_ID?.trim() || `local-${Date.now()}`;
+  const commitSha = process.env.GITHUB_SHA?.trim() || '';
+  const workflowName = process.env.GITHUB_WORKFLOW?.trim() || 'BLOQUE 45 · descubrimiento de temporadas de carrera';
+  async function checkpoint(): Promise<void> {
+    checkpointCount += 1;
+    if (checkpointCount % 10 !== 0 && checkpointCount !== 1) return;
+    checkpointLock = checkpointLock.then(async () => {
+      const unsignedProgress = {
+        artifactKind: 'block45_player_career_seasons' as const,
+        version: '1' as const,
+        sourceBaseRunId: String(sourceManifest.baseRunId),
+        sourceManifestHash: String(sourceManifestHash),
+        parentRunId: sourceRun || null,
+        commitSha,
+        workflowName,
+        eligiblePlayerIds,
+        players: { ...players },
+        requests: [...requests]
+      };
+      const progress: CareerProgress = { ...unsignedProgress, manifestHash: hashJson(unsignedProgress) };
+      await mkdir(outputRoot, { recursive: true });
+      await copyFile(baseManifestPath, resolve(outputRoot, 'BLOCK45_BASE_MANIFEST.json'));
+      await writeFile(resolve(outputRoot, 'BLOCK45_CAREER_SEASONS.json'), stableYellowJson(progress), 'utf8');
+      await writeFile(resolve(outputRoot, 'BLOCK45_CAREER_DISCOVERY_REPORT.json'), stableYellowJson({
+        artifactKind: 'block45_player_career_discovery_report',
+        status: 'career_history_discovery_partial',
+        sourceBaseRunId: String(sourceManifest.baseRunId),
+        sourceManifestHash: String(sourceManifestHash),
+        eligiblePlayerCount: eligiblePlayerIds.length,
+        completePlayerHistoryCount: Object.values(players).filter((value) => value.status === 'complete').length,
+        pendingPlayerHistoryCount: eligiblePlayerIds.length - Object.values(players).filter((value) => value.status === 'complete').length,
+        batchRequests: batch.length,
+        batchSuccessfulResponses: batch.filter((entry) => entry.status === 200).length,
+        checkpoint: true,
+        checkpointRunId: runId,
+        rawPayloadsStored: false,
+        secretPrinted: false,
+        loadExecuted: false,
+        snapshotsCreated: 0
+      }), 'utf8');
+    });
+    await checkpointLock;
+  }
   async function scheduleRequest(): Promise<boolean> {
     let release!: () => void;
     const previous = scheduleLock;
@@ -75,6 +123,7 @@ async function main(): Promise<void> {
     try {
       if (stoppedForRateLimit || scheduledRequests >= maxRequests) return false;
       const intervalMs = Math.max(250, Math.ceil(60_000 / (Math.max(1, perMinuteLimit) * 0.8)));
+      if (Date.now() + intervalMs >= deadlineAt) return false;
       const waitMs = intervalMs - (Date.now() - lastStartedAt);
       if (waitMs > 0) await new Promise((resolveDelay) => setTimeout(resolveDelay, waitMs));
       if (stoppedForRateLimit || scheduledRequests >= maxRequests) return false;
@@ -107,10 +156,11 @@ async function main(): Promise<void> {
     if (status === 429) {
       stoppedForRateLimit = true;
       players[playerId] = { status: 'provider_error', seasons: [], teams: [], responseSha256 };
+      await checkpoint();
       for (const pendingController of inFlight) pendingController.abort();
       return;
     }
-    if (status !== 200 || !Array.isArray(body.response)) { players[playerId] = { status: 'provider_error', seasons: [], teams: [], responseSha256 }; return; }
+    if (status !== 200 || !Array.isArray(body.response)) { players[playerId] = { status: 'provider_error', seasons: [], teams: [], responseSha256 }; await checkpoint(); return; }
     const teams: TeamHistory[] = [];
     for (const entryValue of body.response) {
       const entry = object(entryValue); const team = object(entry.team);
@@ -119,6 +169,7 @@ async function main(): Promise<void> {
     }
     const allSeasons = [...new Set(teams.flatMap((team) => team.seasons))].sort((a, b) => a - b);
     players[playerId] = { status: 'complete', seasons: allSeasons, teams, responseSha256 };
+    await checkpoint();
   }
   async function worker(): Promise<void> {
     while (!stoppedForRateLimit && nextPlayerIndex < pending.length && scheduledRequests < maxRequests) {
@@ -135,10 +186,6 @@ async function main(): Promise<void> {
   const expectedStatsPairsWhenComplete = eligiblePlayerIds.length === completePlayerIds.length ? knownCareerSeasonPairs : null;
   const dailyValues = batch.map((entry) => entry.dailyRemaining).filter((value): value is number => value !== null);
   const minuteValues = batch.map((entry) => entry.minuteRemaining).filter((value): value is number => value !== null);
-  const sourceRun = process.env.BLOCK45_SOURCE_RUN_ID?.trim() || '';
-  const runId = process.env.GITHUB_RUN_ID?.trim() || `local-${Date.now()}`;
-  const commitSha = process.env.GITHUB_SHA?.trim() || '';
-  const workflowName = process.env.GITHUB_WORKFLOW?.trim() || 'BLOQUE 45 · descubrimiento de temporadas de carrera';
   const unsignedProgress = {
     artifactKind: 'block45_player_career_seasons' as const,
     version: '1' as const,

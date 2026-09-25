@@ -62,7 +62,7 @@ async function main(): Promise<void> {
   const batch: RequestEvidence[] = [];
   let stoppedForRateLimit = false;
   let stoppedForBudget = false;
-  let perMinuteLimit = 10;
+  let perMinuteLimit: number | null = null;
   let lastStartedAt = 0;
   const deadlineAt = Date.now() + 38 * 60_000;
   const inFlight = new Set<AbortController>();
@@ -122,7 +122,7 @@ async function main(): Promise<void> {
     await previous;
     try {
       if (stoppedForRateLimit || scheduledRequests >= maxRequests) return false;
-      const intervalMs = Math.max(250, Math.ceil(60_000 / (Math.max(1, perMinuteLimit) * 0.8)));
+      const intervalMs = Math.max(250, Math.ceil(60_000 / (Math.max(1, perMinuteLimit ?? 10) * 0.8)));
       if (Date.now() + intervalMs >= deadlineAt) return false;
       const waitMs = intervalMs - (Date.now() - lastStartedAt);
       if (waitMs > 0) await new Promise((resolveDelay) => setTimeout(resolveDelay, waitMs));
@@ -148,7 +148,7 @@ async function main(): Promise<void> {
       dailyLimit = intHeader(response.headers, 'x-ratelimit-requests-limit');
       minuteRemaining = intHeader(response.headers, 'X-RateLimit-Remaining');
       minuteLimit = intHeader(response.headers, 'X-RateLimit-Limit');
-      if (minuteLimit !== null && minuteLimit > 0) perMinuteLimit = Math.min(perMinuteLimit, minuteLimit);
+      if (minuteLimit !== null && minuteLimit > 0) perMinuteLimit = minuteLimit;
     } catch { /* Keep redacted status-0 evidence; a later tranche retries this player. */ }
     finally { inFlight.delete(controller); }
     const evidence = { endpoint, status, responseSha256, dailyRemaining, dailyLimit, minuteRemaining, minuteLimit };

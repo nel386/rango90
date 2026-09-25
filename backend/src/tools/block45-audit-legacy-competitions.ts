@@ -9,6 +9,7 @@ type Sample = {
   leagueId: number;
   league: string;
   player: string;
+  searchTerm: string;
   season: number;
   expectedTeamAliases: string[];
   expectedYellowCards: number;
@@ -29,22 +30,25 @@ type RequestEvidence = {
 };
 
 const samples: Sample[] = [
-  { leagueId: 39, league: 'Premier League', player: 'Cristiano Ronaldo', season: 2007, expectedTeamAliases: ['Manchester United'], expectedYellowCards: 5, independentSource: 'https://www.statbunker.com/players/GetHistoryStats?comps_type=-1&dates=2007&player_id=17983', independentSourceDescription: 'Statbunker, Premier League 2007/08' },
-  { leagueId: 140, league: 'La Liga', player: 'Dani Parejo', season: 2008, expectedTeamAliases: ['Real Madrid'], expectedYellowCards: 1, independentSource: 'https://theanalyst.com/players/1893/dani-parejo/career', independentSourceDescription: 'Opta Analyst, Primera División 2008/09' },
-  { leagueId: 135, league: 'Serie A', player: 'Zlatan Ibrahimovic', season: 2008, expectedTeamAliases: ['Inter', 'Internazionale'], expectedYellowCards: 8, independentSource: 'https://www.statbunker.com/players/GetHistoryStats?comps_id=258&comps_type=SA&player_id=8695', independentSourceDescription: 'Statbunker, Serie A 2008/09' },
-  { leagueId: 78, league: 'Bundesliga', player: 'Franck Ribery', season: 2008, expectedTeamAliases: ['Bayern Munich', 'FC Bayern München'], expectedYellowCards: 5, independentSource: 'https://www.statbunker.com/players/GetHistoryStats?comps_id=-1&comps_type=BL&player_id=18728', independentSourceDescription: 'Statbunker, Bundesliga 2008/09' },
-  { leagueId: 61, league: 'Ligue 1', player: 'Juninho Pernambucano', season: 2008, expectedTeamAliases: ['Lyon', 'Olympique Lyonnais'], expectedYellowCards: 4, independentSource: 'https://www.worldfootball.net/player_summary/juninho-pernambucano/fra-ligue-1/2/', independentSourceDescription: 'worldfootball.net, Ligue 1 2008/09' },
-  { leagueId: 39, league: 'Premier League', player: 'Luis Suarez', season: 2013, expectedTeamAliases: ['Liverpool'], expectedYellowCards: 6, independentSource: 'https://www.statbunker.com/players/GetHistoryStats?comps_id=-1&comps_type=EPL&player_id=23604', independentSourceDescription: 'Statbunker, Premier League 2013/14' },
-  { leagueId: 140, league: 'La Liga', player: 'Dani Parejo', season: 2013, expectedTeamAliases: ['Valencia', 'Valencia CF'], expectedYellowCards: 7, independentSource: 'https://theanalyst.com/players/1893/dani-parejo/career', independentSourceDescription: 'Opta Analyst, Primera División 2013/14' },
-  { leagueId: 135, league: 'Serie A', player: 'Andrea Pirlo', season: 2013, expectedTeamAliases: ['Juventus'], expectedYellowCards: 4, independentSource: 'https://statbunker.com/players/GetHistoryStats?comps_id=-1&comps_type=SA&player_id=4335', independentSourceDescription: 'Statbunker, Serie A 2013/14' },
-  { leagueId: 78, league: 'Bundesliga', player: 'Franck Ribery', season: 2013, expectedTeamAliases: ['Bayern Munich', 'FC Bayern München'], expectedYellowCards: 2, independentSource: 'https://www.statbunker.com/competitions/TopYellowCards?club_id=99&comp_id=447', independentSourceDescription: 'Statbunker, Bundesliga 2013/14' },
-  { leagueId: 61, league: 'Ligue 1', player: 'Zlatan Ibrahimovic', season: 2013, expectedTeamAliases: ['Paris Saint-Germain', 'Paris Saint Germain'], expectedYellowCards: 7, independentSource: 'https://www.statbunker.com/players/GetHistoryStats?comps_type=-1&dates=2013&player_id=8695', independentSourceDescription: 'Statbunker, Ligue 1 2013/14' }
+  { leagueId: 39, league: 'Premier League', player: 'Cristiano Ronaldo', searchTerm: 'Ronaldo', season: 2007, expectedTeamAliases: ['Manchester United'], expectedYellowCards: 5, independentSource: 'https://www.statbunker.com/players/GetHistoryStats?comps_type=-1&dates=2007&player_id=17983', independentSourceDescription: 'Statbunker, Premier League 2007/08' },
+  { leagueId: 140, league: 'La Liga', player: 'Dani Parejo', searchTerm: 'Parejo', season: 2008, expectedTeamAliases: ['Real Madrid'], expectedYellowCards: 1, independentSource: 'https://theanalyst.com/players/1893/dani-parejo/career', independentSourceDescription: 'Opta Analyst, Primera División 2008/09' },
+  { leagueId: 135, league: 'Serie A', player: 'Zlatan Ibrahimovic', searchTerm: 'Ibrahimovic', season: 2008, expectedTeamAliases: ['Inter', 'Internazionale'], expectedYellowCards: 8, independentSource: 'https://www.statbunker.com/players/GetHistoryStats?comps_id=258&comps_type=SA&player_id=8695', independentSourceDescription: 'Statbunker, Serie A 2008/09' },
+  { leagueId: 78, league: 'Bundesliga', player: 'Franck Ribery', searchTerm: 'Ribery', season: 2008, expectedTeamAliases: ['Bayern Munich', 'FC Bayern München'], expectedYellowCards: 5, independentSource: 'https://www.statbunker.com/players/GetHistoryStats?comps_id=-1&comps_type=BL&player_id=18728', independentSourceDescription: 'Statbunker, Bundesliga 2008/09' },
+  { leagueId: 61, league: 'Ligue 1', player: 'Juninho Pernambucano', searchTerm: 'Juninho', season: 2008, expectedTeamAliases: ['Lyon', 'Olympique Lyonnais'], expectedYellowCards: 4, independentSource: 'https://www.worldfootball.net/player_summary/juninho-pernambucano/fra-ligue-1/2/', independentSourceDescription: 'worldfootball.net, Ligue 1 2008/09' },
+  { leagueId: 39, league: 'Premier League', player: 'Luis Suarez', searchTerm: 'Suarez', season: 2013, expectedTeamAliases: ['Liverpool'], expectedYellowCards: 6, independentSource: 'https://www.statbunker.com/players/GetHistoryStats?comps_id=-1&comps_type=EPL&player_id=23604', independentSourceDescription: 'Statbunker, Premier League 2013/14' },
+  { leagueId: 140, league: 'La Liga', player: 'Dani Parejo', searchTerm: 'Parejo', season: 2013, expectedTeamAliases: ['Valencia', 'Valencia CF'], expectedYellowCards: 7, independentSource: 'https://theanalyst.com/players/1893/dani-parejo/career', independentSourceDescription: 'Opta Analyst, Primera División 2013/14' },
+  { leagueId: 135, league: 'Serie A', player: 'Andrea Pirlo', searchTerm: 'Pirlo', season: 2013, expectedTeamAliases: ['Juventus'], expectedYellowCards: 4, independentSource: 'https://statbunker.com/players/GetHistoryStats?comps_id=-1&comps_type=SA&player_id=4335', independentSourceDescription: 'Statbunker, Serie A 2013/14' },
+  { leagueId: 78, league: 'Bundesliga', player: 'Franck Ribery', searchTerm: 'Ribery', season: 2013, expectedTeamAliases: ['Bayern Munich', 'FC Bayern München'], expectedYellowCards: 2, independentSource: 'https://www.statbunker.com/competitions/TopYellowCards?club_id=99&comp_id=447', independentSourceDescription: 'Statbunker, Bundesliga 2013/14' },
+  { leagueId: 61, league: 'Ligue 1', player: 'Zlatan Ibrahimovic', searchTerm: 'Ibrahimovic', season: 2013, expectedTeamAliases: ['Paris Saint-Germain', 'Paris Saint Germain'], expectedYellowCards: 7, independentSource: 'https://www.statbunker.com/players/GetHistoryStats?comps_type=-1&dates=2013&player_id=8695', independentSourceDescription: 'Statbunker, Ligue 1 2013/14' }
 ];
 
 const apiKey = process.env.API_FOOTBALL_KEY?.trim() ?? '';
 const baseUrl = (process.env.API_FOOTBALL_BASE_URL?.trim() || 'https://v3.football.api-sports.io').replace(/\/$/u, '');
 const outputRoot = resolve(process.env.BLOCK45_OUTPUT_ROOT?.trim() || 'audits/block45/legacy-competition-audit');
 const searchOnly = process.env.BLOCK45_AUDIT_SEARCH_ONLY?.trim().toLowerCase() !== 'false';
+const retryUnresolvedOnly = process.env.BLOCK45_AUDIT_RETRY_UNRESOLVED_ONLY?.trim().toLowerCase() === 'true';
+const unresolvedControlKeys = new Set(['135|2008|Zlatan Ibrahimovic', '78|2008|Franck Ribery', '39|2013|Luis Suarez', '78|2013|Franck Ribery', '61|2013|Zlatan Ibrahimovic']);
+const selectedSamples = retryUnresolvedOnly ? samples.filter((sample) => unresolvedControlKeys.has(`${sample.leagueId}|${sample.season}|${sample.player}`)) : samples;
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 const object = (value: unknown): JsonObject => value && typeof value === 'object' && !Array.isArray(value) ? value as JsonObject : {};
 const array = (value: unknown): unknown[] => Array.isArray(value) ? value : [];
@@ -121,13 +125,13 @@ async function main(): Promise<void> {
     return body;
   }
 
-  for (const sample of samples) {
+  for (const sample of selectedSamples) {
     if (stoppedForRateLimit) break;
-    const searchEndpoint = `/players?league=${sample.leagueId}&search=${encodeURIComponent(sample.player)}&season=${sample.season}`;
+    const searchEndpoint = `/players?league=${sample.leagueId}&search=${encodeURIComponent(sample.searchTerm)}&season=${sample.season}`;
     const searchBody = await get(searchEndpoint, 'player_search');
     const searchEvidence = requests.at(-1);
     if (!searchEvidence || searchEvidence.status !== 200 || searchEvidence.responseClass !== 'data') {
-      results.push({ ...sample, status: 'player_search_unverified', searchStatus: searchEvidence?.status ?? null, searchResponseClass: searchEvidence?.responseClass ?? null });
+      results.push({ ...sample, status: searchEvidence?.responseClass === 'valid_empty' ? 'player_search_empty_for_known_control' : 'player_search_unverified', searchStatus: searchEvidence?.status ?? null, searchResponseClass: searchEvidence?.responseClass ?? null });
       continue;
     }
     const exactMatches = array(searchBody.response).map(object).filter((row) => normalize(String(object(row.player).name ?? '')) === normalize(sample.player));
@@ -165,10 +169,10 @@ async function main(): Promise<void> {
     artifactKind: 'block45_legacy_competition_control_audit',
     version: '1',
     status: stoppedForRateLimit ? 'audit_rate_limited' : results.length === samples.length ? searchOnly ? 'search_diagnostics_complete' : 'audit_complete' : 'audit_partial',
-    scope: { sampling: '5 ligas × 2 temporadas; cohorte 2007/08 y cohorte 2013/14', controls: samples.length, liveRequests: requests.length, mode: searchOnly ? 'search_diagnostics_only' : 'player_search_and_season_stats_controls', noLoad: true, snapshotsCreated: 0 },
+    scope: { sampling: '5 ligas × 2 temporadas; cohorte 2007/08 y cohorte 2013/14', controls: selectedSamples.length, cases: selectedSamples.map(({ league, player, season }) => ({ league, player, season })), liveRequests: requests.length, mode: searchOnly ? 'search_diagnostics_only' : 'player_search_and_season_stats_controls', noLoad: true, snapshotsCreated: 0 },
     results,
     summary: {
-      expectedCases: samples.length,
+      expectedCases: selectedSamples.length,
       matchedIndependentControls: results.filter((row) => row.independentMatch === true).length,
       matchedLegacyIdZeroControls: results.filter((row) => row.status === 'legacy_control_match_unmapped').length,
       positiveIdControls: results.filter((row) => row.status === 'control_match_positive_id').length,

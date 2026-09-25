@@ -8,6 +8,11 @@ on:
         required: true
         type: boolean
         default: true
+      retry_unresolved_only:
+        description: 'Reintentar solo cinco controles de búsqueda vacíos anteriores con término de apellido.'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -25,6 +30,7 @@ jobs:
       API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
       BLOCK45_OUTPUT_ROOT: ${{ github.workspace }}/.block45-legacy-audit
       BLOCK45_AUDIT_SEARCH_ONLY: ${{ inputs.search_only }}
+      BLOCK45_AUDIT_RETRY_UNRESOLVED_ONLY: ${{ inputs.retry_unresolved_only }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

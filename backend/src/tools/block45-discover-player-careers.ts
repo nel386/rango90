@@ -39,12 +39,15 @@ async function main(): Promise<void> {
   const completeLeagueSeasons = new Set(coverage.filter((row) => ['complete', 'no_data'].includes(String(row.status)) && Number(row.pagesExpected) === Number(row.pagesRead)).map((row) => `${row.leagueId}|${row.season}`));
   const records = array(sourceManifest.basePlayerSeasonRecords).map(object);
   const seasonsByPlayerLeague = new Map<string, Set<number>>();
+  const baseSeasonsByPlayer = new Map<string, Set<number>>();
   for (const record of records) {
     const playerId = String(record.playerId ?? ''); const leagueId = Number(record.leagueId); const season = Number(record.season);
     if (!completeLeagueSeasons.has(`${leagueId}|${season}`)) continue;
+    const baseSeasons = baseSeasonsByPlayer.get(playerId) ?? new Set<number>(); baseSeasons.add(season); baseSeasonsByPlayer.set(playerId, baseSeasons);
     const key = `${playerId}|${leagueId}`; const years = seasonsByPlayerLeague.get(key) ?? new Set<number>(); years.add(season); seasonsByPlayerLeague.set(key, years);
   }
   const eligiblePlayerIds = [...new Set([...seasonsByPlayerLeague.entries()].filter(([, years]) => years.size >= 2).map(([key]) => key.split('|')[0] ?? '').filter(Boolean))].sort((a, b) => Number(a) - Number(b));
+  const exactBasePlayerSeasonPairs = eligiblePlayerIds.reduce((sum, id) => sum + (baseSeasonsByPlayer.get(id)?.size ?? 0), 0);
 
   const previousProgressPath = previousProgressCandidates.find(existsSync);
   let previous: CareerProgress | null = null;
@@ -183,8 +186,13 @@ async function main(): Promise<void> {
   const completePlayerIds = eligiblePlayerIds.filter((id) => players[id]?.status === 'complete');
   const pendingPlayerIds = eligiblePlayerIds.filter((id) => players[id]?.status !== 'complete');
   const knownCareerSeasonPairs = completePlayerIds.reduce((sum, id) => sum + new Set(players[id]?.seasons ?? []).size, 0);
-  const observedMeanSeasonsPerPlayer = completePlayerIds.length > 0 ? knownCareerSeasonPairs / completePlayerIds.length : null;
-  const projectedStatsRequestsFromObservedSample = observedMeanSeasonsPerPlayer === null ? null : Math.ceil(observedMeanSeasonsPerPlayer * eligiblePlayerIds.length);
+  const observedAdditionalCareerSeasonPairs = completePlayerIds.reduce((sum, id) => {
+    const career = new Set(players[id]?.seasons ?? []); const base = baseSeasonsByPlayer.get(id) ?? new Set<number>();
+    return sum + [...career].filter((season) => !base.has(season)).length;
+  }, 0);
+  const observedMeanAdditionalSeasonsPerPlayer = completePlayerIds.length > 0 ? observedAdditionalCareerSeasonPairs / completePlayerIds.length : null;
+  const projectedAdditionalCareerStatsRequests = observedMeanAdditionalSeasonsPerPlayer === null ? null : Math.ceil(observedMeanAdditionalSeasonsPerPlayer * eligiblePlayerIds.length);
+  const projectedStatsRequestsFromObservedSample = projectedAdditionalCareerStatsRequests === null ? null : exactBasePlayerSeasonPairs + projectedAdditionalCareerStatsRequests;
   const expectedStatsPairsWhenComplete = eligiblePlayerIds.length === completePlayerIds.length ? knownCareerSeasonPairs : null;
   const dailyValues = batch.map((entry) => entry.dailyRemaining).filter((value): value is number => value !== null);
   const minuteValues = batch.map((entry) => entry.minuteRemaining).filter((value): value is number => value !== null);
@@ -217,10 +225,13 @@ async function main(): Promise<void> {
     stoppedForRateLimit,
     careerSeasonPairsDiscovered: knownCareerSeasonPairs,
     sampledPlayerHistoryCount: completePlayerIds.length,
-    observedMeanCareerSeasonsPerPlayer: observedMeanSeasonsPerPlayer,
+    exactBasePlayerSeasonPairs,
+    observedAdditionalCareerSeasonPairs,
+    observedMeanAdditionalSeasonsPerPlayer,
+    projectedAdditionalCareerStatsRequests,
     projectedStatsRequestsFromObservedSample,
     projectedTotalRequestsIncludingCareerDiscovery: projectedStatsRequestsFromObservedSample === null ? null : eligiblePlayerIds.length + projectedStatsRequestsFromObservedSample,
-    projectionMethodNote: 'Proyección lineal del número de temporadas únicas devueltas por /players/teams. No equivale a una validación de estadísticas por competición ni autoriza expansión.',
+    projectionMethodNote: 'Pares exactos de la base completa más proyección lineal de temporadas únicas de carrera no presentes en la base, usando las historias descubiertas. No valida estadísticas por competición ni autoriza expansión.',
     estimatedStatsRequests: expectedStatsPairsWhenComplete,
     totalStatsRequestsLowerBound: knownCareerSeasonPairs,
     totalCareerDiscoveryRequests: eligiblePlayerIds.length,

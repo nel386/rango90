@@ -72,12 +72,12 @@ jobs:
           path: .block45-career/source
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ inputs.source_run_id }}
+      - name: Run backend type build before provider requests
+        working-directory: backend
+        run: npm run build
       - name: Discover player career seasons without storing payloads
         working-directory: backend
         run: npx tsx src/tools/block45-discover-player-careers.ts
-      - name: Run backend type build
-        working-directory: backend
-        run: npm run build
       - name: Redacted artifact guard
         if: always()
         run: |

@@ -1,0 +1,54 @@
+name: BLOQUE 45 · auditoría histórica de competiciones id0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: block45-club-yellow-cards
+  cancel-in-progress: false
+
+jobs:
+  legacy-competition-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
+      BLOCK45_OUTPUT_ROOT: ${{ github.workspace }}/.block45-legacy-audit
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend dependencies
+        run: npm --prefix backend ci
+      - name: Run backend type build before provider requests
+        working-directory: backend
+        run: npm run build
+      - name: Audit five leagues across two eras
+        working-directory: backend
+        run: npx tsx src/tools/block45-audit-legacy-competitions.ts
+      - name: Redacted artifact guard
+        if: always()
+        run: |
+          set -euo pipefail
+          if rg -n 'x-apisports-key|API_FOOTBALL_KEY|secretPrinted":true|"response"\s*:' .block45-legacy-audit; then
+            echo 'Se detectó un secreto o payload crudo en el artefacto.' >&2
+            exit 1
+          fi
+          test -f .block45-legacy-audit/BLOCK45_LEGACY_COMPETITION_AUDIT.json
+      - name: Upload redacted legacy audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: block45-legacy-competition-audit-${{ github.run_id }}
+          path: .block45-legacy-audit/BLOCK45_LEGACY_COMPETITION_AUDIT.json
+          if-no-files-found: error
+          retention-days: 30

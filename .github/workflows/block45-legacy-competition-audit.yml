@@ -9,7 +9,7 @@ on:
         type: boolean
         default: true
       retry_unresolved_only:
-        description: 'Reintentar solo cinco controles de búsqueda vacíos anteriores con término de apellido.'
+        description: 'Reintentar solo los dos controles Bundesliga que siguen sin confirmar.'
         required: true
         type: boolean
         default: false

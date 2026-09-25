@@ -50,7 +50,7 @@ const baseUrl = (process.env.API_FOOTBALL_BASE_URL?.trim() || 'https://v3.footba
 const outputRoot = resolve(process.env.BLOCK45_OUTPUT_ROOT?.trim() || 'audits/block45/legacy-competition-audit');
 const searchOnly = process.env.BLOCK45_AUDIT_SEARCH_ONLY?.trim().toLowerCase() !== 'false';
 const retryUnresolvedOnly = process.env.BLOCK45_AUDIT_RETRY_UNRESOLVED_ONLY?.trim().toLowerCase() === 'true';
-const unresolvedControlKeys = new Set(['135|2008|Zlatan Ibrahimovic', '78|2008|Franck Ribery', '39|2013|Luis Suarez', '78|2013|Franck Ribery', '61|2013|Zlatan Ibrahimovic']);
+const unresolvedControlKeys = new Set(['78|2008|Franck Ribery', '78|2013|Franck Ribery']);
 const selectedSamples = retryUnresolvedOnly ? samples.filter((sample) => unresolvedControlKeys.has(`${sample.leagueId}|${sample.season}|${sample.player}`)) : samples;
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 const object = (value: unknown): JsonObject => value && typeof value === 'object' && !Array.isArray(value) ? value as JsonObject : {};
@@ -199,14 +199,20 @@ async function main(): Promise<void> {
       continue;
     }
     const statistics = statsBodies.flatMap((statsBody) => array(statsBody.response).flatMap((rowValue) => array(object(rowValue).statistics).map(object)));
-    const exactLeagueRows = statistics.filter((stat) => normalize(String(object(stat.league).name ?? '')) === normalize(sample.league));
+    const exactLeagueRows = statistics.filter((stat) => {
+      const league = object(stat.league); const providerLeagueId = Number(league.id);
+      return Number.isInteger(providerLeagueId) && providerLeagueId > 0
+        ? providerLeagueId === sample.leagueId
+        : normalize(String(league.name ?? '')) === normalize(sample.league);
+    });
     const expectedTeamRows = exactLeagueRows.filter((stat) => sample.expectedTeamAliases.some((name) => normalize(String(object(stat.team).name ?? '')) === normalize(name)));
     const cardValues = expectedTeamRows.map((stat) => Number(object(stat.cards).yellow)).filter((value) => Number.isInteger(value) && value >= 0);
     const observedYellowCards = cardValues.length === expectedTeamRows.length && cardValues.length > 0 ? cardValues.reduce((sum, value) => sum + value, 0) : null;
     const selectedRows = expectedTeamRows.map((stat) => ({ leagueId: Number(object(stat.league).id), leagueName: String(object(stat.league).name ?? ''), country: String(object(stat.league).country ?? ''), teamId: Number(object(stat.team).id) || null, teamName: String(object(stat.team).name ?? ''), yellowCards: Number.isInteger(Number(object(stat.cards).yellow)) ? Number(object(stat.cards).yellow) : null }));
     const legacyRows = selectedRows.filter((row) => !Number.isInteger(row.leagueId) || row.leagueId <= 0);
     const independentMatch = observedYellowCards === sample.expectedYellowCards && expectedTeamRows.length > 0;
-    results.push({ ...sample, playerId, apiPlayerName: identifiedMatchesById.get(playerId)?.playerName ?? null, playerIdentityResolution: identifiedMatchesById.get(playerId)?.resolution ?? null, status: independentMatch ? (legacyRows.length > 0 ? 'legacy_control_match_unmapped' : 'control_match_positive_id') : 'control_mismatch_or_unresolved', searchStatus: searchEvidence.status, searchPagesScanned, totalSearchPages, statsStatus: statsEvidence.status, statsPagesScanned, totalStatsPages, exactCompetitionRows: exactLeagueRows.length, expectedTeamRows: selectedRows, observedYellowCards, independentMatch, legacyIdRows: legacyRows, nameBasedMappingApproved: false });
+    const returnedCompetitionRows = statistics.map((stat) => ({ leagueId: Number(object(stat.league).id), leagueName: String(object(stat.league).name ?? ''), country: String(object(stat.league).country ?? ''), teamId: Number(object(stat.team).id) || null, teamName: String(object(stat.team).name ?? ''), yellowCards: Number.isInteger(Number(object(stat.cards).yellow)) ? Number(object(stat.cards).yellow) : null }));
+    results.push({ ...sample, playerId, apiPlayerName: identifiedMatchesById.get(playerId)?.playerName ?? null, playerIdentityResolution: identifiedMatchesById.get(playerId)?.resolution ?? null, status: independentMatch ? (legacyRows.length > 0 ? 'legacy_control_match_unmapped' : 'control_match_positive_id') : 'control_mismatch_or_unresolved', searchStatus: searchEvidence.status, searchPagesScanned, totalSearchPages, statsStatus: statsEvidence.status, statsPagesScanned, totalStatsPages, exactCompetitionRows: exactLeagueRows.length, expectedTeamRows: selectedRows, returnedCompetitionRows, observedYellowCards, independentMatch, legacyIdRows: legacyRows, nameBasedMappingApproved: false });
   }
 
   const daily = requests.map((request) => request.dailyRemaining).filter((value): value is number => value !== null);

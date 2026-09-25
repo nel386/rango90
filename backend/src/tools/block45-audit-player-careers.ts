@@ -40,6 +40,13 @@ const intHeader = (headers: Headers, name: string): number | null => {
   return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
 };
 const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/gu, '').toLowerCase().replace(/[^a-z0-9]+/gu, ' ').trim().replace(/\s+/gu, ' ');
+const targetMajorByName = new Map([
+  ['premier league', 'Premier League'],
+  ['la liga', 'La Liga'],
+  ['serie a', 'Serie A'],
+  ['bundesliga', 'Bundesliga'],
+  ['ligue 1', 'Ligue 1']
+]);
 
 async function main(): Promise<void> {
   if (!apiKey) throw new Error('API_FOOTBALL_KEY ausente; no se realizaron peticiones.');
@@ -119,16 +126,23 @@ async function main(): Promise<void> {
     }
     const responseRows = body.response.map((row) => object(row));
     const statistics = responseRows.flatMap((row) => array(row.statistics).map((stat) => ({ player: object(row.player), stat: object(stat) })));
-    const competitionRows = statistics.map(({ stat }) => ({
-      leagueId: Number(object(stat.league).id),
-      league: String(object(stat.league).name ?? ''),
+    const competitionRows = statistics.map(({ stat }) => {
+      const league = object(stat.league);
+      const rawYellowCards = object(stat.cards).yellow;
+      const yellowCards = rawYellowCards === null || rawYellowCards === undefined || rawYellowCards === '' ? null : Number(rawYellowCards);
+      const leagueName = String(league.name ?? '');
+      const leagueId = Number(league.id);
+      return {
+      leagueId: Number.isInteger(leagueId) && leagueId > 0 ? leagueId : null,
+      league: leagueName,
+      targetMajorLeague: targetMajorByName.get(normalize(leagueName)) ?? (FIVE_MAJOR_LEAGUE_IDS.includes(leagueId as (typeof FIVE_MAJOR_LEAGUE_IDS)[number]) ? leagueName : null),
       leagueCountry: String(object(stat.league).country ?? ''),
       teamId: Number(object(stat.team).id) || null,
       team: String(object(stat.team).name ?? ''),
-      yellowCards: Number(object(stat.cards).yellow),
-      yellowCardsAvailable: Number.isFinite(Number(object(stat.cards).yellow))
-    }));
-    const eligible = competitionRows.filter((row) => FIVE_MAJOR_LEAGUE_IDS.includes(row.leagueId as (typeof FIVE_MAJOR_LEAGUE_IDS)[number]));
+      yellowCards: yellowCards !== null && Number.isFinite(yellowCards) ? yellowCards : null,
+      yellowCardsAvailable: yellowCards !== null && Number.isFinite(yellowCards)
+    }; });
+    const eligible = competitionRows.filter((row) => row.targetMajorLeague !== null);
     const cardRows = eligible.filter((row) => row.yellowCardsAvailable);
     seasonResults.push({
       playerId: player.id,
@@ -140,7 +154,7 @@ async function main(): Promise<void> {
       totalCompetitionRows: statistics.length,
       eligibleCompetitionRows: eligible.length,
       yellowCardRows: cardRows.length,
-      yellowCardsTotal: cardRows.length ? cardRows.reduce((sum, row) => sum + row.yellowCards, 0) : null,
+      yellowCardsTotal: cardRows.length ? cardRows.reduce((sum, row) => sum + (row.yellowCards ?? 0), 0) : null,
       eligibleCompetitionStats: eligible,
       allCompetitionStats: competitionRows
     });

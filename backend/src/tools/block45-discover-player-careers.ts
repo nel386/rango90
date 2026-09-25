@@ -15,7 +15,7 @@ type HistoricalStatsAuditIndex = {
   version: '1';
   seasonStatsAttempts: number;
   uniqueValidPlayerSeasonPairs: number;
-  pairs: Array<{ playerId: string; season: number; attempts: number; http200Attempts: number; errorsFieldChecked?: boolean }>;
+  pairs: Array<{ playerId: string; season: number; attempts: number; http200Attempts: number; errorsFieldChecked?: boolean; reusableForCareerStats?: boolean }>;
   sourceReports: Array<{ runId: string; reportSha256: string; requestAttempts: number; seasonStatsAttempts: number; validSeasonStatsAttempts: number; http200SeasonStatsAttempts: number }>;
   unreconciledProviderRuns?: Array<{ runId: string; workflow: string; conclusion: string; requestAttempts: number | null; reason: string }>;
   indexHash: string;
@@ -74,7 +74,7 @@ async function main(): Promise<void> {
   const exactBasePlayerSeasonPairs = eligiblePlayerIds.reduce((sum, id) => sum + (baseSeasonsByPlayer.get(id)?.size ?? 0), 0);
   const eligibleIdSet = new Set(eligiblePlayerIds);
   const previouslyQueriedAdditionalStatsPairs = new Set(historicalStatsAudit.pairs.filter((pair) => eligibleIdSet.has(pair.playerId) && !(baseSeasonsByPlayer.get(pair.playerId)?.has(pair.season) ?? false)).map((pair) => `${pair.playerId}|${pair.season}`));
-  const previouslyValidatedAdditionalStatsPairs = new Set(historicalStatsAudit.pairs.filter((pair) => pair.errorsFieldChecked === true && eligibleIdSet.has(pair.playerId) && !(baseSeasonsByPlayer.get(pair.playerId)?.has(pair.season) ?? false)).map((pair) => `${pair.playerId}|${pair.season}`));
+  const previouslyValidatedAdditionalStatsPairs = new Set(historicalStatsAudit.pairs.filter((pair) => pair.errorsFieldChecked === true && pair.reusableForCareerStats === true && eligibleIdSet.has(pair.playerId) && !(baseSeasonsByPlayer.get(pair.playerId)?.has(pair.season) ?? false)).map((pair) => `${pair.playerId}|${pair.season}`));
   const baseRequestAttemptsAlreadySpent = array(sourceManifest.requests).reduce<number>((sum, value) => sum + Math.max(1, Number(object(value).attempts) || 1), 0);
   const historicalAuditRequestAttempts = historicalStatsAudit.sourceReports.reduce((sum, report) => sum + report.requestAttempts, 0);
   const historicalAuditNonStatsAttempts = Math.max(0, historicalAuditRequestAttempts - historicalStatsAudit.seasonStatsAttempts);
@@ -134,13 +134,13 @@ async function main(): Promise<void> {
       await writeFile(resolve(outputRoot, 'BLOCK45_CAREER_SEASONS.json'), stableYellowJson(progress), 'utf8');
       await writeFile(resolve(outputRoot, 'BLOCK45_CAREER_DISCOVERY_REPORT.json'), stableYellowJson({
         artifactKind: 'block45_player_career_discovery_report',
-        classificationVersion: 'errors_empty_and_validated_data_v2',
+        classificationVersion: 'candidate_empty_is_inconsistent_v3',
         status: 'career_history_discovery_partial',
         sourceBaseRunId: String(sourceManifest.baseRunId),
         sourceManifestHash: String(sourceManifestHash),
         eligiblePlayerCount: eligiblePlayerIds.length,
         completePlayerHistoryCount: Object.values(players).filter((value) => value.status === 'complete_with_data').length,
-        validEmptyPlayerHistoryCount: Object.values(players).filter((value) => value.status === 'complete_empty').length,
+        inconsistentEmptyPlayerHistoryCount: Object.values(players).filter((value) => value.status === 'inconsistent_empty').length,
         legacyUnverifiedPlayerHistoryCount: Object.values(players).filter((value) => value.status === 'legacy_unverified').length,
         providerErrorPlayerHistoryCount: Object.values(players).filter((value) => value.status === 'provider_error').length,
         pendingPlayerHistoryCount: eligiblePlayerIds.length - Object.values(players).filter(isVerifiedHistory).length,
@@ -337,7 +337,7 @@ async function main(): Promise<void> {
       },
       basePlayerSeasonPairsAlreadyCovered: exactBasePlayerSeasonPairs,
       eligibleHistoricalStatsPairsAlreadyQueried: previouslyQueriedAdditionalStatsPairs.size,
-      eligibleHistoricalStatsPairsWithErrorsRevalidated: previouslyValidatedAdditionalStatsPairs.size,
+      eligibleHistoricalStatsPairsRevalidatedAndReusable: previouslyValidatedAdditionalStatsPairs.size,
       potentialStatsCallsSavedAfterRevalidation: previouslyQueriedAdditionalStatsPairs.size - previouslyValidatedAdditionalStatsPairs.size,
       pendingEstimate: {
         careerHistoryRequests: pendingPlayerIds.length,

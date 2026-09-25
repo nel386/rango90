@@ -221,7 +221,16 @@ async function main(): Promise<void> {
     pendingStatsRequestsEstimate: expectedStatsPairsWhenComplete === null ? null : expectedStatsPairsWhenComplete,
     historicalAttempts: requests.length - batch.length,
     cumulativeAttempts: requests.length,
-    quotaDaily: { initial: dailyValues[0] ?? null, final: dailyValues.at(-1) ?? null, headerDecrease: dailyValues.length > 1 ? dailyValues[0]! - dailyValues.at(-1)! : null, attemptsMinusHeaderDecrease: dailyValues.length > 1 ? batch.length - (dailyValues[0]! - dailyValues.at(-1)!) : null, headerValuesObserved: dailyValues.length },
+    quotaDaily: {
+      initial: dailyValues[0] ?? null,
+      final: dailyValues.at(-1) ?? null,
+      headerDecrease: dailyValues.length > 1 ? dailyValues[0]! - dailyValues.at(-1)! : null,
+      attemptsMinusHeaderDecrease: dailyValues.length > 1 ? batch.length - (dailyValues[0]! - dailyValues.at(-1)!) : null,
+      headerValuesObserved: dailyValues.length,
+      reconciliationNote: dailyValues.length > 1 && batch.length !== dailyValues[0]! - dailyValues.at(-1)!
+        ? 'La cabecera diaria y los intentos de este run no coinciden; la API no permite atribuir la diferencia a este lote. El contador por minuto es una ventana independiente.'
+        : 'Comparación limitada a los valores de cabecera observados en este lote.'
+    },
     quotaPerMinute: { initial: minuteValues[0] ?? null, final: minuteValues.at(-1) ?? null, limit: batch.find((entry) => entry.minuteLimit !== null)?.minuteLimit ?? null, headerValuesObserved: minuteValues.length, note: 'Ventana móvil, no representa consumo acumulado.' },
     requests: batch,
     rawPayloadsStored: false,

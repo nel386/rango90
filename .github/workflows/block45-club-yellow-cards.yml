@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'plan consulta el alcance; load recorre todas las páginas y carga PostgreSQL efímero'
+        description: 'plan inicia base; continue reanuda páginas base; expand reanuda jugadores; load carga solo expansión completa'
         required: true
         type: choice
-        options: [plan, load]
+        options: [plan, continue, expand, load]
         default: plan
       from_season:
         description: 'Primera temporada; vacío = primera temporada que API-Football devuelva'
@@ -18,11 +18,11 @@ on:
         required: false
         default: ''
       max_requests:
-        description: 'Plan: presupuesto de la fase base. Load: presupuesto de expansión usando el manifiesto base.'
+        description: 'Presupuesto de intentos de esta tanda plan/continue/expand; mínimo 800.'
         required: true
         default: '800'
       base_run_id:
-        description: 'Load: runId de una ejecución plan completada cuyo manifiesto base se reutilizará'
+        description: 'continue/expand/load: runId cuyo manifiesto base se reanudará o consumirá'
         required: false
         default: ''
 
@@ -68,16 +68,30 @@ jobs:
       - name: Validate phase budget and base manifest input
         run: |
           set -euo pipefail
-          if [ "$BLOCK45_MODE" = "plan" ] && [ "$BLOCK45_MAX_REQUESTS" -lt 800 ]; then
-            echo "Plan rechazado: $BLOCK45_MAX_REQUESTS es inferior al mínimo preventivo de 800 para completar la fase base." >&2
+          if [ "$BLOCK45_MODE" != "load" ] && [ "$BLOCK45_MAX_REQUESTS" -lt 800 ]; then
+            echo "Tanda rechazada: $BLOCK45_MAX_REQUESTS es inferior al mínimo de 800 intentos." >&2
             exit 1
           fi
-          if [ "$BLOCK45_MODE" = "load" ] && [ -z "${{ inputs.base_run_id }}" ]; then
-            echo 'Load rechazado: base_run_id es obligatorio para reutilizar el manifiesto base.' >&2
+          if [ "$BLOCK45_MODE" != "plan" ] && [ -z "${{ inputs.base_run_id }}" ]; then
+            echo "$BLOCK45_MODE rechazado: base_run_id es obligatorio para descargar y validar el manifiesto anterior." >&2
             exit 1
           fi
+      - name: Validate source run provenance
+        id: source-run
+        if: ${{ inputs.mode != 'plan' }}
+        uses: actions/github-script@v7
+        env:
+          SOURCE_RUN_ID: ${{ inputs.base_run_id }}
+        with:
+          script: |
+            const runId = Number(process.env.SOURCE_RUN_ID);
+            if (!Number.isSafeInteger(runId) || runId < 1) throw new Error('base_run_id no es un entero válido');
+            const { data } = await github.rest.actions.getWorkflowRun({ owner: context.repo.owner, repo: context.repo.repo, run_id: runId });
+            if (data.path !== '.github/workflows/block45-club-yellow-cards.yml') throw new Error('El run origen pertenece a otro workflow');
+            if (data.status !== 'completed' || data.conclusion !== 'success') throw new Error('El run origen debe estar completado correctamente y conservar su artefacto');
+            core.setOutput('head-sha', data.head_sha);
       - name: Download completed base manifest
-        if: ${{ inputs.mode == 'load' }}
+        if: ${{ inputs.mode != 'plan' }}
         uses: actions/download-artifact@v4
         with:
           name: block45-club-yellow-cards-${{ inputs.base_run_id }}
@@ -86,17 +100,19 @@ jobs:
           run-id: ${{ inputs.base_run_id }}
       - name: Query API-Football without storing payloads
         working-directory: backend
+        env:
+          BLOCK45_SOURCE_COMMIT_SHA: ${{ steps.source-run.outputs.head-sha }}
         run: |
-          if [ "$BLOCK45_MODE" = "plan" ]; then export BLOCK45_PLAN_ONLY=1; fi
+          if [ "$BLOCK45_MODE" != "load" ]; then export BLOCK45_PLAN_ONLY=1; fi
           npx tsx src/tools/block45-api-football-yellow-cards.ts
-      - name: Stop before load when coverage or budget is insufficient
+      - name: Stop before database when load is not ready
         if: ${{ inputs.mode == 'load' }}
         run: |
           set -euo pipefail
           status=$(node -e "const r=require('./.block45/provider/BLOCK45_REPORT.json'); process.stdout.write(String(r.status))")
           case "$status" in
             load_candidate_ready) ;;
-            *) echo "Load bloqueado por el informe del proveedor: $status" >&2; exit 1 ;;
+            *) echo "Load bloqueado por el manifiesto base/expansión: $status" >&2; exit 1 ;;
           esac
       - name: Start isolated PostgreSQL
         if: ${{ inputs.mode == 'load' }}

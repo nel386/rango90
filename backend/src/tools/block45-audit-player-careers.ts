@@ -44,7 +44,7 @@ const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u0
 async function main(): Promise<void> {
   if (!apiKey) throw new Error('API_FOOTBALL_KEY ausente; no se realizaron peticiones.');
   const requests: RequestEvidence[] = [];
-  const lastByPlayer = new Map<string, { teams: TeamSeason[]; seasons: number[]; coverageNotes: string[] }>();
+  const lastByPlayer = new Map<string, { teams: TeamSeason[]; seasons: number[]; invalidSeasonValues: unknown[] }>();
   const seasonResults: Array<Record<string, unknown>> = [];
   let stoppedForRateLimit = false;
   let budgetExhausted = false;
@@ -94,16 +94,18 @@ async function main(): Promise<void> {
     const body = await get(`/players/teams?player=${encodeURIComponent(player.id)}`, 'career_teams');
     if (requests.at(-1)?.status !== 200 || !Array.isArray(body.response)) continue;
     const teams: TeamSeason[] = [];
+    const invalidSeasonValues: unknown[] = [];
     for (const entryValue of body.response) {
       const entry = object(entryValue);
       const team = object(entry.team);
       for (const rawSeason of array(entry.seasons)) {
         const season = Number(rawSeason);
-        if (Number.isInteger(season)) teams.push({ teamId: Number.isInteger(Number(team.id)) ? Number(team.id) : null, teamName: String(team.name ?? ''), season });
+        if (Number.isInteger(season) && season > 0) teams.push({ teamId: Number.isInteger(Number(team.id)) ? Number(team.id) : null, teamName: String(team.name ?? ''), season });
+        else invalidSeasonValues.push(rawSeason);
       }
     }
     const unique = [...new Map(teams.map((row) => [`${row.teamId}|${row.season}`, row])).values()];
-    lastByPlayer.set(player.id, { teams: unique, seasons: [...new Set(unique.map((row) => row.season))].sort((a, b) => a - b), coverageNotes: [] });
+    lastByPlayer.set(player.id, { teams: unique, seasons: [...new Set(unique.map((row) => row.season))].sort((a, b) => a - b), invalidSeasonValues });
   }
 
   const historicalPairs = players.flatMap((player) => (lastByPlayer.get(player.id)?.seasons ?? []).filter((season) => season < 2010).map((season) => ({ player, season })));
@@ -117,14 +119,17 @@ async function main(): Promise<void> {
     }
     const responseRows = body.response.map((row) => object(row));
     const statistics = responseRows.flatMap((row) => array(row.statistics).map((stat) => ({ player: object(row.player), stat: object(stat) })));
-    const eligible = statistics.filter(({ stat }) => FIVE_MAJOR_LEAGUE_IDS.includes(Number(object(stat.league).id) as (typeof FIVE_MAJOR_LEAGUE_IDS)[number]));
-    const cardRows = eligible.map(({ stat }) => ({
+    const competitionRows = statistics.map(({ stat }) => ({
       leagueId: Number(object(stat.league).id),
       league: String(object(stat.league).name ?? ''),
+      leagueCountry: String(object(stat.league).country ?? ''),
       teamId: Number(object(stat.team).id) || null,
       team: String(object(stat.team).name ?? ''),
-      yellowCards: Number(object(stat.cards).yellow)
-    })).filter((row) => Number.isFinite(row.yellowCards));
+      yellowCards: Number(object(stat.cards).yellow),
+      yellowCardsAvailable: Number.isFinite(Number(object(stat.cards).yellow))
+    }));
+    const eligible = competitionRows.filter((row) => FIVE_MAJOR_LEAGUE_IDS.includes(row.leagueId as (typeof FIVE_MAJOR_LEAGUE_IDS)[number]));
+    const cardRows = eligible.filter((row) => row.yellowCardsAvailable);
     seasonResults.push({
       playerId: player.id,
       playerName: player.name,
@@ -136,7 +141,8 @@ async function main(): Promise<void> {
       eligibleCompetitionRows: eligible.length,
       yellowCardRows: cardRows.length,
       yellowCardsTotal: cardRows.length ? cardRows.reduce((sum, row) => sum + row.yellowCards, 0) : null,
-      competitions: cardRows
+      eligibleCompetitionStats: eligible,
+      allCompetitionStats: competitionRows
     });
   }
 
@@ -156,7 +162,7 @@ async function main(): Promise<void> {
       officialContract: 'players/teams identifica equipos y temporadas; las estadísticas de temporada se obtienen por separado desde players.'
     },
     scope: { controls, knownPlayerIds: knownPlayers.map(({ id, name, controlName }) => ({ id, name, controlName })), lopoExactSearchMatches: lopoMatches.map((row) => ({ id: String(object(row.player).id), name: String(object(row.player).name) })), maxRequests },
-    players: players.map((player) => ({ ...player, teamsAndSeasons: lastByPlayer.get(player.id)?.teams ?? [], seasons: lastByPlayer.get(player.id)?.seasons ?? [], pre2010Seasons: (lastByPlayer.get(player.id)?.seasons ?? []).filter((season) => season < 2010) })),
+    players: players.map((player) => ({ ...player, teamsAndSeasons: lastByPlayer.get(player.id)?.teams ?? [], seasons: lastByPlayer.get(player.id)?.seasons ?? [], pre2010Seasons: (lastByPlayer.get(player.id)?.seasons ?? []).filter((season) => season < 2010), invalidSeasonValues: lastByPlayer.get(player.id)?.invalidSeasonValues ?? [] })),
     statsSample: seasonResults,
     seasonCoverage: { discoveredSeasons: seasonUnion, pre2010Seasons, historicalPairs: historicalPairs.length, historicalPairsChecked: seasonResults.length, completeHistoricalStatsCheck, stoppedForRateLimit, budgetExhausted },
     quota: {

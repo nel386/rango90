@@ -49,6 +49,7 @@ jobs:
       BLOCK45_TO_SEASON: ${{ inputs.to_season }}
       BLOCK45_ACTIVE_SEASON: ${{ inputs.to_season }}
       BLOCK45_MAX_REQUESTS: ${{ inputs.max_requests }}
+      BLOCK45_BASE_RUN_ID: ${{ inputs.base_run_id }}
       BLOCK45_BASE_MANIFEST_FILE: ${{ github.workspace }}/.block45/base/provider/BLOCK45_BASE_MANIFEST.json
       BLOCK45_OUTPUT_ROOT: ${{ github.workspace }}/.block45/provider
       BLOCK45_LOADER_OUTPUT_ROOT: ${{ github.workspace }}/.block45/loader

@@ -2,6 +2,12 @@ name: BLOQUE 45 · auditoría histórica de competiciones id0
 
 on:
   workflow_dispatch:
+    inputs:
+      search_only:
+        description: 'Solo diagnosticar /players?search y guardar causas redactadas de errors; no consultar estadísticas.'
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -18,6 +24,7 @@ jobs:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
       API_FOOTBALL_BASE_URL: https://v3.football.api-sports.io
       BLOCK45_OUTPUT_ROOT: ${{ github.workspace }}/.block45-legacy-audit
+      BLOCK45_AUDIT_SEARCH_ONLY: ${{ inputs.search_only }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,6 +51,9 @@ jobs:
             exit 1
           fi
           test -f .block45-legacy-audit/BLOCK45_LEGACY_COMPETITION_AUDIT.json
+          if [[ "$BLOCK45_AUDIT_SEARCH_ONLY" == "true" ]]; then
+            node -e 'const r=require("./.block45-legacy-audit/BLOCK45_LEGACY_COMPETITION_AUDIT.json"); if(r.requests.some(x=>x.kind==="season_stats")) process.exit(1);'
+          fi
       - name: Upload redacted legacy audit
         if: always()
         uses: actions/upload-artifact@v4

@@ -7,8 +7,8 @@ import { stableYellowJson } from '../clubYellowCardsCareerRankingEngine.js';
 type JsonObject = Record<string, unknown>;
 type Envelope = { response?: unknown[]; errors?: unknown; paging?: JsonObject };
 type TeamHistory = { teamId: number | null; teamName: string; seasons: number[] };
-type PlayerHistory = { status: 'complete_with_data' | 'complete_empty' | 'legacy_unverified' | 'provider_error'; seasons: number[]; teams: TeamHistory[]; responseSha256: string | null };
-type RequestEvidence = { endpoint: string; status: number; outcome?: 'data' | 'valid_empty' | 'provider_error' | 'malformed_response'; responseSha256: string; dailyRemaining: number | null; dailyLimit: number | null; minuteRemaining: number | null; minuteLimit: number | null };
+type PlayerHistory = { status: 'complete_with_data' | 'complete_empty' | 'inconsistent_empty' | 'legacy_unverified' | 'provider_error'; seasons: number[]; teams: TeamHistory[]; responseSha256: string | null };
+type RequestEvidence = { endpoint: string; status: number; outcome?: 'data' | 'valid_empty' | 'provider_error' | 'malformed_response'; classificationReason?: string; responseSha256: string; dailyRemaining: number | null; dailyLimit: number | null; minuteRemaining: number | null; minuteLimit: number | null };
 type CareerProgress = { artifactKind: 'block45_player_career_seasons'; version: '1' | '2'; sourceBaseRunId: string; sourceManifestHash: string; parentRunId: string | null; commitSha: string; workflowName: string; eligiblePlayerIds: string[]; players: Record<string, PlayerHistory>; requests: RequestEvidence[]; manifestHash: string };
 type HistoricalStatsAuditIndex = {
   artifactKind: 'block45_historical_stats_audit_index';
@@ -40,7 +40,7 @@ const hasProviderErrors = (errors: unknown): boolean => {
   if (typeof errors === 'object') return Object.keys(errors as JsonObject).length > 0;
   return true;
 };
-const isVerifiedHistory = (history: PlayerHistory | undefined): boolean => history?.status === 'complete_with_data' || history?.status === 'complete_empty';
+const isVerifiedHistory = (history: PlayerHistory | undefined): boolean => history?.status === 'complete_with_data';
 
 async function main(): Promise<void> {
   if (!apiKey) throw new Error('API_FOOTBALL_KEY ausente; no se realizaron peticiones.');
@@ -91,6 +91,7 @@ async function main(): Promise<void> {
   const players: Record<string, PlayerHistory> = { ...(previous?.players ?? {}) };
   for (const [playerId, history] of Object.entries(players)) {
     if (String((history as PlayerHistory).status) === 'complete') players[playerId] = { ...history, status: 'legacy_unverified' };
+    if (String((history as PlayerHistory).status) === 'complete_empty') players[playerId] = { ...history, status: 'inconsistent_empty' };
   }
   const requests = [...(previous?.requests ?? [])];
   const knownTerminal = new Set(Object.entries(players).filter(([, value]) => isVerifiedHistory(value)).map(([id]) => id));
@@ -191,49 +192,54 @@ async function main(): Promise<void> {
       if (minuteLimit !== null && minuteLimit > 0) perMinuteLimit = minuteLimit;
     } catch { /* Keep redacted status-0 evidence; a later tranche retries this player. */ }
     finally { inFlight.delete(controller); }
-    const recordOutcome = (outcome: RequestEvidence['outcome']) => {
-      const evidence: RequestEvidence = { endpoint, status, outcome, responseSha256, dailyRemaining, dailyLimit, minuteRemaining, minuteLimit };
+    const recordOutcome = (outcome: RequestEvidence['outcome'], classificationReason?: string) => {
+      const evidence: RequestEvidence = { endpoint, status, outcome, ...(classificationReason ? { classificationReason } : {}), responseSha256, dailyRemaining, dailyLimit, minuteRemaining, minuteLimit };
       batch.push(evidence); requests.push(evidence);
     };
     if (status === 429) {
       stoppedForRateLimit = true;
-      recordOutcome('provider_error');
+      recordOutcome('provider_error', 'http_429');
       players[playerId] = { status: 'provider_error', seasons: [], teams: [], responseSha256 };
       await checkpoint();
       for (const pendingController of inFlight) pendingController.abort();
       return;
     }
     if (status !== 200 || hasProviderErrors(body.errors)) {
-      recordOutcome('provider_error');
+      recordOutcome('provider_error', status !== 200 ? `http_${status}` : 'provider_errors_nonempty');
       players[playerId] = { status: 'provider_error', seasons: [], teams: [], responseSha256 };
       await checkpoint();
       return;
     }
     if (!Array.isArray(body.response)) {
-      recordOutcome('malformed_response');
+      recordOutcome('malformed_response', 'response_not_array');
       players[playerId] = { status: 'provider_error', seasons: [], teams: [], responseSha256 };
       await checkpoint();
       return;
     }
     if (body.response.length === 0) {
-      recordOutcome('valid_empty');
-      players[playerId] = { status: 'complete_empty', seasons: [], teams: [], responseSha256 };
+      // These candidates were selected from >=2 base seasons, so an empty career response contradicts known activity.
+      recordOutcome('malformed_response', 'empty_history_conflicts_with_base_activity');
+      players[playerId] = { status: 'inconsistent_empty', seasons: [], teams: [], responseSha256 };
       await checkpoint();
       return;
     }
     const teams: TeamHistory[] = [];
-    let malformed = false;
+    const malformedReasons = new Set<string>();
     for (const entryValue of body.response) {
       const entry = object(entryValue); const team = object(entry.team);
       const teamId = Number(team.id); const teamName = String(team.name ?? '').trim();
       const rawSeasons = entry.seasons;
       const seasons = [...new Set(array(rawSeasons).map(Number).filter((year) => Number.isInteger(year) && year > 0))].sort((a, b) => a - b);
-      if (!Number.isInteger(teamId) || teamId < 1 || !teamName || !Array.isArray(rawSeasons) || seasons.length === 0) malformed = true;
+      if (!Number.isInteger(teamId) || teamId < 1) malformedReasons.add('team_id_missing_or_invalid');
+      if (!teamName) malformedReasons.add('team_name_missing');
+      if (!Array.isArray(rawSeasons)) malformedReasons.add('team_seasons_not_array');
+      else if (seasons.length === 0) malformedReasons.add('team_seasons_empty_or_invalid');
       teams.push({ teamId: Number.isInteger(teamId) && teamId > 0 ? teamId : null, teamName, seasons });
     }
     const allSeasons = [...new Set(teams.flatMap((team) => team.seasons))].sort((a, b) => a - b);
-    if (malformed || allSeasons.length === 0) {
-      recordOutcome('malformed_response');
+    if (allSeasons.length === 0) malformedReasons.add('history_has_no_valid_seasons');
+    if (malformedReasons.size > 0) {
+      recordOutcome('malformed_response', [...malformedReasons].sort().join('|'));
       players[playerId] = { status: 'provider_error', seasons: [], teams: [], responseSha256 };
       await checkpoint();
       return;
@@ -253,7 +259,7 @@ async function main(): Promise<void> {
   if (!stoppedForRateLimit && pending.length > batch.length) stoppedForBudget = true;
 
   const completePlayerIds = eligiblePlayerIds.filter((id) => players[id]?.status === 'complete_with_data');
-  const validEmptyPlayerIds = eligiblePlayerIds.filter((id) => players[id]?.status === 'complete_empty');
+  const inconsistentEmptyPlayerIds = eligiblePlayerIds.filter((id) => players[id]?.status === 'inconsistent_empty');
   const legacyUnverifiedPlayerIds = eligiblePlayerIds.filter((id) => players[id]?.status === 'legacy_unverified');
   const providerErrorPlayerIds = eligiblePlayerIds.filter((id) => players[id]?.status === 'provider_error');
   const pendingPlayerIds = eligiblePlayerIds.filter((id) => !isVerifiedHistory(players[id]));
@@ -285,14 +291,14 @@ async function main(): Promise<void> {
   const progress: CareerProgress = { ...unsignedProgress, manifestHash: hashJson(unsignedProgress) };
   const report = {
     artifactKind: 'block45_player_career_discovery_report',
-    classificationVersion: 'errors_empty_and_validated_data_v2',
+    classificationVersion: 'candidate_empty_is_inconsistent_v3',
     status: pendingPlayerIds.length === 0 ? 'career_history_discovery_complete' : stoppedForRateLimit ? 'career_history_rate_limited' : 'career_history_discovery_partial',
     sourceBaseRunId: String(sourceManifest.baseRunId),
     sourceManifestHash: String(sourceManifestHash),
     basePlayerIds: array(sourceManifest.basePlayerNames).length,
     eligiblePlayerCount: eligiblePlayerIds.length,
     completePlayerHistoryCount: completePlayerIds.length,
-    validEmptyPlayerHistoryCount: validEmptyPlayerIds.length,
+    inconsistentEmptyPlayerHistoryCount: inconsistentEmptyPlayerIds.length,
     legacyUnverifiedPlayerHistoryCount: legacyUnverifiedPlayerIds.length,
     providerErrorPlayerHistoryCount: providerErrorPlayerIds.length,
     pendingPlayerHistoryCount: pendingPlayerIds.length,
@@ -300,8 +306,10 @@ async function main(): Promise<void> {
     batchSuccessfulResponses: batch.filter((entry) => entry.status === 200).length,
     batchValidatedWithData: batch.filter((entry) => entry.outcome === 'data').length,
     batchValidEmptyResponses: batch.filter((entry) => entry.outcome === 'valid_empty').length,
+    batchInconsistentEmptyResponses: batch.filter((entry) => entry.classificationReason === 'empty_history_conflicts_with_base_activity').length,
     batchProviderErrorResponses: batch.filter((entry) => entry.outcome === 'provider_error').length,
-    batchMalformedResponses: batch.filter((entry) => entry.outcome === 'malformed_response').length,
+    batchMalformedResponses: batch.filter((entry) => entry.outcome === 'malformed_response' && entry.classificationReason !== 'empty_history_conflicts_with_base_activity').length,
+    batchClassificationReasonCounts: Object.fromEntries([...batch.reduce((counts, entry) => { if (entry.classificationReason) counts.set(entry.classificationReason, (counts.get(entry.classificationReason) ?? 0) + 1); return counts; }, new Map<string, number>()).entries()].sort(([left], [right]) => left.localeCompare(right))),
     batchRetries: 0,
     stoppedForBudget,
     stoppedForRateLimit,

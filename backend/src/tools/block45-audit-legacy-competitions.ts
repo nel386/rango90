@@ -21,6 +21,7 @@ type RequestEvidence = {
   status: number;
   responseSha256: string;
   responseClass: 'data' | 'valid_empty' | 'provider_error' | 'malformed_response';
+  providerErrorCauses?: string[];
   dailyRemaining: number | null;
   dailyLimit: number | null;
   minuteRemaining: number | null;
@@ -43,6 +44,7 @@ const samples: Sample[] = [
 const apiKey = process.env.API_FOOTBALL_KEY?.trim() ?? '';
 const baseUrl = (process.env.API_FOOTBALL_BASE_URL?.trim() || 'https://v3.football.api-sports.io').replace(/\/$/u, '');
 const outputRoot = resolve(process.env.BLOCK45_OUTPUT_ROOT?.trim() || 'audits/block45/legacy-competition-audit');
+const searchOnly = process.env.BLOCK45_AUDIT_SEARCH_ONLY?.trim().toLowerCase() !== 'false';
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 const object = (value: unknown): JsonObject => value && typeof value === 'object' && !Array.isArray(value) ? value as JsonObject : {};
 const array = (value: unknown): unknown[] => Array.isArray(value) ? value : [];
@@ -59,6 +61,24 @@ const hasProviderErrors = (errors: unknown): boolean => {
   return true;
 };
 const normalize = (value: string): string => normalizePlayerName(value);
+function redactedProviderErrorCauses(errors: unknown): string[] {
+  const sanitize = (value: unknown): string => {
+    let message = typeof value === 'string' ? value : JSON.stringify(value);
+    if (!message) message = String(value ?? 'unknown');
+    if (apiKey) message = message.split(apiKey).join('[REDACTED]');
+    return message
+      .replace(/(?:x-apisports-key|api[_ -]?key|authorization|bearer|token)\s*[:=]?\s*[^\s,;"']+/giu, '[REDACTED]')
+      .replace(/https?:\/\/[^\s"']+/giu, '[URL]')
+      .replace(/\b(player|team|league|search)=([^&\s"']+)/giu, '$1=[REDACTED]')
+      .replace(/\s+/gu, ' ')
+      .trim()
+      .slice(0, 220);
+  };
+  if (errors === undefined || errors === null || errors === false || errors === '') return [];
+  if (Array.isArray(errors)) return errors.map((value) => sanitize(value)).filter(Boolean).slice(0, 8);
+  if (typeof errors === 'object') return Object.entries(errors as JsonObject).slice(0, 8).map(([key, value]) => `${key.replace(/[^a-z0-9_.-]/giu, '_').slice(0, 60)}: ${sanitize(value)}`);
+  return [sanitize(errors)];
+}
 
 async function main(): Promise<void> {
   if (!apiKey) throw new Error('API_FOOTBALL_KEY ausente; no se realizaron peticiones.');
@@ -86,7 +106,8 @@ async function main(): Promise<void> {
         : hasData ? 'data' : 'valid_empty';
     const observedLimit = intHeader(response.headers, 'X-RateLimit-Limit');
     if (observedLimit !== null && observedLimit > 0) minuteLimit = observedLimit;
-    requests.push({ endpoint, kind, status: response.status, responseSha256: sha256(raw), responseClass, dailyRemaining: intHeader(response.headers, 'x-ratelimit-requests-remaining'), dailyLimit: intHeader(response.headers, 'x-ratelimit-requests-limit'), minuteRemaining: intHeader(response.headers, 'X-RateLimit-Remaining'), minuteLimit: observedLimit });
+    const providerErrorCauses = hasProviderErrors(body.errors) ? redactedProviderErrorCauses(body.errors) : [];
+    requests.push({ endpoint, kind, status: response.status, responseSha256: sha256(raw), responseClass, ...(providerErrorCauses.length ? { providerErrorCauses } : {}), dailyRemaining: intHeader(response.headers, 'x-ratelimit-requests-remaining'), dailyLimit: intHeader(response.headers, 'x-ratelimit-requests-limit'), minuteRemaining: intHeader(response.headers, 'X-RateLimit-Remaining'), minuteLimit: observedLimit });
     if (response.status === 429) stoppedForRateLimit = true;
     return body;
   }
@@ -107,6 +128,10 @@ async function main(): Promise<void> {
       continue;
     }
     const playerId = playerIds[0]!;
+    if (searchOnly) {
+      results.push({ ...sample, playerId, status: 'player_search_verified_stats_not_requested', searchStatus: searchEvidence.status, searchResponseClass: searchEvidence.responseClass });
+      continue;
+    }
     const statsEndpoint = `/players?id=${encodeURIComponent(playerId)}&season=${sample.season}`;
     const statsBody = await get(statsEndpoint, 'season_stats');
     const statsEvidence = requests.at(-1);
@@ -130,8 +155,8 @@ async function main(): Promise<void> {
   const report = {
     artifactKind: 'block45_legacy_competition_control_audit',
     version: '1',
-    status: stoppedForRateLimit ? 'audit_rate_limited' : results.length === samples.length ? 'audit_complete' : 'audit_partial',
-    scope: { sampling: '5 ligas × 2 temporadas; cohorte 2007/08 y cohorte 2013/14', controls: samples.length, liveRequests: requests.length, noLoad: true, snapshotsCreated: 0 },
+    status: stoppedForRateLimit ? 'audit_rate_limited' : results.length === samples.length ? searchOnly ? 'search_diagnostics_complete' : 'audit_complete' : 'audit_partial',
+    scope: { sampling: '5 ligas × 2 temporadas; cohorte 2007/08 y cohorte 2013/14', controls: samples.length, liveRequests: requests.length, mode: searchOnly ? 'search_diagnostics_only' : 'player_search_and_season_stats_controls', noLoad: true, snapshotsCreated: 0 },
     results,
     summary: {
       expectedCases: samples.length,
@@ -139,6 +164,8 @@ async function main(): Promise<void> {
       matchedLegacyIdZeroControls: results.filter((row) => row.status === 'legacy_control_match_unmapped').length,
       positiveIdControls: results.filter((row) => row.status === 'control_match_positive_id').length,
       unresolvedOrMismatchedControls: results.filter((row) => !['legacy_control_match_unmapped', 'control_match_positive_id'].includes(String(row.status))).length,
+      searchProviderErrorRequests: requests.filter((request) => request.kind === 'player_search' && request.responseClass === 'provider_error').length,
+      providerErrorCauseGroups: Object.entries(requests.flatMap((request) => (request.providerErrorCauses ?? []).map((cause) => `${request.kind}|${cause}`)).reduce<Record<string, number>>((counts, cause) => { counts[cause] = (counts[cause] ?? 0) + 1; return counts; }, {})).map(([cause, count]) => ({ cause, count })).sort((left, right) => right.count - left.count || left.cause.localeCompare(right.cause)),
       nameBasedMappingApproved: false,
       mappingDecision: 'Sin mapa aprobado: los casos con ID ausente/cero quedan fuera de facts y visibles como pendientes hasta contrastar nombre, país, equipo, temporada y fuente independiente.'
     },

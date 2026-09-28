@@ -28,6 +28,7 @@
     "test:block6:official-fixture": "NODE_ENV=test RANGO90_RUNTIME_MODE=official RANGO90_BLOCK6_OFFICIAL_FIXTURE=1 tsx src/tests/block6-official-fixture.integration.test.ts",
     "verify:block6-release": "NODE_ENV=test RANGO90_RUNTIME_MODE=lab tsx src/tools/verify-block6-release.ts",
     "test:runtime-modes": "NODE_ENV=test RANGO90_RUNTIME_MODE=lab tsx src/tests/runtime-modes.test.ts",
+    "test:block45:legacy-zero": "NODE_ENV=test RANGO90_RUNTIME_MODE=lab tsx src/tests/block45-legacy-zero-evidence.test.ts",
     "test:frontend-runtime": "tsx ../src/data/runtime-contract.test.ts",
     "test:frontend-flow": "tsx ../src/data/game-flow.test.ts && tsx ../src/data/game-clock.test.ts && tsx ../src/data/image-preload.test.ts && tsx ../src/data/game-repository.test.ts",
     "test:playable-media-audit": "tsx src/tests/playable-media-audit.test.ts",

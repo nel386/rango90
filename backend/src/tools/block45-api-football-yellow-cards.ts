@@ -2,12 +2,15 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { buildYellowCardSnapshots, CONTROL_NAMES, FIVE_MAJOR_LEAGUE_IDS, normalizePlayerName, stableYellowJson, type YellowCardFact } from '../clubYellowCardsCareerRankingEngine.js';
-import { classifyClubCompetition, isOfficialClubCompetition } from './block45-provider-scope.js';
+import { classifyClubCompetition } from './block45-provider-scope.js';
+import { hasValidBlock45LegacyZeroAttribution, resolveBlock45LegacyZeroRow } from './block45-legacy-zero-evidence.js';
+import { computeBlock45AttemptBudget } from './block45-quota-budget.js';
+import { factFromStats } from './block45-yellow-card-fact.js';
 
 type JsonRecord = Record<string, unknown>;
-type Envelope = { response?: unknown[]; errors?: unknown; paging?: JsonRecord };
+type Envelope = { response?: unknown; errors?: unknown; paging?: JsonRecord; results?: unknown };
 type League = { id: number; name: string };
-type RequestEvidence = { endpoint: string; status: number; responseSha256: string; responseComplete?: boolean; dailyRemaining: number | null; dailyLimit: number | null; minuteRemaining: number | null; minuteLimit: number | null; pagingTotal: number | null; kind: 'coverage' | 'league_page' | 'player_season'; attempts: number; retryCount: number; attemptStatuses: number[] };
+type RequestEvidence = { endpoint: string; status: number; responseSha256: string; responseComplete?: boolean; dailyRemaining: number | null; dailyLimit: number | null; minuteRemaining: number | null; minuteLimit: number | null; pagingTotal: number | null; kind: 'quota_preflight' | 'coverage' | 'league_page' | 'player_season'; attempts: number; retryCount: number; attemptStatuses: number[] };
 type BasePlayerSeasonRecord = { playerId: string; leagueId: number; season: number };
 type CoverageRow = { leagueId: number; league: string; season: number; status: 'complete' | 'partial' | 'unavailable' | 'no_data'; pagesExpected: number | null; pagesRead: number; playersReturned: number; facts: number; reason: string };
 type PlayerSeasonEvidence = { playerId: string; season: number; status: 'player_did_not_participate' | 'data_available' | 'provider_returned_no_eligible_club_stats' | 'pending_legacy_competition' | 'provider_error'; competitions: string[]; unclassifiedLegacyCompetitions?: string[] };
@@ -23,7 +26,9 @@ const outputRoot = resolve(process.env.BLOCK45_OUTPUT_ROOT?.trim() || 'audits/bl
 const fromInput = process.env.BLOCK45_FROM_SEASON?.trim() ?? '';
 const toInput = process.env.BLOCK45_TO_SEASON?.trim() ?? '';
 const activeSeasonInput = process.env.BLOCK45_ACTIVE_SEASON?.trim() ?? '';
-const maxRequests = Math.max(1, Number(process.env.BLOCK45_MAX_REQUESTS ?? 500));
+const requestedMaxRequests = Math.max(0, Number(process.env.BLOCK45_MAX_REQUESTS ?? 0));
+const maxRequestHardCeiling = 10000;
+let maxRequests = requestedMaxRequests ? Math.min(requestedMaxRequests, maxRequestHardCeiling) : maxRequestHardCeiling;
 const maxRetries = Math.max(0, Math.min(3, Number(process.env.BLOCK45_MAX_RETRIES ?? 2)));
 const requestedMode = process.env.BLOCK45_MODE?.trim() ?? 'plan';
 const mode: 'plan' | 'continue' | 'expand' | 'load' = ['plan', 'continue', 'expand', 'load'].includes(requestedMode) ? requestedMode as 'plan' | 'continue' | 'expand' | 'load' : 'plan';
@@ -39,11 +44,12 @@ let requestAttemptsUsed = 0;
 let perMinuteLimit: number | null = null;
 let lastRequestStartedAt = 0;
 let stoppedForRateLimit = false;
+let preflightDailyRemainingUsed: number | null = null;
+let quotaPreflight: { status: 'passed' | 'blocked'; requestSha256: string; attempts: number; dailyRemainingHeader: number | null; dailyRemainingFromStatus: number | null; dailyRemainingUsed: number | null; dailyLimit: number | null; perMinuteRemaining: number | null; perMinuteLimit: number | null; effectiveAttemptBudget: number; pendingWorkAtPreflight: number | null; reason: string | null } | null = null;
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 const hashJson = (value: unknown) => sha256(stableYellowJson(value));
 const object = (value: unknown): JsonRecord => value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : {};
 const array = (value: unknown): unknown[] => Array.isArray(value) ? value : [];
-const numberOrNull = (value: unknown): number | null => typeof value === 'number' && Number.isInteger(value) && value >= 0 ? value : null;
 const hasProviderErrors = (errors: unknown): boolean => {
   if (errors === undefined || errors === null || errors === false || errors === '') return false;
   if (Array.isArray(errors)) return errors.length > 0;
@@ -67,11 +73,11 @@ async function waitForRequestSlot(): Promise<void> {
   lastRequestStartedAt = Date.now();
 }
 
-async function request(endpoint: string, kind: RequestEvidence['kind']): Promise<{ body: Envelope; evidence: RequestEvidence }> {
+async function request(endpoint: string, kind: RequestEvidence['kind'], retryLimit = maxRetries): Promise<{ body: Envelope; evidence: RequestEvidence }> {
   let lastError = false;
   const attemptStatuses: number[] = [];
   let finalEvidence: RequestEvidence | null = null;
-  for (let attempt = 0; attempt <= maxRetries && requestAttemptsUsed < maxRequests; attempt += 1) {
+  for (let attempt = 0; attempt <= retryLimit && requestAttemptsUsed < maxRequests; attempt += 1) {
     if (stoppedForRateLimit) break;
     await waitForRequestSlot();
     requestAttemptsUsed += 1;
@@ -85,15 +91,15 @@ async function request(endpoint: string, kind: RequestEvidence['kind']): Promise
       const dailyLimit = headerInteger(response.headers, 'x-ratelimit-requests-limit');
       const observedPerMinuteLimit = headerInteger(response.headers, 'X-RateLimit-Limit');
       if (observedPerMinuteLimit !== null && observedPerMinuteLimit > 0) perMinuteLimit = perMinuteLimit === null ? observedPerMinuteLimit : Math.min(perMinuteLimit, observedPerMinuteLimit);
-      finalEvidence = { endpoint, status: response.status, responseSha256: sha256(raw), responseComplete: response.status === 200 && Array.isArray(body.response) && !hasProviderErrors(body.errors), dailyRemaining: headerInteger(response.headers, 'x-ratelimit-requests-remaining'), dailyLimit, minuteRemaining: headerInteger(response.headers, 'X-RateLimit-Remaining'), minuteLimit: observedPerMinuteLimit, pagingTotal: Number.isInteger(pagingTotal) && pagingTotal > 0 ? pagingTotal : null, kind, attempts: attempt + 1, retryCount: attempt, attemptStatuses: [...attemptStatuses] };
+      finalEvidence = { endpoint, status: response.status, responseSha256: sha256(raw), responseComplete: response.status === 200 && (Array.isArray(body.response) || (body.response !== null && typeof body.response === 'object')) && !hasProviderErrors(body.errors), dailyRemaining: headerInteger(response.headers, 'x-ratelimit-requests-remaining'), dailyLimit, minuteRemaining: headerInteger(response.headers, 'X-RateLimit-Remaining'), minuteLimit: observedPerMinuteLimit, pagingTotal: Number.isInteger(pagingTotal) && pagingTotal > 0 ? pagingTotal : null, kind, attempts: attempt + 1, retryCount: attempt, attemptStatuses: [...attemptStatuses] };
       if (response.status === 429) { stoppedForRateLimit = true; return { body, evidence: finalEvidence }; }
-      if (response.status >= 500 && attempt < maxRetries && requestAttemptsUsed < maxRequests) { await new Promise((resolveDelay) => setTimeout(resolveDelay, 2000 * (2 ** attempt))); continue; }
+      if (response.status >= 500 && attempt < retryLimit && requestAttemptsUsed < maxRequests) { await new Promise((resolveDelay) => setTimeout(resolveDelay, 2000 * (2 ** attempt))); continue; }
       return { body, evidence: finalEvidence };
     } catch {
       lastError = true;
       attemptStatuses.push(0);
       finalEvidence = { endpoint, status: 0, responseSha256: sha256('network_error'), responseComplete: false, dailyRemaining: null, dailyLimit: null, minuteRemaining: null, minuteLimit: perMinuteLimit, pagingTotal: null, kind, attempts: attempt + 1, retryCount: attempt, attemptStatuses: [...attemptStatuses] };
-      if (attempt < maxRetries && requestAttemptsUsed < maxRequests) await new Promise((resolveDelay) => setTimeout(resolveDelay, 2000 * (2 ** attempt)));
+      if (attempt < retryLimit && requestAttemptsUsed < maxRequests) await new Promise((resolveDelay) => setTimeout(resolveDelay, 2000 * (2 ** attempt)));
     }
   }
   if (finalEvidence) return { body: {}, evidence: finalEvidence };
@@ -144,28 +150,19 @@ function assertBaseManifestIntegrity(manifest: BaseManifest, requireCompleteCove
   }
   if (hashJson(Object.keys(manifest.discoveredSeasonsByLeague).map(Number).sort((a, b) => a - b)) !== hashJson(expectedLeagueIds)) errors.push('discoveredSeasonsByLeague no contiene las cinco ligas');
   if (manifest.facts.some((fact) => !requestHashes.has(fact.responseSha256))) errors.push('hay hechos cuyo response hash no está respaldado por una petición registrada');
+  if (manifest.facts.some((fact) => fact.competitionAttribution && !hasValidBlock45LegacyZeroAttribution(fact))) errors.push('hay una atribución league.id=0 que no coincide con una de las cuatro decisiones BLOCK45E verificadas');
   if (manifest.requests.some((request) => !/^[a-f0-9]{64}$/u.test(request.responseSha256) || request.attempts < 1 || request.retryCount !== request.attempts - 1)) errors.push('evidencia de peticiones inválida');
   if (manifest.playerSeasonCoverage && (typeof manifest.playerSeasonCoverage !== 'object' || Array.isArray(manifest.playerSeasonCoverage))) errors.push('playerSeasonCoverage inválido');
   return [...new Set(errors)];
 }
 
 
-function factFromStats(player: JsonRecord, statistic: JsonRecord, season: number, sourceUrl: string, page: number, responseSha256: string, eligibilityMajorLeagueId: number | null): YellowCardFact | null {
-  if (!isOfficialClubCompetition(statistic)) return null;
-  const team = object(statistic.team); const league = object(statistic.league); const games = object(statistic.games); const cards = object(statistic.cards);
-  const playerId = Number(player.id); const clubId = Number(team.id); const competitionId = Number(league.id); const yellow = numberOrNull(cards.yellow);
-  if (!Number.isInteger(playerId) || playerId < 1 || !Number.isInteger(clubId) || clubId < 1 || !Number.isInteger(competitionId) || competitionId < 1 || yellow === null) return null;
-  const name = String(player.name ?? `Player ${playerId}`).replace(/\s+/gu, ' ').trim();
-  const sourceRecord = `${season}|${playerId}|${clubId}|${competitionId}`;
-  return { id: `club-yellow-card-fact-${sha256(sourceRecord).slice(0, 32)}`, sourcePlayerId: String(playerId), playerNameOriginal: name, canonicalPlayerId: `api-football:player:${playerId}`, canonicalName: name, clubProviderId: clubId, clubName: String(team.name ?? `Club ${clubId}`), competitionProviderId: competitionId, competitionName: String(league.name ?? `Competition ${competitionId}`), competitionType: 'official_club_competition', eligibilityMajorLeagueId, seasonStart: season, appearances: numberOrNull(games.appearences), minutes: numberOrNull(games.minutes), yellowCards: yellow, sourceKey: 'api-football', sourceUrl, sourcePage: page, locator: `response.player.id=${playerId}.statistics[league=${competitionId},season=${season}].team.id=${clubId}.cards.yellow`, responseSha256, capturedAt: new Date().toISOString(), sourceType: 'primary', verificationStatus: 'confirmed', coverageStatus: 'coverage_partial' };
-}
-
 async function main(): Promise<void> {
   await mkdir(outputRoot, { recursive: true });
   const baseReport = { artifactKind: 'block45_api_football_yellow_cards', source: 'api-football', leagues, rawPayloadsStored: false, secretPrinted: false, topYellowCardsEndpointUsed: false, oldRankingUsed: false, allPagesUsePagingTotal: true, careerExpansionEndpoint: '/players?id={playerId}&season={season}', exclusions: ['national teams', 'friendlies', 'youth', 'unresolved team statistics'] };
   if (mode !== 'plan' && !baseManifestInput) { await writeJson(resolve(outputRoot, 'BLOCK45_REPORT.json'), { ...baseReport, mode, status: `${mode}_blocked_base_manifest_required`, noSnapshotsCreated: true, noDatabaseTouched: true, reason: `${mode} requiere el manifiesto del run base_run_id.` }); return; }
   if (mode !== 'load' && !apiKey) { await writeJson(resolve(outputRoot, 'BLOCK45_REPORT.json'), { ...baseReport, mode, status: 'not_run', reason: 'API_FOOTBALL_KEY ausente; no se realizaron peticiones.' }); return; }
-  const requests: RequestEvidence[] = []; const baseRequests: RequestEvidence[] = []; const facts: YellowCardFact[] = []; const discoveredByLeague = new Map<number, number[]>(); const playerIds = new Set<string>(); const basePlayerNames = new Map<string, string>(); const basePlayerSeasonRecords: BasePlayerSeasonRecord[] = []; const competitionDecisions = new Map<string, Record<string, unknown>>(); const playerSeasonCoverage: Record<string, PlayerSeasonEvidence> = {}; const recordCompetitionDecision = (statistic: JsonRecord) => { const league = object(statistic.league); const id = Number(league.id); const name = String(league.name ?? `Competition ${id}`); const key = `${id}|${name}`; if (!competitionDecisions.has(key)) competitionDecisions.set(key, { providerId: Number.isInteger(id) ? id : null, name, type: String(league.type ?? ''), country: String(league.country ?? ''), ...classifyClubCompetition(statistic) }); }; let providerErrors = 0; let stoppedForBudget = false;
+  const requests: RequestEvidence[] = []; const baseRequests: RequestEvidence[] = []; const facts: YellowCardFact[] = []; const discoveredByLeague = new Map<number, number[]>(); const playerIds = new Set<string>(); const basePlayerNames = new Map<string, string>(); const basePlayerSeasonRecords: BasePlayerSeasonRecord[] = []; const competitionDecisions = new Map<string, Record<string, unknown>>(); const playerSeasonCoverage: Record<string, PlayerSeasonEvidence> = {}; const recordCompetitionDecision = (statistic: JsonRecord) => { const league = object(statistic.league); const id = Number(league.id); const name = String(league.name ?? `Competition ${id}`); const key = `${id}|${name}`; if (!competitionDecisions.has(key)) competitionDecisions.set(key, { providerId: Number.isInteger(id) ? id : null, name, type: String(league.type ?? ''), country: String(league.country ?? ''), attributionPolicy: id === 0 ? 'exact_BLOCK45E_case_evidence_required' : Number.isInteger(id) && id > 0 ? 'provider_competition_id' : 'invalid_or_missing_provider_id', ...classifyClubCompetition(statistic) }); }; let providerErrors = 0; let stoppedForBudget = false;
 
   let selectedSeasons: number[]; let activeSeason: number; let coverage: CoverageRow[]; let sourceManifest: BaseManifest | null = null;
   if (mode !== 'plan') {
@@ -199,8 +196,61 @@ async function main(): Promise<void> {
     coverage = leagues.flatMap((league) => selectedSeasons.map((season) => ({ leagueId: league.id, league: league.name, season, status: 'unavailable' as 'complete' | 'partial' | 'unavailable' | 'no_data', pagesExpected: null as number | null, pagesRead: 0, playersReturned: 0, facts: 0, reason: 'not_queried' })));
   }
 
+  if (mode === 'continue' || mode === 'expand') {
+    const preflight = await request('/status', 'quota_preflight', 0);
+    requests.push(preflight.evidence);
+    const statusBody = object(preflight.body.response);
+    const statusRequests = object(statusBody.requests);
+    const bodyCurrent = Number(statusRequests.current);
+    const bodyLimit = Number(statusRequests.limit_day);
+    const bodyDailyRemaining = Number.isInteger(bodyCurrent) && bodyCurrent >= 0 && Number.isInteger(bodyLimit) && bodyLimit > 0 && bodyCurrent <= bodyLimit
+      ? bodyLimit - bodyCurrent
+      : null;
+    const dailyRemainingHeader = preflight.evidence.dailyRemaining;
+    const observedDailyValues = [dailyRemainingHeader, bodyDailyRemaining].filter((value): value is number => value !== null);
+    const dailyRemainingUsed = observedDailyValues.length ? Math.min(...observedDailyValues) : null;
+    const statusValid = preflight.evidence.status === 200
+      && !hasProviderErrors(preflight.body.errors)
+      && Number(preflight.body.results) === 1
+      && Object.keys(statusBody).length > 0
+      && bodyDailyRemaining !== null
+      && dailyRemainingUsed !== null;
+    if (!statusValid) {
+      providerErrors += 1;
+      stoppedForBudget = true;
+      maxRequests = requestAttemptsUsed;
+      quotaPreflight = {
+        status: 'blocked', requestSha256: preflight.evidence.responseSha256, attempts: preflight.evidence.attempts,
+        dailyRemainingHeader, dailyRemainingFromStatus: bodyDailyRemaining, dailyRemainingUsed,
+        dailyLimit: preflight.evidence.dailyLimit ?? (bodyLimit > 0 ? bodyLimit : null),
+        perMinuteRemaining: preflight.evidence.minuteRemaining, perMinuteLimit: preflight.evidence.minuteLimit,
+        effectiveAttemptBudget: requestAttemptsUsed, pendingWorkAtPreflight: null,
+        reason: preflight.evidence.status === 429 ? 'status_preflight_rate_limited' : 'status_preflight_invalid_or_quota_unavailable'
+      };
+    } else {
+      preflightDailyRemainingUsed = dailyRemainingUsed;
+      const budget = computeBlock45AttemptBudget({
+        dailyRemainingAfterPreflight: dailyRemainingUsed,
+        perMinuteLimit,
+        requestedMaxAttempts: requestedMaxRequests,
+        pendingWork: null,
+        hardCeiling: maxRequestHardCeiling
+      });
+      maxRequests = budget.effectiveAttemptBudget;
+      if (maxRequests <= requestAttemptsUsed) stoppedForBudget = true;
+      quotaPreflight = {
+        status: 'passed', requestSha256: preflight.evidence.responseSha256, attempts: preflight.evidence.attempts,
+        dailyRemainingHeader, dailyRemainingFromStatus: bodyDailyRemaining, dailyRemainingUsed,
+        dailyLimit: preflight.evidence.dailyLimit ?? bodyLimit,
+        perMinuteRemaining: preflight.evidence.minuteRemaining, perMinuteLimit: preflight.evidence.minuteLimit,
+        effectiveAttemptBudget: maxRequests, pendingWorkAtPreflight: null,
+        reason: maxRequests <= requestAttemptsUsed ? 'no_daily_quota_left_after_preflight' : null
+      };
+    }
+  }
+
   if (mode === 'plan' || mode === 'continue') {
-    const queryRows = mode === 'plan' ? coverage : coverage.filter((row) => row.status !== 'complete' && row.status !== 'no_data');
+    const queryRows = mode === 'plan' ? coverage : quotaPreflight?.status === 'passed' && requestAttemptsUsed < maxRequests ? coverage.filter((row) => row.status !== 'complete' && row.status !== 'no_data') : [];
     queryCoverage: for (const rowCoverage of queryRows) {
       if (stoppedForRateLimit) break queryCoverage;
       const league = leagues.find((candidateLeague) => candidateLeague.id === rowCoverage.leagueId)!;
@@ -247,15 +297,28 @@ async function main(): Promise<void> {
   const terminalExpansionStatuses = new Set<string>(['player_did_not_participate', 'data_available', 'provider_returned_no_eligible_club_stats', 'pending_legacy_competition']);
   const legacyCompetitionPendingPairs = expansionPairs.filter(({ key }) => playerSeasonCoverage[key]?.status === 'pending_legacy_competition');
   const pendingExpansionPairs = expansionPairs.filter(({ key }) => !terminalExpansionStatuses.has(playerSeasonCoverage[key]?.status ?? ''));
+  if (mode === 'expand' && quotaPreflight?.status === 'passed') {
+    quotaPreflight.pendingWorkAtPreflight = pendingExpansionPairs.length;
+    const budget = computeBlock45AttemptBudget({
+      dailyRemainingAfterPreflight: preflightDailyRemainingUsed ?? 0,
+      perMinuteLimit,
+      requestedMaxAttempts: requestedMaxRequests,
+      pendingWork: pendingExpansionPairs.length,
+      hardCeiling: maxRequestHardCeiling
+    });
+    maxRequests = budget.effectiveAttemptBudget;
+    quotaPreflight.effectiveAttemptBudget = maxRequests;
+  }
   let expansionSkippedReason: string | null = null;
   if (mode === 'plan') expansionSkippedReason = 'plan_only_base_phase';
   else if (mode === 'continue') expansionSkippedReason = 'base_continuation_does_not_expand_players';
+  else if (mode === 'expand' && quotaPreflight?.status !== 'passed') expansionSkippedReason = 'quota_preflight_blocked';
   else if (mode === 'expand' && !completeBaseCoverage) expansionSkippedReason = 'base_coverage_incomplete';
   else if (mode === 'load' && !completeBaseCoverage) expansionSkippedReason = 'base_coverage_incomplete';
   else if (mode === 'load' && legacyCompetitionPendingPairs.length > 0) expansionSkippedReason = 'legacy_competition_classification_pending';
   else if (mode === 'load' && pendingExpansionPairs.length > 0) expansionSkippedReason = 'expansion_batches_incomplete';
   else if (mode === 'load') expansionSkippedReason = 'load_from_complete_expansion_manifest';
-  if (mode === 'expand' && completeBaseCoverage) {
+  if (mode === 'expand' && completeBaseCoverage && quotaPreflight?.status === 'passed' && requestAttemptsUsed < maxRequests) {
     expansionLoop: for (const { playerId, season, key: coverageKey } of pendingExpansionPairs) {
       if (stoppedForRateLimit) break expansionLoop;
       if (requestAttemptsUsed >= maxRequests) { stoppedForBudget = true; break; }
@@ -273,7 +336,8 @@ async function main(): Promise<void> {
         const hasPositiveLeagueId = Number.isInteger(leagueId) && leagueId > 0;
         const leagueIdLabel = Number.isInteger(leagueId) && leagueId >= 0 ? String(leagueId) : 'missing';
         returnedCompetitions.add(`${leagueIdLabel}:${leagueName}`);
-        if (!hasPositiveLeagueId && classifyClubCompetition(statistic).decision === 'accepted') unclassifiedLegacyCompetitions.add(`${leagueIdLabel}|${leagueName}|${String(league.country ?? '')}|${String(team.id ?? '')}|${String(team.name ?? '')}|${season}`);
+        const legacyAttribution = resolveBlock45LegacyZeroRow({ playerId: Number(object(row.player).id), season, eligibilityMajorLeagueId: null, statistic });
+        if (!hasPositiveLeagueId && classifyClubCompetition(statistic).decision === 'accepted' && !legacyAttribution) unclassifiedLegacyCompetitions.add(`${leagueIdLabel}|${leagueName}|${String(league.country ?? '')}|${String(team.id ?? '')}|${String(team.name ?? '')}|${season}`);
         const majorEligibility = FIVE_MAJOR_LEAGUE_IDS.includes(leagueId as (typeof FIVE_MAJOR_LEAGUE_IDS)[number]) ? leagueId : null;
         const fact = factFromStats(object(row.player), statistic, season, `${baseUrl}${endpoint}`, 1, result.evidence.responseSha256, majorEligibility);
         if (fact) { facts.push(fact); expansionFactCount += 1; const values = playerCompetitionMap.get(fact.sourcePlayerId) ?? new Set<string>(); values.add(`${fact.competitionProviderId}:${fact.competitionName}`); playerCompetitionMap.set(fact.sourcePlayerId, values); }
@@ -300,7 +364,7 @@ async function main(): Promise<void> {
   await writeJson(resolve(outputRoot, 'BLOCK45_PLAYER_SEASON_COVERAGE.json'), playerSeasonCoverage);
   const reportRequests = manifestRequests;
   const baseRequestAttempts = baseRequests.reduce((sum, request) => sum + request.attempts, 0);
-  const expansionRequestAttempts = mode === 'expand' ? requestAttemptsUsed : 0;
+  const expansionRequestAttempts = mode === 'expand' ? requests.filter((request) => request.kind === 'player_season').reduce((sum, request) => sum + request.attempts, 0) : 0;
   const requestAttempts = mode === 'plan' ? requestAttemptsUsed : baseRequestAttempts + requestAttemptsUsed;
   const retryAttempts = reportRequests.reduce((sum, request) => sum + request.retryCount, 0);
   await writeJson(resolve(outputRoot, 'BLOCK45_REQUESTS.json'), { requests: reportRequests, summary: { recordedFinalResponses: reportRequests.length, actualAttempts: requestAttempts, batchAttempts: requestAttemptsUsed, historicalAttempts: baseRequestAttempts, expansionAttempts: expansionRequestAttempts, retryAttempts, statusCounts: Object.fromEntries([...new Set(reportRequests.map((request) => request.status))].map((status) => [status, reportRequests.filter((request) => request.status === status).length])) } });
@@ -318,12 +382,12 @@ async function main(): Promise<void> {
   const quotaDailyInitial = dailyQuotaValues[0] ?? null; const quotaDailyFinal = dailyQuotaValues.at(-1) ?? null;
   const quotaPerMinuteInitial = minuteQuotaValues[0] ?? null; const quotaPerMinuteFinal = minuteQuotaValues.at(-1) ?? null;
   const successfulResponses = reportRequests.filter((request) => request.status >= 200 && request.status < 300).length; const rateLimitedResponses = reportRequests.filter((request) => request.status === 429).length;
-  const reportStatus = mode === 'plan' ? (stoppedForBudget ? 'plan_budget_insufficient' : providerErrors > 0 ? 'plan_partial' : 'plan_ready') : mode === 'continue' ? (completeBaseCoverage ? 'base_complete_expansion_estimate_ready' : stoppedForRateLimit ? 'continue_rate_limited' : stoppedForBudget || providerErrors > 0 ? 'continue_partial' : 'continue_ready') : mode === 'expand' ? (expansionComplete ? 'expansion_complete_ready_for_load' : stoppedForRateLimit ? 'expansion_batch_rate_limited' : 'expansion_batch_partial') : legacyCompetitionPendingPairs.length > 0 ? 'load_blocked_legacy_competition_classification' : expansionComplete ? 'load_candidate_ready' : 'load_blocked_expansion_incomplete';
+  const reportStatus = mode === 'plan' ? (stoppedForBudget ? 'plan_budget_insufficient' : providerErrors > 0 ? 'plan_partial' : 'plan_ready') : mode === 'continue' ? (quotaPreflight?.status === 'blocked' ? 'continue_preflight_blocked' : completeBaseCoverage ? 'base_complete_expansion_estimate_ready' : stoppedForRateLimit ? 'continue_rate_limited' : stoppedForBudget || providerErrors > 0 ? 'continue_partial' : 'continue_ready') : mode === 'expand' ? (quotaPreflight?.status === 'blocked' ? 'expansion_preflight_blocked' : expansionComplete ? 'expansion_complete_ready_for_load' : stoppedForRateLimit ? 'expansion_batch_rate_limited' : 'expansion_batch_partial') : legacyCompetitionPendingPairs.length > 0 ? 'load_blocked_legacy_competition_classification' : expansionComplete ? 'load_candidate_ready' : 'load_blocked_expansion_incomplete';
   const reportBatchRequests = mode === 'plan' ? baseRequests : requests;
   const batchDailyValues = reportBatchRequests.map((request) => request.dailyRemaining).filter((value): value is number => value !== null);
   const batchMinuteValues = reportBatchRequests.map((request) => request.minuteRemaining).filter((value): value is number => value !== null);
   const reportRanking = candidate ? { careerTop100: candidate.snapshots.career.ranking.slice(0, 100), activeSeasonTop100: candidate.snapshots.active_season.ranking.slice(0, 100), activePlayersCareerTop100: candidate.snapshots.active_players_career.ranking.slice(0, 100) } : null;
-  await writeJson(resolve(outputRoot, 'BLOCK45_REPORT.json'), { ...baseReport, mode, status: reportStatus, planOnly, noSnapshotsCreated: !candidate, noDatabaseTouched: true, discoveredSeasonsByLeague: Object.fromEntries([...discoveredByLeague.entries()].map(([id, years]) => [id, years])), selectedSeasons: requestedSeasons, activeSeason, baseCoverageComplete: completeBaseCoverage, baseManifestFile: 'BLOCK45_BASE_MANIFEST.json', baseManifestReusable: completeBaseCoverage && Boolean(commitSha && workflowName), baseManifestHashes: { coverageHash: baseManifest.coverageHash, factsHash: baseManifest.factsHash, manifestHash: baseManifest.manifestHash }, requestsEstimated: totalEstimated, requestsEstimatedLowerBound: lowerBoundEstimate, requestsEstimatedBreakdown: { leagueCoverage: discoveredByLeague.size, leaguePages: pagesEstimated, playerSeasonExpansion: expansionEstimate, expansionEligiblePlayers: eligiblePlayerIds.size, expansionCompletedPairs: completedExpansionPairs, expansionTotalPairs: expansionPairs.length, expansionPendingPairs: expansionPairs.length - completedExpansionPairs, expansionStatus: !completeBaseCoverage ? 'blocked_until_base_coverage_complete' : expansionComplete ? 'complete' : 'pending_batches' }, requestsPerformed: reportRequests.length, batchRequestsPerformed: reportBatchRequests.length, requestAttempts, batchRequestAttempts: requestAttemptsUsed, expansionAttempts: expansionRequestAttempts, retryAttempts, quotaDaily: { initial: batchDailyValues[0] ?? null, final: batchDailyValues.at(-1) ?? null, limit: reportBatchRequests.find((request) => request.dailyLimit !== null)?.dailyLimit ?? null }, quotaPerMinute: { initial: batchMinuteValues[0] ?? null, final: batchMinuteValues.at(-1) ?? null, limit: reportBatchRequests.find((request) => request.minuteLimit !== null)?.minuteLimit ?? null }, quotaReconciliation: { cumulativeFinalResponses: reportRequests.length, cumulativeAttempts: requestAttempts, batchFinalResponses: reportBatchRequests.length, batchAttempts: requestAttemptsUsed, successfulResponses: reportRequests.filter((request) => request.status >= 200 && request.status < 300).length, rateLimitedResponses: reportRequests.filter((request) => request.status === 429).length, retryAttempts, dailyBatchHeaderValuesObserved: batchDailyValues.length, perMinuteBatchHeaderValuesObserved: batchMinuteValues.length, dailyBatchHeaderDecrease: batchDailyValues.length > 1 ? batchDailyValues[0]! - batchDailyValues.at(-1)! : null, dailyBatchUnreconciledDifference: batchDailyValues.length > 1 ? requestAttemptsUsed - (batchDailyValues[0]! - batchDailyValues.at(-1)!) : null, perMinuteWindowNote: 'El contador por minuto se renueva; sus valores inicial y final no son consumo acumulado. La cuota diaria se registra por separado; la diferencia con intentos queda explícita.' }, pages: reportRequests.filter((request) => request.kind === 'league_page' && (request.responseComplete ?? request.status === 200)).length, batchPagesRead: reportBatchRequests.filter((request) => request.kind === 'league_page' && (request.responseComplete ?? request.status === 200)).length, pageResponses: reportRequests.filter((request) => request.kind === 'league_page').length, discoveredPlayers: playerIds.size, eligiblePlayers: eligiblePlayerIds.size, factsObserved: uniqueFacts.length, expansionComplete, providerTerminalExpansionPairs: completedExpansionPairs, legacyCompetitionPendingPairCount: finalLegacyCompetitionPendingPairs.length, duplicatesRemoved: facts.length - new Set(facts.map((fact) => fact.id)).size, providerErrors, stoppedForBudget, stoppedForRateLimit, expansionSkippedReason, coverage, competitionsNotQueried: notQueried, competitionDecisions: [...competitionDecisions.values()], playerCompetitionCoverageFile: 'BLOCK45_PLAYER_COVERAGE.json', playerSeasonCoverageFile: 'BLOCK45_PLAYER_SEASON_COVERAGE.json', controlCasesFile: 'BLOCK45_CONTROL_CASES.json', controls: candidate?.controls ?? null, controlValidationStatus: candidate ? 'provisional_pending_real_evidence_review' : 'provisional', rankingCandidate: reportRanking, hashes: { facts: sha256(stableYellowJson(uniqueFacts.map((fact) => fact.id).sort())), requests: sha256(stableYellowJson(reportRequests.map((request) => request.responseSha256))) }, rawPayloadsStored: false, secretPrinted: false, snapshotsCreated: candidate ? 3 : 0, officialSnapshotCreated: false });
+  await writeJson(resolve(outputRoot, 'BLOCK45_REPORT.json'), { ...baseReport, mode, status: reportStatus, planOnly, noSnapshotsCreated: !candidate, noDatabaseTouched: true, discoveredSeasonsByLeague: Object.fromEntries([...discoveredByLeague.entries()].map(([id, years]) => [id, years])), selectedSeasons: requestedSeasons, activeSeason, baseCoverageComplete: completeBaseCoverage, baseManifestFile: 'BLOCK45_BASE_MANIFEST.json', baseManifestReusable: completeBaseCoverage && Boolean(commitSha && workflowName), baseManifestHashes: { coverageHash: baseManifest.coverageHash, factsHash: baseManifest.factsHash, manifestHash: baseManifest.manifestHash }, requestsEstimated: totalEstimated, requestsEstimatedLowerBound: lowerBoundEstimate, requestsEstimatedBreakdown: { leagueCoverage: discoveredByLeague.size, leaguePages: pagesEstimated, playerSeasonExpansion: expansionEstimate, expansionEligiblePlayers: eligiblePlayerIds.size, expansionCompletedPairs: completedExpansionPairs, expansionTotalPairs: expansionPairs.length, expansionPendingPairs: expansionPairs.length - completedExpansionPairs, expansionStatus: !completeBaseCoverage ? 'blocked_until_base_coverage_complete' : expansionComplete ? 'complete' : 'pending_batches' }, requestedAttemptBudget: requestedMaxRequests || 'auto', effectiveAttemptBudget: maxRequests, quotaPreflight, requestsPerformed: reportRequests.length, batchRequestsPerformed: reportBatchRequests.length, requestAttempts, batchRequestAttempts: requestAttemptsUsed, expansionAttempts: expansionRequestAttempts, retryAttempts, quotaDaily: { initial: batchDailyValues[0] ?? null, final: batchDailyValues.at(-1) ?? null, limit: reportBatchRequests.find((request) => request.dailyLimit !== null)?.dailyLimit ?? null }, quotaPerMinute: { initial: batchMinuteValues[0] ?? null, final: batchMinuteValues.at(-1) ?? null, limit: reportBatchRequests.find((request) => request.minuteLimit !== null)?.minuteLimit ?? null }, quotaReconciliation: { cumulativeFinalResponses: reportRequests.length, cumulativeAttempts: requestAttempts, batchFinalResponses: reportBatchRequests.length, batchAttempts: requestAttemptsUsed, successfulResponses: reportRequests.filter((request) => request.status >= 200 && request.status < 300).length, rateLimitedResponses: reportRequests.filter((request) => request.status === 429).length, retryAttempts, dailyBatchHeaderValuesObserved: batchDailyValues.length, perMinuteBatchHeaderValuesObserved: batchMinuteValues.length, dailyBatchHeaderDecrease: batchDailyValues.length > 1 ? batchDailyValues[0]! - batchDailyValues.at(-1)! : null, dailyBatchExpectedDecreaseAfterFirstResponse: Math.max(0, requestAttemptsUsed - 1), dailyBatchUnreconciledDifference: batchDailyValues.length > 1 ? Math.max(0, requestAttemptsUsed - 1 - (batchDailyValues[0]! - batchDailyValues.at(-1)!)) : null, dailyHeaderTimingNote: 'La preflight es la primera petición de la tanda; su cabecera diaria ya refleja el consumo de esa petición. Por ello, entre la primera y última cabecera de una tanda sin actividad externa se espera un descenso de intentos menos uno.', perMinuteWindowNote: 'El contador por minuto se renueva; sus valores inicial y final no son consumo acumulado.' }, pages: reportRequests.filter((request) => request.kind === 'league_page' && (request.responseComplete ?? request.status === 200)).length, batchPagesRead: reportBatchRequests.filter((request) => request.kind === 'league_page' && (request.responseComplete ?? request.status === 200)).length, pageResponses: reportRequests.filter((request) => request.kind === 'league_page').length, discoveredPlayers: playerIds.size, eligiblePlayers: eligiblePlayerIds.size, factsObserved: uniqueFacts.length, expansionComplete, providerTerminalExpansionPairs: completedExpansionPairs, legacyCompetitionPendingPairCount: finalLegacyCompetitionPendingPairs.length, legacyZeroAttributionsUsed: uniqueFacts.flatMap((fact) => fact.competitionAttribution ? [{ factId: fact.id, sourcePlayerId: fact.sourcePlayerId, season: fact.seasonStart, teamId: fact.clubProviderId, sourceCompetitionId: fact.competitionAttribution.sourceCompetitionId, attributedCompetitionId: fact.competitionAttribution.attributedCompetitionId, caseId: fact.competitionAttribution.caseId, independentSource: fact.competitionAttribution.independentSource, auditArtifact: fact.competitionAttribution.auditArtifact, auditResponseSha256: fact.competitionAttribution.auditResponseSha256, currentSourceResponseSha256: fact.responseSha256 }] : []), duplicatesRemoved: facts.length - new Set(facts.map((fact) => fact.id)).size, providerErrors, stoppedForBudget, stoppedForRateLimit, expansionSkippedReason, coverage, competitionsNotQueried: notQueried, competitionDecisions: [...competitionDecisions.values()], playerCompetitionCoverageFile: 'BLOCK45_PLAYER_COVERAGE.json', playerSeasonCoverageFile: 'BLOCK45_PLAYER_SEASON_COVERAGE.json', controlCasesFile: 'BLOCK45_CONTROL_CASES.json', controls: candidate?.controls ?? null, controlValidationStatus: candidate ? 'provisional_pending_real_evidence_review' : 'provisional', rankingCandidate: reportRanking, hashes: { facts: sha256(stableYellowJson(uniqueFacts.map((fact) => fact.id).sort())), requests: sha256(stableYellowJson(reportRequests.map((request) => request.responseSha256))) }, rawPayloadsStored: false, secretPrinted: false, snapshotsCreated: candidate ? 3 : 0, officialSnapshotCreated: false });
 }
 
 await main();

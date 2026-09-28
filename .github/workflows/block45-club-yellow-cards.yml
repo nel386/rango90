@@ -18,9 +18,9 @@ on:
         required: false
         default: ''
       max_requests:
-        description: 'Presupuesto de intentos de esta tanda plan/continue/expand; mínimo 800.'
+        description: 'Techo total de intentos, incluido /status; 0 calcula la tanda tras la preflight de cuota.'
         required: true
-        default: '800'
+        default: '0'
       base_run_id:
         description: 'continue/expand/load: runId cuyo manifiesto base se reanudará o consumirá'
         required: false
@@ -68,8 +68,8 @@ jobs:
       - name: Validate phase budget and base manifest input
         run: |
           set -euo pipefail
-          if [ "$BLOCK45_MODE" != "load" ] && [ "$BLOCK45_MAX_REQUESTS" -lt 800 ]; then
-            echo "Tanda rechazada: $BLOCK45_MAX_REQUESTS es inferior al mínimo de 800 intentos." >&2
+          if ! [[ "$BLOCK45_MAX_REQUESTS" =~ ^[0-9]+$ ]] || [ "$BLOCK45_MAX_REQUESTS" -gt 10000 ]; then
+            echo "Tanda rechazada: max_requests debe ser 0 (auto) o un entero entre 1 y 10000." >&2
             exit 1
           fi
           if [ "$BLOCK45_MODE" != "plan" ] && [ -z "${{ inputs.base_run_id }}" ]; then
@@ -140,6 +140,7 @@ jobs:
         working-directory: backend
         run: |
           npx tsx src/tests/club-yellow-cards-career-ranking-engine.test.ts
+          npm run test:block45:legacy-zero
           npm run build
       - name: Run frontend and repository checks
         run: |

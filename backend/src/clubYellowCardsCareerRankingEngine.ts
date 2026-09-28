@@ -25,6 +25,16 @@ export type YellowCardFact = {
   sourceType: 'primary' | 'contrast';
   verificationStatus: 'confirmed' | 'unresolved' | 'conflict';
   coverageStatus: 'coverage_complete' | 'coverage_partial';
+  competitionAttribution?: {
+    method: 'block45e_exact_case_evidence';
+    caseId: string;
+    sourceCompetitionId: 0;
+    attributedCompetitionId: number;
+    independentSource: string;
+    auditArtifact: string;
+    auditReportSha256: string;
+    auditResponseSha256: string;
+  };
 };
 
 export type YellowRankingType = 'career' | 'active_season' | 'active_players_career';
@@ -108,7 +118,7 @@ export function deduplicateYellowFacts(facts: YellowCardFact[]): { facts: Yellow
   return { facts: [...byKey.values()].sort((left, right) => left.id.localeCompare(right.id)), duplicates, conflicts };
 }
 
-function eligiblePlayerIds(facts: YellowCardFact[], requestedSeasons: number[]): Set<string> {
+export function eligibleYellowCardPlayerIds(facts: YellowCardFact[], requestedSeasons: number[]): Set<string> {
   const deduped = deduplicateYellowFacts(facts).facts;
   const byPlayerLeague = new Map<string, Set<number>>();
   for (const fact of deduped) {
@@ -122,7 +132,7 @@ function eligiblePlayerIds(facts: YellowCardFact[], requestedSeasons: number[]):
 }
 
 function buildEntries(facts: YellowCardFact[], rankingType: YellowRankingType, activeSeason: number, requestedSeasons: number[]): YellowRankingEntry[] {
-  const careerEligiblePlayerIds = eligiblePlayerIds(facts, requestedSeasons);
+  const careerEligiblePlayerIds = eligibleYellowCardPlayerIds(facts, requestedSeasons);
   const eligible = deduplicateYellowFacts(facts).facts.filter((fact) => requestedSeasons.includes(fact.seasonStart) && (rankingType === 'active_season' || careerEligiblePlayerIds.has(fact.canonicalPlayerId)));
   const grouped = new Map<string, { playerName: string; value: number; facts: YellowCardFact[] }>();
   for (const fact of eligible) {

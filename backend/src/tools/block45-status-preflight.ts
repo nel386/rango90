@@ -36,7 +36,8 @@ export function validateBlock45StatusPreflight(input: {
   let reason: Block45StatusPreflight['reason'] = 'passed';
   if (input.httpStatus !== 200) reason = 'http_status_not_200';
   else if (hasProviderErrors(input.errors)) reason = 'provider_errors';
-  else if (Number.isNaN(resultsValue) || (resultsValue !== null && resultsValue !== 1)) reason = 'malformed_results';
+  // The observed /status envelope uses results: 0 while still returning its account/quota object.
+  else if (Number.isNaN(resultsValue) || (resultsValue !== null && resultsValue > 1)) reason = 'malformed_results';
   else if (Object.keys(statusResponse).length === 0) reason = 'status_response_missing';
   else if (!quotaValid) reason = 'daily_quota_missing';
   return {

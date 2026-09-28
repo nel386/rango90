@@ -6,7 +6,8 @@ const result = (overrides: Partial<Parameters<typeof validateBlock45StatusPrefli
 
 assert.deepEqual(result(), { valid: true, reason: 'passed', resultsValue: null, dailyRemaining: 7154, dailyLimit: 7500 });
 assert.equal(result({ results: 1 }).valid, true, 'a one-item status envelope is valid');
-assert.equal(result({ results: 0 }).reason, 'malformed_results', 'zero results must not mask the status object');
+assert.equal(result({ results: 0 }).valid, true, 'the observed /status envelope may report zero list results alongside its status object');
+assert.equal(result({ results: 2 }).reason, 'malformed_results', 'unexpected result cardinality is rejected');
 assert.equal(result({ results: '1' }).reason, 'malformed_results', 'non-numeric result values are rejected');
 assert.equal(result({ errors: { unauthorized: true } }).reason, 'provider_errors');
 assert.equal(result({ httpStatus: 429 }).reason, 'http_status_not_200');

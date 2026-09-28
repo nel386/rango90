@@ -5,6 +5,7 @@ import { buildYellowCardSnapshots, CONTROL_NAMES, FIVE_MAJOR_LEAGUE_IDS, normali
 import { classifyClubCompetition } from './block45-provider-scope.js';
 import { hasValidBlock45LegacyZeroAttribution, resolveBlock45LegacyZeroRow } from './block45-legacy-zero-evidence.js';
 import { computeBlock45AttemptBudget } from './block45-quota-budget.js';
+import { validateBlock45StatusPreflight } from './block45-status-preflight.js';
 import { factFromStats } from './block45-yellow-card-fact.js';
 
 type JsonRecord = Record<string, unknown>;
@@ -45,7 +46,7 @@ let perMinuteLimit: number | null = null;
 let lastRequestStartedAt = 0;
 let stoppedForRateLimit = false;
 let preflightDailyRemainingUsed: number | null = null;
-let quotaPreflight: { status: 'passed' | 'blocked'; requestSha256: string; attempts: number; dailyRemainingHeader: number | null; dailyRemainingFromStatus: number | null; dailyRemainingUsed: number | null; dailyLimit: number | null; perMinuteRemaining: number | null; perMinuteLimit: number | null; effectiveAttemptBudget: number; pendingWorkAtPreflight: number | null; reason: string | null } | null = null;
+let quotaPreflight: { status: 'passed' | 'blocked'; requestSha256: string; attempts: number; resultsValue: number | null; dailyRemainingHeader: number | null; dailyRemainingFromStatus: number | null; dailyRemainingUsed: number | null; dailyLimit: number | null; perMinuteRemaining: number | null; perMinuteLimit: number | null; effectiveAttemptBudget: number; pendingWorkAtPreflight: number | null; reason: string | null } | null = null;
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
 const hashJson = (value: unknown) => sha256(stableYellowJson(value));
 const object = (value: unknown): JsonRecord => value && typeof value === 'object' && !Array.isArray(value) ? value as JsonRecord : {};
@@ -199,33 +200,30 @@ async function main(): Promise<void> {
   if (mode === 'continue' || mode === 'expand') {
     const preflight = await request('/status', 'quota_preflight', 0);
     requests.push(preflight.evidence);
-    const statusBody = object(preflight.body.response);
-    const statusRequests = object(statusBody.requests);
-    const bodyCurrent = Number(statusRequests.current);
-    const bodyLimit = Number(statusRequests.limit_day);
-    const bodyDailyRemaining = Number.isInteger(bodyCurrent) && bodyCurrent >= 0 && Number.isInteger(bodyLimit) && bodyLimit > 0 && bodyCurrent <= bodyLimit
-      ? bodyLimit - bodyCurrent
-      : null;
+    const status = validateBlock45StatusPreflight({
+      httpStatus: preflight.evidence.status,
+      errors: preflight.body.errors,
+      results: preflight.body.results,
+      response: preflight.body.response
+    });
+    const bodyDailyRemaining = status.dailyRemaining;
+    const bodyLimit = status.dailyLimit;
     const dailyRemainingHeader = preflight.evidence.dailyRemaining;
     const observedDailyValues = [dailyRemainingHeader, bodyDailyRemaining].filter((value): value is number => value !== null);
     const dailyRemainingUsed = observedDailyValues.length ? Math.min(...observedDailyValues) : null;
-    const statusValid = preflight.evidence.status === 200
-      && !hasProviderErrors(preflight.body.errors)
-      && Number(preflight.body.results) === 1
-      && Object.keys(statusBody).length > 0
-      && bodyDailyRemaining !== null
-      && dailyRemainingUsed !== null;
+    const statusValid = status.valid && dailyRemainingUsed !== null;
     if (!statusValid) {
       providerErrors += 1;
       stoppedForBudget = true;
       maxRequests = requestAttemptsUsed;
       quotaPreflight = {
         status: 'blocked', requestSha256: preflight.evidence.responseSha256, attempts: preflight.evidence.attempts,
+        resultsValue: status.resultsValue,
         dailyRemainingHeader, dailyRemainingFromStatus: bodyDailyRemaining, dailyRemainingUsed,
-        dailyLimit: preflight.evidence.dailyLimit ?? (bodyLimit > 0 ? bodyLimit : null),
+        dailyLimit: preflight.evidence.dailyLimit ?? (bodyLimit !== null && bodyLimit > 0 ? bodyLimit : null),
         perMinuteRemaining: preflight.evidence.minuteRemaining, perMinuteLimit: preflight.evidence.minuteLimit,
         effectiveAttemptBudget: requestAttemptsUsed, pendingWorkAtPreflight: null,
-        reason: preflight.evidence.status === 429 ? 'status_preflight_rate_limited' : 'status_preflight_invalid_or_quota_unavailable'
+        reason: preflight.evidence.status === 429 ? 'status_preflight_rate_limited' : `status_preflight_${status.reason}`
       };
     } else {
       preflightDailyRemainingUsed = dailyRemainingUsed;
@@ -240,6 +238,7 @@ async function main(): Promise<void> {
       if (maxRequests <= requestAttemptsUsed) stoppedForBudget = true;
       quotaPreflight = {
         status: 'passed', requestSha256: preflight.evidence.responseSha256, attempts: preflight.evidence.attempts,
+        resultsValue: status.resultsValue,
         dailyRemainingHeader, dailyRemainingFromStatus: bodyDailyRemaining, dailyRemainingUsed,
         dailyLimit: preflight.evidence.dailyLimit ?? bodyLimit,
         perMinuteRemaining: preflight.evidence.minuteRemaining, perMinuteLimit: preflight.evidence.minuteLimit,

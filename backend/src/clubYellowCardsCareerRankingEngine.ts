@@ -15,7 +15,11 @@ export type YellowCardFact = {
   seasonStart: number;
   appearances: number | null;
   minutes: number | null;
-  yellowCards: number;
+  yellowCards: number | null;
+  /** API-Football cards.red, preserved separately from second-yellow dismissals. */
+  redCards?: number | null;
+  /** API-Football cards.yellowred, preserved without folding it into cards.red. */
+  yellowRedCards?: number | null;
   sourceKey: string;
   sourceUrl: string;
   sourcePage: number;
@@ -110,8 +114,8 @@ export function deduplicateYellowFacts(facts: YellowCardFact[]): { facts: Yellow
     const key = `${fact.sourceKey}|${fact.sourcePlayerId}|${fact.competitionProviderId}|${fact.clubProviderId}|${fact.seasonStart}`;
     const previous = byKey.get(key);
     if (!previous) { byKey.set(key, fact); continue; }
-    const left = stableYellowJson([previous.yellowCards, previous.appearances, previous.minutes, previous.competitionName, previous.clubName]);
-    const right = stableYellowJson([fact.yellowCards, fact.appearances, fact.minutes, fact.competitionName, fact.clubName]);
+    const left = stableYellowJson([previous.yellowCards, previous.redCards ?? null, previous.yellowRedCards ?? null, previous.appearances, previous.minutes, previous.competitionName, previous.clubName]);
+    const right = stableYellowJson([fact.yellowCards, fact.redCards ?? null, fact.yellowRedCards ?? null, fact.appearances, fact.minutes, fact.competitionName, fact.clubName]);
     if (left !== right) conflicts.push(key);
     else duplicates += 1;
   }
@@ -122,7 +126,7 @@ export function eligibleYellowCardPlayerIds(facts: YellowCardFact[], requestedSe
   const deduped = deduplicateYellowFacts(facts).facts;
   const byPlayerLeague = new Map<string, Set<number>>();
   for (const fact of deduped) {
-    if (fact.verificationStatus !== 'confirmed' || fact.yellowCards < 0) continue;
+    if (fact.verificationStatus !== 'confirmed' || fact.yellowCards === null || fact.yellowCards < 0) continue;
     if (fact.eligibilityMajorLeagueId === null || !requestedSeasons.includes(fact.seasonStart)) continue;
     const key = `${fact.canonicalPlayerId}|${fact.eligibilityMajorLeagueId}`;
     const seasons = byPlayerLeague.get(key) ?? new Set<number>();
@@ -136,6 +140,8 @@ function buildEntries(facts: YellowCardFact[], rankingType: YellowRankingType, a
   const eligible = deduplicateYellowFacts(facts).facts.filter((fact) => requestedSeasons.includes(fact.seasonStart) && (rankingType === 'active_season' || careerEligiblePlayerIds.has(fact.canonicalPlayerId)));
   const grouped = new Map<string, { playerName: string; value: number; facts: YellowCardFact[] }>();
   for (const fact of eligible) {
+    // This engine ranks yellow cards. A missing yellow value is unknown, not zero.
+    if (fact.yellowCards === null) continue;
     if (rankingType === 'active_season' && fact.seasonStart !== activeSeason) continue;
     const current = grouped.get(fact.canonicalPlayerId);
     if (current) { current.value += fact.yellowCards; current.facts.push(fact); }

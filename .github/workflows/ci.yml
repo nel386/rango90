@@ -65,6 +65,18 @@ jobs:
         working-directory: backend
         run: npm run build && npm test && npm run test:rate-limit
 
+      - name: Create isolated BLOQUE 45 database
+        run: |
+          postgres_container="$(docker ps --filter ancestor=postgres:16 --format '{{.ID}}' | head -n 1)"
+          test -n "$postgres_container"
+          docker exec "$postgres_container" createdb -U rango90 rango90_block45_ci
+
+      - name: Verify BLOQUE 45 persistence and migration
+        working-directory: backend
+        env:
+          RANGO90_ISOLATED_DATABASE_URL: postgres://rango90:rango90-ci@localhost:5432/rango90_block45_ci
+        run: npm run test:block45:persistence
+
       - name: Prepare empty integration schema
         working-directory: backend
         run: |

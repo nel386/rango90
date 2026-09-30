@@ -1,0 +1,96 @@
+{
+  "artifactKind": "block45f_career_ranking_decision",
+  "decision": "no_go_global_career_ranking",
+  "sourceCheckpoint": "36574961077",
+  "networkRequests": 0,
+  "loadExecuted": false,
+  "importsExecuted": false,
+  "postgresqlTouched": false,
+  "snapshotsCreated": 0,
+  "checkpointOrManifestValidationChanged": false,
+  "base": {
+    "coverageCombinations": 85,
+    "coverageComplete": true,
+    "leagueIds": [
+      39,
+      140,
+      135,
+      78,
+      61
+    ],
+    "seasons": [
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025,
+      2026
+    ]
+  },
+  "expansion2010To2026": {
+    "eligiblePlayers": 11034,
+    "allSeasonsPerPlayer": 17,
+    "totalCartesianPairs": 187578,
+    "completedTerminalPairs": 15353,
+    "pendingCartesianPairs": 172225,
+    "baseActivityPairs": 52476,
+    "alreadyTerminalAmongBaseActivityPairs": 5410,
+    "pendingBaseActivityPairs": 47066,
+    "savedQueriesUnderBaseActivityOnlyScenario": 125159,
+    "activityOnlyScenarioIsFullCareerProof": false
+  },
+  "pre2010": {
+    "eligiblePlayersForDiscovery": 11034,
+    "teamsHistoryDiscoveryCallsMinimum": 11034,
+    "candidatePairsKnown": 22,
+    "candidatePairsErrorsUnchecked": 17,
+    "knownUnverifiedPairRechecks": 17,
+    "exactYellowFactsAdmissible": 4,
+    "exactRedFactsAdmissible": 0,
+    "historicalStatsPairCountH": null,
+    "estimatedTotalFormula": "11034 + H player-season statistics requests; H is unknown until complete career histories are available",
+    "knownFloorIncludingErrorsRechecks": 11051,
+    "floorIsCompleteHistoricalCost": false,
+    "globalLeagueIdZeroMapping": false,
+    "coverageStatus": "partial"
+  },
+  "cardsExtraction": {
+    "previousFactsOnlyRetainYellow": true,
+    "newFields": {
+      "yellowCards": "cards.yellow",
+      "redCards": "cards.red",
+      "yellowRedCards": "cards.yellowred"
+    },
+    "missingValuesStayNull": true,
+    "redAndYellowRedCombined": false,
+    "previousResponsesRequeried": false,
+    "databaseMigration": "095_club_yellow_card_types.sql",
+    "databaseMigrationTestedOnEphemeralPostgresql": true,
+    "competitionAttributionStoredInEvidence": true,
+    "competitionAttributionRecoveredOnRead": true,
+    "competitionAttributionRoundTripTested": true,
+    "productionDatabaseTouched": false
+  },
+  "tests": {
+    "cardTypes": "passed",
+    "legacyZero": "passed",
+    "yellowRankingEngine": "passed",
+    "providerCompetitionFilter": "passed",
+    "postgresqlMigrationAndRoundTrip": "passed_on_ephemeral_database",
+    "backendBuild": "passed",
+    "gitDiffCheck": "passed"
+  },
+  "reportHashAlgorithm": "SHA-256, canonical JSON with sorted object keys, excluding reportHash",
+  "reportHash": "bbc1b04dcf9f1e1ad7f5b56691256232bd7c7415451afe911358b650a745b4a4"
+}

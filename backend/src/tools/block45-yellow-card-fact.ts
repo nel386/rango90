@@ -19,10 +19,11 @@ export function factFromStats(
   eligibilityMajorLeagueId: number | null
 ): YellowCardFact | null {
   const team = object(statistic.team); const league = object(statistic.league); const games = object(statistic.games); const cards = object(statistic.cards);
-  const playerId = Number(player.id); const clubId = Number(team.id); const sourceCompetitionId = Number(league.id); const yellow = numberOrNull(cards.yellow);
+  const playerId = Number(player.id); const clubId = Number(team.id); const sourceCompetitionId = Number(league.id);
+  const yellow = numberOrNull(cards.yellow); const red = numberOrNull(cards.red); const yellowRed = numberOrNull(cards.yellowred);
   const legacyAttribution = resolveBlock45LegacyZeroRow({ playerId, season, eligibilityMajorLeagueId, statistic });
   if (!legacyAttribution && !isOfficialClubCompetition(statistic)) return null;
-  if (!Number.isInteger(playerId) || playerId < 1 || !Number.isInteger(clubId) || clubId < 1 || yellow === null) return null;
+  if (!Number.isInteger(playerId) || playerId < 1 || !Number.isInteger(clubId) || clubId < 1 || yellow === null && red === null && yellowRed === null) return null;
   if (sourceCompetitionId === 0 && !legacyAttribution) return null;
   if (sourceCompetitionId !== 0 && (!Number.isInteger(sourceCompetitionId) || sourceCompetitionId < 1)) return null;
   const competitionId = legacyAttribution?.attributedCompetitionId ?? sourceCompetitionId;
@@ -34,9 +35,9 @@ export function factFromStats(
     canonicalPlayerId: `api-football:player:${playerId}`, canonicalName: name, clubProviderId: clubId,
     clubName: String(team.name ?? `Club ${clubId}`), competitionProviderId: competitionId, competitionName,
     competitionType: 'official_club_competition', eligibilityMajorLeagueId,
-    seasonStart: season, appearances: numberOrNull(games.appearences), minutes: numberOrNull(games.minutes), yellowCards: yellow,
+    seasonStart: season, appearances: numberOrNull(games.appearences), minutes: numberOrNull(games.minutes), yellowCards: yellow, redCards: red, yellowRedCards: yellowRed,
     sourceKey: 'api-football', sourceUrl, sourcePage: page,
-    locator: `response.player.id=${playerId}.statistics[league=${sourceCompetitionId},name=${competitionName},season=${season}].team.id=${clubId}.cards.yellow`,
+    locator: `response.player.id=${playerId}.statistics[league=${sourceCompetitionId},name=${competitionName},season=${season}].team.id=${clubId}.cards.{yellow,red,yellowred}`,
     responseSha256, capturedAt: new Date().toISOString(), sourceType: 'primary', verificationStatus: 'confirmed', coverageStatus: 'coverage_partial',
     ...(legacyAttribution ? { competitionAttribution: {
       method: 'block45e_exact_case_evidence', caseId: legacyAttribution.caseId,

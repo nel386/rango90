@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import pg from 'pg';
 import { buildYellowCardSnapshots, stableYellowJson, type YellowCardFact, type YellowRankingSnapshot } from '../clubYellowCardsCareerRankingEngine.js';
+import { existingBlock45Facts, insertBlock45Facts as insertFacts } from './block45-yellow-card-persistence.js';
 
 type InputFile = { facts?: YellowCardFact[]; requestedSeasons?: number[]; activeSeason?: number } | YellowCardFact[];
 const databaseUrl = process.env.DATABASE_URL?.trim() ?? '';
@@ -29,27 +30,8 @@ async function readFacts(): Promise<{ facts: YellowCardFact[]; requestedSeasons?
   return Array.isArray(parsed) ? { facts: parsed } : { facts: parsed.facts ?? [], requestedSeasons: parsed.requestedSeasons, activeSeason: parsed.activeSeason };
 }
 
-function rowFact(row: Record<string, unknown>): YellowCardFact {
-  return {
-    id: String(row.id), sourcePlayerId: String(row.source_player_id), playerNameOriginal: String(row.player_name_original), canonicalPlayerId: String(row.canonical_player_id), canonicalName: String(row.canonical_name), clubProviderId: Number(row.club_provider_id), clubName: String(row.club_name), competitionProviderId: Number(row.competition_provider_id), competitionName: String(row.competition_name), competitionType: 'official_club_competition', eligibilityMajorLeagueId: row.eligibility_major_league_id === null ? null : Number(row.eligibility_major_league_id), seasonStart: Number(row.season_start), appearances: row.appearances === null ? null : Number(row.appearances), minutes: row.minutes === null ? null : Number(row.minutes), yellowCards: Number(row.yellow_cards), sourceKey: String(row.source_key), sourceUrl: String(row.source_url), sourcePage: Number(row.source_page), locator: String(row.locator), responseSha256: String(row.response_sha256), capturedAt: new Date(String(row.captured_at)).toISOString(), sourceType: String(row.source_type) as YellowCardFact['sourceType'], verificationStatus: String(row.verification_status) as YellowCardFact['verificationStatus'], coverageStatus: String(row.coverage_status) as YellowCardFact['coverageStatus']
-  };
-}
-
 async function existingFacts(pool: pg.Pool): Promise<YellowCardFact[]> {
-  const result = await pool.query('SELECT * FROM club_yellow_card_facts ORDER BY id');
-  return result.rows.map((row) => rowFact(row));
-}
-
-async function insertFacts(pool: pg.Pool, facts: YellowCardFact[]): Promise<{ added: number; skipped: number }> {
-  let added = 0; let skipped = 0;
-  for (const fact of facts) {
-    const result = await pool.query(`INSERT INTO club_yellow_card_facts
-      (id,source_player_id,player_name_original,canonical_player_id,canonical_name,club_provider_id,club_name,competition_provider_id,competition_name,competition_type,eligibility_major_league_id,season_start,appearances,minutes,yellow_cards,source_key,source_url,source_page,locator,response_sha256,captured_at,source_type,verification_status,coverage_status,evidence)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)
-      ON CONFLICT DO NOTHING`, [fact.id, fact.sourcePlayerId, fact.playerNameOriginal, fact.canonicalPlayerId, fact.canonicalName, fact.clubProviderId, fact.clubName, fact.competitionProviderId, fact.competitionName, fact.competitionType, fact.eligibilityMajorLeagueId, fact.seasonStart, fact.appearances, fact.minutes, fact.yellowCards, fact.sourceKey, fact.sourceUrl, fact.sourcePage, fact.locator, fact.responseSha256, fact.capturedAt, fact.sourceType, fact.verificationStatus, fact.coverageStatus, { sourceUrl: fact.sourceUrl, locator: fact.locator, responseSha256: fact.responseSha256, rawPayloadStored: false }]);
-    if ((result.rowCount ?? 0) > 0) added += 1; else skipped += 1;
-  }
-  return { added, skipped };
+  return existingBlock45Facts(pool);
 }
 
 async function persistSnapshot(pool: pg.Pool, snapshot: YellowRankingSnapshot, limit: number): Promise<{ snapshotInserted: number; entriesInserted: number }> {

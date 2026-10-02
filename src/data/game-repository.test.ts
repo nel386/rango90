@@ -9,6 +9,8 @@ const challenge = { id: "challenge-1", kind: "daily", challengeDate: "2026-09-16
 const jsonResponse = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 const originalFetch = globalThis.fetch;
 let dailyCalls = 0;
+let yellowEndpointLabelEs = "Tarjetas amarillas globales en clubes — alcance observado";
+let yellowEndpointLabelEn = "Global club yellow cards — observed scope";
 void (async () => {
 globalThis.fetch = (async (input: RequestInfo | URL) => {
   const path = new URL(String(input)).pathname;
@@ -24,7 +26,7 @@ globalThis.fetch = (async (input: RequestInfo | URL) => {
     return jsonResponse({ categories: [{ slug: "club-career-yellow-cards", labelEs: "Tarjetas amarillas globales en clubes — alcance observado", labelEn: "Global club yellow cards — observed scope", scope: "Ranking de carrera global", status: "partial_scope", selectable: true, allowsActiveSeason: true }] });
   }
   if (path.startsWith("/v1/rankings/")) {
-    return jsonResponse({ category: "club-career-yellow-cards", categoryLabelEs: "Tarjetas amarillas globales en clubes — alcance observado", categoryLabelEn: "Global club yellow cards — observed scope", snapshotId: "snapshot-0", mode: "lab", status: "provisional", dataset: "active_weekly", season: 2026, scope: "active", scopeLabelEs: "3 competiciones completas", scopeLabelEn: "3 complete competitions", entries: [{ label_es: "Categoría 0", label_en: "Category 0", entity_id: "entity-0", canonical_name: "Entity 0", raw_value: 4, score_value: 4, rank: 1, tie_group: 1, image_status: "fallback", image_url: "/v1/media/entity-0/fallback", generated_at: "2026-09-16T00:00:00.000Z" }] });
+    return jsonResponse({ category: "club-career-yellow-cards", categoryLabelEs: yellowEndpointLabelEs, categoryLabelEn: yellowEndpointLabelEn, snapshotId: "snapshot-0", mode: "lab", status: "provisional", dataset: "active_weekly", season: 2026, scope: "active", scopeKind: "club_active_season_observed", scopeDescriptor: { kind: "active_season_observed", season: 2026, competitionFilter: "complete_scope", includedCompetitionIds: ["39", "140", "135"], excludedCompetitionIds: ["78", "61", "94"], careerComplete: false }, scopeLabelEs: "3 competiciones completas: Premier League, La Liga y Serie A. 3 pendientes por cuota; no es un ranking global de seis competiciones.", scopeLabelEn: "3 complete competitions: Premier League, La Liga and Serie A. 3 pending quota; this is not a six-competition global ranking.", factCount: 1692, generatedAt: "2026-09-25T08:28:13.756Z", updateDate: "2026-09-25T08:28:13.756Z", entries: [{ label_es: "Categoría 0", label_en: "Category 0", entity_id: "entity-0", canonical_name: "Entity 0", raw_value: 4, score_value: 4, rank: 1, tie_group: 1, image_status: "fallback", image_url: "/v1/media/entity-0/fallback", generated_at: "2026-09-25T08:28:13.756Z" }] });
   }
   return jsonResponse({ error: "not_found" }, 404);
 }) as typeof fetch;
@@ -58,6 +60,15 @@ try {
   const yellowRanking = await repository.getCategoryRanking("club-career-yellow-cards", "active_season_weekly", "complete_scope");
   assert.equal(yellowRanking.category.labelEs, "Tarjetas amarillas — temporada activa (alcance observado)");
   assert.doesNotMatch(yellowRanking.category.labelEs, /global|carrera|histórico/iu);
+  assert.equal(yellowRanking.scopeKind, "club_active_season_observed");
+  assert.deepEqual(yellowRanking.scopeDescriptor, { kind: "active_season_observed", season: 2026, competitionFilter: "complete_scope", includedCompetitionIds: ["39", "140", "135"], excludedCompetitionIds: ["78", "61", "94"], careerComplete: false });
+  assert.equal(yellowRanking.snapshotId, "snapshot-0");
+  assert.equal(yellowRanking.generatedAt, yellowRanking.updateDate);
+  assert.match(yellowRanking.scopeLabelEs ?? "", /Premier League, La Liga y Serie A/u);
+  yellowEndpointLabelEs = "Tarjetas amarillas — temporada activa (alcance observado)";
+  yellowEndpointLabelEn = "Yellow cards — active season (observed scope)";
+  const alignedYellowRanking = await repository.getCategoryRanking("club-career-yellow-cards", "active_season_weekly", "complete_scope");
+  assert.equal(alignedYellowRanking.category.labelEs, yellowEndpointLabelEs, "frontend preserves the corrected endpoint contract label");
   const rankingCategories = await repository.getRankingCategories();
   const yellowCatalogCategory = rankingCategories.find((category) => category.slug === "club-career-yellow-cards");
   assert.equal(yellowCatalogCategory?.labelEs, "Tarjetas amarillas — temporada activa (alcance observado)");

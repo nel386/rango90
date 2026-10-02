@@ -27,6 +27,7 @@ export type RankingCatalogCategory = {
   slug: string;
   labelEs: string;
   labelEn: string;
+  scopeKind?: string;
   descriptionEs: string;
   descriptionEn: string;
   metric: 'goals' | 'assists' | 'yellow_cards' | 'red_cards' | 'titles';
@@ -87,12 +88,13 @@ export const RANKING_CATALOG_DEFINITIONS = [
   },
   {
     slug: 'club-career-yellow-cards',
-    labelEs: 'Tarjetas amarillas — temporada actual',
-    labelEn: 'Yellow cards — current season',
+    labelEs: 'Tarjetas amarillas — temporada activa (alcance observado)',
+    labelEn: 'Yellow cards — active season (observed scope)',
+    scopeKind: 'club_active_season_observed',
     descriptionEs: 'Alcance activo observado de tarjetas amarillas; no es una carrera completa.',
     descriptionEn: 'Observed active-season yellow cards; not a complete career ranking.',
     metric: 'yellow_cards' as const,
-    scope: 'Temporada actual; alcance observado de clubes',
+    scope: 'Temporada activa; alcance observado de clubes; no es una carrera completa ni un ranking global',
   },
   {
     slug: 'club-yellow-cards-career',

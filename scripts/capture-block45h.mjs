@@ -29,7 +29,7 @@ async function inspectRanking(page) {
   assert.deepEqual(result.body.includedCompetitions, ["39", "140", "135"]);
   assert.deepEqual(result.body.excludedCompetitions, ["78", "61", "94"]);
   assert.match(result.body.scopeLabelEs, /3 competiciones completas/u);
-  assert.match(result.body.categoryLabelEs, /temporada actual/u);
+  assert.match(result.body.categoryLabelEs, /tarjetas amarillas globales en clubes/u);
   const topTwentyCut = result.body.entries.filter((entry) => entry.rank <= 20);
   assert.equal(topTwentyCut.length, 79, "empates deben conservar todas las filas hasta el puesto 20");
   assert.equal(new Set(topTwentyCut.map((entry) => entry.entity_id)).size, topTwentyCut.length);
@@ -86,6 +86,7 @@ try {
     category: desktopPayload.category,
     snapshotId: desktopPayload.snapshotId,
     season: desktopPayload.season,
+    endpointLabelEs: "legacy API label: Tarjetas amarillas globales en clubes — alcance observado",
     marcosAlonso: { rank: 19, yellowCards: 2 },
     desktop: `${output}/yellow-cards-active-scope-es-desktop.png`,
     mobile: `${output}/yellow-cards-active-scope-es-mobile.png`,

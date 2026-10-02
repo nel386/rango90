@@ -83,6 +83,7 @@ export type RankingCategoryOption = {
   descriptionEs?: string;
   descriptionEn?: string;
   scope?: string;
+  scopeEn?: string;
   availability: "official" | "provisional";
   status: RankingCatalogStatus;
   selectable: boolean;
@@ -104,6 +105,9 @@ export type AuthUser = { id: string; email: string; displayName: string; emailVe
 export type RepositoryErrorKind = "offline" | "timeout" | "auth" | "session" | "not_found" | "expired" | "conflict" | "invalid" | "server";
 
 export type RequestOptions = { signal?: AbortSignal; timeoutMs?: number };
+
+const yellowCardsActiveLabel = { es: "Tarjetas amarillas — temporada activa (alcance observado)", en: "Yellow cards — active season (observed scope)" };
+const yellowCardsActiveScope = { es: "Temporada activa; solo competiciones observadas. No es un ranking histórico ni de carrera.", en: "Active season; observed competitions only. This is not a historical or career ranking." };
 
 export class RepositoryError extends Error {
   constructor(message: string, readonly kind: RepositoryErrorKind, readonly status?: number, readonly code?: string, readonly details?: unknown) {
@@ -408,7 +412,8 @@ export class HttpGameRepository implements GameRepository {
       const rightsStatus = (entry.rightsStatus ?? entry.rights_status) === "approved" || (entry.rightsStatus ?? entry.rights_status) === "review_required" || (entry.rightsStatus ?? entry.rights_status) === "rejected" ? (entry.rightsStatus ?? entry.rights_status) as "approved" | "review_required" | "rejected" : "missing";
       return { rank, entityId: entry.entity_id, canonicalName: entry.canonical_name, rawValue, scoreValue, tieGroup: number(entry.tie_group), imageUrl: typeof entry.image_url === "string" ? resolveApiAssetUrl(this.baseUrl, entry.image_url) : undefined, imageStatus: status, reviewStatus, rightsStatus, isPublishable: (entry.isPublishable ?? entry.is_publishable) === true, playable: entry.playable === true, imageSourceUrl: typeof entry.image_source_url === "string" ? entry.image_source_url : undefined, imageLicenseName: typeof entry.image_license_name === "string" ? entry.image_license_name : undefined, snapshotId: response.snapshotId, dataVersion: typeof entry.data_version === "string" ? entry.data_version : undefined, generatedAt: typeof entry.generated_at === "string" ? entry.generated_at : undefined, sources: Array.isArray(entry.sources) ? entry.sources as CategoryRankingEntry["sources"] : undefined };
     });
-    return { category: { slug: typeof response.category === "string" ? response.category : categorySlug, labelEs: typeof response.categoryLabelEs === "string" ? response.categoryLabelEs : (typeof response.entries[0]?.label_es === "string" ? response.entries[0].label_es : categorySlug), labelEn: typeof response.categoryLabelEn === "string" ? response.categoryLabelEn : (typeof response.entries[0]?.label_en === "string" ? response.entries[0].label_en : categorySlug) }, rankingScope: response.rankingScope ?? "historical_snapshot", snapshotId: response.snapshotId, mode: response.mode ?? "official", status: response.status ?? "official", entries, dataset: response.dataset, scopeLabelEs: response.scopeLabelEs, scopeLabelEn: response.scopeLabelEn, coverageComplete: response.coverageComplete, scope: response.scope, season: response.season, coverageEstimated: response.coverageEstimated, provisionalWarningEs: response.provisionalWarningEs, provisionalWarningEn: response.provisionalWarningEn, source: response.source, degraded: response.degraded, updateDate: response.updateDate, factCount: response.factCount, sourceCount: response.sourceCount, dataVersion: response.dataVersion, contentSha256: response.contentSha256, generatedAt: response.generatedAt, fixtureOnly: response.fixtureOnly, redTypesDifferentiated: response.redTypesDifferentiated, scopeStatus: response.scopeStatus, activeSeasonStatus: response.activeSeasonStatus, seasonInProgress: response.seasonInProgress, observedFacts: response.observedFacts, observedPages: response.observedPages, includedCompetitions: Array.isArray(response.includedCompetitions) ? response.includedCompetitions.filter((value): value is string => typeof value === "string") : undefined, excludedCompetitions: Array.isArray(response.excludedCompetitions) ? response.excludedCompetitions.filter((value): value is string => typeof value === "string") : undefined, blockReason: typeof response.blockReason === "string" ? response.blockReason : null };
+    const isYellowCardsRanking = categorySlug === "club-career-yellow-cards";
+    return { category: { slug: typeof response.category === "string" ? response.category : categorySlug, labelEs: isYellowCardsRanking ? yellowCardsActiveLabel.es : typeof response.categoryLabelEs === "string" ? response.categoryLabelEs : (typeof response.entries[0]?.label_es === "string" ? response.entries[0].label_es : categorySlug), labelEn: isYellowCardsRanking ? yellowCardsActiveLabel.en : typeof response.categoryLabelEn === "string" ? response.categoryLabelEn : (typeof response.entries[0]?.label_en === "string" ? response.entries[0].label_en : categorySlug) }, rankingScope: response.rankingScope ?? "historical_snapshot", snapshotId: response.snapshotId, mode: response.mode ?? "official", status: response.status ?? "official", entries, dataset: response.dataset, scopeLabelEs: response.scopeLabelEs, scopeLabelEn: response.scopeLabelEn, coverageComplete: response.coverageComplete, scope: response.scope, season: response.season, coverageEstimated: response.coverageEstimated, provisionalWarningEs: response.provisionalWarningEs, provisionalWarningEn: response.provisionalWarningEn, source: response.source, degraded: response.degraded, updateDate: response.updateDate, factCount: response.factCount, sourceCount: response.sourceCount, dataVersion: response.dataVersion, contentSha256: response.contentSha256, generatedAt: response.generatedAt, fixtureOnly: response.fixtureOnly, redTypesDifferentiated: response.redTypesDifferentiated, scopeStatus: response.scopeStatus, activeSeasonStatus: response.activeSeasonStatus, seasonInProgress: response.seasonInProgress, observedFacts: response.observedFacts, observedPages: response.observedPages, includedCompetitions: Array.isArray(response.includedCompetitions) ? response.includedCompetitions.filter((value): value is string => typeof value === "string") : undefined, excludedCompetitions: Array.isArray(response.excludedCompetitions) ? response.excludedCompetitions.filter((value): value is string => typeof value === "string") : undefined, blockReason: typeof response.blockReason === "string" ? response.blockReason : null };
   }
 
   async getRankingCategories(options?: RequestOptions) {
@@ -421,11 +426,12 @@ export class HttpGameRepository implements GameRepository {
       const isSelectable = category.selectable !== false && ["available_lab", "provisional_lab", "partial_scope"].includes(status);
       return [{
         slug: category.slug,
-        labelEs: category.labelEs,
-        labelEn: category.labelEn,
+        labelEs: category.slug === "club-career-yellow-cards" ? yellowCardsActiveLabel.es : category.labelEs,
+        labelEn: category.slug === "club-career-yellow-cards" ? yellowCardsActiveLabel.en : category.labelEn,
         descriptionEs: typeof category.descriptionEs === "string" ? category.descriptionEs : undefined,
         descriptionEn: typeof category.descriptionEn === "string" ? category.descriptionEn : undefined,
-        scope: typeof category.scope === "string" ? category.scope : undefined,
+        scope: category.slug === "club-career-yellow-cards" ? yellowCardsActiveScope.es : typeof category.scope === "string" ? category.scope : undefined,
+        scopeEn: category.slug === "club-career-yellow-cards" ? yellowCardsActiveScope.en : typeof category.scopeEn === "string" ? category.scopeEn : undefined,
         availability: isSelectable ? "provisional" as const : "official" as const,
         status,
         selectable: isSelectable,

@@ -7,7 +7,7 @@ const output = "artifacts/block45h";
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 
-async function inspectRanking(page) {
+async function inspectRanking(page, captureName) {
   const endpointResponse = new Promise((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error("No llegó la respuesta del ranking de amarillas")), 30_000);
     page.on("response", async (response) => {
@@ -29,7 +29,7 @@ async function inspectRanking(page) {
   assert.deepEqual(result.body.includedCompetitions, ["39", "140", "135"]);
   assert.deepEqual(result.body.excludedCompetitions, ["78", "61", "94"]);
   assert.match(result.body.scopeLabelEs, /3 competiciones completas/u);
-  assert.match(result.body.categoryLabelEs, /tarjetas amarillas globales en clubes/u);
+  assert.match(result.body.categoryLabelEs, /tarjetas amarillas globales en clubes/iu);
   const topTwentyCut = result.body.entries.filter((entry) => entry.rank <= 20);
   assert.equal(topTwentyCut.length, 79, "empates deben conservar todas las filas hasta el puesto 20");
   assert.equal(new Set(topTwentyCut.map((entry) => entry.entity_id)).size, topTwentyCut.length);
@@ -63,6 +63,8 @@ async function inspectRanking(page) {
   assert.doesNotMatch(selectedCategory, /global|carrera|histórico/iu);
   assert.match(await page.locator("#ranking-dataset-select").locator("option:checked").innerText(), /temporada activa/u);
   assert.match(await page.locator(".ranking-status").innerText(), /3 competiciones completas/u);
+  await uiRow.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `${output}/yellow-cards-marcos-${captureName}.png` });
   return result.body;
 }
 
@@ -70,16 +72,18 @@ try {
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 1100 }, deviceScaleFactor: 1 });
   const response = await desktop.goto(`${baseUrl}/es/`, { waitUntil: "networkidle", timeout: 60_000 });
   assert.ok(response?.ok(), `La página no respondió correctamente: ${response?.status()}`);
-  const desktopPayload = await inspectRanking(desktop);
-  await desktop.screenshot({ path: `${output}/yellow-cards-active-scope-es-desktop.png`, fullPage: true });
+  const desktopPayload = await inspectRanking(desktop, "desktop");
+  await desktop.evaluate(() => window.scrollTo(0, 0));
+  await desktop.screenshot({ path: `${output}/yellow-cards-active-scope-es-desktop.png` });
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
   const mobileResponse = await mobile.goto(`${baseUrl}/es/`, { waitUntil: "networkidle", timeout: 60_000 });
   assert.ok(mobileResponse?.ok(), `La página móvil no respondió correctamente: ${mobileResponse?.status()}`);
-  const mobilePayload = await inspectRanking(mobile);
+  const mobilePayload = await inspectRanking(mobile, "mobile");
   assert.equal(mobilePayload.snapshotId, desktopPayload.snapshotId);
   assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false);
-  await mobile.screenshot({ path: `${output}/yellow-cards-active-scope-es-mobile.png`, fullPage: true });
+  await mobile.evaluate(() => window.scrollTo(0, 0));
+  await mobile.screenshot({ path: `${output}/yellow-cards-active-scope-es-mobile.png` });
 
   console.log(JSON.stringify({
     status: "passed",
@@ -90,6 +94,7 @@ try {
     marcosAlonso: { rank: 19, yellowCards: 2 },
     desktop: `${output}/yellow-cards-active-scope-es-desktop.png`,
     mobile: `${output}/yellow-cards-active-scope-es-mobile.png`,
+    marcosRow: [`${output}/yellow-cards-marcos-desktop.png`, `${output}/yellow-cards-marcos-mobile.png`],
     endpointScope: "active season 2026; 3/6 competitions",
     mobileHorizontalOverflow: false,
   }, null, 2));

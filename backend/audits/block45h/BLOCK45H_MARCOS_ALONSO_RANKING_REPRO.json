@@ -1,0 +1,1678 @@
+{
+  "artifactKind": "block45h_marcos_alonso_active_scope_reproduction",
+  "status": "published_frontend_scope_fix_verified_endpoint_legacy_label_retained",
+  "checkedDateUtc": "2026-10-02",
+  "publishedScreen": {
+    "url": "https://nel386.github.io/rango90/es/",
+    "navigation": "90 Ranking → Ver rankings por categoría → Tarjetas amarillas en clubes · Alcance parcial",
+    "categoryLabelBefore": "Tarjetas amarillas en clubes · Alcance parcial",
+    "scopeSelectorBefore": "Clubes — temporada activa",
+    "marcosRowBefore": {
+      "rank": 19,
+      "tieGroup": 3,
+      "yellowCards": 2,
+      "playerId": "clubcards:api-football:player:2278"
+    },
+    "categoryLabelAfter": "Tarjetas amarillas — temporada activa (alcance observado)",
+    "scopeCopyAfter": "Temporada activa; solo competiciones observadas. No es un ranking histórico ni de carrera.",
+    "verifiedAtCommit": "351015a57dba63b16fe3c231383b78c2829c2121",
+    "desktopScreenshot": "artifacts/block45h/yellow-cards-active-scope-es-desktop.png",
+    "mobileScreenshot": "artifacts/block45h/yellow-cards-active-scope-es-mobile.png",
+    "marcosDesktopScreenshot": "artifacts/block45h/yellow-cards-marcos-desktop.png",
+    "marcosMobileScreenshot": "artifacts/block45h/yellow-cards-marcos-mobile.png",
+    "mobileHorizontalOverflow": false,
+    "captureStatus": "passed"
+  },
+  "endpoint": {
+    "url": "https://rango90.onrender.com/v1/rankings/club-career-yellow-cards?limit=200&dataset=active_season_weekly&competition=complete_scope",
+    "httpStatus": 200,
+    "bodySha256": "f096ac5c8b78369a885678064cf6feae8222344168f075b5c33ae51be01f65f4",
+    "category": "club-career-yellow-cards",
+    "categoryLabelEs": "Tarjetas amarillas globales en clubes — alcance observado",
+    "snapshotId": "club-cards-yellow-snapshot-a17ece340d31a31960c00624c9078866",
+    "rankingScope": "active_season_weekly",
+    "dataset": "active_weekly",
+    "scope": "active",
+    "season": 2026,
+    "competitionFilter": "complete_scope",
+    "includedCompetitions": [
+      "39",
+      "140",
+      "135"
+    ],
+    "excludedCompetitions": [
+      "78",
+      "61",
+      "94"
+    ],
+    "coverageComplete": true,
+    "factCount": 1247,
+    "entryCount": 350,
+    "generatedAt": "2026-09-21T16:58:04.505Z",
+    "contentSha256": "a17ece340d31a31960c00624c90788665c77fe12f7a248ca1a4d763fe9506fa4",
+    "redTypesDifferentiated": true,
+    "scopeLabelEs": "3 competiciones completas: Premier League, La Liga y Serie A. 3 pendientes por cuota; no es un ranking global de seis competiciones.",
+    "categoryLabelEsDirectResponse": "Tarjetas amarillas globales en clubes — alcance observado",
+    "labelMismatchVisibleInApi": "The Render API still returns the legacy category label. The frontend now overrides it for this active-season dataset; Render was not deployed or changed."
+  },
+  "topTwentyByCompetitiveRank": {
+    "rowCountIncludingTies": 79,
+    "rankValueGroups": [
+      {
+        "rank": 1,
+        "value": 4,
+        "rows": 1
+      },
+      {
+        "rank": 2,
+        "value": 3,
+        "rows": 17
+      },
+      {
+        "rank": 19,
+        "value": 2,
+        "rows": 61
+      }
+    ],
+    "allRowsHaveConfirmedSources": true,
+    "allSourceRowsUseSeason": 2026,
+    "sourceCompetitionIds": [
+      "39",
+      "140",
+      "135"
+    ],
+    "rows": [
+      {
+        "playerId": "clubcards:api-football:player:185398",
+        "name": "Isaac",
+        "value": 4,
+        "rank": 1,
+        "tieGroup": 1,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-15",
+            "sourceRecordId": "league:140:season:2026:player:185398:team:536",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "536",
+            "verificationStatus": "confirmed",
+            "contentSha256": "bce60dea90e53539e1f2069c881ee0f708e479bbce67c19a86403df2deee6a8a"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:286038",
+        "name": "Álex Calatrava",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-17",
+            "sourceRecordId": "league:140:season:2026:player:286038:team:540",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "540",
+            "verificationStatus": "confirmed",
+            "contentSha256": "94acefd80f6401799fb3a7835a623470e576311c6ddd5ab1b8a1a8f37534fb91"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:162686",
+        "name": "Antonio Blanco",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-13",
+            "sourceRecordId": "league:140:season:2026:player:162686:team:542",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "542",
+            "verificationStatus": "confirmed",
+            "contentSha256": "36466c14eba476977af23948d637e86106bb8d5534c342ea1d9c7114d858be31"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:183751",
+        "name": "A. Rebbach",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-15",
+            "sourceRecordId": "league:140:season:2026:player:183751:team:542",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "542",
+            "verificationStatus": "confirmed",
+            "contentSha256": "bce60dea90e53539e1f2069c881ee0f708e479bbce67c19a86403df2deee6a8a"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:18869",
+        "name": "A. Smith",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-6",
+            "sourceRecordId": "league:39:season:2026:player:18869:team:35",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "35",
+            "verificationStatus": "confirmed",
+            "contentSha256": "15f7b671f9796bfe75b0b3511ce3432e9b0b827f4f6595694d9cea158d6b05a7"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:18766",
+        "name": "D. Calvert-Lewin",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-6",
+            "sourceRecordId": "league:39:season:2026:player:18766:team:63",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "63",
+            "verificationStatus": "confirmed",
+            "contentSha256": "15f7b671f9796bfe75b0b3511ce3432e9b0b827f4f6595694d9cea158d6b05a7"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:1145",
+        "name": "I. Konaté",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-3",
+            "sourceRecordId": "league:140:season:2026:player:1145:team:541",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "541",
+            "verificationStatus": "confirmed",
+            "contentSha256": "9500eafb9883f2cc8d1b8c220d3680c9a89dd6bdd601e16f06c681e59aab3f90"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:199044",
+        "name": "J. Aramburu",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-16",
+            "sourceRecordId": "league:140:season:2026:player:199044:team:548",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "548",
+            "verificationStatus": "confirmed",
+            "contentSha256": "16d5e4ccb71ef399d87d024c322313182d948934e0b2d217b1c3440c28684292"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:104821",
+        "name": "Jon Guridi",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-11",
+            "sourceRecordId": "league:140:season:2026:player:104821:team:536",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "536",
+            "verificationStatus": "confirmed",
+            "contentSha256": "1dbcb5d0392752289e93d44d86cc3732968387c33e6d2905445ac94da239b2c6"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:46667",
+        "name": "Kike Barja",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-7",
+            "sourceRecordId": "league:140:season:2026:player:46667:team:727",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "727",
+            "verificationStatus": "confirmed",
+            "contentSha256": "0037330f2044442b0c6452425021216287d8d129bcd483175d47f70673bf8681"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:346865",
+        "name": "L. Amatucci",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-21",
+            "sourceRecordId": "league:140:season:2026:player:346865:team:544",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "544",
+            "verificationStatus": "confirmed",
+            "contentSha256": "752c38bfcbc6d38a3b123b9543e47ef622f362eaae8ebd61663dfb66235720ac"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:18967",
+        "name": "L. Østigård",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-135-2026-7",
+            "sourceRecordId": "league:135:season:2026:player:18967:team:495",
+            "competitionId": "135",
+            "season": 2026,
+            "teamId": "495",
+            "verificationStatus": "confirmed",
+            "contentSha256": "dd7659daad2b4e56bd6fed6729d189c4eb6a73a05e62105ca20b064c5e35bab9"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:343205",
+        "name": "Mario Martín",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-21",
+            "sourceRecordId": "league:140:season:2026:player:343205:team:546",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "546",
+            "verificationStatus": "confirmed",
+            "contentSha256": "752c38bfcbc6d38a3b123b9543e47ef622f362eaae8ebd61663dfb66235720ac"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:457101",
+        "name": "M. Zabiri",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-25",
+            "sourceRecordId": "league:140:season:2026:player:457101:team:4665",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "4665",
+            "verificationStatus": "confirmed",
+            "contentSha256": "29b4f6f8eb381ace691ef5d66ac0ea111272499d5e192d3792c9d913402ae30a"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:41552",
+        "name": "P. Ciss",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-7",
+            "sourceRecordId": "league:140:season:2026:player:41552:team:728",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "728",
+            "verificationStatus": "confirmed",
+            "contentSha256": "0037330f2044442b0c6452425021216287d8d129bcd483175d47f70673bf8681"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:129056",
+        "name": "Ramón Enríquez",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-12",
+            "sourceRecordId": "league:140:season:2026:player:129056:team:535",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "535",
+            "verificationStatus": "confirmed",
+            "contentSha256": "e0e0889fbe658c9a61175059ca1164884d48140f89acdafba128c423f1e07ec8"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:25073",
+        "name": "V. Janelt",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-11",
+            "sourceRecordId": "league:39:season:2026:player:25073:team:55",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "55",
+            "verificationStatus": "confirmed",
+            "contentSha256": "e5dea4bae619415b59891939a607609e7adc6dbc159fb71a7cd2e344edf3f96e"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:2449",
+        "name": "Y. Herrera",
+        "value": 3,
+        "rank": 2,
+        "tieGroup": 2,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-4",
+            "sourceRecordId": "league:140:season:2026:player:2449:team:548",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "548",
+            "verificationStatus": "confirmed",
+            "contentSha256": "d4260b539ec055f438d7db53bf5077ad83ed3273b0ee2ec7c05894927629b654"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:181259",
+        "name": "Abel Bretones",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-14",
+            "sourceRecordId": "league:140:season:2026:player:181259:team:727",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "727",
+            "verificationStatus": "confirmed",
+            "contentSha256": "a9d70bcca5e3d58fa9440d4af18721e61ffb7ddc71b1750f02cff8ddb207be78"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:30561",
+        "name": "A. Deiola",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-135-2026-9",
+            "sourceRecordId": "league:135:season:2026:player:30561:team:490",
+            "competitionId": "135",
+            "season": 2026,
+            "teamId": "490",
+            "verificationStatus": "confirmed",
+            "contentSha256": "a43cb406fb822baf681e5c70850ff874d50c397fc49b61d2e4cb974ca5a37d94"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:303467",
+        "name": "A. Fatawu",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-19",
+            "sourceRecordId": "league:39:season:2026:player:303467:team:57",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "57",
+            "verificationStatus": "confirmed",
+            "contentSha256": "f38b5b3a12b7637cda2beb5db82693c33ef3875729012f56495356832e5835ec"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:181685",
+        "name": "Álvaro Mantilla",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-14",
+            "sourceRecordId": "league:140:season:2026:player:181685:team:4665",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "4665",
+            "verificationStatus": "confirmed",
+            "contentSha256": "a9d70bcca5e3d58fa9440d4af18721e61ffb7ddc71b1750f02cff8ddb207be78"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:332307",
+        "name": "Beñat Gerenabarrena",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-20",
+            "sourceRecordId": "league:140:season:2026:player:332307:team:531",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "531",
+            "verificationStatus": "confirmed",
+            "contentSha256": "d0c91ca2e8c153f80158da691c48cf82a25695ea9780ee935b85ad34c44aa022"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:282054",
+        "name": "C. Riedel",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-17",
+            "sourceRecordId": "league:140:season:2026:player:282054:team:540",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "540",
+            "verificationStatus": "confirmed",
+            "contentSha256": "94acefd80f6401799fb3a7835a623470e576311c6ddd5ab1b8a1a8f37534fb91"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:161800",
+        "name": "C. Tzolis",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-15",
+            "sourceRecordId": "league:39:season:2026:player:161800:team:42",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "42",
+            "verificationStatus": "confirmed",
+            "contentSha256": "ae513f3fe085c539b7da12f35eb53d30d21f103ef46eaf2c0fda7e967bd3ec0f"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:190253",
+        "name": "David Larrubia",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-16",
+            "sourceRecordId": "league:140:season:2026:player:190253:team:535",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "535",
+            "verificationStatus": "confirmed",
+            "contentSha256": "16d5e4ccb71ef399d87d024c322313182d948934e0b2d217b1c3440c28684292"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:471478",
+        "name": "Davinchi",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-25",
+            "sourceRecordId": "league:140:season:2026:player:471478:team:546",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "546",
+            "verificationStatus": "confirmed",
+            "contentSha256": "29b4f6f8eb381ace691ef5d66ac0ea111272499d5e192d3792c9d913402ae30a"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:55904",
+        "name": "D. Ballard",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-12",
+            "sourceRecordId": "league:39:season:2026:player:55904:team:746",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "746",
+            "verificationStatus": "confirmed",
+            "contentSha256": "fcb9c5d33310f311200d4a2634e72cc1c90d09be4ac6db3e0d40e923e80b9772"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:47250",
+        "name": "D. Dakonam",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-8",
+            "sourceRecordId": "league:140:season:2026:player:47250:team:546",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "546",
+            "verificationStatus": "confirmed",
+            "contentSha256": "9802dc8b54e499b2a5f0fde99e2361c6880f9d2305ca3b50fae230d87d252d71"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:2207",
+        "name": "E. Camavinga",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-4",
+            "sourceRecordId": "league:140:season:2026:player:2207:team:541",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "541",
+            "verificationStatus": "confirmed",
+            "contentSha256": "d4260b539ec055f438d7db53bf5077ad83ed3273b0ee2ec7c05894927629b654"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:14470",
+        "name": "Einar Galilea",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-5",
+            "sourceRecordId": "league:140:season:2026:player:14470:team:535",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "535",
+            "verificationStatus": "confirmed",
+            "contentSha256": "5ba6825bb8508ccb69b0db7f2fc5578f10f506b27d4983ed4bb43cb9417180ef"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:47499",
+        "name": "E. Ünal",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-10",
+            "sourceRecordId": "league:140:season:2026:player:47499:team:546",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "546",
+            "verificationStatus": "confirmed",
+            "contentSha256": "1e4537257ecb01c8ec4d988903cd1cb9c37804c47972249dea849214855940fb"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:22224",
+        "name": "Gabriel Magalhães",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-10",
+            "sourceRecordId": "league:39:season:2026:player:22224:team:42",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "42",
+            "verificationStatus": "confirmed",
+            "contentSha256": "c1bc936c57e3707e7f96b1d545c9d3c339b15da25f26d75ae6f8d15fcdb32018"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:46982",
+        "name": "Gonzalo Villar",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-7",
+            "sourceRecordId": "league:140:season:2026:player:46982:team:797",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "797",
+            "verificationStatus": "confirmed",
+            "contentSha256": "0037330f2044442b0c6452425021216287d8d129bcd483175d47f70673bf8681"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:47291",
+        "name": "Gorka Guruzeta",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-9",
+            "sourceRecordId": "league:140:season:2026:player:47291:team:531",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "531",
+            "verificationStatus": "confirmed",
+            "contentSha256": "2caa92aaf2b5448f86988f6257824ecadc8b4300abb939e1836fff1322ffde14"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:11421",
+        "name": "G. Suazo",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-5",
+            "sourceRecordId": "league:140:season:2026:player:11421:team:536",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "536",
+            "verificationStatus": "confirmed",
+            "contentSha256": "5ba6825bb8508ccb69b0db7f2fc5578f10f506b27d4983ed4bb43cb9417180ef"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:1464",
+        "name": "G. Xhaka",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-2",
+            "sourceRecordId": "league:39:season:2026:player:1464:team:746",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "746",
+            "verificationStatus": "confirmed",
+            "contentSha256": "0c31a5939300ea11457414286ebcc1875babd53a95918e67d4e3935940d08bd3"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:2669",
+        "name": "Hermoso",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-135-2026-5",
+            "sourceRecordId": "league:135:season:2026:player:2669:team:497",
+            "competitionId": "135",
+            "season": 2026,
+            "teamId": "497",
+            "verificationStatus": "confirmed",
+            "contentSha256": "0ee492e6c54b343d6d0ad486942b83e05af1d19a1c43f6221b9c1a2fd68692ec"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:2935",
+        "name": "H. Maguire",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-4",
+            "sourceRecordId": "league:39:season:2026:player:2935:team:33",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "33",
+            "verificationStatus": "confirmed",
+            "contentSha256": "5cd2e82c1fc923067274fbfcc256fde312e0f4643e359bcbeee0c81a3de706ca"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:166",
+        "name": "J. Foyth",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-1",
+            "sourceRecordId": "league:140:season:2026:player:166:team:533",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "533",
+            "verificationStatus": "confirmed",
+            "contentSha256": "45b21ba1cdf080b027281d47495a22f471690415a1654781ea5db39f06d5be87"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:895",
+        "name": "J. Garner",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-2",
+            "sourceRecordId": "league:39:season:2026:player:895:team:45",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "45",
+            "verificationStatus": "confirmed",
+            "contentSha256": "0c31a5939300ea11457414286ebcc1875babd53a95918e67d4e3935940d08bd3"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:1929",
+        "name": "J. Lucumí",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-135-2026-5",
+            "sourceRecordId": "league:135:season:2026:player:1929:team:496",
+            "competitionId": "135",
+            "season": 2026,
+            "teamId": "496",
+            "verificationStatus": "confirmed",
+            "contentSha256": "0ee492e6c54b343d6d0ad486942b83e05af1d19a1c43f6221b9c1a2fd68692ec"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:158697",
+        "name": "J. McAtee",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-15",
+            "sourceRecordId": "league:39:season:2026:player:158697:team:65",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "65",
+            "verificationStatus": "confirmed",
+            "contentSha256": "ae513f3fe085c539b7da12f35eb53d30d21f103ef46eaf2c0fda7e967bd3ec0f"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:19191",
+        "name": "J.  McGinn",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-8",
+            "sourceRecordId": "league:39:season:2026:player:19191:team:66",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "66",
+            "verificationStatus": "confirmed",
+            "contentSha256": "10006eec9c319a01308d56a4712b7cf7713721bcad50330f82eebb3504e7d6bc"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:64268",
+        "name": "J. Mojica",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-11",
+            "sourceRecordId": "league:140:season:2026:player:64268:team:546",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "546",
+            "verificationStatus": "confirmed",
+            "contentSha256": "1dbcb5d0392752289e93d44d86cc3732968387c33e6d2905445ac94da239b2c6"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:19163",
+        "name": "J. Murphy",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-8",
+            "sourceRecordId": "league:39:season:2026:player:19163:team:34",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "34",
+            "verificationStatus": "confirmed",
+            "contentSha256": "10006eec9c319a01308d56a4712b7cf7713721bcad50330f82eebb3504e7d6bc"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:482469",
+        "name": "Jorge Salinas",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-26",
+            "sourceRecordId": "league:140:season:2026:player:482469:team:4665",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "4665",
+            "verificationStatus": "confirmed",
+            "contentSha256": "d6c65d24b168e8d2f59b9dd4a75731fc27e1e075f40fc5b1257830feab09a734"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:1939",
+        "name": "J. Piotrowski",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-135-2026-5",
+            "sourceRecordId": "league:135:season:2026:player:1939:team:494",
+            "competitionId": "135",
+            "season": 2026,
+            "teamId": "494",
+            "verificationStatus": "confirmed",
+            "contentSha256": "0ee492e6c54b343d6d0ad486942b83e05af1d19a1c43f6221b9c1a2fd68692ec"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:217",
+        "name": "Lautaro Martínez",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-135-2026-1",
+            "sourceRecordId": "league:135:season:2026:player:217:team:505",
+            "competitionId": "135",
+            "season": 2026,
+            "teamId": "505",
+            "verificationStatus": "confirmed",
+            "contentSha256": "2ba1cbce84a3d62e075621fed6fa113dd3b665bfb30b23302cad845d8b089f7b"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:2278",
+        "name": "Marcos Alonso",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-4",
+            "sourceRecordId": "league:140:season:2026:player:2278:team:538",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "538",
+            "verificationStatus": "confirmed",
+            "contentSha256": "d4260b539ec055f438d7db53bf5077ad83ed3273b0ee2ec7c05894927629b654"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:347885",
+        "name": "Marcos Fernández",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-21",
+            "sourceRecordId": "league:140:season:2026:player:347885:team:540",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "540",
+            "verificationStatus": "confirmed",
+            "contentSha256": "752c38bfcbc6d38a3b123b9543e47ef622f362eaae8ebd61663dfb66235720ac"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:19666",
+        "name": "M. Crooks",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-9",
+            "sourceRecordId": "league:39:season:2026:player:19666:team:64",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "64",
+            "verificationStatus": "confirmed",
+            "contentSha256": "b4ee90faca83ccea5f384c1461e3c54348413c80e549f48a67a84fcd149cebc3"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:916",
+        "name": "M. Diakhaby",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-2",
+            "sourceRecordId": "league:140:season:2026:player:916:team:532",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "532",
+            "verificationStatus": "confirmed",
+            "contentSha256": "469d7b74161b1edb7868f072310a0fe01c573279c8ea0dc5b6ad23e53b66a6a3"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:760",
+        "name": "M. Díaz",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-2",
+            "sourceRecordId": "league:140:season:2026:player:760:team:542",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "542",
+            "verificationStatus": "confirmed",
+            "contentSha256": "469d7b74161b1edb7868f072310a0fe01c573279c8ea0dc5b6ad23e53b66a6a3"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:206254",
+        "name": "M. Kerkez",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-17",
+            "sourceRecordId": "league:39:season:2026:player:206254:team:40",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "40",
+            "verificationStatus": "confirmed",
+            "contentSha256": "431e53806e088fba6c38404ce019c672457eeab0ae81bdbbd4b2ea8441a263fa"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:546798",
+        "name": "M. Sierra",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-26",
+            "sourceRecordId": "league:140:season:2026:player:546798:team:536",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "536",
+            "verificationStatus": "confirmed",
+            "contentSha256": "d6c65d24b168e8d2f59b9dd4a75731fc27e1e075f40fc5b1257830feab09a734"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:19245",
+        "name": "M. Tavernier",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-8",
+            "sourceRecordId": "league:39:season:2026:player:19245:team:35",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "35",
+            "verificationStatus": "confirmed",
+            "contentSha256": "10006eec9c319a01308d56a4712b7cf7713721bcad50330f82eebb3504e7d6bc"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:195100",
+        "name": "Natan",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-16",
+            "sourceRecordId": "league:140:season:2026:player:195100:team:543",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "543",
+            "verificationStatus": "confirmed",
+            "contentSha256": "16d5e4ccb71ef399d87d024c322313182d948934e0b2d217b1c3440c28684292"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:6233",
+        "name": "N. Tenaglia",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-5",
+            "sourceRecordId": "league:140:season:2026:player:6233:team:542",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "542",
+            "verificationStatus": "confirmed",
+            "contentSha256": "5ba6825bb8508ccb69b0db7f2fc5578f10f506b27d4983ed4bb43cb9417180ef"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:2771",
+        "name": "O. Aina",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-4",
+            "sourceRecordId": "league:39:season:2026:player:2771:team:65",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "65",
+            "verificationStatus": "confirmed",
+            "contentSha256": "5cd2e82c1fc923067274fbfcc256fde312e0f4643e359bcbeee0c81a3de706ca"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:19337",
+        "name": "O. McBurnie",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-8",
+            "sourceRecordId": "league:39:season:2026:player:19337:team:64",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "64",
+            "verificationStatus": "confirmed",
+            "contentSha256": "10006eec9c319a01308d56a4712b7cf7713721bcad50330f82eebb3504e7d6bc"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:18970",
+        "name": "P. Groß",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-7",
+            "sourceRecordId": "league:39:season:2026:player:18970:team:51",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "51",
+            "verificationStatus": "confirmed",
+            "contentSha256": "8303fcfc8d05b7fd72ac693b0ba4f2af1a0da7b3e67e1199f85a1ddfe368f035"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:185096",
+        "name": "Puga",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-15",
+            "sourceRecordId": "league:140:season:2026:player:185096:team:535",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "535",
+            "verificationStatus": "confirmed",
+            "contentSha256": "bce60dea90e53539e1f2069c881ee0f708e479bbce67c19a86403df2deee6a8a"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:450716",
+        "name": "Roger Hinojo",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-25",
+            "sourceRecordId": "league:140:season:2026:player:450716:team:540",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "540",
+            "verificationStatus": "confirmed",
+            "contentSha256": "29b4f6f8eb381ace691ef5d66ac0ea111272499d5e192d3792c9d913402ae30a"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:410840",
+        "name": "R. Sato",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-23",
+            "sourceRecordId": "league:140:season:2026:player:410840:team:532",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "532",
+            "verificationStatus": "confirmed",
+            "contentSha256": "d5ba9f998b2176fe007accfa75d599355968a20661b8b6dc2c44e1bbed990c0a"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:7562",
+        "name": "R. Schmid",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-135-2026-5",
+            "sourceRecordId": "league:135:season:2026:player:7562:team:512",
+            "competitionId": "135",
+            "season": 2026,
+            "teamId": "512",
+            "verificationStatus": "confirmed",
+            "contentSha256": "0ee492e6c54b343d6d0ad486942b83e05af1d19a1c43f6221b9c1a2fd68692ec"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:52",
+        "name": "Sergio Camello",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-1",
+            "sourceRecordId": "league:140:season:2026:player:52:team:728",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "728",
+            "verificationStatus": "confirmed",
+            "contentSha256": "45b21ba1cdf080b027281d47495a22f471690415a1654781ea5db39f06d5be87"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:46646",
+        "name": "Sergio Herrera",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-7",
+            "sourceRecordId": "league:140:season:2026:player:46646:team:727",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "727",
+            "verificationStatus": "confirmed",
+            "contentSha256": "0037330f2044442b0c6452425021216287d8d129bcd483175d47f70673bf8681"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:2823",
+        "name": "S. Lukić",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-4",
+            "sourceRecordId": "league:39:season:2026:player:2823:team:57",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "57",
+            "verificationStatus": "confirmed",
+            "contentSha256": "5cd2e82c1fc923067274fbfcc256fde312e0f4643e359bcbeee0c81a3de706ca"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:311773",
+        "name": "S. Mouriño",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-18",
+            "sourceRecordId": "league:140:season:2026:player:311773:team:533",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "533",
+            "verificationStatus": "confirmed",
+            "contentSha256": "7e0682c6430e3a4a4b8e53bcc00d6804b86470cf06340bca59d4f1e566a3d0e4"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:1014",
+        "name": "S. Sohm",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-135-2026-3",
+            "sourceRecordId": "league:135:season:2026:player:1014:team:517",
+            "competitionId": "135",
+            "season": 2026,
+            "teamId": "517",
+            "verificationStatus": "confirmed",
+            "contentSha256": "7a8da60214739c032f457d30ad1997020e2806ecb3aa65982ffae83b994a8acf"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:47285",
+        "name": "Unai López",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-8",
+            "sourceRecordId": "league:140:season:2026:player:47285:team:728",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "728",
+            "verificationStatus": "confirmed",
+            "contentSha256": "9802dc8b54e499b2a5f0fde99e2361c6880f9d2305ca3b50fae230d87d252d71"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:183699",
+        "name": "Urko González",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-15",
+            "sourceRecordId": "league:140:season:2026:player:183699:team:540",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "540",
+            "verificationStatus": "confirmed",
+            "contentSha256": "bce60dea90e53539e1f2069c881ee0f708e479bbce67c19a86403df2deee6a8a"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:762",
+        "name": "Vinícius Júnior",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-2",
+            "sourceRecordId": "league:140:season:2026:player:762:team:541",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "541",
+            "verificationStatus": "confirmed",
+            "contentSha256": "469d7b74161b1edb7868f072310a0fe01c573279c8ea0dc5b6ad23e53b66a6a3"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:47360",
+        "name": "Ximo Navarro",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-9",
+            "sourceRecordId": "league:140:season:2026:player:47360:team:544",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "544",
+            "verificationStatus": "confirmed",
+            "contentSha256": "2caa92aaf2b5448f86988f6257824ecadc8b4300abb939e1836fff1322ffde14"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:329722",
+        "name": "Yoel Lago",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-19",
+            "sourceRecordId": "league:140:season:2026:player:329722:team:538",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "538",
+            "verificationStatus": "confirmed",
+            "contentSha256": "adaa73995ae379a27430ceb0c92e03be6e5f59d67f750d58215a5405acf259f3"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:47273",
+        "name": "Yuri",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-8",
+            "sourceRecordId": "league:140:season:2026:player:47273:team:531",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "531",
+            "verificationStatus": "confirmed",
+            "contentSha256": "9802dc8b54e499b2a5f0fde99e2361c6880f9d2305ca3b50fae230d87d252d71"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:20649",
+        "name": "Y. Wissa",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-39-2026-10",
+            "sourceRecordId": "league:39:season:2026:player:20649:team:34",
+            "competitionId": "39",
+            "season": 2026,
+            "teamId": "34",
+            "verificationStatus": "confirmed",
+            "contentSha256": "c1bc936c57e3707e7f96b1d545c9d3c339b15da25f26d75ae6f8d15fcdb32018"
+          }
+        ]
+      },
+      {
+        "playerId": "clubcards:api-football:player:47314",
+        "name": "Zubeldia",
+        "value": 2,
+        "rank": 19,
+        "tieGroup": 3,
+        "sources": [
+          {
+            "sourceCaptureId": "block31-api-140-2026-9",
+            "sourceRecordId": "league:140:season:2026:player:47314:team:548",
+            "competitionId": "140",
+            "season": 2026,
+            "teamId": "548",
+            "verificationStatus": "confirmed",
+            "contentSha256": "2caa92aaf2b5448f86988f6257824ecadc8b4300abb939e1836fff1322ffde14"
+          }
+        ]
+      }
+    ]
+  },
+  "controls": {
+    "Marcos Alonso": [
+      {
+        "rank": 19,
+        "value": 2,
+        "playerId": "clubcards:api-football:player:2278",
+        "sources": [
+          {
+            "locator": "response.player.id=2278.statistics[league=140,season=2026].team.id=538.cards",
+            "sourceKey": "api-football",
+            "sourceUrl": "https://v3.football.api-sports.io/players?league=140&season=2026&page=4",
+            "sourceType": "primary",
+            "contentSha256": "d4260b539ec055f438d7db53bf5077ad83ed3273b0ee2ec7c05894927629b654",
+            "sourceRecordId": "league:140:season:2026:player:2278:team:538",
+            "sourceCaptureId": "block31-api-140-2026-4",
+            "verificationStatus": "confirmed"
+          }
+        ]
+      }
+    ],
+    "Raúl García": [
+      {
+        "rank": 80,
+        "value": 1,
+        "playerId": "clubcards:api-football:player:146751",
+        "sources": [
+          {
+            "locator": "response.player.id=146751.statistics[league=140,season=2026].team.id=727.cards",
+            "sourceKey": "api-football",
+            "sourceUrl": "https://v3.football.api-sports.io/players?league=140&season=2026&page=12",
+            "sourceType": "primary",
+            "contentSha256": "e0e0889fbe658c9a61175059ca1164884d48140f89acdafba128c423f1e07ec8",
+            "sourceRecordId": "league:140:season:2026:player:146751:team:727",
+            "sourceCaptureId": "block31-api-140-2026-12",
+            "verificationStatus": "confirmed"
+          }
+        ]
+      }
+    ],
+    "Alberto Lopo": {
+      "present": false,
+      "interpretation": "not in this active-season 2026 snapshot; this does not establish career zero"
+    }
+  },
+  "checkpointRecalculation": {
+    "sourceRunId": "36574961077",
+    "sourceManifestHash": "b0ffddc63e0a0d71687642c743d3bb6358f912380040c58a8f9e0ee751caee16",
+    "seasons": [
+      2026
+    ],
+    "competitionIds": [
+      39,
+      140,
+      135
+    ],
+    "completePageCounts": {
+      "39": "26/26",
+      "140": "29/29",
+      "135": "30/30"
+    },
+    "latestFactCapturedAt": {
+      "39": "2026-09-28T13:45:22.989Z",
+      "140": "2026-09-28T13:48:51.248Z",
+      "135": "2026-09-28T13:46:22.479Z"
+    },
+    "uniquePositivePlayers": 481,
+    "value4Players": 3,
+    "value3Players": 27,
+    "rankForValue2": 31,
+    "marcosAlonso": {
+      "value": 2,
+      "rank": 31,
+      "competitions": [
+        140
+      ]
+    },
+    "raulGarcia": {
+      "value": 1,
+      "rank": 127,
+      "competitions": [
+        140
+      ]
+    },
+    "albertoLopo": "not present in the verified active-season 2026 rows; no career inference is made"
+  },
+  "lineage": {
+    "snapshotQuery": "SELECT rs.* FROM club_card_ranking_snapshots rs WHERE rs.category_slug=$1 AND rs.card_kind=$2 AND rs.dataset=$3 AND status IN (lab_provisional,draft) AND season_start=$4 AND competition_filter=complete_scope ORDER BY generated_at DESC LIMIT 1",
+    "entryQuery": "SELECT re.raw_value,re.rank,re.tie_group,re.fact_ids FROM club_card_ranking_entries re WHERE re.snapshot_id=$1 AND re.rank<=200; sources join club_card_facts f on f.id=ANY(re.fact_ids",
+    "sourceCaptureId": "block31-api-140-2026-4",
+    "sourceRecordId": "league:140:season:2026:player:2278:team:538",
+    "sourceLocator": "response.player.id=2278.statistics[league=140,season=2026].team.id=538.cards",
+    "sourceUrl": "https://v3.football.api-sports.io/players?league=140&season=2026&page=4",
+    "sourceContentSha256": "d4260b539ec055f438d7db53bf5077ad83ed3273b0ee2ec7c05894927629b654",
+    "verifiedCheckpointFactId": "club-yellow-card-fact-21148d89c154e83500267820163f9f67",
+    "verifiedCheckpointFact": {
+      "playerId": "api-football:player:2278",
+      "playerName": "Marcos Alonso",
+      "season": 2026,
+      "competitionId": 140,
+      "clubId": 538,
+      "clubName": "Celta Vigo",
+      "yellowCards": 2,
+      "sourcePage": 1,
+      "responseSha256": "8bb08cac99fb340ab45b560e69d058c5f210915716d018e87e450f3b6d9d895c"
+    }
+  },
+  "cardExtractionReview": {
+    "yellow": "The ranking selects cards.yellow only.",
+    "red": "The red ranking selects the red total stored in redCards.",
+    "secondYellow": "API cards.second_yellow is stored separately as redSecondYellow; importer also preserves redDirect and derives total red from redDirect + redSecondYellow. No second-yellow value is added to yellowCards.",
+    "liveSnapshotReportsRedTypesDifferentiated": true
+  },
+  "rootCause": {
+    "kind": [
+      "userFacingScopeLabel",
+      "snapshotOlderThanSavedCheckpoint"
+    ],
+    "detail": "The UI and category definition described the yellow-card challenge as a historical/global club ranking. The API response and source fact are only an active 2026 snapshot for the three included competitions. The served snapshot was generated on 2026-09-21; the already verified checkpoint has newer facts captured through 2026-09-28. No identity collision, league attribution error or duplicate fact was found for Marcos. The public API response itself also carries a legacy global-career category label despite dataset=active_weekly; the UI now normalizes that label and displays the explicit active-season scope. The API response was left unchanged to avoid a Render deployment.",
+    "recalculatedPositionAtNewerCut": "31",
+    "recalculatedValue": 2,
+    "latestCutIsNotPublished": true
+  },
+  "changes": {
+    "categoryCopy": "Tarjetas amarillas — temporada activa (alcance observado)",
+    "challengeCopy": "No presenta el ranking como carrera/global; el detalle dirige a alcance, competiciones y corte.",
+    "snapshotStillReadOnly": true,
+    "productionDatabaseChanged": false,
+    "providerApiCalled": false,
+    "renderTouched": false,
+    "frontendOverridesLegacyApiLabel": "true",
+    "afterCaptureScript": "scripts/capture-block45h.mjs"
+  },
+  "reportHashAlgorithm": "SHA-256 canonical JSON sorted keys, excluding reportHash",
+  "afterPublication": {
+    "commit": "351015a57dba63b16fe3c231383b78c2829c2121",
+    "screenUrl": "https://nel386.github.io/rango90/es/",
+    "endpointUrl": "https://rango90.onrender.com/v1/rankings/club-career-yellow-cards?limit=200&dataset=active_season_weekly&competition=complete_scope",
+    "httpStatus": 200,
+    "snapshotId": "club-cards-yellow-snapshot-a17ece340d31a31960c00624c9078866",
+    "season": 2026,
+    "displayedCategoryLabel": "Tarjetas amarillas — temporada activa (alcance observado)",
+    "displayedScopeLabel": "3 competiciones completas: Premier League, La Liga y Serie A. 3 pendientes por cuota; no es un ranking global de seis competiciones.",
+    "marcosAlonso": {
+      "rank": 19,
+      "tieGroup": 3,
+      "yellowCards": 2,
+      "playerId": "clubcards:api-football:player:2278"
+    },
+    "desktopAndMobile": "passed; same endpoint response and snapshot on both viewports",
+    "mobileHorizontalOverflow": false,
+    "productionSnapshotChanged": false,
+    "renderDeployed": false,
+    "providerApiCalled": false
+  },
+  "verificationWorkflow": {
+    "runId": "37009501796",
+    "url": "https://github.com/nel386/rango90/actions/runs/37009501796",
+    "status": "failure",
+    "passedSteps": [
+      "Verify frontend",
+      "Verify static Pages build",
+      "Verify static Android build",
+      "Verify backend",
+      "Verify HTTP game integration"
+    ],
+    "failedStep": "Audit production dependencies",
+    "failureDetail": "Existing pinned Next.js 16.3.4 is affected by GHSA-vcvr-r3jv-pc5j; workflow says fixed version 16.3.8. No dependency upgrade was included in this ranking-scope fix."
+  },
+  "reportHash": "e68000ee2a52bf20de95a2bedeabde4afe66ec305767f4fd00e6fa746e0a7fb3"
+}

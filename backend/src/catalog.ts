@@ -260,13 +260,13 @@ export const categories: CategorySeed[] = [
   {
     id: 'category-club-career-yellow-cards',
     slug: 'club-career-yellow-cards',
-    labelEs: 'Tarjetas amarillas globales en clubes',
-    labelEn: 'Global club career yellow cards',
+    labelEs: 'Tarjetas amarillas — temporada activa (alcance observado)',
+    labelEn: 'Yellow cards — active season (observed scope)',
     entityType: 'player',
     metricKey: 'yellow_cards',
-    scopeKind: 'club_career_global',
+    scopeKind: 'club_active_season_observed',
     scope: { officialOnly: true, firstTeamOnly: true, excluded: ['friendlies', 'youth', 'reserve', 'testimonial'] },
-    definition: 'Tarjetas amarillas acumuladas por un jugador en partidos oficiales de primer equipo de clubes, agregadas globalmente.'
+    definition: 'Tarjetas amarillas observadas por jugador en el snapshot de temporada activa de clubes. El alcance se limita a las competiciones y fecha indicadas por el snapshot; no es una carrera completa ni un ranking global.'
   },
   {
     id: 'category-club-career-red-cards',

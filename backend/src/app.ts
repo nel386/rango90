@@ -701,9 +701,9 @@ export function buildApp(options: { gameDb?: ContractDatabase; clock?: () => Dat
       const clubCardsCandidates = await appDb.query(
         `SELECT DISTINCT ON (card_kind) id,
                 category_slug AS slug,
-                CASE WHEN card_kind = 'yellow' THEN 'Tarjetas amarillas globales en clubes — alcance observado' ELSE 'Tarjetas rojas globales en clubes — alcance observado' END AS label_es,
-                CASE WHEN card_kind = 'yellow' THEN 'Global club yellow cards — observed scope' ELSE 'Global club red cards — observed scope' END AS label_en,
-                'player' AS entity_type, 'cards' AS metric_key, 'club_career_global' AS scope_kind,
+                CASE WHEN card_kind = 'yellow' THEN 'Tarjetas amarillas — temporada activa, alcance observado' ELSE 'Tarjetas rojas globales en clubes — alcance observado' END AS label_es,
+                CASE WHEN card_kind = 'yellow' THEN 'Yellow cards — active season, observed scope' ELSE 'Global club red cards — observed scope' END AS label_en,
+                'player' AS entity_type, 'cards' AS metric_key, CASE WHEN card_kind = 'yellow' THEN 'club_active_season_observed' ELSE 'club_career_global' END AS scope_kind,
                 '{}'::jsonb AS scope, 'desc' AS ranking_direction, 'competition' AS tie_policy,
                 100 AS score_cap, 1 AS definition_version,
                 'Hechos estadísticos de competiciones de clubes observadas; selecciones, amistosos y juveniles excluidos.' AS definition_md,

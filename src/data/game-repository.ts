@@ -207,7 +207,7 @@ function resolveApiAssetUrl(baseUrl: string, path?: string): string | undefined 
   }
 }
 
-function normalizeChallenge(raw: ApiChallenge, baseUrl = ""): MockChallenge {
+export function normalizeChallenge(raw: ApiChallenge, baseUrl = ""): MockChallenge {
   const provisional = raw.provisionalData === true || raw.testOnly === true || raw.runtimeMode === "lab";
   return {
     id: raw.id, kind: raw.kind === "duel" ? "duel" : "daily",
@@ -219,7 +219,23 @@ function normalizeChallenge(raw: ApiChallenge, baseUrl = ""): MockChallenge {
     timeLimitSeconds: raw.timeLimitSeconds, qualificationScore: 250, scoreCap: raw.scoreCap, sourceVersion: raw.sourceVersion, challengeSha256: raw.challengeSha256, engineVersion: raw.engineVersion, difficulty: "balanced",
     runtimeMode: raw.runtimeMode,
     provisionalData: provisional,
-    categories: raw.categories.map((category) => ({ slug: category.slug, code: category.slug === "club-career-yellow-cards" ? "AM" : category.slug === "club-career-red-cards" ? "RO" : category.slug.includes("champions-league") ? "CL" : category.slug === "world-cup-goals" ? "WC" : "90", id: category.id, ordinal: category.ordinal, entityType: category.entityType === "club" || category.entityType === "national_team" ? category.entityType : "player", label: { es: category.labelEs, en: category.labelEn }, competitionLabel: { es: category.slug.includes("champions-league") ? "UEFA · Champions League" : category.slug === "world-cup-goals" ? "FIFA · Mundial" : category.slug.includes("club-career") ? "Clubes · global" : "Carrera · global", en: category.slug.includes("champions-league") ? "UEFA · Champions League" : category.slug === "world-cup-goals" ? "FIFA · World Cup" : category.slug.includes("club-career") ? "Clubs · global" : "Career · global" }, definition: { es: "Ranking publicado para este reto.", en: "Published ranking for this challenge." } })),
+    categories: raw.categories.map((category) => {
+      const isActiveYellowCards = category.slug === "club-career-yellow-cards";
+      return {
+        slug: category.slug,
+        code: category.slug === "club-career-yellow-cards" ? "AM" : category.slug === "club-career-red-cards" ? "RO" : category.slug.includes("champions-league") ? "CL" : category.slug === "world-cup-goals" ? "WC" : "90",
+        id: category.id,
+        ordinal: category.ordinal,
+        entityType: category.entityType === "club" || category.entityType === "national_team" ? category.entityType : "player",
+        label: isActiveYellowCards ? { es: "Tarjetas amarillas — temporada activa", en: "Yellow cards — active season" } : { es: category.labelEs, en: category.labelEn },
+        competitionLabel: isActiveYellowCards
+          ? { es: "Clubes · alcance observado", en: "Clubs · observed scope" }
+          : { es: category.slug.includes("champions-league") ? "UEFA · Champions League" : category.slug === "world-cup-goals" ? "FIFA · Mundial" : category.slug.includes("club-career") ? "Clubes · global" : "Carrera · global", en: category.slug.includes("champions-league") ? "UEFA · Champions League" : category.slug === "world-cup-goals" ? "FIFA · World Cup" : category.slug.includes("club-career") ? "Clubs · global" : "Career · global" },
+        definition: isActiveYellowCards
+          ? { es: "Snapshot provisional de temporada activa; consulta el ranking por categoría para ver temporada, competiciones y fecha de corte. No representa una carrera completa.", en: "Provisional active-season snapshot; see the category ranking for its season, competitions and data cutoff. It is not a complete career." }
+          : { es: "Ranking publicado para este reto.", en: "Published ranking for this challenge." },
+      };
+    }),
     entities: raw.decisions.map((decision) => ({ id: decision.entityId, name: decision.name, shortName: decision.shortName ?? decision.name.slice(0, 2).toUpperCase(), entityType: decision.entityType === "club" || decision.entityType === "national_team" ? decision.entityType : "player", position: "", imageUrl: resolveApiAssetUrl(baseUrl, decision.imageUrl), imageFallbackUrl: resolveApiAssetUrl(baseUrl, `/v1/media/${encodeURIComponent(decision.entityId)}/fallback`), imageStatus: decision.imageStatus, ordinal: decision.ordinal, scores: {} })),
   };
 }

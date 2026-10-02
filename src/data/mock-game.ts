@@ -14,7 +14,7 @@ export const mockDailyChallenge: MockChallenge = {
   challengeSha256: "0000000000000000000000000000000000000000000000000000000000000000",
   difficulty: "balanced",
   categories: [
-    { slug: "club-career-yellow-cards", code: "TA", entityType: "player", label: { es: "Tarjetas amarillas", en: "Yellow cards" }, definition: { es: "Tarjetas amarillas recibidas en partidos oficiales.", en: "Yellow cards received in official matches." } },
+    { slug: "club-career-yellow-cards", code: "TA", entityType: "player", label: { es: "Tarjetas amarillas — temporada activa", en: "Yellow cards — active season" }, competitionLabel: { es: "Clubes · alcance observado", en: "Clubs · observed scope" }, definition: { es: "Snapshot provisional de temporada activa; no representa una carrera completa.", en: "Provisional active-season snapshot; it is not a complete career." } },
     { slug: "club-career-red-cards", code: "TR", entityType: "player", label: { es: "Tarjetas rojas", en: "Red cards" }, definition: { es: "Tarjetas rojas recibidas en partidos oficiales.", en: "Red cards received in official matches." } },
     { slug: "club-career-titles", code: "TC", entityType: "player", label: { es: "Títulos de club del jugador", en: "Player club titles" }, definition: { es: "Títulos oficiales ganados por el jugador a nivel de club.", en: "Official titles won by the player at club level." } },
     { slug: "world-cup-goals", code: "GM", entityType: "player", label: { es: "Goles en Mundiales", en: "World Cup goals" }, definition: { es: "Goles marcados en fases finales de la Copa del Mundo.", en: "Goals scored in FIFA World Cup final tournaments." } },

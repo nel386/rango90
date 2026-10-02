@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { HttpGameRepository, RepositoryError } from "./game-repository";
+import { categories as backendCategories } from "../../backend/src/catalog";
+import { HttpGameRepository, normalizeChallenge, RepositoryError } from "./game-repository";
 
 const categories = Array.from({ length: 7 }, (_, index) => ({ ordinal: index, id: `category-${index}`, rankingSnapshotId: `snapshot-${index}`, slug: `category-${index}`, labelEs: `Categoría ${index}`, labelEn: `Category ${index}` }));
 const decisions = Array.from({ length: 7 }, (_, index) => ({ ordinal: index, entityId: `entity-${index}`, name: `Entity ${index}`, shortName: `E${index}`, entityType: "player", imageStatus: "fallback" }));
@@ -31,6 +32,19 @@ try {
   assert.equal(first.id, "challenge-1");
   assert.equal(second.id, "challenge-1");
   assert.equal(dailyCalls, 1, "simultaneous daily loads must be deduplicated");
+  const cardChallenge = normalizeChallenge({
+    ...challenge,
+    categories: [...categories.slice(0, 6), { ...categories[6]!, slug: "club-career-yellow-cards", labelEs: "Tarjetas amarillas globales en clubes", labelEn: "Global club career yellow cards" }],
+  } as Parameters<typeof normalizeChallenge>[0]);
+  const yellowCardsCategory = cardChallenge.categories.find((category) => category.slug === "club-career-yellow-cards");
+  assert.equal(yellowCardsCategory?.label.es, "Tarjetas amarillas — temporada activa");
+  assert.equal(yellowCardsCategory?.competitionLabel?.es, "Clubes · alcance observado");
+  assert.match(yellowCardsCategory?.definition.es ?? "", /no representa una carrera completa/iu);
+  assert.doesNotMatch(`${yellowCardsCategory?.label.es} ${yellowCardsCategory?.competitionLabel?.es}`, /global|histórico|carrera/iu);
+  const backendYellowCards = backendCategories.find((category) => category.slug === "club-career-yellow-cards");
+  assert.equal(backendYellowCards?.scopeKind, "club_active_season_observed");
+  assert.match(backendYellowCards?.labelEs ?? "", /temporada activa.*alcance observado/iu);
+  assert.match(backendYellowCards?.definition ?? "", /no es una carrera completa ni un ranking global/u);
 
   const session = await repository.startGame("challenge-1");
   assert.equal(session.status, "active");

@@ -188,7 +188,9 @@ async function main(): Promise<void> {
       checkpoint.requests.push(call.evidence);
       const response = asArray(call.body.response);
       const results = int(call.body.results);
-      const statusStructureOkay = call.response.status === 200 && !hasErrors(call.body.errors) && results !== null && results === response.length && response.length > 0;
+      // /status may return an empty response/results=0 while still exposing
+      // current quota in headers. Empty is valid when the count agrees.
+      const statusStructureOkay = call.response.status === 200 && !hasErrors(call.body.errors) && Array.isArray(call.body.response) && results !== null && results === response.length;
       const initialRemaining = call.evidence.dailyRemaining;
       const preflightSummary = { httpStatus: call.response.status, errorsPresent: hasErrors(call.body.errors), results: results ?? null, responseCount: response.length, dailyRemainingAfterStatus: initialRemaining, dailyLimit: call.evidence.dailyLimit, minuteRemaining: call.evidence.minuteRemaining, minuteLimit: call.evidence.minuteLimit, responseSha256: call.evidence.responseSha256, statusStructureOkay };
       checkpoint.preflight = preflightSummary;

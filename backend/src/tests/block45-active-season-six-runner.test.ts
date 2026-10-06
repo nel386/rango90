@@ -17,7 +17,7 @@ const server = createServer((request, response) => {
   response.setHeader('X-RateLimit-Limit', '600');
   response.setHeader('X-RateLimit-Remaining', String(600 - calls.length));
   if (request.url === '/status') {
-    response.end(JSON.stringify({ errors: [], results: 1, response: [{ account: { status: 'active' }, requests: { current: 1, limit_day: 7500 } }], paging: { current: 1, total: 1 } }));
+    response.end(JSON.stringify({ errors: [], results: 0, response: [], paging: { current: 0, total: 0 } }));
     return;
   }
   if (request.url === '/players?league=94&season=2026&page=1') {

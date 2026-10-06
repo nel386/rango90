@@ -186,13 +186,15 @@ async function main(): Promise<void> {
     else {
       const call = await perform('/status', 'preflight');
       checkpoint.requests.push(call.evidence);
-      const response = asArray(call.body.response);
+      const responseValue = call.body.response;
+      const responseIsObjectOrArray = responseValue !== null && typeof responseValue === 'object';
+      const responseCount = Array.isArray(responseValue) ? responseValue.length : null;
       const results = int(call.body.results);
-      // /status may return an empty response/results=0 while still exposing
-      // current quota in headers. Empty is valid when the count agrees.
-      const statusStructureOkay = call.response.status === 200 && !hasErrors(call.body.errors) && Array.isArray(call.body.response) && results !== null && results === response.length;
+      // /status is a special endpoint: it may return an object in `response`
+      // and `results` need not equal that object's nested-field count.
+      const statusStructureOkay = call.response.status === 200 && !hasErrors(call.body.errors) && responseIsObjectOrArray && results !== null;
       const initialRemaining = call.evidence.dailyRemaining;
-      const preflightSummary = { httpStatus: call.response.status, errorsPresent: hasErrors(call.body.errors), results: results ?? null, responseCount: response.length, dailyRemainingAfterStatus: initialRemaining, dailyLimit: call.evidence.dailyLimit, minuteRemaining: call.evidence.minuteRemaining, minuteLimit: call.evidence.minuteLimit, responseSha256: call.evidence.responseSha256, statusStructureOkay };
+      const preflightSummary = { httpStatus: call.response.status, errorsPresent: hasErrors(call.body.errors), results: results ?? null, responseShape: Array.isArray(responseValue) ? 'array' : responseIsObjectOrArray ? 'object' : 'missing_or_malformed', responseCount, dailyRemainingAfterStatus: initialRemaining, dailyLimit: call.evidence.dailyLimit, minuteRemaining: call.evidence.minuteRemaining, minuteLimit: call.evidence.minuteLimit, responseSha256: call.evidence.responseSha256, statusStructureOkay };
       checkpoint.preflight = preflightSummary;
       checkpoint.preflightHistory = [...(checkpoint.preflightHistory ?? []), preflightSummary];
       if (call.response.status === 429) { stoppedForRateLimit = true; terminalReason = 'preflight_429'; }

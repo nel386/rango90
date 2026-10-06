@@ -21,5 +21,16 @@
     "marcosAlonsoLaLigaYellowCards": 2,
     "marcosAlonsoLaLigaRank": 20
   },
-  "note": "The remote workflow's first PostgreSQL assertion failed because the test compared an unprefixed API player ID with the candidate's canonical-form ID. The test was corrected and passed locally against this unchanged workflow artifact; no API request was repeated."
+  "repoCi": {
+    "runId": "37420816216",
+    "headSha": "c778c44862d092ed3289e373880ccb484da895eb",
+    "frontend": "passed",
+    "staticPages": "passed",
+    "staticAndroidBuild": "passed",
+    "backend": "passed",
+    "httpIntegration": "passed",
+    "dependencyAudit": "failed_existing_dependency_advisory",
+    "dependencyAuditDetail": "Next.js 16.3.4 has a critical npm advisory; CI reports fix available at 16.3.8. Dependency change is outside BLOQUE 45G."
+  },
+  "note": "The remote active-season workflow's first PostgreSQL assertion failed because the test compared an unprefixed API player ID with the candidate's canonical-form ID. The test was corrected and passed locally against this unchanged workflow artifact; no API request was repeated. Repository CI's frontend, Android static build, backend, and HTTP integration checks pass; its separate production dependency audit fails on the existing Next.js advisory recorded above."
 }

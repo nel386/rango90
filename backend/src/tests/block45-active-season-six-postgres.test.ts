@@ -86,7 +86,7 @@ try {
   assert.equal(coverageCount.rows[0]?.count, 6, 'all six league page sets are complete');
   const rankedQuery = await client.query<{ league_id: number; player_id: string; player_name: string; yellow_cards: number; rank: string; tie_group: string }>(`
     WITH player_totals AS (
-      SELECT league_id, player_id, MAX(player_name) AS player_name, SUM(yellow_cards)::int AS yellow_cards
+      SELECT league_id, 'api-football:player:' || player_id AS player_id, MAX(player_name) AS player_name, SUM(yellow_cards)::int AS yellow_cards
         FROM active_fact GROUP BY league_id, player_id HAVING SUM(yellow_cards) > 0
     ), ranked AS (
       SELECT *, RANK() OVER (PARTITION BY league_id ORDER BY yellow_cards DESC) AS rank,

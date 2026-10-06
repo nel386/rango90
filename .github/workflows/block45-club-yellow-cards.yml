@@ -60,7 +60,7 @@ jobs:
       BLOCK45_SEASON_SIX_SOURCE_RUN_ID: ${{ inputs.base_run_id }}
       BLOCK45_SEASON_SIX_SOURCE_FILE: ${{ github.workspace }}/.block45/base/provider/BLOCK45_BASE_MANIFEST.json
       BLOCK45_SEASON_SIX_SOURCE_REPORT_FILE: ${{ github.workspace }}/.block45/base/provider/BLOCK45_REPORT.json
-      BLOCK45_SEASON_SIX_RESUME_FILE: ${{ inputs.resume_run_id != '' && format('{0}/.block45/resume/season-six/BLOCK45_ACTIVE_SEASON_SIX_CHECKPOINT.json', github.workspace) || '' }}
+      BLOCK45_SEASON_SIX_RESUME_FILE: ${{ inputs.resume_run_id != '' && format('{0}/.block45/resume/BLOCK45_ACTIVE_SEASON_SIX_CHECKPOINT.json', github.workspace) || '' }}
       BLOCK45_SEASON_SIX_OUTPUT_ROOT: ${{ github.workspace }}/.block45/season-six
       BLOCK45_SEASON_SIX_MAX_REQUESTS: ${{ inputs.max_requests }}
     steps:
@@ -226,8 +226,16 @@ jobs:
           else
             test -f .block45/provider/BLOCK45_REPORT.json
           fi
+      - name: Upload active-season report and checkpoint
+        uses: actions/upload-artifact@v4
+        if: always() && inputs.mode == 'active-season-six'
+        with:
+          name: block45-club-yellow-cards-${{ github.run_id }}
+          path: .block45/season-six/
+          if-no-files-found: error
+          include-hidden-files: true
       - name: Upload BLOQUE 45 report
-        if: always()
+        if: always() && inputs.mode != 'active-season-six'
         uses: actions/upload-artifact@v4
         with:
           name: block45-club-yellow-cards-${{ github.run_id }}

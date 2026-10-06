@@ -1,0 +1,25 @@
+{
+  "artifactKind": "block45_active_season_six_postgres_validation",
+  "status": "passed",
+  "apiWorkflowRunId": "37419802537",
+  "validationMethod": "PostgreSQL 16 disposable container; transaction-scoped temporary tables; SQL sums and window ranks compared row-for-row to candidate JSON",
+  "productionDatabaseTouched": false,
+  "snapshotsCreated": false,
+  "migrationsApplied": false,
+  "factsLoaded": 3119,
+  "rankedPlayers": 897,
+  "leagueRankings": 6,
+  "coveragePages": "158/158",
+  "rankingSha256": "b63ea020e7118d69f6e7d8f4ee0b8ce37be1661ee6b23588f9d262280ecca17e",
+  "factsSha256": "47e84f23d4ba1cea1d3e246876d1aaad3751ae106b743a673a1f2ab32e8295ab",
+  "checks": {
+    "perCompetitionRankingsRemainSeparate": true,
+    "rankAndTieGroupsMatchPostgres": true,
+    "evidenceFactsMatchPlayerAndCompetition": true,
+    "allSeasonAndCoverageRowsReconcile": true,
+    "latestCutoffExistsForEachLeague": true,
+    "marcosAlonsoLaLigaYellowCards": 2,
+    "marcosAlonsoLaLigaRank": 20
+  },
+  "note": "The remote workflow's first PostgreSQL assertion failed because the test compared an unprefixed API player ID with the candidate's canonical-form ID. The test was corrected and passed locally against this unchanged workflow artifact; no API request was repeated."
+}

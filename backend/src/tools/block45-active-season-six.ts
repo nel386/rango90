@@ -173,7 +173,7 @@ async function main(): Promise<void> {
   };
   const persist = async (coverage: Coverage[], facts: ActiveFact[], errors: string[], stoppedForRateLimit: boolean) => {
     checkpoint.requests = [...checkpoint.requests]; checkpoint.coverage = coverage; checkpoint.facts = facts; checkpoint.errors = errors; checkpoint.stoppedForRateLimit = stoppedForRateLimit; checkpoint.generatedAt = new Date().toISOString();
-    const { checkpointHash: _oldHash, ...unsigned } = checkpoint; checkpoint.checkpointHash = HASH_JSON(unsigned);
+    const unsigned: Partial<SeasonCheckpoint> = { ...checkpoint }; delete unsigned.checkpointHash; checkpoint.checkpointHash = HASH_JSON(unsigned);
     await jsonWrite('BLOCK45_ACTIVE_SEASON_SIX_CHECKPOINT.json', checkpoint);
   };
 
@@ -248,7 +248,7 @@ async function main(): Promise<void> {
   }
 
   if (!terminalReason && checkpoint.preflight && pageTotal !== null) {
-    let priorTotal = pageTotal;
+    const priorTotal = pageTotal;
     for (let page = pagesRead + 1; page <= pageTotal; page += 1) {
       if (checkpoint.requests.length - batchStartAttempts >= max) { terminalReason = 'request_attempt_budget_reached'; break; }
       const lastDaily = checkpoint.requests.at(-1)?.dailyRemaining;

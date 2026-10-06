@@ -4,14 +4,18 @@ import { readFile } from 'node:fs/promises';
 import { Pool } from 'pg';
 import { stableYellowJson } from '../clubYellowCardsCareerRankingEngine.js';
 
-type Json = Record<string, any>;
+type CandidateFact = { factId: string; leagueId: number; competitionName: string; competitionType: string; playerId: string; playerName: string; season: number; clubId: number; clubName: string; yellowCards: number; page: number; responseSha256: string; capturedAt: string; sourceUrl: string };
+type RankingEvidence = { factId: string; yellowCards: number };
+type RankingRow = { playerId: string; playerName: string; yellowCards: number; rank: number; tieGroup: number; evidence: RankingEvidence[] };
+type LeagueRanking = { leagueId: number; leagueNameEn: string; coverage: { status: string; pagesExpected: number; pagesRead: number; verifiedFactRows: number; rankedPlayers: number; latestFactCapturedAt: string | null }; rows: RankingRow[] };
+type Candidate = { status: string; scopeKind: string; careerComplete: boolean; season: number; includedCompetitionIds: number[]; excludedCompetitionIds: number[]; rankingMode: string; sourceRunId: string; sourceCommitSha: string; sourceManifestHash: string; sourceCoverageHash: string; sourceFactsHash: string; rankingSha256: string; factSha256: string; rankings: LeagueRanking[] };
 const databaseUrl = process.env.DATABASE_URL ?? '';
 assert.equal(process.env.BLOCK45_ISOLATED_POSTGRES, '1', 'explicit isolated database guard is required');
 const parsedDatabaseUrl = new URL(databaseUrl);
 assert.ok(['127.0.0.1', 'localhost', '::1'].includes(parsedDatabaseUrl.hostname), 'PostgreSQL host must be loopback');
 assert.match(parsedDatabaseUrl.pathname, /^\/rango90_block45(?:_|$)/u, 'database name must be a disposable BLOQUE 45 database');
-const candidate = JSON.parse(await readFile(process.env.BLOCK45_ACTIVE_SEASON_SIX_CANDIDATE_FILE ?? '', 'utf8')) as Json;
-const facts = JSON.parse(await readFile(process.env.BLOCK45_ACTIVE_SEASON_SIX_FACTS_FILE ?? '', 'utf8')) as Json[];
+const candidate = JSON.parse(await readFile(process.env.BLOCK45_ACTIVE_SEASON_SIX_CANDIDATE_FILE ?? '', 'utf8')) as Candidate;
+const facts = JSON.parse(await readFile(process.env.BLOCK45_ACTIVE_SEASON_SIX_FACTS_FILE ?? '', 'utf8')) as CandidateFact[];
 assert.equal(candidate.status, 'ready_for_isolated_validation');
 assert.equal(candidate.scopeKind, 'club_active_season_observed');
 assert.equal(candidate.careerComplete, false);
@@ -62,15 +66,15 @@ try {
     `INSERT INTO active_fact VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
     [fact.factId, fact.leagueId, fact.competitionName, fact.competitionType, fact.playerId, fact.playerName, fact.season, fact.clubId, fact.clubName, fact.yellowCards, fact.page, fact.responseSha256, fact.capturedAt, fact.sourceUrl]
   );
-  for (const league of candidate.rankings as Json[]) {
+  for (const league of candidate.rankings) {
     assert.equal(league.coverage.status, 'complete', `${league.leagueId} needs complete paging coverage`);
     assert.equal(league.coverage.pagesRead, league.coverage.pagesExpected, `${league.leagueId} must exhaust paging.total`);
     assert.equal(league.coverage.verifiedFactRows, facts.filter((fact) => fact.leagueId === league.leagueId).length, `${league.leagueId} fact count must reconcile`);
     await client.query('INSERT INTO coverage VALUES ($1,$2,$3,$4,$5)', [league.leagueId, league.coverage.pagesExpected, league.coverage.pagesRead, league.coverage.verifiedFactRows, league.coverage.latestFactCapturedAt]);
-    for (const row of league.rows as Json[]) {
-      const evidenceIds = (row.evidence as Json[]).map((evidence) => evidence.factId);
+    for (const row of league.rows) {
+      const evidenceIds = row.evidence.map((evidence) => evidence.factId);
       assert.ok(evidenceIds.length > 0, `ranked row ${row.playerId} has source facts`);
-      assert.equal((row.evidence as Json[]).reduce((sum, evidence) => sum + evidence.yellowCards, 0), row.yellowCards, `evidence sum matches ${row.playerId}`);
+      assert.equal(row.evidence.reduce((sum, evidence) => sum + evidence.yellowCards, 0), row.yellowCards, `evidence sum matches ${row.playerId}`);
       for (const evidenceId of evidenceIds) {
         const sourceFact = facts.find((fact) => fact.factId === evidenceId);
         assert.ok(sourceFact, `evidence ${evidenceId} exists in the candidate fact artifact`);
@@ -96,7 +100,7 @@ try {
     SELECT league_id, player_id, player_name, yellow_cards, rank::text, tie_group::text
       FROM ranked ORDER BY league_id, rank, player_name
   `);
-  const actual = new Map((candidate.rankings as Json[]).flatMap((league) => (league.rows as Json[]).map((row) => [`${league.leagueId}|${row.playerId}`, row])));
+  const actual = new Map<string, RankingRow>(candidate.rankings.flatMap((league) => league.rows.map((row) => [`${league.leagueId}|${row.playerId}`, row] as const)));
   assert.equal(rankedQuery.rows.length, actual.size, 'SQL and JSON rankings have same number of players');
   for (const row of rankedQuery.rows) {
     const sourceId = `${row.league_id}|${row.player_id}`;
@@ -113,7 +117,7 @@ try {
   assert.equal(marcos.playerName, 'Marcos Alonso');
   assert.equal(marcos.yellowCards, 2);
   assert.equal(marcos.rank, 20);
-  assert.ok((candidate.rankings as Json[]).every((league) => league.coverage.latestFactCapturedAt), 'every league has a data cutoff');
+  assert.ok(candidate.rankings.every((league) => league.coverage.latestFactCapturedAt), 'every league has a data cutoff');
   await client.query('COMMIT');
   console.log(JSON.stringify({ status: 'passed', database: parsedDatabaseUrl.pathname.slice(1), candidateSha256: candidate.rankingSha256, facts: facts.length, rankedPlayers: rankedQuery.rows.length, leagues: 6, marcosLaLiga: { rank: marcos.rank, yellowCards: marcos.yellowCards } }));
 } catch (error) {

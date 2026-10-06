@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'plan inicia base; continue reanuda páginas base; expand reanuda jugadores; load carga solo expansión completa'
+        description: 'plan/continue/expand/load mantienen la fase de carrera; active-season-six completa solo Primeira 2026 desde el checkpoint auditado de cinco ligas'
         required: true
         type: choice
-        options: [plan, continue, expand, load]
+        options: [plan, continue, expand, load, active-season-six]
         default: plan
       from_season:
         description: 'Primera temporada; vacío = primera temporada que API-Football devuelva'
@@ -18,11 +18,15 @@ on:
         required: false
         default: ''
       max_requests:
-        description: 'Presupuesto de intentos de esta tanda plan/continue/expand; mínimo 800.'
+        description: 'Presupuesto de intentos por tanda; plan/continue/expand requieren 800; active-season-six cuenta status y páginas exactas.'
         required: true
         default: '800'
       base_run_id:
-        description: 'continue/expand/load: runId cuyo manifiesto base se reanudará o consumirá'
+        description: 'continue/expand/load/active-season-six: runId del checkpoint base verificado'
+        required: false
+        default: ''
+      resume_run_id:
+        description: 'active-season-six: runId de la tanda anterior para reanudar Primeira Liga sin repetir páginas'
         required: false
         default: ''
 
@@ -53,6 +57,12 @@ jobs:
       BLOCK45_BASE_MANIFEST_FILE: ${{ github.workspace }}/.block45/base/provider/BLOCK45_BASE_MANIFEST.json
       BLOCK45_OUTPUT_ROOT: ${{ github.workspace }}/.block45/provider
       BLOCK45_LOADER_OUTPUT_ROOT: ${{ github.workspace }}/.block45/loader
+      BLOCK45_SEASON_SIX_SOURCE_RUN_ID: ${{ inputs.base_run_id }}
+      BLOCK45_SEASON_SIX_SOURCE_FILE: ${{ github.workspace }}/.block45/base/provider/BLOCK45_BASE_MANIFEST.json
+      BLOCK45_SEASON_SIX_SOURCE_REPORT_FILE: ${{ github.workspace }}/.block45/base/provider/BLOCK45_REPORT.json
+      BLOCK45_SEASON_SIX_RESUME_FILE: ${{ inputs.resume_run_id != '' && format('{0}/.block45/resume/season-six/BLOCK45_ACTIVE_SEASON_SIX_CHECKPOINT.json', github.workspace) || '' }}
+      BLOCK45_SEASON_SIX_OUTPUT_ROOT: ${{ github.workspace }}/.block45/season-six
+      BLOCK45_SEASON_SIX_MAX_REQUESTS: ${{ inputs.max_requests }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -68,8 +78,12 @@ jobs:
       - name: Validate phase budget and base manifest input
         run: |
           set -euo pipefail
-          if [ "$BLOCK45_MODE" != "load" ] && [ "$BLOCK45_MAX_REQUESTS" -lt 800 ]; then
+          if [ "$BLOCK45_MODE" != "load" ] && [ "$BLOCK45_MODE" != "active-season-six" ] && [ "$BLOCK45_MAX_REQUESTS" -lt 800 ]; then
             echo "Tanda rechazada: $BLOCK45_MAX_REQUESTS es inferior al mínimo de 800 intentos." >&2
+            exit 1
+          fi
+          if [ "$BLOCK45_MODE" = "active-season-six" ] && [ "$BLOCK45_MAX_REQUESTS" -lt 2 ]; then
+            echo "active-season-six necesita presupuesto mínimo para status y la página 1." >&2
             exit 1
           fi
           if [ "$BLOCK45_MODE" != "plan" ] && [ -z "${{ inputs.base_run_id }}" ]; then
@@ -98,13 +112,50 @@ jobs:
           path: .block45/base
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ inputs.base_run_id }}
+      - name: Validate previous active-season-six checkpoint provenance
+        id: resume-run
+        if: ${{ inputs.mode == 'active-season-six' && inputs.resume_run_id != '' }}
+        uses: actions/github-script@v7
+        env:
+          RESUME_RUN_ID: ${{ inputs.resume_run_id }}
+        with:
+          script: |
+            const runId = Number(process.env.RESUME_RUN_ID);
+            if (!Number.isSafeInteger(runId) || runId < 1) throw new Error('resume_run_id no es un entero válido');
+            const { data } = await github.rest.actions.getWorkflowRun({ owner: context.repo.owner, repo: context.repo.repo, run_id: runId });
+            if (data.path !== '.github/workflows/block45-club-yellow-cards.yml') throw new Error('El checkpoint de reanudación pertenece a otro workflow');
+            if (data.status !== 'completed' || data.conclusion !== 'success') throw new Error('El run de reanudación debe estar completado correctamente y conservar el checkpoint');
+            core.setOutput('run-id', String(runId));
+      - name: Download previous active-season-six checkpoint
+        if: ${{ inputs.mode == 'active-season-six' && inputs.resume_run_id != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: block45-club-yellow-cards-${{ inputs.resume_run_id }}
+          path: .block45/resume
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ inputs.resume_run_id }}
       - name: Query API-Football without storing payloads
+        if: ${{ inputs.mode != 'active-season-six' }}
         working-directory: backend
         env:
           BLOCK45_SOURCE_COMMIT_SHA: ${{ steps.source-run.outputs.head-sha }}
         run: |
           if [ "$BLOCK45_MODE" != "load" ]; then export BLOCK45_PLAN_ONLY=1; fi
           npx tsx src/tools/block45-api-football-yellow-cards.ts
+      - name: Complete six active-season league candidate from saved checkpoint
+        id: season-six
+        if: ${{ inputs.mode == 'active-season-six' }}
+        working-directory: backend
+        env:
+          BLOCK45_SEASON_SIX_EXPECTED_SOURCE_COMMIT_SHA: ${{ steps.source-run.outputs.head-sha }}
+        run: |
+          npx tsx src/tools/block45-active-season-six.ts
+          if [ -f "$BLOCK45_SEASON_SIX_OUTPUT_ROOT/BLOCK45_ACTIVE_SEASON_SIX_REPORT.json" ]; then
+            status=$(node -e "const r=require(process.env.BLOCK45_SEASON_SIX_OUTPUT_ROOT + '/BLOCK45_ACTIVE_SEASON_SIX_REPORT.json'); process.stdout.write(String(r.status))")
+            echo "status=$status" >> "$GITHUB_OUTPUT"
+          else
+            echo 'status=not_run' >> "$GITHUB_OUTPUT"
+          fi
       - name: Stop before database when load is not ready
         if: ${{ inputs.mode == 'load' }}
         run: |
@@ -115,7 +166,7 @@ jobs:
             *) echo "Load bloqueado por el manifiesto base/expansión: $status" >&2; exit 1 ;;
           esac
       - name: Start isolated PostgreSQL
-        if: ${{ inputs.mode == 'load' }}
+        if: ${{ inputs.mode == 'load' || (inputs.mode == 'active-season-six' && steps.season-six.outputs.status == 'ready_for_isolated_validation') }}
         run: |
           set -euo pipefail
           docker run -d --name rango90-block45-postgres -e POSTGRES_DB=rango90_block45 -e POSTGRES_USER=rango90 -e POSTGRES_PASSWORD=rango90-qa -p 55460:5432 postgres:16
@@ -136,10 +187,25 @@ jobs:
           BLOCK45_FACTS_FILE: ${{ github.workspace }}/.block45/provider/BLOCK45_FACTS.json
           BLOCK45_OUTPUT_ROOT: ${{ github.workspace }}/.block45/loader
         run: npx tsx src/tools/block45-club-yellow-cards.ts
+      - name: Validate six active-season rankings in isolated PostgreSQL
+        if: ${{ inputs.mode == 'active-season-six' && steps.season-six.outputs.status == 'ready_for_isolated_validation' }}
+        working-directory: backend
+        env:
+          BLOCK45_ISOLATED_POSTGRES: '1'
+          DATABASE_URL: postgresql://rango90:rango90-qa@127.0.0.1:55460/rango90_block45
+          BLOCK45_ACTIVE_SEASON_SIX_CANDIDATE_FILE: ${{ github.workspace }}/.block45/season-six/BLOCK45_ACTIVE_SEASON_SIX_RANKING.json
+          BLOCK45_ACTIVE_SEASON_SIX_FACTS_FILE: ${{ github.workspace }}/.block45/season-six/BLOCK45_ACTIVE_SEASON_SIX_FACTS.json
+        run: npx tsx src/tests/block45-active-season-six-postgres.test.ts
       - name: Run BLOQUE 45 fixtures and checks
         working-directory: backend
         run: |
           npx tsx src/tests/club-yellow-cards-career-ranking-engine.test.ts
+          npx tsx src/tests/block45-active-season-six.test.ts
+          if [ "$BLOCK45_MODE" = "active-season-six" ]; then
+            BLOCK45_SEASON_SIX_SOURCE_FILE="$GITHUB_WORKSPACE/.block45/base/provider/BLOCK45_BASE_MANIFEST.json" \
+            BLOCK45_SEASON_SIX_SOURCE_REPORT_FILE="$GITHUB_WORKSPACE/.block45/base/provider/BLOCK45_REPORT.json" \
+            npx tsx src/tests/block45-active-season-six-runner.test.ts
+          fi
           npm run build
       - name: Run frontend and repository checks
         run: |
@@ -155,7 +221,11 @@ jobs:
             echo 'Se detectó secreto o payload crudo en artefactos.' >&2
             exit 1
           fi
-          test -f .block45/provider/BLOCK45_REPORT.json
+          if [ "$BLOCK45_MODE" = "active-season-six" ]; then
+            test -f .block45/season-six/BLOCK45_ACTIVE_SEASON_SIX_REPORT.json
+          else
+            test -f .block45/provider/BLOCK45_REPORT.json
+          fi
       - name: Upload BLOQUE 45 report
         if: always()
         uses: actions/upload-artifact@v4
@@ -165,5 +235,5 @@ jobs:
           if-no-files-found: error
           include-hidden-files: true
       - name: Cleanup isolated PostgreSQL
-        if: always()
+        if: always() && (inputs.mode == 'load' || steps.season-six.outputs.status == 'ready_for_isolated_validation')
         run: docker rm -f rango90-block45-postgres >/dev/null 2>&1 || true

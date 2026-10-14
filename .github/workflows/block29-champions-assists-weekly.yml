@@ -2,8 +2,6 @@ name: BLOQUE 29 · asistencias Champions temporada activa
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 9 * * 1'
 
 permissions:
   contents: read

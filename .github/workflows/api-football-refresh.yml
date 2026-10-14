@@ -28,9 +28,6 @@ on:
           - serie-a
           - ligue-1
           - primeira-liga
-  schedule:
-    - cron: "15 3 * * *"
-    - cron: "30 4 * * 0"
 
 permissions:
   contents: read

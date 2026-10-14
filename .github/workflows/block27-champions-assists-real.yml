@@ -2,8 +2,6 @@ name: BLOQUE 27 · carga real asistencias Champions
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 8 * * 1'
 
 permissions:
   contents: read

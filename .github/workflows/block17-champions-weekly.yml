@@ -2,8 +2,6 @@ name: BLOQUE 17 · snapshot candidato y actualización semanal Champions
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 6 * * 1'
 
 permissions:
   contents: read

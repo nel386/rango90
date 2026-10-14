@@ -2,8 +2,6 @@ name: BLOQUE 30 · goles globales en clubes
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 10 * * 1'
 
 permissions:
   contents: read

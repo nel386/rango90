@@ -2,8 +2,6 @@ name: BLOQUE 31 · tarjetas globales en clubes
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 11 * * 1'
 
 permissions:
   contents: read

@@ -2,8 +2,6 @@ name: BLOQUE 26 · asistencias históricas Champions en lab
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 7 * * 1'
 
 permissions:
   contents: read
